@@ -4,7 +4,10 @@
   "type": "module",
   "scripts": {
     "test": "tsx tests/example.test.ts",
-    "test:headed": "HEADLESS=false tsx tests/example.test.ts",
+    "test:headed": "cross-env HEADLESS=false tsx tests/example.test.ts",
+    "test:explore": "cross-env HEADLESS=false tsx tests/explore-login.ts",
+    "test:login": "cross-env HEADLESS=false tsx tests/login.test.ts",
+    "test:login:headless": "cross-env HEADLESS=true tsx tests/login.test.ts",
     "build": "tsc",
     "clean": "rm -rf dist logs/*.log reports/screenshots/*.png"
   },
@@ -18,6 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.30",
+    "cross-env": "^10.1.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
