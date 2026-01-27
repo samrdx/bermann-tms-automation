@@ -1,0 +1,24 @@
+{
+  "name": "qa-automation-framework",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "tsx tests/example.test.ts",
+    "test:headed": "HEADLESS=false tsx tests/example.test.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist logs/*.log reports/screenshots/*.png"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.58.0",
+    "dotenv": "^16.6.1",
+    "playwright": "^1.58.0",
+    "playwright-core": "^1.58.0",
+    "stagehand-ai": "^1.0.0",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.30",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

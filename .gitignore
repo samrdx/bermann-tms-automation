@@ -1,0 +1,44 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Variables de entorno (NUNCA subir API keys)
+.env
+.env.local
+.env.*.local
+
+# Archivos compilados
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Reports y screenshots
+reports/
+reports/screenshots/
+reports/videos/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Temporal
+tmp/
+temp/
+*.tmp
