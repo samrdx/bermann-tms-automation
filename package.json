@@ -6,6 +6,7 @@
     "test": "tsx tests/example.test.ts",
     "test:headed": "cross-env HEADLESS=false tsx tests/example.test.ts",
     "test:explore": "cross-env HEADLESS=false tsx tests/explore-login.ts",
+    "test:experiments": "cross-env HEADLESS=false tsx tests/login-experiments.ts",
     "test:login": "cross-env HEADLESS=false tsx tests/login.test.ts",
     "test:login:headless": "cross-env HEADLESS=true tsx tests/login.test.ts",
     "build": "tsc",
