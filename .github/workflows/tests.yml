@@ -27,6 +27,13 @@ jobs:
     - name: Run tests
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+        BASE_URL_STAGING: https://moveontruckqa.bermanntms.cl
+        BASE_URL_PROD: https://moveontruck.bermanntms.cl
+        ENVIRONMENT: dev
+        HEADLESS: true
+        TIMEOUT: 30000
+        LOG_LEVEL: info
       run: npm run test
     
     - name: Upload screenshots
