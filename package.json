@@ -15,15 +15,18 @@
     "test:full-flow": "cross-env HEADLESS=false tsx tests/full-flow.test.ts",
     "test:login:negative": "cross-env HEADLESS=false tsx tests/login-negative.test.ts",
     "test:all": "npm run test:login && npm run test:logout && npm run test:full-flow && npm run test:login:negative",
+    "test:stagehand": "cross-env HEADLESS=false tsx tests/stagehand-login.test.ts",
+    "test:stagehand:simple": "cross-env HEADLESS=false tsx tests/stagehand-simple.test.ts",
+    "test:stagehand:ai-login": "cross-env HEADLESS=false tsx tests/stagehand-login-ai.test.ts",
     "build": "tsc",
     "clean": "rm -rf dist logs/*.log reports/screenshots/*.png"
   },
   "dependencies": {
+    "@browserbasehq/stagehand": "^3.0.8",
     "@playwright/test": "^1.58.0",
     "dotenv": "^16.6.1",
     "playwright": "^1.58.0",
     "playwright-core": "^1.58.0",
-    "stagehand-ai": "^1.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {

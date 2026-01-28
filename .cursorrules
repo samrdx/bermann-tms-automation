@@ -1,0 +1,61 @@
+cursor .cursorrules
+```
+
+Contenido:
+```
+# Bermann TMS Automation - Cursor Rules
+
+## Project Context
+Este es un framework de automatización QA para el sistema TMS de Bermann usando Playwright, TypeScript y Page Object Model.
+
+## Code Style
+- Usar TypeScript estricto
+- Seguir patrón Page Object Model
+- Todos los métodos deben tener logging
+- Usar async/await en lugar de callbacks
+- Nombres en inglés para código, español para mensajes de log en español
+
+## Architecture
+- BasePage: clase base con métodos reutilizables
+- Page Objects: una clase por página del TMS
+- Tests: un archivo por flujo de negocio
+- Logger: Winston para logging estructurado
+
+## Naming Conventions
+- Page Objects: `NombrePage.ts` (ej: LoginPage.ts)
+- Tests: `nombre.test.ts` (ej: login.test.ts)
+- Métodos: camelCase descriptivos (ej: `fillUsername()`)
+- Selectores: constantes en objeto `selectors`
+
+## Testing Standards
+- Cada test debe tener logging claro
+- Screenshots en caso de error
+- Timeouts explícitos
+- Manejo de errores con try/catch
+- Cleanup en finally block
+
+## When Creating New Features
+1. Primero verificar si existe patrón similar
+2. Seguir estructura existente
+3. Agregar logging apropiado
+4. Crear test correspondiente
+5. Actualizar package.json con script
+
+## File Structure
+src/
+  core/ - Clases base y managers
+  pages/ - Page Objects
+  config/ - Configuración
+  utils/ - Utilidades
+tests/ - Tests ejecutables
+
+## Example Prompts That Work Well
+- "Crea un nuevo Page Object siguiendo el patrón de @LoginPage.ts"
+- "Agrega manejo de errores y retry logic a este método"
+- "Genera un test end-to-end para este flujo"
+
+## What NOT to do
+- No usar selectores CSS directos en tests
+- No crear código sin logging
+- No mezclar lógica de UI con lógica de tests
+- No ignorar errores silenciosamente

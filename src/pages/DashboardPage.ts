@@ -49,19 +49,30 @@ export class DashboardPage extends BasePage {
     }
   }
 
-  /**
-   * Obtener nombre del usuario logueado
-   */
-  async getLoggedUserName(): Promise<string> {
+ /**
+ * Obtener nombre del usuario logueado
+ */
+async getLoggedUserName(): Promise<string> {
+  try {
+    // Usar el selector específico que excluye notificaciones
+    const userElement = this.page.locator(this.selectors.userDropdown).first();
+    await userElement.waitFor({ state: 'visible', timeout: 5000 });
+    
+    const userName = await userElement.textContent();
+    return userName?.trim() || '';
+  } catch (error) {
+    logger.warn('Could not get logged user name', error);
+    
+    // Método alternativo: buscar por contenido "user"
     try {
-      await this.waitForElement(this.selectors.userDropdown, 5000);
-      return await this.getText(this.selectors.userDropdown);
-    } catch (error) {
-      logger.warn('Could not get logged user name', error);
+      const userDropdownAlt = this.page.locator('a.nav-link.dropdown-toggle.nav-user').filter({ hasText: /user/i }).first();
+      const userName = await userDropdownAlt.textContent();
+      return userName?.trim() || '';
+    } catch {
       return '';
     }
   }
-
+}
   /**
    * Abrir dropdown de usuario
    */
