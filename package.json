@@ -10,8 +10,11 @@
     "test:login": "cross-env HEADLESS=false tsx tests/login.test.ts",
     "test:login:headless": "cross-env HEADLESS=true tsx tests/login.test.ts",
     "test:explore:dashboard": "cross-env HEADLESS=false tsx tests/explore-dashboard.ts",
-"test:logout": "cross-env HEADLESS=false tsx tests/logout.test.ts",
-"test:dashboard": "cross-env HEADLESS=false tsx tests/dashboard.test.ts",
+    "test:logout": "cross-env HEADLESS=false tsx tests/logout.test.ts",
+    "test:dashboard": "cross-env HEADLESS=false tsx tests/dashboard.test.ts",
+    "test:full-flow": "cross-env HEADLESS=false tsx tests/full-flow.test.ts",
+    "test:login:negative": "cross-env HEADLESS=false tsx tests/login-negative.test.ts",
+    "test:all": "npm run test:login && npm run test:logout && npm run test:full-flow && npm run test:login:negative",
     "build": "tsc",
     "clean": "rm -rf dist logs/*.log reports/screenshots/*.png"
   },
