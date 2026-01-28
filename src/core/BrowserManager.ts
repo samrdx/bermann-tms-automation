@@ -23,7 +23,7 @@ export class BrowserManager {
     this.options = {
       browserType: options.browserType || 'chromium',
       headless: options.headless ?? config.get().headless,
-      viewport: options.viewport || { width: 1920, height: 1080 },
+      viewport: options.viewport || { width: 1280, height: 720 },
       timeout: options.timeout || config.get().timeout,
     };
   }

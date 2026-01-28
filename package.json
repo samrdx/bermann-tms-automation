@@ -9,6 +9,9 @@
     "test:experiments": "cross-env HEADLESS=false tsx tests/login-experiments.ts",
     "test:login": "cross-env HEADLESS=false tsx tests/login.test.ts",
     "test:login:headless": "cross-env HEADLESS=true tsx tests/login.test.ts",
+    "test:explore:dashboard": "cross-env HEADLESS=false tsx tests/explore-dashboard.ts",
+"test:logout": "cross-env HEADLESS=false tsx tests/logout.test.ts",
+"test:dashboard": "cross-env HEADLESS=false tsx tests/dashboard.test.ts",
     "build": "tsc",
     "clean": "rm -rf dist logs/*.log reports/screenshots/*.png"
   },
