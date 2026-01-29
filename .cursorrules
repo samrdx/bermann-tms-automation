@@ -6,7 +6,7 @@ Contenido:
 # Bermann TMS Automation - Cursor Rules
 
 ## Project Context
-Este es un framework de automatización QA para el sistema TMS de Bermann usando Playwright, TypeScript y Page Object Model.
+Este es un framework de automatización QA para el sistema TMS de Bermann usando Playwright,Stagehand, TypeScript y Page Object Model.
 
 ## Code Style
 - Usar TypeScript estricto
