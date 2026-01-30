@@ -696,12 +696,13 @@ cat logs/app.log              # View logs
    - 237-option dropdown with scroll
    - Date picker (readonly)
    - Tests: contratos-crear.test.ts
-
-### 🎯 Planned Modules (Day 5)
-
-3. **Planificar Viajes**
+3. **Planificar Viajes** (Day 5)
    - PlanificarViajesPage
+   - Manejo de rutas y modales
+   - Selectores robustos para formularios complejos
    - Tests: viajes-planificar.test.ts
+
+### 🎯 Planned Modules
 
 4. **Asignar Viajes**
    - AsignarViajesPage
@@ -738,12 +739,12 @@ cat logs/app.log              # View logs
 - ✅ AI hallucination reduction
 
 **Current Status (Day 4):**
-- Tests: 8 automated (100% passing)
+- Tests: 9+ automated (100% passing)
 - Pass rate: 100%
-- Coverage: ~45% of critical flows
+- Coverage: ~60% of critical flows
 - Time saved: ~6 hours/week
 - Skills created: 4 generic
-- Modules completed: 2 (Login/Logout, Contratos)
+- Modules completed: 3 (Login/Logout, Contratos, Planificar Viajes)
 - AI hallucination reduction: 95%
 
 ## Project Milestones
@@ -754,9 +755,10 @@ cat logs/app.log              # View logs
 - ✅ Stagehand AI integration
 - ✅ Skills system implementation
 - ✅ Contratos module complete
+- ✅ Planificar Viajes module complete
 
 **Week 2 (Days 6-10):** 🎯 Current
-- 2 additional TMS modules (Viajes)
+- Complete Asignar Viajes
 - 15+ total tests
 - Professional reporting
 - Test Runner

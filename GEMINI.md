@@ -126,7 +126,8 @@ Skills System → All follow same patterns
 **Modules:**
 - Login/Logout ✅
 - Contratos ✅
-- Viajes 🎯
+- Planificar Viajes ✅
+- Asignar Viajes 🎯
 - Reportes 📋
 
 **Metrics:**

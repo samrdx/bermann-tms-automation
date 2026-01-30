@@ -119,9 +119,9 @@ LOG_LEVEL=info
 - [x] Configuración inicial del proyecto
 - [x] Browser Manager
 - [x] Sistema de logging
-- [ ] Page Object Model para Login
-- [ ] Integración con Stagehand
-- [ ] Automatización de flujos críticos TMS
+- [x] Page Object Model para Login
+- [x] Integración con Stagehand
+- [x] Automatización de flujos críticos TMS (Login, Contratos, Planificar Viajes)
 - [ ] Sistema de reportes ejecutivos
 - [ ] CI/CD con GitHub Actions
 
