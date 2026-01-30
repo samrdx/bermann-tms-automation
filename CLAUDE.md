@@ -891,7 +891,6 @@ qa-automation-framework/
 ├── tests/              # Executable tests
 ├── reports/            # Screenshots, videos
 ├── logs/               # Execution logs
-├── data/               # Test data
 ├── .github/workflows/  # GitHub Actions CI/CD
 └── .env                # Environment variables (not versioned)
 ```

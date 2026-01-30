@@ -74,7 +74,7 @@ export class PlanificarViajesPage extends BasePage {
   async fillNroViaje(nro?: string): Promise<void> {
     logger.info('Filling Nro Viaje');
     try {
-      const nroViaje = nro || String(Math.floor(1000 + Math.random() * 9000));
+      const nroViaje = nro || String(Math.floor(10000 + Math.random() * 90000));
       await this.fill(this.selectors.nroViaje, nroViaje);
       logger.info(`✅ Nro Viaje filled: ${nroViaje}`);
     } catch (error) {

@@ -179,6 +179,8 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Creating contract automation | `tms-selectors`, `tms-dropdowns` |
 | Planificar viajes automation | `tms-selectors`, `tms-page-objects` |
 | Asignar viajes automation | `tms-selectors`, `tms-page-objects` |
+| Planificar viajes automation | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
+| Asignar viajes automation | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
 | Any cascading dropdown (tipo → transportista) | `tms-dropdowns` |
 | Debugging selector issues | `tms-selectors` |
 | Adding new module to framework | `tms-page-objects`, `tms-tests` |
@@ -209,6 +211,25 @@ Bermann TMS QA Automation Framework for transport management system testing.
 | Core | `src/core/` | BasePage, BrowserManager |
 | Utils | `src/utils/` | Winston logger |
 | Config | `src/config/` | Credentials, environment |
+
+## Project Structure
+```
+qa-automation-framework/
+├── AGENTS.md           # Skills system index
+├── CLAUDE.md           # Claude context
+├── GEMINI.md           # Gemini context
+├── skills/             # AI agent skills
+├── src/
+│   ├── core/           # BasePage, BrowserManager
+│   ├── pages/          # Page Objects
+│   ├── flows/          # Business flows
+│   ├── utils/          # Logger and utilities
+│   └── config/         # Environment, credentials
+├── tests/              # Executable tests
+├── reports/            # Screenshots, videos
+└── logs/               # Execution logs
+└── docs/               # Documentation & AI Context
+```
 
 ---
 

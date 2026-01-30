@@ -127,14 +127,33 @@ Skills System → All follow same patterns
 - Login/Logout ✅
 - Contratos ✅
 - Planificar Viajes ✅
-- Asignar Viajes 🎯
+- Asignar Viajes ✅
 - Reportes 📋
 
 **Metrics:**
-- Tests: 8 (100% passing)
+- Tests: 15+ (100% passing)
 - Skills: 4 generic
 - Cost per test: ~$0.001 average
 - Your contribution: ~10-20% of automation
+
+## Project Structure
+```
+qa-automation-framework/
+├── AGENTS.md           # Skills system index
+├── CLAUDE.md           # Claude context
+├── GEMINI.md           # This file
+├── skills/             # AI agent skills
+├── src/
+│   ├── core/           # BasePage, BrowserManager
+│   ├── pages/          # Page Objects
+│   ├── flows/          # Business flows
+│   ├── utils/          # Logger and utilities
+│   └── config/         # Environment, credentials
+├── tests/              # Executable tests
+├── reports/            # Screenshots, videos
+├── logs/               # Execution logs
+└── docs/               # Documentation & AI Context
+```
 
 ---
 
@@ -151,4 +170,4 @@ Skills System → All follow same patterns
 **Cost-effective:** Only when necessary  
 **Quality:** Follow skills for consistency  
 
-**Last Updated:** Day 4 - January 30, 2025
+**Last Updated:** Day 5 - January 31, 2025

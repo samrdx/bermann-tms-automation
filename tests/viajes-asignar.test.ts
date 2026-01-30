@@ -40,7 +40,7 @@ async function testAsignarViaje() {
     const user = getTestUser('regular');
 
     // Generate unique ID for the trip
-    nroViaje = String(Math.floor(1000 + Math.random() * 9000));
+    nroViaje = String(Math.floor(10000 + Math.random() * 90000));
     logger.info(`Generated Nro Viaje: ${nroViaje}`);
 
     // ========================================

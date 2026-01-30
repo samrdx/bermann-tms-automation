@@ -19,15 +19,23 @@ Este proyecto automatiza los flujos críticos del sistema TMS (Transport Managem
 ## 📁 Estructura del Proyecto
 ```
 qa-automation-framework/
+├── AGENTS.md           # Skills system index
+├── claude.md           # This file (Claude context)
+├── gemini.md           # Gemini context
+├── .cursorrules        # Cursor IDE optimization
+├── skills/             # AI agent skills (anti-hallucination)
+│   ├── tms-selectors/
+│   ├── tms-dropdowns/
+│   ├── tms-page-objects/
+│   └── tms-tests/
 ├── src/
-│   ├── core/           # Browser Manager y clases base
-│   ├── pages/          # Page Object Models
-│   ├── flows/          # Flujos de negocio
-│   ├── utils/          # Utilidades (logger, helpers)
-│   └── config/         # Configuración centralizada
-├── tests/              # Tests ejecutables
-├── data/               # Datos de prueba
-└── reports/            # Reportes y screenshots (no versionados)
+│   ├── core/           # BasePage, BrowserManager, StagehandManager
+│   ├── pages/          # Page Objects
+│   ├── utils/          # Logger and utilities
+│   └── config/         # Environment, credentials
+├── tests/              # Executable tests
+├── reports/            # Screenshots, videos
+└── docs/               # Documentation
 ```
 
 ## 🚀 Instalación
