@@ -1,61 +1,258 @@
-cursor .cursorrules
-```
+# Cursor AI Rules - Bermann TMS QA Automation
 
-Contenido:
-```
-# Bermann TMS Automation - Cursor Rules
+You are an AI assistant helping with the Bermann TMS QA Automation Framework.
 
 ## Project Context
-Este es un framework de automatización QA para el sistema TMS de Bermann usando Playwright,Stagehand, TypeScript y Page Object Model.
+
+**Framework:** QA Automation for Transport Management System (TMS)
+**Tech Stack:** Playwright + TypeScript + Page Object Model
+**Goal:** Automate critical TMS workflows for Bermann (Chile)
+
+## Skills System
+
+**CRITICAL:** This project uses a skills system to prevent hallucinations.
+
+Before suggesting ANY code:
+1. Check [AGENTS.md](AGENTS.md) for relevant skills
+2. Read the skill documentation in [skills/](skills/)
+3. Follow patterns exactly as documented
+
+**Available Skills:**
+- `tms-selectors` - Selector priority & Confluence integration
+- `tms-dropdowns` - Bootstrap dropdown patterns
+- `tms-page-objects` - Page Object Model structure
+- `tms-tests` - Test file structure
 
 ## Code Style
-- Usar TypeScript estricto
-- Seguir patrón Page Object Model
-- Todos los métodos deben tener logging
-- Usar async/await en lugar de callbacks
-- Nombres en inglés para código, español para mensajes de log en español
 
-## Architecture
-- BasePage: clase base con métodos reutilizables
-- Page Objects: una clase por página del TMS
-- Tests: un archivo por flujo de negocio
-- Logger: Winston para logging estructurado
+### TypeScript
+- **Strict mode** always enabled
+- **No `any` types** - specify types explicitly
+- **Import with `.js` extension** for ES modules
+- **async/await** instead of promises/callbacks
+```typescript
+// ✅ GOOD
+import { BasePage } from '../core/BasePage.js';
+async function example(): Promise<void> { }
 
-## Naming Conventions
-- Page Objects: `NombrePage.ts` (ej: LoginPage.ts)
-- Tests: `nombre.test.ts` (ej: login.test.ts)
-- Métodos: camelCase descriptivos (ej: `fillUsername()`)
-- Selectores: constantes en objeto `selectors`
+// ❌ BAD
+import { BasePage } from '../core/BasePage';
+function example() { }
+```
 
-## Testing Standards
-- Cada test debe tener logging claro
-- Screenshots en caso de error
-- Timeouts explícitos
-- Manejo de errores con try/catch
-- Cleanup en finally block
+### Naming Conventions
+- **Classes:** PascalCase (`LoginPage`, `BrowserManager`)
+- **Methods:** camelCase (`fillUsername()`, `clickButton()`)
+- **Files:** 
+  - Page Objects: `ModuleNamePage.ts`
+  - Tests: `module-action.test.ts`
+- **Selectors:** camelCase in private `selectors` object
 
-## When Creating New Features
-1. Primero verificar si existe patrón similar
-2. Seguir estructura existente
-3. Agregar logging apropiado
-4. Crear test correspondiente
-5. Actualizar package.json con script
+### Page Object Model (MANDATORY)
 
-## File Structure
-src/
-  core/ - Clases base y managers
-  pages/ - Page Objects
-  config/ - Configuración
-  utils/ - Utilidades
-tests/ - Tests ejecutables
+**Every page MUST:**
+1. Extend `BasePage`
+2. Have private `readonly selectors` object
+3. Use Winston logger
+4. Include error handling with screenshots
+5. Follow template from `tms-page-objects` skill
+```typescript
+import { BasePage } from '../core/BasePage.js';
+import { createLogger } from '../utils/logger.js';
 
-## Example Prompts That Work Well
-- "Crea un nuevo Page Object siguiendo el patrón de @LoginPage.ts"
-- "Agrega manejo de errores y retry logic a este método"
-- "Genera un test end-to-end para este flujo"
+const logger = createLogger('PageName');
 
-## What NOT to do
-- No usar selectores CSS directos en tests
-- No crear código sin logging
-- No mezclar lógica de UI con lógica de tests
-- No ignorar errores silenciosamente
+export class PageNamePage extends BasePage {
+  private readonly selectors = {
+    // From Confluence
+  };
+
+  constructor(page: Page) {
+    super(page);
+  }
+
+  async methodName(): Promise<void> {
+    logger.info('Action description');
+    try {
+      // Action
+    } catch (error) {
+      logger.error('Error description', error);
+      await this.takeScreenshot('error-context');
+      throw error;
+    }
+  }
+}
+```
+
+### Logging (Winston - MANDATORY)
+
+**NEVER use console.log**
+```typescript
+// ✅ GOOD
+import { createLogger } from '../utils/logger.js';
+const logger = createLogger('ComponentName');
+
+logger.info('Action successful');
+logger.error('Action failed', error);
+logger.debug('Debug information');
+
+// ❌ BAD
+console.log('Something happened');
+```
+
+### Selectors (Confluence as truth)
+
+**Priority order:**
+1. ID (`#element-id`)
+2. data-id (`[data-id="field-id"]`)
+3. name (`[name="field"]`)
+4. aria-* (`[aria-label="label"]`)
+5. Classes (last resort)
+
+**NEVER:**
+- Hardcode selectors in test files
+- Use XPath
+- Guess selectors
+
+**ALWAYS:**
+- Check Confluence database
+- Use selectors from Page Objects
+- Document new selectors in Confluence
+
+### Bootstrap Dropdowns
+
+**5 patterns available** (see `tms-dropdowns` skill):
+1. Simple (< 20 options)
+2. Long with scroll (100+ options)
+3. With search (`.bs-searchbox`)
+4. Cascading (parent → child)
+5. Date picker (readonly)
+
+**CRITICAL:**
+- ALWAYS wait 1.5s after parent selection in cascading
+- NEVER use `.fill()` on readonly date inputs
+- ALWAYS use `page.evaluate()` for readonly fields
+
+### Error Handling (MANDATORY)
+```typescript
+try {
+  await action();
+  logger.info('✅ Success');
+} catch (error) {
+  logger.error('❌ Failed', error);
+  await this.takeScreenshot('error-context');
+  throw error;
+} finally {
+  await cleanup();
+}
+```
+
+### Test Structure
+
+**Phases (MANDATORY):**
+- Phase 0: Setup
+- Phase 1: Login
+- Phase 2: Navigation
+- Phase 3+: Actions
+- Final Phase: Verification
+
+**See `tms-tests` skill for complete structure.**
+
+## Autocomplete Preferences
+
+When suggesting code:
+
+### DO:
+- ✅ Suggest Winston logger imports
+- ✅ Auto-import from `../core/BasePage.js`
+- ✅ Suggest error handling blocks
+- ✅ Offer TypeScript types
+- ✅ Suggest reading skills before major changes
+- ✅ Reference Confluence for selectors
+
+### DON'T:
+- ❌ Suggest console.log
+- ❌ Suggest hardcoded selectors in tests
+- ❌ Suggest .fill() for readonly inputs
+- ❌ Suggest XPath selectors
+- ❌ Ignore existing patterns
+
+## File Locations
+```
+src/pages/          → Page Objects
+tests/              → Test files
+src/core/           → BasePage, BrowserManager
+src/utils/          → Logger, helpers
+src/config/         → Credentials, environment
+skills/             → Skill documentation
+```
+
+## Common Prompts
+
+### "Create a Page Object"
+→ First suggest: "Check @tms-page-objects skill"
+→ Then generate following exact template
+
+### "Create a test"
+→ First suggest: "Check @tms-tests skill"
+→ Then generate with phase structure
+
+### "Handle dropdown"
+→ First suggest: "Check @tms-dropdowns skill"
+→ Then use appropriate pattern (1-5)
+
+### "Add selector"
+→ First suggest: "Check Confluence database"
+→ Then use priority order
+
+## Quick References
+
+**Imports:**
+```typescript
+import { BasePage } from '../core/BasePage.js';
+import type { Page } from 'playwright';
+import { createLogger } from '../utils/logger.js';
+```
+
+**Logger:**
+```typescript
+const logger = createLogger('ComponentName');
+```
+
+**Screenshots:**
+```typescript
+await this.takeScreenshot('context-name');
+```
+
+**Wait for cascade:**
+```typescript
+await this.page.waitForTimeout(1500);
+```
+
+## Critical Rules
+
+1. ❌ NEVER suggest code without checking skills
+2. ❌ NEVER use console.log
+3. ❌ NEVER hardcode selectors
+4. ❌ NEVER skip error handling
+5. ✅ ALWAYS use Winston logging
+6. ✅ ALWAYS follow Page Object Model
+7. ✅ ALWAYS check Confluence for selectors
+8. ✅ ALWAYS reference skills in suggestions
+
+## Example Prompts to Handle
+
+**User:** "create login page"
+**You:** "I'll create LoginPage.ts following the tms-page-objects skill. First, do you have the selectors from Confluence?"
+
+**User:** "add dropdown for cliente"
+**You:** "I'll use the dropdown pattern from tms-dropdowns skill. Is this a simple dropdown (< 20 options) or long list (100+)?"
+
+**User:** "why is my test failing"
+**You:** "Let me check the error. Did you follow the phase structure from tms-tests skill? Are you using Winston logging?"
+
+---
+
+**Remember:** Skills prevent hallucinations. Always reference them.
+
+**Last Updated:** Day 4 - January 30, 2025

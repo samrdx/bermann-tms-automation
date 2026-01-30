@@ -137,4 +137,50 @@ Este proyecto es propiedad de Bermann - Uso interno exclusivo.
 
 ---
 
+## 🔄 Multi-Site Setup (Casa/Trabajo)
+
+### First Time Setup (New Machine)
+```bash
+# 1. Clone repository
+git clone https://github.com/samrdx/bermann-tms-automation.git
+cd bermann-tms-automation
+
+# 2. Setup environment
+./scripts/setup-env.sh
+
+# 3. Edit .env with your credentials
+nano .env  # or your preferred editor
+
+# 4. Install dependencies
+npm install
+
+# 5. Run tests
+npm run test:all
+```
+
+### Daily Workflow
+
+**Before leaving (Casa/Trabajo):**
+```bash
+git add .
+git commit -m "Day X: progress"
+git push origin main
+```
+
+**When arriving:**
+```bash
+git pull origin main
+npm run test:all
+```
+
+**Note:** Your `.env` file stays on your local machine and won't be overwritten by `git pull`.
+
+### Updating Credentials
+
+If you need to update credentials:
+```bash
+nano .env  # Edit your local .env
+# Changes stay local, never pushed to Git
+```
+
 **Última actualización:** Enero 2025

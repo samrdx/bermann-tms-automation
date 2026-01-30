@@ -1,365 +1,462 @@
-import { Page } from 'playwright';
 import { BasePage } from '../core/BasePage.js';
-import { config } from '../config/environment.js';
+import type { Page } from 'playwright';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('PlanificarViajesPage');
 
-/**
- * Page Object for the Planificar Viajes (Plan Trips) module
- * Handles trip creation and management in Bermann TMS
- */
+export interface ViajeData {
+  // Campos básicos
+  nroViaje?: string;
+  numeroPlanilla?: string;
+  valorFlete?: string;
+  
+  // Selects críticos
+  tipoOperacion?: string;    // 'Tclp2210'
+  cliente?: string;           // 'Clientedummy'
+  tipoServicio?: string;      // 'Tclp2210'
+  tipoViaje?: string;         // '1'
+  unidadNegocio?: string;     // '1'
+  codigoCarga?: string;       // 'CONT-Bobinas-Sider14'
+  
+  // Ruta
+  numeroRuta?: string;        // '05082025-1'
+  
+  // Origen/Destino
+  origen?: string;            // '1_agunsa_lampa_RM'
+  destino?: string;           // '225_Starken_Sn Bernardo'
+  
+  // Fecha (pre-llenado generalmente)
+  fechaEntradaOrigen?: string;
+}
+
 export class PlanificarViajesPage extends BasePage {
   private readonly selectors = {
-    // Form fields
-    originInput: '#origen',
-    destinationInput: '#destino',
-    dateInput: '#fecha',
-    clientDropdown: '#cliente',
-    clientOption: (value: string) => `#cliente option[value="${value}"]`,
-
-    // Action buttons
-    saveButton: 'button[type="submit"].btn-success',
-    cancelButton: 'button.btn-secondary, a.btn-secondary',
-
-    // Alternative selectors (fallbacks)
-    originInputAlt: '[name="origen"], input[placeholder*="origen" i]',
-    destinationInputAlt: '[name="destino"], input[placeholder*="destino" i]',
-    dateInputAlt: '[name="fecha"], input[type="date"]',
-    clientDropdownAlt: '[name="cliente"], select[data-field="cliente"]',
-
-    // Success/Error messages
-    successMessage: '.alert-success, [data-notify="message"].alert-success',
-    errorMessage: '.alert-danger, [data-notify="message"].alert-danger',
-
-    // Page verification
-    pageTitle: '.page-title, h1',
-    formContainer: 'form#viaje-form, form.viaje-form, .card-body form',
-
-    // Loading indicators
-    loadingSpinner: '.spinner, .loading, [data-loading="true"]',
+    // Campos básicos
+    nroViaje: '#viajes-nro_viaje',
+    numeroPlanilla: '#viajes-numero_planilla',
+    valorFlete: '#viajes-valor_flete',
+    
+    // Selects críticos
+    tipoOperacion: '#tipo_operacion_form',
+    cliente: '#viajes-cliente_id',
+    tipoServicio: '#viajes-tipo_servicio_id',
+    tipoViaje: '#viajes-tipo_viaje_id',
+    unidadNegocio: '#viajes-unidad_negocio_id',
+    codigoCarga: '#viajes-carga_id',
+    
+    // Ruta
+    btnAgregarRuta: 'button:has-text("Agregar Ruta")',
+    modalRutas: '#modalRutasSugeridas',
+    tablaRutas: '#tabla-rutas tbody tr',
+    
+    // Origen/Destino
+    origen: '#_origendestinoform-origen',
+    destino: '#_origendestinoform-destino',
+    fechaEntradaOrigen: '#_origendestinoform-fechaentradaorigen',
+    
+    // Botones
+    btnGuardar: '#btn_guardar_form',
+    btnVolver: 'a[href="/viajes/index"]',
   };
 
   constructor(page: Page) {
-    const planificarViajesUrl = `${config.get().baseUrl}/viajes/crear`;
-    super(page, planificarViajesUrl);
+    super(page);
   }
 
-  /**
-   * Navigate to the Planificar Viajes page
-   */
-  async navigateToPlanificarViajes(): Promise<void> {
+  async navigate(): Promise<void> {
     logger.info('Navigating to Planificar Viajes page');
+    await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/crear');
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  // ========== CAMPOS BÁSICOS ==========
+
+  async fillNroViaje(nro?: string): Promise<void> {
+    logger.info('Filling Nro Viaje');
     try {
-      await this.navigate();
-      await this.waitForPageLoad();
-      logger.info('✅ Successfully navigated to Planificar Viajes');
+      const nroViaje = nro || String(Math.floor(1000 + Math.random() * 9000));
+      await this.fill(this.selectors.nroViaje, nroViaje);
+      logger.info(`✅ Nro Viaje filled: ${nroViaje}`);
     } catch (error) {
-      logger.error('Failed to navigate to Planificar Viajes', error);
-      await this.takeScreenshot('planificar-viajes-navigation-error');
+      logger.error('Failed to fill Nro Viaje', error);
+      await this.takeScreenshot('fill-nro-viaje-error');
       throw error;
     }
   }
 
-  /**
-   * Wait for the page to fully load
-   */
-  async waitForPageLoad(): Promise<void> {
-    logger.debug('Waiting for Planificar Viajes page to load');
-    await this.waitForNavigation();
-
-    // Wait for form to be visible
-    const formVisible = await this.isVisible(this.selectors.formContainer);
-    if (!formVisible) {
-      // Try waiting for any of the form fields
-      await this.waitForElement(this.selectors.originInput, 5000).catch(() => {
-        logger.warn('Origin input not found with primary selector, trying alternative');
-      });
-    }
-  }
-
-  /**
-   * Fill the origin field
-   * @param origin - Origin location text
-   */
-  async fillOrigin(origin: string): Promise<void> {
-    logger.info(`Filling origin field with: ${origin}`);
+  async fillNumeroPlanilla(numero: string): Promise<void> {
+    logger.info(`Filling Numero Planilla: ${numero}`);
     try {
-      // Try primary selector first
-      const primaryExists = await this.isVisible(this.selectors.originInput);
-      const selector = primaryExists ? this.selectors.originInput : this.selectors.originInputAlt;
-
-      await this.waitForElement(selector);
-      await this.fill(selector, origin);
-      logger.debug('Origin field filled successfully');
+      await this.fill(this.selectors.numeroPlanilla, numero);
     } catch (error) {
-      logger.error('Failed to fill origin field', error);
-      await this.takeScreenshot('fill-origin-error');
+      logger.error('Failed to fill Numero Planilla', error);
       throw error;
     }
   }
 
-  /**
-   * Fill the destination field
-   * @param destination - Destination location text
-   */
-  async fillDestination(destination: string): Promise<void> {
-    logger.info(`Filling destination field with: ${destination}`);
+  async fillValorFlete(valor: string): Promise<void> {
+    logger.info(`Filling Valor Flete: ${valor}`);
     try {
-      const primaryExists = await this.isVisible(this.selectors.destinationInput);
-      const selector = primaryExists ? this.selectors.destinationInput : this.selectors.destinationInputAlt;
-
-      await this.waitForElement(selector);
-      await this.fill(selector, destination);
-      logger.debug('Destination field filled successfully');
+      await this.fill(this.selectors.valorFlete, valor);
     } catch (error) {
-      logger.error('Failed to fill destination field', error);
-      await this.takeScreenshot('fill-destination-error');
+      logger.error('Failed to fill Valor Flete', error);
       throw error;
     }
   }
 
-  /**
-   * Select a date for the trip
-   * @param date - Date string in YYYY-MM-DD format
-   */
-  async selectDate(date: string): Promise<void> {
-    logger.info(`Selecting date: ${date}`);
-    try {
-      const primaryExists = await this.isVisible(this.selectors.dateInput);
-      const selector = primaryExists ? this.selectors.dateInput : this.selectors.dateInputAlt;
+  // ========== SELECTS ROBUSTOS (Pattern from old script) ==========
 
-      await this.waitForElement(selector);
-      await this.fill(selector, date);
-      logger.debug('Date selected successfully');
+  /**
+   * Robust select that retries and uses fallback methods
+   */
+  private async robustSelect(
+    selector: string,
+    textOrValue: string,
+    searchByText = true
+  ): Promise<void> {
+    const selectLoc = this.page.locator(selector);
+    
+    // Wait for select to be visible
+    await selectLoc.waitFor({ state: 'visible', timeout: 5000 });
+    
+    for (let retry = 0; retry < 3; retry++) {
+      try {
+        if (searchByText) {
+          // Find option by text content
+          const optionValue = await selectLoc.evaluate((sel: HTMLSelectElement, text: string) => {
+            const opts = Array.from(sel.options || []);
+            const found = opts.find(o => 
+              (o.textContent || '').toLowerCase().includes(text.toLowerCase())
+            );
+            return found ? found.value : null;
+          }, textOrValue);
+          
+          if (optionValue) {
+            await selectLoc.selectOption(optionValue);
+          } else {
+            throw new Error(`Option with text "${textOrValue}" not found`);
+          }
+        } else {
+          // Select by value directly
+          await selectLoc.selectOption(textOrValue);
+        }
+        
+        // Wait and verify not invalid
+        await this.page.waitForTimeout(900);
+        const isInvalid = await selectLoc.evaluate(el => 
+          el.classList.contains('is-invalid') || 
+          el.closest('.form-group, .form-control')?.classList.contains('has-error')
+        );
+        
+        if (!isInvalid) {
+          return; // Success
+        }
+      } catch (error) {
+        if (retry === 2) throw error;
+        await this.page.waitForTimeout(500);
+      }
+    }
+    
+    // Fallback: set value via DOM
+    await selectLoc.evaluate((el: HTMLSelectElement, val: string) => {
+      el.value = val;
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }, textOrValue);
+    
+    await this.page.waitForTimeout(500);
+  }
+
+  async selectTipoOperacion(tipo: string = 'tclp2210'): Promise<void> {
+    logger.info(`Selecting Tipo Operacion: ${tipo}`);
+    try {
+      await this.robustSelect(this.selectors.tipoOperacion, tipo, true);
+      logger.info('✅ Tipo Operacion selected');
     } catch (error) {
-      logger.error('Failed to select date', error);
-      await this.takeScreenshot('select-date-error');
+      logger.error('Failed to select Tipo Operacion', error);
+      await this.takeScreenshot('select-tipo-operacion-error');
       throw error;
     }
   }
 
-  /**
-   * Select a client from the dropdown
-   * @param clientValue - The value attribute of the client option to select
-   */
-  async selectClient(clientValue: string): Promise<void> {
-    logger.info(`Selecting client: ${clientValue}`);
+  async selectCliente(cliente: string = 'Clientedummy'): Promise<void> {
+    logger.info(`Selecting Cliente: ${cliente}`);
     try {
-      const primaryExists = await this.isVisible(this.selectors.clientDropdown);
-      const selector = primaryExists ? this.selectors.clientDropdown : this.selectors.clientDropdownAlt;
-
-      await this.waitForElement(selector);
-      await this.page.selectOption(selector, clientValue);
-      logger.debug('Client selected successfully');
+      await this.robustSelect(this.selectors.cliente, cliente, true);
+      logger.info('✅ Cliente selected');
     } catch (error) {
-      logger.error('Failed to select client', error);
-      await this.takeScreenshot('select-client-error');
+      logger.error('Failed to select Cliente', error);
+      await this.takeScreenshot('select-cliente-error');
       throw error;
     }
   }
 
-  /**
-   * Select a client by visible text
-   * @param clientName - The visible text of the client option
-   */
-  async selectClientByText(clientName: string): Promise<void> {
-    logger.info(`Selecting client by text: ${clientName}`);
+  async selectTipoServicio(tipo: string = 'tclp2210'): Promise<void> {
+    logger.info(`Selecting Tipo Servicio: ${tipo}`);
     try {
-      const primaryExists = await this.isVisible(this.selectors.clientDropdown);
-      const selector = primaryExists ? this.selectors.clientDropdown : this.selectors.clientDropdownAlt;
-
-      await this.waitForElement(selector);
-      await this.page.selectOption(selector, { label: clientName });
-      logger.debug('Client selected by text successfully');
+      await this.page.waitForTimeout(1000); // Wait for cascade
+      await this.robustSelect(this.selectors.tipoServicio, tipo, true);
+      logger.info('✅ Tipo Servicio selected');
     } catch (error) {
-      logger.error('Failed to select client by text', error);
-      await this.takeScreenshot('select-client-text-error');
+      logger.error('Failed to select Tipo Servicio', error);
+      await this.takeScreenshot('select-tipo-servicio-error');
       throw error;
     }
   }
 
-  /**
-   * Click the save button to create the trip
-   */
-  async clickSave(): Promise<void> {
-    logger.info('Clicking save button');
+  async selectTipoViaje(value: string = '1'): Promise<void> {
+    logger.info('Selecting Tipo Viaje');
     try {
-      await this.waitForElement(this.selectors.saveButton);
-      await this.click(this.selectors.saveButton);
-      await this.page.waitForTimeout(2000);
-      logger.info('Save button clicked');
+      await this.robustSelect(this.selectors.tipoViaje, value, false);
+      logger.info('✅ Tipo Viaje selected');
     } catch (error) {
-      logger.error('Failed to click save button', error);
-      await this.takeScreenshot('click-save-error');
+      logger.error('Failed to select Tipo Viaje', error);
       throw error;
     }
   }
 
-  /**
-   * Click the cancel button to abort trip creation
-   */
-  async clickCancel(): Promise<void> {
-    logger.info('Clicking cancel button');
+  async selectUnidadNegocio(value: string = '1'): Promise<void> {
+    logger.info('Selecting Unidad Negocio');
     try {
-      await this.waitForElement(this.selectors.cancelButton);
-      await this.click(this.selectors.cancelButton);
+      await this.robustSelect(this.selectors.unidadNegocio, value, false);
+      logger.info('✅ Unidad Negocio selected');
+    } catch (error) {
+      logger.error('Failed to select Unidad Negocio', error);
+      throw error;
+    }
+  }
+
+  async selectCodigoCarga(carga: string = 'CONT-Bobinas-Sider14'): Promise<void> {
+    logger.info(`Selecting Codigo Carga: ${carga}`);
+    try {
+      await this.robustSelect(this.selectors.codigoCarga, carga, true);
+      logger.info('✅ Codigo Carga selected');
+    } catch (error) {
+      logger.error('Failed to select Codigo Carga', error);
+      await this.takeScreenshot('select-carga-error');
+      throw error;
+    }
+  }
+
+  // ========== RUTA (MODAL COMPLEJO) ==========
+
+  async agregarRuta(numeroRuta: string = '05082025-1'): Promise<void> {
+    logger.info(`Adding ruta: ${numeroRuta}`);
+    
+    try {
+      // Click Agregar Ruta button
+      const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
+      
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          await btnAgregar.click({ timeout: 5000 });
+          logger.info('Clicked Agregar Ruta button');
+          break;
+        } catch (error) {
+          if (attempt === 2) throw error;
+          await this.page.waitForTimeout(500);
+        }
+      }
+      
+      // Wait for modal
       await this.page.waitForTimeout(1000);
-      logger.info('Cancel button clicked');
+      const modal = this.page.locator(this.selectors.modalRutas);
+      const modalVisible = await modal.isVisible({ timeout: 5000 }).catch(() => false);
+      
+      if (!modalVisible) {
+        throw new Error('Modal de rutas no apareció');
+      }
+      
+      logger.info('Modal de rutas visible, buscando ruta en tabla');
+      
+      // Find and click row with matching ruta
+      const rows = this.page.locator(this.selectors.tablaRutas);
+      const rowCount = await rows.count();
+      
+      logger.info(`Found ${rowCount} rows in ruta table`);
+      
+      let foundRuta = false;
+      for (let i = 0; i < rowCount; i++) {
+        const row = rows.nth(i);
+        const cells = await row.locator('td').allTextContents();
+        const rowText = cells.join('|');
+        
+        if (rowText.includes(numeroRuta)) {
+          logger.info(`Found ruta ${numeroRuta} in row ${i}`);
+          
+          // Click green button in this row
+          const btnOk = row.locator('button.btn.btn-sm.btn-success').first();
+          await btnOk.scrollIntoViewIfNeeded();
+          await btnOk.click();
+          
+          logger.info('✅ Ruta selected and clicked');
+          foundRuta = true;
+          break;
+        }
+      }
+      
+      if (!foundRuta) {
+        throw new Error(`Ruta ${numeroRuta} not found in table`);
+      }
+      
+      // Wait for modal to close
+      await this.page.waitForTimeout(1000);
+      
     } catch (error) {
-      logger.error('Failed to click cancel button', error);
-      await this.takeScreenshot('click-cancel-error');
+      logger.error('Failed to add ruta', error);
+      await this.takeScreenshot('agregar-ruta-error');
       throw error;
     }
   }
 
-  /**
-   * Verify that a trip was created successfully
-   * @returns true if success message is displayed or URL changed to success state
-   */
-  async isViajeCreatedSuccessfully(): Promise<boolean> {
-    logger.info('Verifying viaje creation');
+  // ========== ORIGEN/DESTINO ==========
+
+  async selectOrigen(origen: string = '1_agunsa_lampa_RM'): Promise<void> {
+    logger.info(`Selecting Origen: ${origen}`);
+    try {
+      await this.robustSelect(this.selectors.origen, origen, true);
+      logger.info('✅ Origen selected');
+    } catch (error) {
+      logger.error('Failed to select Origen', error);
+      await this.takeScreenshot('select-origen-error');
+      throw error;
+    }
+  }
+
+  async selectDestino(destino: string = '225_Starken_Sn Bernardo'): Promise<void> {
+    logger.info(`Selecting Destino: ${destino}`);
+    try {
+      await this.robustSelect(this.selectors.destino, destino, true);
+      logger.info('✅ Destino selected');
+    } catch (error) {
+      logger.error('Failed to select Destino', error);
+      await this.takeScreenshot('select-destino-error');
+      throw error;
+    }
+  }
+
+  // ========== GUARDAR ==========
+
+  async clickGuardar(): Promise<void> {
+    logger.info('Clicking Guardar button');
+    
+    try {
+      const btnGuardar = this.page.locator(this.selectors.btnGuardar).first();
+      
+      // Wait for button to be visible
+      await btnGuardar.waitFor({ state: 'visible', timeout: 10000 });
+      
+      // Remove any modal backdrops
+      await this.page.evaluate(() => {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(bd => bd.remove());
+      });
+      
+      await this.page.waitForTimeout(300);
+      
+      // Try click with retries
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (attempt === 0) {
+            await btnGuardar.click({ timeout: 5000 });
+          } else if (attempt === 1) {
+            await btnGuardar.click({ force: true, timeout: 5000 });
+          } else {
+            // JS fallback
+            await this.page.evaluate(() => {
+              const btn = document.querySelector('#btn_guardar_form') as HTMLElement;
+              if (btn) btn.click();
+            });
+          }
+          
+          logger.info('✅ Guardar button clicked');
+          break;
+        } catch (error) {
+          if (attempt === 2) throw error;
+          await this.page.waitForTimeout(500);
+        }
+      }
+      
+      // Wait for response
+      await this.page.waitForLoadState('networkidle');
+      await this.page.waitForTimeout(2000);
+      
+    } catch (error) {
+      logger.error('Failed to click Guardar', error);
+      await this.takeScreenshot('click-guardar-error');
+      throw error;
+    }
+  }
+
+  // ========== VERIFICACIÓN ==========
+
+  async isFormSaved(): Promise<boolean> {
     try {
       await this.page.waitForTimeout(2000);
-
-      // Check for success message
-      const successVisible = await this.isVisible(this.selectors.successMessage);
-      if (successVisible) {
-        const message = await this.getText(this.selectors.successMessage);
-        logger.info(`✅ Success message displayed: ${message}`);
+      
+      // Check for success alert
+      const successAlert = await this.page.locator('.alert-success, [role="alert"]').first().isVisible({ timeout: 3000 }).catch(() => false);
+      
+      if (successAlert) {
+        const alertText = await this.page.locator('.alert-success, [role="alert"]').first().textContent();
+        logger.info(`Success alert: ${alertText}`);
         return true;
       }
-
-      // Check URL for success indicators
-      const currentUrl = this.getCurrentUrl();
-      const urlIndicatesSuccess = currentUrl.includes('/viajes') && !currentUrl.includes('/crear');
-
-      if (urlIndicatesSuccess) {
-        logger.info('✅ URL indicates successful creation');
+      
+      // Check URL change
+      const url = this.page.url();
+      if (!url.includes('/crear')) {
+        logger.info('URL changed from /crear, form likely saved');
         return true;
       }
+      
+      return false;
+    } catch {
+      return false;
+    }
+  }
 
-      // Check for error message
-      const errorVisible = await this.isVisible(this.selectors.errorMessage);
-      if (errorVisible) {
-        const errorMsg = await this.getText(this.selectors.errorMessage);
-        logger.warn(`Error message displayed: ${errorMsg}`);
+  async verifyInAsignar(nroViaje: string): Promise<boolean> {
+    logger.info(`Verifying viaje ${nroViaje} in /viajes/asignar`);
+    
+    try {
+      await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/asignar');
+      await this.page.waitForLoadState('networkidle');
+      
+      // Use search if available
+      const searchInput = this.page.locator('input[type="search"]').first();
+      const searchVisible = await searchInput.isVisible({ timeout: 2000 }).catch(() => false);
+      
+      if (searchVisible) {
+        await searchInput.fill(nroViaje);
+        await this.page.waitForTimeout(1000);
+      }
+      
+      // Check table for nroViaje
+      const found = await this.page.evaluate((viaje: string) => {
+        const tbody = document.querySelector('table tbody');
+        if (!tbody) return false;
+        
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        for (const row of rows) {
+          const cells = Array.from(row.querySelectorAll('td'));
+          // Column 2 is Nro Viaje in asignar table
+          if (cells[2]?.textContent?.trim() === viaje) {
+            return true;
+          }
+        }
         return false;
-      }
-
-      logger.warn('Could not determine viaje creation status');
-      return false;
-    } catch (error) {
-      logger.error('Error verifying viaje creation', error);
-      await this.takeScreenshot('verify-viaje-error');
-      return false;
-    }
-  }
-
-  /**
-   * Get the success message text
-   */
-  async getSuccessMessage(): Promise<string> {
-    if (await this.isVisible(this.selectors.successMessage)) {
-      return await this.getText(this.selectors.successMessage);
-    }
-    return '';
-  }
-
-  /**
-   * Get the error message text
-   */
-  async getErrorMessage(): Promise<string> {
-    if (await this.isVisible(this.selectors.errorMessage)) {
-      return await this.getText(this.selectors.errorMessage);
-    }
-    return '';
-  }
-
-  /**
-   * Check if we are on the Planificar Viajes page
-   */
-  async isOnPlanificarViajesPage(): Promise<boolean> {
-    const currentUrl = this.getCurrentUrl();
-    return currentUrl.includes('/viajes/crear');
-  }
-
-  /**
-   * Create a complete viaje with all required fields
-   * @param viajeData - Object containing origin, destination, date, and client
-   */
-  async createViaje(viajeData: {
-    origin: string;
-    destination: string;
-    date: string;
-    client: string;
-  }): Promise<boolean> {
-    logger.info('='.repeat(50));
-    logger.info('🚀 Creating new viaje');
-    logger.info('='.repeat(50));
-
-    try {
-      // Ensure we're on the right page
-      if (!await this.isOnPlanificarViajesPage()) {
-        await this.navigateToPlanificarViajes();
-      }
-
-      // Fill all form fields
-      logger.info('📝 STEP 1: Filling origin');
-      await this.fillOrigin(viajeData.origin);
-
-      logger.info('📝 STEP 2: Filling destination');
-      await this.fillDestination(viajeData.destination);
-
-      logger.info('📝 STEP 3: Selecting date');
-      await this.selectDate(viajeData.date);
-
-      logger.info('📝 STEP 4: Selecting client');
-      await this.selectClient(viajeData.client);
-
-      logger.info('📝 STEP 5: Saving viaje');
-      await this.clickSave();
-
-      // Verify creation
-      logger.info('📝 STEP 6: Verifying creation');
-      const success = await this.isViajeCreatedSuccessfully();
-
-      if (success) {
-        logger.info('='.repeat(50));
-        logger.info('✅ VIAJE CREATED SUCCESSFULLY');
-        logger.info('='.repeat(50));
+      }, nroViaje);
+      
+      if (found) {
+        logger.info(`✅ Viaje ${nroViaje} found in /viajes/asignar`);
       } else {
-        const errorMsg = await this.getErrorMessage();
-        logger.error(`❌ Viaje creation failed: ${errorMsg}`);
-        await this.takeScreenshot('viaje-creation-failed');
+        logger.warn(`⚠️ Viaje ${nroViaje} NOT found in /viajes/asignar`);
       }
-
-      return success;
+      
+      return found;
     } catch (error) {
-      logger.error('❌ Error during viaje creation', error);
-      await this.takeScreenshot('viaje-creation-error');
-      throw error;
-    }
-  }
-
-  /**
-   * Clear all form fields
-   */
-  async clearForm(): Promise<void> {
-    logger.info('Clearing form fields');
-    try {
-      const originSelector = await this.isVisible(this.selectors.originInput)
-        ? this.selectors.originInput
-        : this.selectors.originInputAlt;
-      const destSelector = await this.isVisible(this.selectors.destinationInput)
-        ? this.selectors.destinationInput
-        : this.selectors.destinationInputAlt;
-
-      await this.page.fill(originSelector, '');
-      await this.page.fill(destSelector, '');
-      logger.debug('Form fields cleared');
-    } catch (error) {
-      logger.warn('Could not clear some form fields', error);
+      logger.error('Failed to verify in asignar', error);
+      return false;
     }
   }
 }

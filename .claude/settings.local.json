@@ -6,7 +6,8 @@
       "Bash(git push)",
       "Bash(npm install)",
       "Bash(npx tsc:*)",
-      "Bash(npm run test:login:*)"
+      "Bash(npm run test:login:*)",
+      "Bash(if not exist \"c:\\\\projects\\\\qa-automation-framework\\\\reports\\\\screenshots\" mkdir \"c:\\\\projects\\\\qa-automation-framework\\\\reports\\\\screenshots\")"
     ]
   }
 }
