@@ -46,3 +46,9 @@ playwright/.cache/
 tmp/
 temp/
 *.tmp
+
+# Test artifacts
+tests/**/*.js
+tests/**/*.js.map
+*.test.js
+*.test.js.map
