@@ -30,7 +30,7 @@
       "// === EXPLORATION (Inspección de páginas) ===": "",
       "test:explore:contratos": "cross-env HEADLESS=false tsx tests/exploration/inspect-contratos.ts",
       "test:explore:viajes": "cross-env HEADLESS=false tsx tests/exploration/inspect-viajes.ts",
-      "test:explore:asignar": "cross-env HEADLESS=false tsx tests/exploration/inspect-asignar-viajes.ts",
+      
       
       "// === EXPERIMENTS (Demos/Pruebas) ===": "",
       "test:stagehand:simple": "cross-env HEADLESS=false tsx tests/experiments/stagehand-simple.test.ts",

@@ -1,9 +1,9 @@
-import { BrowserManager } from '../src/core/BrowserManager.js';
-import { LoginPage } from '../src/pages/LoginPage.js';
-import { DashboardPage } from '../src/pages/DashboardPage.js';
-import { ContratosFormPage } from '../src/pages/ContratosFormPage.js';
-import { getTestUser } from '../src/config/credentials.js';
-import { logger } from '../src/utils/logger.js';
+import { BrowserManager } from '../../../src/core/BrowserManager.js';
+import { LoginPage } from '../../../src/pages/LoginPage.js';
+import { DashboardPage } from '../../../src/pages/DashboardPage.js';
+import { ContratosFormPage } from '../../../src/pages/ContratosFormPage.js';
+import { getTestUser } from '../../../src/config/credentials.js';
+import { logger } from '../../../src/utils/logger.js';
 
 async function testCrearContrato() {
   const browser = new BrowserManager({ headless: false });

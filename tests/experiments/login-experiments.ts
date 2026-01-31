@@ -1,6 +1,7 @@
-import { BrowserManager } from '../src/core/BrowserManager.js';
-import { LoginPage } from '../src/pages/LoginPage.js';
-import { logger } from '../src/utils/logger.js';
+import { BrowserManager } from '../../src/core/BrowserManager.js';
+import { LoginPage } from '../../src/pages/LoginPage.js';
+import { getTestUser } from '../../src/config/credentials.js';
+import { logger } from '../../src/utils/logger.js';
 
 async function experimentalTests() {
   const browser = new BrowserManager({ headless: false });
