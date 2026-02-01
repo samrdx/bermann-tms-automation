@@ -1,15 +1,10 @@
-import { Browser, BrowserContext, Page, chromium, firefox, webkit } from 'playwright';
+import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { createLogger } from '../utils/logger.js';
-import { config } from '../config/environment.js';
 
 const logger = createLogger('BrowserManager');
 
-export type BrowserType = 'chromium' | 'firefox' | 'webkit';
-
 export interface BrowserOptions {
-  browserType?: BrowserType;
   headless?: boolean;
-  viewport?: { width: number; height: number };
   timeout?: number;
 }
 
@@ -21,65 +16,33 @@ export class BrowserManager {
 
   constructor(options: BrowserOptions = {}) {
     this.options = {
-      browserType: options.browserType || 'chromium',
-      headless: options.headless ?? config.get().headless,
-      viewport: options.viewport || { width: 1280, height: 720 },
-      timeout: options.timeout || config.get().timeout,
+      headless: options.headless ?? false,
+      timeout: options.timeout ?? 30000,
     };
   }
 
   async initialize(): Promise<void> {
-    try {
-      logger.info('Initializing browser...', this.options);
+    logger.info('Initializing browser...');
+    
+    this.browser = await chromium.launch({
+      headless: this.options.headless,
+      args: [
+        '--start-maximized',
+        '--disable-blink-features=AutomationControlled',
+      ],
+    });
 
-      // Seleccionar browser
-      const browserLauncher = {
-        chromium,
-        firefox,
-        webkit,
-      }[this.options.browserType!];
+    this.context = await this.browser.newContext({
+      viewport: null,
+      ignoreHTTPSErrors: true,
+    });
 
-      // Lanzar browser
-      this.browser = await browserLauncher.launch({
-        headless: this.options.headless,
-        args: ['--start-maximized'],
-      });
-
-      // Crear contexto
-      this.context = await this.browser.newContext({
-        viewport: this.options.viewport,
-        recordVideo: config.get().environment !== 'prod' ? {
-          dir: './reports/videos',
-          size: this.options.viewport,
-        } : undefined,
-      });
-
-      // Configurar timeout por defecto
-      this.context.setDefaultTimeout(this.options.timeout!);
-
-      // Crear página
-      this.page = await this.context.newPage();
-
-      logger.info('Browser initialized successfully');
-    } catch (error) {
-      logger.error('Failed to initialize browser', error);
-      throw error;
-    }
-  }
-
-  async navigate(url: string): Promise<void> {
-    if (!this.page) {
-      throw new Error('Browser not initialized. Call initialize() first.');
-    }
-
-    try {
-      logger.info(`Navigating to: ${url}`);
-      await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-      logger.info('Navigation successful');
-    } catch (error) {
-      logger.error(`Failed to navigate to ${url}`, error);
-      throw error;
-    }
+    this.page = await this.context.newPage();
+    
+    const timeout = this.options.timeout ?? 30000;
+    this.page.setDefaultTimeout(timeout);
+    
+    logger.info('Browser initialized successfully');
   }
 
   getPage(): Page {
@@ -89,46 +52,55 @@ export class BrowserManager {
     return this.page;
   }
 
+  getBrowser(): Browser {
+    if (!this.browser) {
+      throw new Error('Browser not initialized. Call initialize() first.');
+    }
+    return this.browser;
+  }
+
   getContext(): BrowserContext {
     if (!this.context) {
-      throw new Error('Browser context not initialized.');
+      throw new Error('Browser context not initialized. Call initialize() first.');
     }
     return this.context;
   }
 
-  async takeScreenshot(name: string): Promise<string> {
-    if (!this.page) {
-      throw new Error('Page not available');
+  async close(): Promise<void> {
+    logger.info('Closing browser...');
+    
+    if (this.page) {
+      await this.page.close();
+      this.page = null;
     }
 
-    const screenshotPath = `./reports/screenshots/${name}-${Date.now()}.png`;
-    await this.page.screenshot({ path: screenshotPath, fullPage: true });
-    logger.info(`Screenshot saved: ${screenshotPath}`);
-    return screenshotPath;
+    if (this.context) {
+      await this.context.close();
+      this.context = null;
+    }
+
+    if (this.browser) {
+      await this.browser.close();
+      this.browser = null;
+    }
+
+    logger.info('Browser closed successfully');
   }
 
-  async close(): Promise<void> {
-    try {
-      logger.info('Closing browser...');
-      
-      if (this.page) {
-        await this.page.close();
-      }
-      if (this.context) {
-        await this.context.close();
-      }
-      if (this.browser) {
-        await this.browser.close();
-      }
-
-      this.page = null;
-      this.context = null;
-      this.browser = null;
-
-      logger.info('Browser closed successfully');
-    } catch (error) {
-      logger.error('Error closing browser', error);
-      throw error;
+  async takeScreenshot(name: string): Promise<void> {
+    if (!this.page) {
+      logger.warn('Cannot take screenshot: page not initialized');
+      return;
     }
+
+    const timestamp = Date.now();
+    const filename = `./reports/screenshots/${name}-${timestamp}.png`;
+    
+    await this.page.screenshot({
+      path: filename,
+      fullPage: true,
+    });
+
+    logger.info(`Screenshot saved: ${filename}`);
   }
 }

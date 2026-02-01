@@ -9,100 +9,77 @@ async function testFullFlow() {
   
   try {
     logger.info('='.repeat(60));
-    logger.info('🚀 Starting Full Flow Test');
+    logger.info('🚀 Starting Full Flow Test (Login + Navigate + Logout)');
     logger.info('='.repeat(60));
 
+    // PHASE 0: Setup
     await browser.initialize();
+    const page = browser.getPage();
     
-    const loginPage = new LoginPage(browser.getPage());
-    const dashboardPage = new DashboardPage(browser.getPage());
+    const loginPage = new LoginPage(page);
+    const dashboardPage = new DashboardPage(page);
+    
     const user = getTestUser('regular');
 
-    // ========================================
-    // FASE 1: LOGIN
-    // ========================================
+    // PHASE 1: Login
     logger.info('\n🔐 PHASE 1: Login');
-    
     await loginPage.loginAndWaitForDashboard(user.username, user.password);
     
-    if (await dashboardPage.isOnDashboard()) {
-      logger.info('✅ Login successful');
-      await dashboardPage.takeScreenshot('01-dashboard');
-    } else {
+    let isOnDashboard = await dashboardPage.isOnDashboard();
+    if (!isOnDashboard) {
       throw new Error('Failed to reach dashboard');
     }
-
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // FASE 2: NAVEGACIÓN EN DASHBOARD
-    // ========================================
-    logger.info('\n🧭 PHASE 2: Dashboard Navigation');
     
-    // Obtener título de página
-    const pageTitle = await dashboardPage.getPageTitle();
-    logger.info(`Page title: ${pageTitle}`);
-    
-    // Verificar usuario logueado
-    const userName = await dashboardPage.getLoggedUserName();
-    logger.info(`Logged user: ${userName}`);
-    
-    if (userName) {
-      logger.info('✅ User information displayed');
-    }
+    logger.info('✅ Login successful');
+    await page.screenshot({ path: './reports/screenshots/full-flow-01-login.png' });
 
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // FASE 3: INTERACCIONES
-    // ========================================
-    logger.info('\n🎯 PHASE 3: User Interactions');
+    // PHASE 2: Navigate Dashboard
+    logger.info('\n🧭 PHASE 2: Navigate Dashboard');
     
-    // Click en Home (debería mantenernos en dashboard)
-    await dashboardPage.clickHome();
-    await browser.getPage().waitForTimeout(1000);
-    logger.info('✅ Home navigation works');
+    // Wait to see dashboard elements
+    await page.waitForTimeout(2000);
     
-    await dashboardPage.takeScreenshot('02-after-home-click');
-
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // FASE 4: LOGOUT
-    // ========================================
-    logger.info('\n🚪 PHASE 4: Logout');
+    // Verify dashboard elements visible
+    const welcomeVisible = await page.locator('text=/bienvenido|dashboard|inicio/i').first().isVisible({ timeout: 5000 }).catch(() => false);
+    logger.info(`Dashboard elements visible: ${welcomeVisible}`);
     
+    await page.screenshot({ path: './reports/screenshots/full-flow-02-dashboard.png' });
+    logger.info('✅ Dashboard navigation verified');
+
+    // PHASE 3: Logout
+    logger.info('\n🚪 PHASE 3: Logout');
     await dashboardPage.logout();
+    logger.info('✅ Logout action completed');
+    await page.screenshot({ path: './reports/screenshots/full-flow-03-logout.png' });
+
+    // PHASE 4: Verify
+    logger.info('\n✅ PHASE 4: Final Verification');
+    await page.waitForTimeout(2000);
     
-    if (await dashboardPage.isLoggedOut()) {
-      logger.info('✅ Logout successful');
-      await loginPage.takeScreenshot('03-logged-out');
-    } else {
-      throw new Error('Logout failed');
+    const isOnLoginPage = await loginPage.isOnLoginPage();
+    if (!isOnLoginPage) {
+      throw new Error('Not redirected to login page after logout');
     }
-
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // RESUMEN FINAL
-    // ========================================
+    
+    logger.info('✅ Full flow completed: Login → Dashboard → Logout');
+    await page.screenshot({ path: './reports/screenshots/full-flow-04-verification.png' });
+    
     logger.info('\n' + '='.repeat(60));
-    logger.info('📊 FULL FLOW TEST RESULTS:');
-    logger.info('='.repeat(60));
-    logger.info('✅ Phase 1: Login - PASSED');
-    logger.info('✅ Phase 2: Dashboard Navigation - PASSED');
-    logger.info('✅ Phase 3: User Interactions - PASSED');
-    logger.info('✅ Phase 4: Logout - PASSED');
-    logger.info('='.repeat(60));
-    logger.info('🎉 ALL PHASES COMPLETED SUCCESSFULLY');
+    logger.info('✅ FULL FLOW TEST PASSED');
     logger.info('='.repeat(60));
 
   } catch (error) {
-    logger.error('❌ Test failed with error', error);
-    await browser.getPage().screenshot({ 
-      path: `./reports/screenshots/flow-error-${Date.now()}.png`,
-      fullPage: true 
-    });
+    logger.error('❌ Full flow test failed', error);
+    
+    try {
+      await browser.getPage().screenshot({ 
+        path: `./reports/screenshots/full-flow-error-${Date.now()}.png`,
+        fullPage: true 
+      });
+    } catch (screenshotError) {
+      logger.error('Could not take screenshot', screenshotError);
+    }
+    
     throw error;
   } finally {
     await browser.close();

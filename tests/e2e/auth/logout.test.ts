@@ -12,77 +12,60 @@ async function testLogout() {
     logger.info('🚀 Starting Logout Test');
     logger.info('='.repeat(60));
 
+    // PHASE 0: Setup
     await browser.initialize();
+    const page = browser.getPage();
     
-    const loginPage = new LoginPage(browser.getPage());
-    const dashboardPage = new DashboardPage(browser.getPage());
-
-    // ========================================
-    // PASO 1: Login
-    // ========================================
-    logger.info('\n📝 STEP 1: Login to TMS');
+    const loginPage = new LoginPage(page);
+    const dashboardPage = new DashboardPage(page);
     
     const user = getTestUser('regular');
+
+    // PHASE 1: Login
+    logger.info('\n🔐 PHASE 1: Login');
     await loginPage.loginAndWaitForDashboard(user.username, user.password);
     
     const isOnDashboard = await dashboardPage.isOnDashboard();
     if (!isOnDashboard) {
-      throw new Error('Failed to reach dashboard after login');
+      throw new Error('Failed to reach dashboard');
     }
     
-    logger.info('✅ STEP 1 PASSED: Successfully logged in');
-    await dashboardPage.takeScreenshot('01-logged-in');
+    logger.info('✅ Login successful');
+    await page.screenshot({ path: './reports/screenshots/logout-01-login.png' });
 
-    // Esperar un momento
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // PASO 2: Verificar usuario logueado
-    // ========================================
-    logger.info('\n📝 STEP 2: Verify logged user');
-    
-    const userName = await dashboardPage.getLoggedUserName();
-    logger.info(`Logged user: ${userName}`);
-    
-    if (userName) {
-      logger.info('✅ STEP 2 PASSED: User name displayed');
-    } else {
-      logger.warn('⚠️  STEP 2 WARNING: Could not get user name');
-    }
-
-    // ========================================
-    // PASO 3: Logout
-    // ========================================
-    logger.info('\n📝 STEP 3: Logout');
-    
+    // PHASE 2: Logout
+    logger.info('\n🚪 PHASE 2: Logout');
     await dashboardPage.logout();
+    logger.info('✅ Logout action completed');
+    await page.screenshot({ path: './reports/screenshots/logout-02-after-logout.png' });
+
+    // PHASE 3: Verify
+    logger.info('\n✅ PHASE 3: Verification');
+    await page.waitForTimeout(2000);
     
-    const isLoggedOut = await dashboardPage.isLoggedOut();
-    
-    if (isLoggedOut) {
-      logger.info('✅ STEP 3 PASSED: Logout successful');
-      await loginPage.takeScreenshot('02-logged-out');
-    } else {
-      logger.error('❌ STEP 3 FAILED: Logout unsuccessful');
-      await dashboardPage.takeScreenshot('logout-failure');
-      throw new Error('Logout failed - still on dashboard');
+    const isOnLoginPage = await loginPage.isOnLoginPage();
+    if (!isOnLoginPage) {
+      throw new Error('Not redirected to login page after logout');
     }
-
-    // Esperar para ver resultado
-    await browser.getPage().waitForTimeout(2000);
-
+    
+    logger.info('✅ Successfully redirected to login page');
+    await page.screenshot({ path: './reports/screenshots/logout-03-verification.png' });
+    
     logger.info('\n' + '='.repeat(60));
-    logger.info('✅ Logout Test Completed Successfully');
+    logger.info('✅ LOGOUT TEST PASSED');
     logger.info('='.repeat(60));
 
   } catch (error) {
-    logger.error('❌ Test failed with error', error);
+    logger.error('❌ Logout test failed', error);
     
-    const page = browser.getPage();
-    await page.screenshot({ 
-      path: `./reports/screenshots/test-error-${Date.now()}.png`,
-      fullPage: true 
-    });
+    try {
+      await browser.getPage().screenshot({ 
+        path: `./reports/screenshots/logout-error-${Date.now()}.png`,
+        fullPage: true 
+      });
+    } catch (screenshotError) {
+      logger.error('Could not take screenshot', screenshotError);
+    }
     
     throw error;
   } finally {

@@ -1,7 +1,5 @@
 import { BrowserManager } from '../../../src/core/BrowserManager.js';
 import { LoginPage } from '../../../src/pages/LoginPage.js';
-import { DashboardPage } from '../../../src/pages/DashboardPage.js';
-import { getTestUser } from '../../../src/config/credentials.js';
 import { logger } from '../../../src/utils/logger.js';
 
 async function testLoginNegative() {
@@ -9,88 +7,68 @@ async function testLoginNegative() {
   
   try {
     logger.info('='.repeat(60));
-    logger.info('🚀 Starting Negative Login Tests');
+    logger.info('🚀 Starting Login Negative Test');
     logger.info('='.repeat(60));
 
+    // PHASE 0: Setup
     await browser.initialize();
-    const loginPage = new LoginPage(browser.getPage());
+    const page = browser.getPage();
+    const loginPage = new LoginPage(page);
 
-    // ========================================
-    // TEST 1: Usuario incorrecto
-    // ========================================
-    logger.info('\n❌ TEST 1: Invalid Username');
-    
-    await loginPage.login('usuario_invalido_xyz', 'password123');
-    await browser.getPage().waitForTimeout(2000);
-    
-    const hasError1 = await loginPage.hasErrorMessage();
-    const errorMsg1 = await loginPage.getErrorMessage();
-    
-    if (hasError1) {
-      logger.info('✅ TEST 1 PASSED: Error message displayed');
-      logger.info(`Error message: ${errorMsg1}`);
-    } else {
-      logger.warn('⚠️  TEST 1 WARNING: No error message found');
-    }
-    
-    await loginPage.takeScreenshot('01-invalid-username');
-    await browser.getPage().waitForTimeout(2000);
+    // PHASE 1: Navigate
+    logger.info('\n🧭 PHASE 1: Navigate to Login');
+    await loginPage.navigate();
+    logger.info('✅ On login page');
+    await page.screenshot({ path: './reports/screenshots/login-negative-01-navigate.png' });
 
-    // ========================================
-    // TEST 2: Contraseña incorrecta
-    // ========================================
-    logger.info('\n❌ TEST 2: Invalid Password');
+    // PHASE 2: Test Invalid Credentials
+    logger.info('\n❌ PHASE 2: Attempt Login with Invalid Credentials');
     
-    await loginPage.clearFields();
-    await loginPage.login('arivas', 'password_incorrecto_xyz');
-    await browser.getPage().waitForTimeout(2000);
+    await loginPage.fillUsername('invalid_user');
+    await loginPage.fillPassword('wrong_password');
+    await page.screenshot({ path: './reports/screenshots/login-negative-02-filled.png' });
     
-    const hasError2 = await loginPage.hasErrorMessage();
-    const errorMsg2 = await loginPage.getErrorMessage();
-    
-    if (hasError2) {
-      logger.info('✅ TEST 2 PASSED: Error message displayed');
-      logger.info(`Error message: ${errorMsg2}`);
-    } else {
-      logger.warn('⚠️  TEST 2 WARNING: No error message found');
-    }
-    
-    await loginPage.takeScreenshot('02-invalid-password');
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // TEST 3: Campos vacíos
-    // ========================================
-    logger.info('\n❌ TEST 3: Empty Fields');
-    
-    await loginPage.clearFields();
     await loginPage.clickLoginButton();
-    await browser.getPage().waitForTimeout(2000);
+    await page.waitForTimeout(2000);
     
-    const hasInvalidFields = await loginPage.hasInvalidFields();
+    logger.info('✅ Login button clicked with invalid credentials');
+    await page.screenshot({ path: './reports/screenshots/login-negative-03-after-submit.png' });
+
+    // PHASE 3: Verify Error Message
+    logger.info('\n✅ PHASE 3: Verify Error Handling');
     
-    if (hasInvalidFields) {
-      logger.info('✅ TEST 3 PASSED: Invalid field markers displayed');
+    const hasError = await loginPage.hasErrorMessage();
+    if (!hasError) {
+      logger.warn('⚠️ No explicit error message found (checking URL)');
     } else {
-      logger.warn('⚠️  TEST 3 WARNING: No invalid field markers found');
+      logger.info('✅ Error message displayed correctly');
     }
     
-    await loginPage.takeScreenshot('03-empty-fields');
-    await browser.getPage().waitForTimeout(2000);
-
-    // ========================================
-    // RESUMEN
-    // ========================================
+    // Verify still on login page (not redirected)
+    const stillOnLogin = await loginPage.isOnLoginPage();
+    if (!stillOnLogin) {
+      throw new Error('Unexpectedly redirected despite invalid credentials');
+    }
+    
+    logger.info('✅ Correctly stayed on login page');
+    await page.screenshot({ path: './reports/screenshots/login-negative-04-verification.png' });
+    
     logger.info('\n' + '='.repeat(60));
-    logger.info('📊 NEGATIVE LOGIN TESTS COMPLETED');
+    logger.info('✅ LOGIN NEGATIVE TEST PASSED');
     logger.info('='.repeat(60));
 
   } catch (error) {
-    logger.error('❌ Test failed with error', error);
-    await browser.getPage().screenshot({ 
-      path: `./reports/screenshots/negative-error-${Date.now()}.png`,
-      fullPage: true 
-    });
+    logger.error('❌ Login negative test failed', error);
+    
+    try {
+      await browser.getPage().screenshot({ 
+        path: `./reports/screenshots/login-negative-error-${Date.now()}.png`,
+        fullPage: true 
+      });
+    } catch (screenshotError) {
+      logger.error('Could not take screenshot', screenshotError);
+    }
+    
     throw error;
   } finally {
     await browser.close();

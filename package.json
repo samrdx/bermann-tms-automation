@@ -6,16 +6,22 @@
       "build": "tsc",
       "clean": "rm -rf reports/* logs/*",
       
+      "// === TEST RUNNER ===": "",
+      "test:suite": "tsx tests/run-all.ts",
+      "test:suite:open": "tsx tests/run-all.ts && open reports/test-report.html",
+      
       "// === E2E TESTS (Producción) ===": "",
       "test:all": "tsx tests/e2e/**/*.test.ts",
-      "test:all:suite": "tsx tests/run-all.ts",
       
       "// Auth Tests": "",
       "test:login": "cross-env HEADLESS=false tsx tests/e2e/auth/login.test.ts",
       "test:login:headless": "cross-env HEADLESS=true tsx tests/e2e/auth/login.test.ts",
       "test:logout": "cross-env HEADLESS=false tsx tests/e2e/auth/logout.test.ts",
+      "test:logout:headless": "cross-env HEADLESS=true tsx tests/e2e/auth/logout.test.ts",
       "test:login:negative": "cross-env HEADLESS=false tsx tests/e2e/auth/login-negative.test.ts",
+      "test:login:negative:headless": "cross-env HEADLESS=true tsx tests/e2e/auth/login-negative.test.ts",
       "test:full-flow": "cross-env HEADLESS=false tsx tests/e2e/auth/full-flow.test.ts",
+      "test:full-flow:headless": "cross-env HEADLESS=true tsx tests/e2e/auth/full-flow.test.ts",
       
       "// Contratos Tests": "",
       "test:contratos:crear": "cross-env HEADLESS=false tsx tests/e2e/contratos/contratos-crear.test.ts",
@@ -26,10 +32,18 @@
       "test:viajes:planificar:headless": "cross-env HEADLESS=true tsx tests/e2e/viajes/viajes-planificar.test.ts",
       "test:viajes:asignar": "cross-env HEADLESS=false tsx tests/e2e/viajes/viajes-asignar.test.ts",
       "test:viajes:asignar:headless": "cross-env HEADLESS=true tsx tests/e2e/viajes/viajes-asignar.test.ts",
+
+      "// Complete Flow Tests": "",
+      "test:complete-flow": "cross-env HEADLESS=false tsx tests/e2e/flows/complete-business-flow.test.ts",
+      "test:complete-flow:headless": "cross-env HEADLESS=true tsx tests/e2e/flows/complete-business-flow.test.ts",
       
       "// === EXPLORATION (Inspección de páginas) ===": "",
       "test:explore:contratos": "cross-env HEADLESS=false tsx tests/exploration/inspect-contratos.ts",
       "test:explore:viajes": "cross-env HEADLESS=false tsx tests/exploration/inspect-viajes.ts",
+      "inspect:transportistas": "cross-env HEADLESS=false tsx tests/exploration/inspect-transportistas.ts",
+      "inspect:vehiculos": "cross-env HEADLESS=false tsx tests/exploration/inspect-vehiculos.ts",
+      "inspect:conductores": "cross-env HEADLESS=false tsx tests/exploration/inspect-conductores.ts",
+      "inspect:clientes": "cross-env HEADLESS=false tsx tests/exploration/inspect-clientes.ts",
       
       
       "// === EXPERIMENTS (Demos/Pruebas) ===": "",

@@ -35,7 +35,14 @@ export class LoginPage extends BasePage {
 
   async clickLoginButton(): Promise<void> {
     logger.info('Clicking login button');
-    await this.click(this.selectors.loginButton);
+    try {
+      await this.click(this.selectors.loginButton);
+      await this.page.waitForLoadState('networkidle');
+    } catch (error) {
+      logger.error('Failed to click login button', error);
+      await this.takeScreenshot('click-login-error');
+      throw error;
+    }
   }
 
   async login(username: string, password: string): Promise<void> {
