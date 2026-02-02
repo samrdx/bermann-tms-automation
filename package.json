@@ -26,6 +26,7 @@
       "// Contratos Tests": "",
       "test:contratos:crear": "cross-env HEADLESS=false tsx tests/e2e/contratos/contratos-crear.test.ts",
       "test:contratos:crear:headless": "cross-env HEADLESS=true tsx tests/e2e/contratos/contratos-crear.test.ts",
+      "test:transportistas:crear": "cross-env HEADLESS=false tsx tests/e2e/transportistas/transportistas-crear.test.ts",
       
       "// Viajes Tests": "",
       "test:viajes:planificar": "cross-env HEADLESS=false tsx tests/e2e/viajes/viajes-planificar.test.ts",

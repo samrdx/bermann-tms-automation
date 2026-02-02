@@ -179,3 +179,35 @@ export function generateCompanyName(): string {
 
   return `${type} ${name} ${id}`;
 }
+
+/**
+ * Generates a short company name with "SpA" suffix
+ * Example: "Transportes SpA" or "Logistica SpA"
+ */
+export function generateShortCompanyName(): string {
+  const words = ['Transportes', 'Logística', 'Cargo', 'Envíos', 'Distribución', 'Ruta', 'Express', 'Veloz', 'Norte', 'Sur'];
+  const word = words[Math.floor(Math.random() * words.length)];
+  return `${word} Express SpA`;
+}
+
+/**
+ * Generates a random Chilean street name
+ */
+export function generateChileanStreet(): string {
+  const streets = [
+    'Av. Libertador Bernardo O\'Higgins',
+    'Av. Providencia',
+    'Av. Apoquindo',
+    'Av. Las Condes',
+    'Av. Kennedy',
+    'Calle Estado',
+    'Calle Huérfanos',
+    'Calle Ahumada',
+    'Av. Vicuña Mackenna',
+    'Av. Matta',
+    'Gran Avenida',
+    'Av. Pajaritos',
+    'Camino a Melipilla'
+  ];
+  return streets[Math.floor(Math.random() * streets.length)];
+}

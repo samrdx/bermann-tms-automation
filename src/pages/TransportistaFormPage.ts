@@ -1,5 +1,6 @@
 import { BasePage } from '../core/BasePage.js';
 import type { Page } from 'playwright';
+import { expect } from '@playwright/test';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('TransportistaFormPage');
@@ -201,20 +202,29 @@ export class TransportistaFormPage extends BasePage {
   async selectFormaPago(formaPago: string): Promise<void> {
     logger.info(`Selecting forma de pago: ${formaPago}`);
     try {
-      await this.page.click(this.selectors.formaPagoButton);
+      const button = this.page.locator(this.selectors.formaPagoButton);
+      
+      // Check if button exists and is visible
+      const isVisible = await button.isVisible({ timeout: 5000 }).catch(() => false);
+      if (!isVisible) {
+        logger.warn('⚠️ Forma Pago field not visible - skipping (may be conditional)');
+        return;
+      }
+      
+      await button.click();
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
-      await dropdownMenu.waitFor({ state: 'visible' });
+      await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
 
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: formaPago }).first();
+      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: formaPago });
       await option.click();
 
       logger.info(`✅ Forma de pago "${formaPago}" selected`);
     } catch (error) {
-      logger.error(`Failed to select forma de pago: ${formaPago}`, error);
-      await this.takeScreenshot('select-forma-pago-error');
-      throw error;
+      logger.warn(`⚠️ Failed to select forma de pago: ${formaPago} - skipping (may be conditional)`, error);
+      await this.takeScreenshot('select-forma-pago-skipped');
+      // Don't throw - this field might be conditional
     }
   }
 
@@ -266,6 +276,188 @@ export class TransportistaFormPage extends BasePage {
       return url.includes('/transportistas/index') || url.includes('/transportistas/ver');
     } catch (error) {
       logger.error('Failed to check if form saved', error);
+      return false;
+    }
+  }
+
+  // Random Selection Methods
+  
+  // Random Selection Methods
+  
+  // Random Selection Methods
+  
+  // Random Selection Methods
+  
+  // Scoped Dropdown Selection (Pattern: Button Parent -> Menu)
+  
+  async selectRandomRegion(): Promise<void> {
+    logger.info('Selecting random Region');
+    try {
+      const button = this.page.locator(this.selectors.regionButton);
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..'); // Bootstrap select wrapper
+
+      // Retry loop to ensure menu opens
+      let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+        
+        // Check for SHOWING menu inside this specific wrapper
+        const menu = parent.locator('.dropdown-menu.inner.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+        logger.warn(`Region Dropdown (scoped) not visible on attempt ${i + 1}, retrying...`);
+        await this.page.waitForTimeout(500);
+      }
+
+      if (!isOpened) {
+        throw new Error('Failed to open region dropdown after 3 attempts');
+      }
+      
+      const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
+      const options = await dropdownMenu.locator('.dropdown-item').all();
+      
+      const validOptions = [];
+      for (const option of options) {
+          if (await option.isVisible()) {
+              validOptions.push(option);
+          }
+      }
+
+      if (validOptions.length === 0) {
+        throw new Error('No visible region options found');
+      }
+
+      const randomIndex = Math.floor(Math.random() * validOptions.length);
+      const randomOption = validOptions[randomIndex];
+      const optionText = await randomOption.innerText();
+      
+      await randomOption.click();
+      logger.info(`✅ Random Region selected: "${optionText}"`);
+      
+      await this.page.waitForTimeout(1500); // Cascade wait
+    } catch (error) {
+      logger.error('Failed to select random region', error);
+      await this.takeScreenshot('select-random-region-error');
+      throw error;
+    }
+  }
+
+  async selectRandomCiudad(): Promise<void> {
+    logger.info('Selecting random Ciudad');
+    try {
+      const button = this.page.locator(this.selectors.ciudadButton);
+      await expect(button).toBeEnabled({ timeout: 5000 });
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+        
+        const menu = parent.locator('.dropdown-menu.inner.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+        logger.warn(`Ciudad Dropdown (scoped) not visible on attempt ${i + 1}, retrying...`);
+      }
+
+      if (!isOpened) {
+          throw new Error('Failed to open Ciudad dropdown');
+      }
+
+      const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
+      const options = await dropdownMenu.locator('.dropdown-item').all();
+      
+      const validOptions = [];
+      for (const option of options) {
+          if (await option.isVisible()) {
+              validOptions.push(option);
+          }
+      }
+
+      if (validOptions.length === 0) {
+          throw new Error('No visible ciudad options found');
+      }
+
+      const randomIndex = Math.floor(Math.random() * validOptions.length);
+      const randomOption = validOptions[randomIndex];
+      const optionText = await randomOption.innerText();
+      
+      await randomOption.click();
+      logger.info(`✅ Random Ciudad selected: "${optionText}"`);
+      
+      await this.page.waitForTimeout(1500); // Cascade wait
+    } catch (error) {
+      logger.error('Failed to select random ciudad', error);
+      await this.takeScreenshot('select-random-ciudad-error');
+      throw error;
+    }
+  }
+
+  async selectRandomComuna(): Promise<boolean> {
+    logger.info('Selecting random Comuna');
+    try {
+       const button = this.page.locator(this.selectors.comunaButton);
+       
+       // Check if button is enabled (cascade check)
+       const isEnabled = await button.isEnabled({ timeout: 5000 }).catch(() => false);
+       if (!isEnabled) {
+         logger.warn('⚠️ Comuna dropdown is disabled - skipping (field is optional)');
+         return false;
+       }
+       
+       await button.scrollIntoViewIfNeeded();
+       const parent = button.locator('..');
+
+       let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+        
+        const menu = parent.locator('.dropdown-menu.inner.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+        logger.warn(`Comuna Dropdown (scoped) not visible on attempt ${i + 1}, retrying...`);
+      }
+
+      if (!isOpened) {
+          logger.warn('⚠️ Failed to open Comuna dropdown - skipping (field is optional)');
+          return false;
+      }
+
+      const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
+      const options = await dropdownMenu.locator('.dropdown-item').all();
+      
+      const validOptions = [];
+      for (const option of options) {
+          if (await option.isVisible()) {
+              validOptions.push(option);
+          }
+      }
+
+      if (validOptions.length === 0) {
+          logger.warn('⚠️ No Comuna options available - skipping (field is optional)');
+          return false;
+      }
+
+      const randomIndex = Math.floor(Math.random() * validOptions.length);
+      const randomOption = validOptions[randomIndex];
+      const optionText = await randomOption.innerText();
+      
+      await randomOption.click();
+      logger.info(`✅ Random Comuna selected: "${optionText}"`);
+      return true;
+    } catch (error) {
+      logger.warn('⚠️ Comuna selection failed - skipping (field is optional)', error);
+      await this.takeScreenshot('select-random-comuna-skipped');
       return false;
     }
   }

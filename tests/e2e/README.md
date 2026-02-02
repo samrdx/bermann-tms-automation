@@ -3,14 +3,17 @@
 Tests funcionales completos que se ejecutan en CI/CD.
 
 ## Estructura
+
 ```
 e2e/
 ├── auth/         # Autenticación (login, logout)
 ├── contratos/    # Módulo de contratos
+├── transportistas/ # Módulo de transportistas
 └── viajes/       # Módulo de viajes (planificar, asignar)
 ```
 
 ## Ejecutar
+
 ```bash
 # Todos los tests E2E
 npm run test:all
@@ -18,6 +21,7 @@ npm run test:all
 # Por módulo
 npm run test:login
 npm run test:contratos:crear
+npm run test:transportistas:crear
 npm run test:viajes:planificar
 npm run test:viajes:asignar
 ```
