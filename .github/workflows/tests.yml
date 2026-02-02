@@ -2,44 +2,73 @@ name: QA Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps chromium
-    
-    - name: Run tests
-      env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
-        BASE_URL_STAGING: https://moveontruckqa.bermanntms.cl
-        BASE_URL_PROD: https://moveontruck.bermanntms.cl
-        ENVIRONMENT: dev
-        HEADLESS: true
-        TIMEOUT: 30000
-        LOG_LEVEL: info
-      run: npm run test
-    
-    - name: Upload screenshots
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: screenshots
-        path: reports/screenshots/
-        if-no-files-found: ignore
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run tests
+        env:
+          # API Keys
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+          # Environment URLs
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          BASE_URL_STAGING: https://moveontruckqa.bermanntms.cl
+          BASE_URL_PROD: https://moveontruck.bermanntms.cl
+          ENVIRONMENT: dev
+
+          # Test Configuration
+          HEADLESS: true
+          TIMEOUT: 30000
+          LOG_LEVEL: info
+
+          # User Credentials (REQUIRED for login tests)
+          USERNAME_DEV: ${{ secrets.USERNAME_DEV }}
+          PASSWORD_DEV: ${{ secrets.PASSWORD_DEV }}
+        run: npm run test
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: reports/test-report.html
+          retention-days: 30
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: reports/screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: logs/
+          if-no-files-found: ignore
+          retention-days: 7

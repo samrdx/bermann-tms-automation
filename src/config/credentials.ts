@@ -14,8 +14,10 @@ export interface TestUser {
     },
     
     regular: {
-      username: process.env.TEST_REGULAR_USER || 'user_test',
-      password: process.env.TEST_REGULAR_PASS || 'User123!',
+      // CI/CD uses USERNAME_DEV and PASSWORD_DEV
+      // Local dev can use TEST_REGULAR_USER and TEST_REGULAR_PASS
+      username: process.env.TEST_REGULAR_USER || process.env.USERNAME_DEV || 'user_test',
+      password: process.env.TEST_REGULAR_PASS || process.env.PASSWORD_DEV || 'User123!',
       role: 'user',
       description: 'Usuario regular para tests'
     },

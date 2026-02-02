@@ -101,9 +101,9 @@ async function runAllTests() {
         
         try {
           execSync(`npm run ${suite.script}`, {
-            stdio: 'pipe',
+            stdio: 'inherit', // Show output for debugging
             timeout: 300000,
-            env: { ...process.env, FORCE_COLOR: '0' }, // Disable colors in subprocess
+            env: { ...process.env, FORCE_COLOR: '0' },
           });
           
           const duration = Date.now() - suiteStartTime;
