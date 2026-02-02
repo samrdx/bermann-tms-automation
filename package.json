@@ -5,6 +5,7 @@
   "scripts": {
       "build": "tsc",
       "clean": "rm -rf reports/* logs/*",
+      "test": "npm run test:suite",
       
       "// === TEST RUNNER ===": "",
       "test:suite": "tsx tests/run-all.ts",
