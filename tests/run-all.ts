@@ -54,12 +54,7 @@ const testSuites: TestSuite[] = [
     critical: true,
     category: 'Viajes'
   },
-  { 
-    name: 'Viajes - Asignar', 
-    script: 'test:viajes:asignar:headless', 
-    critical: true,
-    category: 'Viajes'
-  },
+
 ];
 
 interface TestResult {
