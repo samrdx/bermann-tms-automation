@@ -8,6 +8,8 @@ Este proyecto automatiza los flujos críticos del sistema TMS (Transport Managem
 
 **Ambiente QA:** https://moveontruckqa.bermanntms.cl
 
+[![Open in IDX](https://cdn.idx.dev/btn/open_in_idx.svg)](https://idx.google.com/import?url=https://github.com/samrdx/qa-automation-framework)
+
 ## 🛠️ Tecnologías
 
 - **Playwright** - Automatización de navegadores
