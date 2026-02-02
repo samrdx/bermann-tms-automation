@@ -3,7 +3,7 @@ import { LoginPage } from '../../../src/pages/LoginPage.js';
 import { logger } from '../../../src/utils/logger.js';
 
 async function testLoginNegative() {
-  const browser = new BrowserManager({ headless: false });
+  const browser = new BrowserManager();
   
   try {
     logger.info('='.repeat(60));

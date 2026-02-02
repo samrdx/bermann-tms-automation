@@ -16,7 +16,8 @@ export class BrowserManager {
 
   constructor(options: BrowserOptions = {}) {
     this.options = {
-      headless: options.headless ?? false,
+      // Prioritize explicit option, then env var, then default to false
+      headless: options.headless ?? (process.env.HEADLESS === 'true'),
       timeout: options.timeout ?? 30000,
     };
   }

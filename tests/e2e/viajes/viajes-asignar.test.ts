@@ -7,7 +7,7 @@ import { getTestUser } from '../../../src/config/credentials.js';
 import { logger } from '../../../src/utils/logger.js';
 
 async function testAsignarViaje() {
-  const browser = new BrowserManager({ headless: false });
+  const browser = new BrowserManager();
 
   // Test results tracking
   const results = {

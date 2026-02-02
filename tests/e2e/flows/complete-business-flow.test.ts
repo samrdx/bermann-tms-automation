@@ -9,7 +9,7 @@ import { createLogger } from '../../../src/utils/logger.js';
 const logger = createLogger('CompleteBusinessFlowTest');
 
 async function testCompleteBusinessFlow() {
-  const browser = new BrowserManager({ headless: false });
+  const browser = new BrowserManager();
 
   try {
     logger.info('='.repeat(60));

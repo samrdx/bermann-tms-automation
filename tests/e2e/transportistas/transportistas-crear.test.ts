@@ -11,7 +11,7 @@ import {
 } from '../../../src/utils/rutGenerator.js';
 
 async function testCrearTransportista() {
-  const browser = new BrowserManager({ headless: false });
+  const browser = new BrowserManager();
   
   try {
     logger.info('='.repeat(60));

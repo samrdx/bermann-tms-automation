@@ -6,7 +6,7 @@ import { getTestUser } from '../../../src/config/credentials.js';
 import { logger } from '../../../src/utils/logger.js';
 
 async function testCrearContrato() {
-  const browser = new BrowserManager({ headless: false });
+  const browser = new BrowserManager();
   
   try {
     logger.info('='.repeat(60));
