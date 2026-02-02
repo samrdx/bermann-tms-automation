@@ -211,3 +211,10 @@ export function generateChileanStreet(): string {
   ];
   return streets[Math.floor(Math.random() * streets.length)];
 }
+
+/**
+ * Generates a random apartment number
+ */
+export function generateApartmentNumber(): string {
+  return Math.floor(Math.random() * 900 + 100).toString();
+}

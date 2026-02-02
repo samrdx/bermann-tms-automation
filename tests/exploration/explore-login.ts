@@ -1,6 +1,6 @@
-import { BrowserManager } from '../src/core/BrowserManager.js';
-import { config } from '../src/config/environment.js';
-import { logger } from '../src/utils/logger.js';
+import { BrowserManager } from '../../src/core/BrowserManager.js';
+import { config } from '../../src/config/environment.js';
+import { logger } from '../../src/utils/logger.js';
 
 async function exploreLogin() {
   const browser = new BrowserManager({ headless: false });
@@ -10,7 +10,7 @@ async function exploreLogin() {
     
     await browser.initialize();
     const loginUrl = config.get().baseUrl + '/login';
-    await browser.navigate(loginUrl);
+    await browser.getPage().goto(loginUrl);
     
     console.log('\n' + '='.repeat(60));
     console.log('✅ Navegador abierto en: ' + loginUrl);

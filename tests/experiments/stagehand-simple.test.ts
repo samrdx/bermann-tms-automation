@@ -1,9 +1,9 @@
-import { StagehandManager } from '../src/core/StagehandManager.js';
-import { config } from '../src/config/environment.js';
-import { logger } from '../src/utils/logger.js';
+import { StagehandManager } from '../../src/core/StagehandManager.js';
+import { config } from '../../src/config/environment.js';
+import { logger } from '../../src/utils/logger.js';
 
 async function testStagehandSimple() {
-  const stagehand = new StagehandManager({ headless: false });
+  const stagehand = new StagehandManager({ env: 'LOCAL' });
 
   try {
     logger.info('='.repeat(60));
@@ -17,7 +17,7 @@ async function testStagehandSimple() {
     await stagehand.initialize();
     logger.info('✅ Stagehand initialized successfully');
 
-    const page = stagehand.getPage();
+    const page = await stagehand.getPage();
 
     // ========================================
     // PASO 2: Navegar a login
@@ -48,7 +48,7 @@ async function testStagehandSimple() {
       
       if (elements.length > 0) {
         logger.info('\nFirst 3 elements:');
-        elements.slice(0, 3).forEach((el, idx) => {
+        elements.slice(0, 3).forEach((el: any, idx: number) => {
           logger.info(`  ${idx + 1}. ${JSON.stringify(el)}`);
         });
       }
@@ -96,7 +96,7 @@ async function testStagehandSimple() {
     logger.error('❌ Simple test failed', error);
     
     try {
-      const page = stagehand.getPage();
+      const page = await stagehand.getPage();
       await page.screenshot({ 
         path: `./reports/screenshots/stagehand-simple-error-${Date.now()}.png`,
         fullPage: true 

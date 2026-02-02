@@ -1,7 +1,7 @@
 import { Page } from 'playwright';
-import { BasePage } from '../core/BasePage.js';
-import { config } from '../config/environment.js';
-import { createLogger } from '../utils/logger.js';
+import { BasePage } from '../../../core/BasePage.js';
+import { config } from '../../../config/environment.js';
+import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('DashboardPage');
 

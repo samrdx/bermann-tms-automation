@@ -1,6 +1,6 @@
-import { BasePage } from '../core/BasePage.js';
+import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('ContratosFormPage');
 
@@ -45,10 +45,12 @@ export class ContratosFormPage extends BasePage {
     super(page);
   }
 
-async navigate(): Promise<void> {
-  await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/crear');
-  await this.page.waitForLoadState('domcontentloaded');
-}
+  async navigate(): Promise<void> {
+    await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/crear');
+    await this.page.waitForLoadState('domcontentloaded');
+  }
+
+
 
   async fillNroContrato(nro: string): Promise<void> {
     logger.info(`Filling contract number: ${nro}`);

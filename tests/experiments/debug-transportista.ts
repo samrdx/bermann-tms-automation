@@ -1,6 +1,6 @@
 import { BrowserManager } from '../../src/core/BrowserManager.js';
-import { LoginPage } from '../../src/pages/LoginPage.js';
-import { TransportistaFormPage } from '../../src/pages/TransportistaFormPage.js';
+import { LoginPage } from '../../src/modules/auth/pages/LoginPage.js';
+import { TransportistaFormPage } from '../../src/modules/transport/pages/TransportistaPage.js';
 import { getTestUser } from '../../src/config/credentials.js';
 import { logger } from '../../src/utils/logger.js';
 

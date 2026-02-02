@@ -1,8 +1,8 @@
 import { BrowserManager } from '../../../src/core/BrowserManager.js';
-import { LoginPage } from '../../../src/pages/LoginPage.js';
-import { DashboardPage } from '../../../src/pages/DashboardPage.js';
-import { PlanificarViajesPage } from '../../../src/pages/PlanificarViajesPage.js';
-import { AsignarViajesPage } from '../../../src/pages/AsignarViajesPage.js';
+import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
+import { DashboardPage } from '../../../src/modules/auth/pages/DashboardPage.js';
+import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
+import { PlanificarPage } from '../../../src/modules/planning/pages/PlanificarPage.js';
 import { getTestUser } from '../../../src/config/credentials.js';
 import { logger } from '../../../src/utils/logger.js';
 
@@ -34,8 +34,8 @@ async function testAsignarViaje() {
 
     const loginPage = new LoginPage(page);
     const dashboardPage = new DashboardPage(page);
-    const planificarPage = new PlanificarViajesPage(page);
-    const asignarPage = new AsignarViajesPage(page);
+    const asignarPage = new AsignarPage(page);
+    const planificarPage = new PlanificarPage(page);
 
     const user = getTestUser('regular');
 

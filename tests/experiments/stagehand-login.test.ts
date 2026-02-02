@@ -1,7 +1,7 @@
-import { StagehandManager } from '../src/core/StagehandManager.js';
-import { getTestUser } from '../src/config/credentials.js';
-import { config } from '../src/config/environment.js';
-import { logger } from '../src/utils/logger.js';
+import { StagehandManager } from '../../src/core/StagehandManager.js';
+import { getTestUser } from '../../src/config/credentials.js';
+import { config } from '../../src/config/environment.js';
+import { logger } from '../../src/utils/logger.js';
 import { z } from 'zod';
 
 // Definir interface para el resultado
@@ -11,7 +11,7 @@ interface UserInfo {
 }
 
 async function testStagehandLogin() {
-  const stagehand = new StagehandManager({ headless: false, verbose: true });
+  const stagehand = new StagehandManager({ env: 'LOCAL' });
 
   try {
     logger.info('='.repeat(60));
@@ -20,7 +20,7 @@ async function testStagehandLogin() {
 
     // Inicializar Stagehand
     await stagehand.initialize();
-    const page = stagehand.getPage();
+    const page = await stagehand.getPage();
 
     const user = getTestUser('regular');
     const loginUrl = `${config.get().baseUrl}/login`;
@@ -100,7 +100,7 @@ async function testStagehandLogin() {
         hasNotifications: z.boolean().describe('Whether the user has notifications'),
       });
 
-      const userInfo = await stagehand.extract<UserInfo>(
+      const userInfo = await stagehand.extract(
         'Extract the logged in user information from the page',
         userSchema
       );
@@ -127,7 +127,7 @@ async function testStagehandLogin() {
     logger.error('❌ Stagehand test failed', error);
     
     try {
-      const page = stagehand.getPage();
+      const page = await stagehand.getPage();
       await page.screenshot({ 
         path: `./reports/screenshots/stagehand-error-${Date.now()}.png`,
         fullPage: true 

@@ -1,6 +1,6 @@
-import { BasePage } from '../core/BasePage.js';
+import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('PlanificarViajesPage');
 
@@ -29,7 +29,7 @@ export interface ViajeData {
   fechaEntradaOrigen?: string;
 }
 
-export class PlanificarViajesPage extends BasePage {
+export class PlanificarPage extends BasePage {
   private readonly selectors = {
     // Campos básicos
     nroViaje: '#viajes-nro_viaje',

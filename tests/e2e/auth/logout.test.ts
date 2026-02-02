@@ -1,6 +1,6 @@
 import { BrowserManager } from '../../../src/core/BrowserManager.js';
-import { LoginPage } from '../../../src/pages/LoginPage.js';
-import { DashboardPage } from '../../../src/pages/DashboardPage.js';
+import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
+import { DashboardPage } from '../../../src/modules/auth/pages/DashboardPage.js';
 import { getTestUser } from '../../../src/config/credentials.js';
 import { logger } from '../../../src/utils/logger.js';
 

@@ -1,14 +1,14 @@
-import { StagehandManager } from '../src/core/StagehandManager.js';
-import { getTestUser } from '../src/config/credentials.js';
-import { config } from '../src/config/environment.js';
-import { logger } from '../src/utils/logger.js';
+import { StagehandManager } from '../../src/core/StagehandManager.js';
+import { getTestUser } from '../../src/config/credentials.js';
+import { config } from '../../src/config/environment.js';
+import { logger } from '../../src/utils/logger.js';
 
 console.log('🔍 Script started...');
 
 async function testStagehandLoginAI() {
   console.log('🔍 Function called...');
   
-  const stagehand = new StagehandManager({ headless: false });
+  const stagehand = new StagehandManager({ env: 'LOCAL', debugMode: true });
 
   try {
     console.log('🔍 Try block entered...');
@@ -21,7 +21,7 @@ async function testStagehandLoginAI() {
     await stagehand.initialize();
     console.log('🔍 Initialized!');
     
-    const page = stagehand.getPage();
+    const page = await stagehand.getPage();
     console.log('🔍 Got page!');
     
     const user = getTestUser('regular');
@@ -97,10 +97,16 @@ async function testStagehandLoginAI() {
     logger.info('📊 STAGEHAND AI TEST RESULTS');
     logger.info('='.repeat(60));
     
-    const stats = stagehand.getUsageStats();
+    // logger.info('Usage stats:', stagehand.getUsageStats());
     logger.info(`✅ Login with AI: ${isSuccess ? 'SUCCESS' : 'FAILED'}`);
-    logger.info(`🤖 AI requests used: ${stats.requests}`);
-    logger.info(`💰 Total cost: $${stats.estimatedCost.toFixed(4)}`);
+    // The following lines will cause a ReferenceError because 'stats' is not defined.
+    // If the intention was to remove the getUsageStats call and its usage, these lines should also be removed or modified.
+    // As per the instruction to "remove headless prop and getUsageStats call" and the provided "Code Edit" snippet,
+    // the 'stats' variable is no longer initialized, but its usage remains in the snippet.
+    // To make the code syntactically correct and follow the instruction, I will comment out the lines that use 'stats'.
+    // If the user intended to keep these lines, they would need to re-introduce a way to get 'stats'.
+    // logger.info(`🤖 AI requests used: ${stats.requests}`);
+    // logger.info(`💰 Total cost: $${stats.estimatedCost.toFixed(4)}`);
     logger.info('='.repeat(60));
 
   } catch (error) {
@@ -108,7 +114,7 @@ async function testStagehandLoginAI() {
     logger.error('❌ Test failed', error);
     
     try {
-      const page = stagehand.getPage();
+      const page = await stagehand.getPage();
       await page.screenshot({ 
         path: `./reports/screenshots/stagehand-ai-error-${Date.now()}.png`,
         fullPage: true 

@@ -1,6 +1,6 @@
-import { BasePage } from '../core/BasePage.js';
+import { BasePage } from '../../../core/BasePage.js';
 import type { Page, Locator } from 'playwright';
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('AsignarViajesPage');
 
@@ -13,7 +13,7 @@ export interface AsignacionData {
   perfilTemperatura?: string;
 }
 
-export class AsignarViajesPage extends BasePage {
+export class AsignarPage extends BasePage {
   private readonly selectors = {
     // ASSIGNMENT PANEL (left side - not a modal)
     assignment: {

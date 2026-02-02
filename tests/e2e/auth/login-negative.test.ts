@@ -1,5 +1,5 @@
 import { BrowserManager } from '../../../src/core/BrowserManager.js';
-import { LoginPage } from '../../../src/pages/LoginPage.js';
+import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
 import { logger } from '../../../src/utils/logger.js';
 
 async function testLoginNegative() {

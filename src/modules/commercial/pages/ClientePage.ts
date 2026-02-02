@@ -1,6 +1,7 @@
-import { BasePage } from '../core/BasePage.js';
+import { BasePage } from '../../../core/BasePage.js';
+import { config } from '../../../config/environment.js';
 import type { Page } from 'playwright';
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('ClienteFormPage');
 
