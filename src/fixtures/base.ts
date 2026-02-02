@@ -9,6 +9,13 @@ import { ContratosFormPage } from '../modules/contracts/pages/ContratosPage.js';
 import { ContratosActions } from '../modules/contracts/actions/ContratosActions.js';
 import { ContractLifecycleFlow } from '../modules/contracts/flows/ContractLifecycleFlow.js';
 import { ContratoFactory } from '../modules/contracts/factories/ContratoFactory.js';
+import { DashboardPage } from '../modules/auth/pages/DashboardPage.js';
+import { TransportistaFormPage } from '../modules/transport/pages/TransportistaPage.js';
+import { ConductorFormPage } from '../modules/transport/pages/ConductorPage.js';
+import { VehiculoFormPage } from '../modules/transport/pages/VehiculoPage.js';
+import { PlanificarPage } from '../modules/planning/pages/PlanificarPage.js';
+import { AsignarPage } from '../modules/planning/pages/AsignarPage.js';
+import { ClienteFormPage } from '../modules/commercial/pages/ClientePage.js';
 
 // Transport Module
 import { TransportistaFactory } from '../modules/transport/factories/TransportistaFactory.js';
@@ -35,7 +42,14 @@ import { ClienteFactory } from '../modules/commercial/factories/ClienteFactory.j
 type MyFixtures = {
   // Pages
   loginPage: LoginPage;
+  dashboardPage: DashboardPage;
   contratosPage: ContratosFormPage;
+  transportistaPage: TransportistaFormPage;
+  conductorPage: ConductorFormPage;
+  vehiculoPage: VehiculoFormPage;
+  viajesPlanificarPage: PlanificarPage;
+  viajesAsignarPage: AsignarPage;
+  clientePage: ClienteFormPage;
 
   // Actions
   authActions: AuthActions;
@@ -53,13 +67,35 @@ type MyFixtures = {
 };
 
 // Extend base test to include fixtures.
+// Extend base test to include fixtures.
 export const test = base.extend<MyFixtures>({
   // Pages
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
   },
+  dashboardPage: async ({ page }, use) => {
+    await use(new DashboardPage(page));
+  },
   contratosPage: async ({ page }, use) => {
     await use(new ContratosFormPage(page));
+  },
+  transportistaPage: async ({ page }, use) => {
+    await use(new TransportistaFormPage(page));
+  },
+  conductorPage: async ({ page }, use) => {
+    await use(new ConductorFormPage(page));
+  },
+  vehiculoPage: async ({ page }, use) => {
+    await use(new VehiculoFormPage(page));
+  },
+  viajesPlanificarPage: async ({ page }, use) => {
+    await use(new PlanificarPage(page));
+  },
+  viajesAsignarPage: async ({ page }, use) => {
+    await use(new AsignarPage(page));
+  },
+  clientePage: async ({ page }, use) => {
+    await use(new ClienteFormPage(page));
   },
 
   // Actions

@@ -25,10 +25,11 @@
    - Manual prompts via terminal
 
 ### API Configuration
+
 ```typescript
 // Stagehand uses Gemini automatically
 const stagehand = new Stagehand({
-  env: 'LOCAL',
+  env: "LOCAL",
   enableCaching: true,
   // Gemini configured via GEMINI_API_KEY env var
 });
@@ -37,16 +38,19 @@ const stagehand = new Stagehand({
 ### Cost Optimization
 
 **Your role in the 80/20 strategy:**
+
 - 80% Playwright (free) ← Main automation
 - 20% You (Gemini via Stagehand) ← Complex cases only
 
 **When to use you:**
+
 - Dynamic dropdowns without stable selectors
 - Complex modal interactions
 - Visual element identification
 - Exploratory testing
 
 **When NOT to use you:**
+
 - Stable form fields (use Playwright)
 - Known selectors (use Page Objects)
 - Login/logout flows (use Playwright)
@@ -70,6 +74,7 @@ When generating code for this project:
    - Error handling with screenshots
 
 ### Example Prompt for You
+
 ```
 Using @tms-page-objects skill, create [ModuleName]Page.ts with:
 - Selectors: [list from Confluence]
@@ -80,6 +85,7 @@ Using @tms-page-objects skill, create [ModuleName]Page.ts with:
 ### Output Format
 
 When generating code, always:
+
 - Use TypeScript with strict types
 - Include Winston logging
 - Add error handling
@@ -87,6 +93,7 @@ When generating code, always:
 - Reference Confluence for selectors
 
 ### Integration with Other AIs
+
 ```
 Claude Pro (claude.ai) → Strategic planning, architecture
     ↓
@@ -100,12 +107,14 @@ Skills System → All follow same patterns
 ### Critical Rules (Same as Claude)
 
 ❌ **Never:**
+
 - Hardcode selectors not in Confluence
 - Skip reading skills before coding
 - Use .fill() on readonly inputs
 - Assume dropdown state
 
 ✅ **Always:**
+
 - Check AGENTS.md first
 - Read skill documentation
 - Follow Page Object Model
@@ -118,40 +127,50 @@ Skills System → All follow same patterns
 ## Project Context
 
 **Tech Stack:**
+
 - Playwright + TypeScript
 - Page Object Model
 - Winston logging
 - Stagehand + Gemini 2.0 Flash (you!)
 
 **Modules:**
+
 - Login/Logout ✅
 - Contratos ✅
 - Planificar Viajes ✅
 - Asignar Viajes ✅
-- Reportes 📋
+- Transport Resource Management ✅
+- Reportes 📋 (Next)
 
 **Metrics:**
+
 - Tests: 15+ (100% passing)
 - Skills: 4 generic
 - Cost per test: ~$0.001 average
 - Your contribution: ~10-20% of automation
 
 ## Project Structure
+
 ```
 qa-automation-framework/
 ├── AGENTS.md           # Skills system index
 ├── CLAUDE.md           # Claude context
 ├── GEMINI.md           # This file
+├── .github/workflows/  # CI/CD pipelines
 ├── skills/             # AI agent skills
 ├── src/
+│   ├── modules/        # Modular Architecture (Domain-Driven)
+│   │   ├── auth/       # Login/Logout
+│   │   ├── contracts/  # Contratos management
+│   │   ├── planning/   # Viajes (Planificar/Asignar)
+│   │   └── commercial/ # Clients
 │   ├── core/           # BasePage, BrowserManager
-│   ├── pages/          # Page Objects
-│   ├── flows/          # Business flows
+│   ├── fixtures/       # Playwright Fixtures
 │   ├── utils/          # Logger and utilities
 │   └── config/         # Environment, credentials
 ├── tests/              # Executable tests
 ├── reports/            # Screenshots, videos
-├── logs/               # Execution logs
+└── logs/               # Execution logs
 └── docs/               # Documentation & AI Context
 ```
 
@@ -168,6 +187,6 @@ qa-automation-framework/
 
 **Your Role:** Intelligent automation where Playwright can't reach  
 **Cost-effective:** Only when necessary  
-**Quality:** Follow skills for consistency  
+**Quality:** Follow skills for consistency
 
 **Last Updated:** Day 5 - January 31, 2025

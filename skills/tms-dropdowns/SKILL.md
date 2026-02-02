@@ -8,7 +8,7 @@ license: MIT
 metadata:
   author: QA Team
   version: "1.1.0"
-  scope: [root, tests, src/pages]
+  scope: [root, tests/e2e, src/modules]
   auto_invoke: "Working with Bootstrap Select dropdowns, Handling date pickers or time fields, Any cascading dropdown"
   last_updated: "2025-01-30"
   status: active
@@ -34,6 +34,7 @@ allowed-tools: Read, Edit, Write, Bash
 ## When to Use This Skill
 
 ✅ **Always use when:**
+
 - Working with ANY dropdown in ANY TMS module
 - Handling cascading dropdowns (parent → child)
 - Date picker fields (readonly inputs with calendar)
@@ -42,6 +43,7 @@ allowed-tools: Read, Edit, Write, Bash
 - Debugging "element not interactable" errors
 
 ❌ **Not needed when:**
+
 - Working with standard HTML `<select>` (rare in TMS)
 - Plain text inputs or textareas
 - Radio buttons or checkboxes
@@ -51,26 +53,30 @@ allowed-tools: Read, Edit, Write, Bash
 ## Bootstrap-Select Anatomy (Universal)
 
 **ALL TMS dropdowns follow this structure:**
+
 ```html
 <!-- Trigger Button -->
-<button class="btn dropdown-toggle btn-light"
-        data-id="[field-name]"
-        type="button">
+<button
+  class="btn dropdown-toggle btn-light"
+  data-id="[field-name]"
+  type="button"
+>
   <span class="filter-option-inner-inner">[Current Selection]</span>
 </button>
 
 <!-- Dropdown Menu (hidden until clicked) -->
 <div class="dropdown-menu">
-  
   <!-- Optional Search Box (not all dropdowns have this) -->
   <div class="bs-searchbox">
-    <input type="text" 
-           class="form-control" 
-           autocomplete="off"
-           role="textbox"
-           aria-label="Search">
+    <input
+      type="text"
+      class="form-control"
+      autocomplete="off"
+      role="textbox"
+      aria-label="Search"
+    />
   </div>
-  
+
   <!-- Options Container -->
   <div class="inner show">
     <a class="dropdown-item" role="option" tabindex="0">[Option 1]</a>
@@ -85,31 +91,34 @@ allowed-tools: Read, Edit, Write, Bash
 ## Core Principles (Apply to ALL Modules)
 
 ### 1. State Machine (Universal)
+
 ```
 CLOSED → click → OPENING → wait → OPEN → select → CLOSING → CLOSED
 ```
 
 ### 2. Never Assume State
+
 ```typescript
 // ❌ BAD: Assumes ready
-await page.click('.dropdown-item');
+await page.click(".dropdown-item");
 
 // ✅ GOOD: Verify first
 await page.click(buttonSelector);
-await page.waitForSelector('.dropdown-menu.show', { state: 'visible' });
-await page.click('.dropdown-item');
+await page.waitForSelector(".dropdown-menu.show", { state: "visible" });
+await page.click(".dropdown-item");
 ```
 
 ### 3. Classification System
 
-| Dropdown Type | Criteria | Pattern |
-|---------------|----------|---------|
-| Simple | < 20 options, no search | Pattern 1 |
-| Long | 20-500 options, has search | Pattern 2 or 3 |
-| Cascading | Depends on parent selection | Pattern 4 |
-| DatePicker | Readonly input with calendar | Pattern 5 |
+| Dropdown Type | Criteria                     | Pattern        |
+| ------------- | ---------------------------- | -------------- |
+| Simple        | < 20 options, no search      | Pattern 1      |
+| Long          | 20-500 options, has search   | Pattern 2 or 3 |
+| Cascading     | Depends on parent selection  | Pattern 4      |
+| DatePicker    | Readonly input with calendar | Pattern 5      |
 
 **How to identify:**
+
 - Inspect with F12
 - Count options or check for `.bs-searchbox`
 - Check if `readonly` attribute exists
@@ -122,29 +131,30 @@ await page.click('.dropdown-item');
 ### Pattern 1: Simple Dropdown
 
 **When:** < 20 options, no search box
+
 ```typescript
 async selectSimpleDropdown(
   buttonSelector: string,
   optionText: string
 ): Promise<void> {
   logger.info(`Selecting "${optionText}" from simple dropdown`);
-  
+
   try {
     // 1. Click to open
     await this.page.click(buttonSelector);
     await this.page.waitForTimeout(500);
-    
+
     // 2. Wait for dropdown visible
     await this.page.waitForSelector('.dropdown-menu.show', {
       state: 'visible',
       timeout: 5000
     });
-    
+
     // 3. Click option
     await this.page.click(
       `.dropdown-menu.show .dropdown-item:has-text("${optionText}")`
     );
-    
+
     logger.info(`✅ Selected "${optionText}"`);
   } catch (error) {
     logger.error(`Failed to select`, error);
@@ -155,6 +165,7 @@ async selectSimpleDropdown(
 ```
 
 **Examples across modules:**
+
 - Contratos: Tipo (Costo/Venta)
 - Viajes: Tipo Viaje
 - Reportes: Tipo Reporte
@@ -164,29 +175,30 @@ async selectSimpleDropdown(
 ### Pattern 2: Long Dropdown with Scroll
 
 **When:** 20-500+ options, requires scrolling
+
 ```typescript
 async selectLongDropdown(
   buttonSelector: string,
   optionText: string
 ): Promise<void> {
   logger.info(`Selecting from long dropdown`);
-  
+
   try {
     await this.page.click(buttonSelector);
     await this.page.waitForTimeout(1000);
-    
+
     await this.page.waitForSelector('.dropdown-menu.show .dropdown-item', {
       state: 'visible',
       timeout: 5000
     });
-    
+
     const options = await this.page.$$('.dropdown-menu.show .dropdown-item');
     logger.info(`Found ${options.length} options`);
-    
+
     for (const option of options) {
       if (await option.isVisible()) {
         const text = await option.textContent();
-        
+
         if (text && text.includes(optionText)) {
           await option.scrollIntoViewIfNeeded();
           await this.page.waitForTimeout(300);
@@ -196,7 +208,7 @@ async selectLongDropdown(
         }
       }
     }
-    
+
     throw new Error(`Option "${optionText}" not found`);
   } catch (error) {
     logger.error(`Failed`, error);
@@ -207,6 +219,7 @@ async selectLongDropdown(
 ```
 
 **Examples:**
+
 - Contratos: Transportista (237 options)
 - Viajes: Cliente
 - Cualquier lista larga
@@ -216,32 +229,33 @@ async selectLongDropdown(
 ### Pattern 3: Dropdown with Search
 
 **When:** Has `.bs-searchbox`, better performance than scrolling
+
 ```typescript
 async selectWithSearch(
   buttonSelector: string,
   searchText: string
 ): Promise<void> {
   logger.info(`Searching for "${searchText}"`);
-  
+
   try {
     await this.page.click(buttonSelector);
     await this.page.waitForTimeout(800);
-    
+
     const searchBox = await this.page.waitForSelector(
       '.bs-searchbox input[type="text"]',
       { state: 'visible', timeout: 5000 }
     );
-    
+
     await searchBox.fill(searchText);
     await this.page.waitForTimeout(500);
-    
+
     await this.page.waitForSelector('.dropdown-menu.show .dropdown-item', {
       state: 'visible'
     });
-    
+
     const firstOption = await this.page.$('.dropdown-menu.show .dropdown-item');
     await firstOption?.click();
-    
+
     logger.info(`✅ Selected via search`);
   } catch (error) {
     logger.error(`Search failed`, error);
@@ -252,6 +266,7 @@ async selectWithSearch(
 ```
 
 **Examples:**
+
 - Cualquier dropdown con searchbox
 - Recomendado para listas largas
 
@@ -260,6 +275,7 @@ async selectWithSearch(
 ### Pattern 4: Cascading Dropdown
 
 **When:** Child dropdown depends on parent selection
+
 ```typescript
 async selectCascading(
   parentButton: string,
@@ -269,24 +285,24 @@ async selectCascading(
   waitMs = 1500  // CRITICAL
 ): Promise<void> {
   logger.info(`Cascading: ${parentValue} → ${childValue}`);
-  
+
   try {
     // Parent
     await this.selectSimpleDropdown(parentButton, parentValue);
-    
+
     // WAIT for cascade
     logger.info(`Waiting ${waitMs}ms for cascade...`);
     await this.page.waitForTimeout(waitMs);
-    
+
     // Verify child enabled
     const enabled = await this.page.isEnabled(childButton);
     if (!enabled) {
       throw new Error('Child not enabled');
     }
-    
+
     // Child
     await this.selectLongDropdown(childButton, childValue);
-    
+
     logger.info(`✅ Cascade complete`);
   } catch (error) {
     logger.error('Cascade failed', error);
@@ -297,11 +313,13 @@ async selectCascading(
 ```
 
 **Examples:**
+
 - Contratos: Tipo → Transportista
 - Viajes: Región → Comuna
 - Cualquier parent → child
 
 **Rules:**
+
 - ✅ ALWAYS wait 1-2 seconds
 - ✅ Verify child enabled
 - ❌ Never assume immediate
@@ -311,26 +329,27 @@ async selectCascading(
 ### Pattern 5: Date Picker
 
 **When:** Input has `readonly` or `data-toggle="datetimepicker"`
+
 ```typescript
 async setDatePicker(
   inputSelector: string,
   date: string  // "YYYY-MM-DD" or "DD/MM/YYYY"
 ): Promise<void> {
   logger.info(`Setting date: ${date}`);
-  
+
   try {
     await this.page.evaluate((selector, value) => {
       const el = document.querySelector(selector) as HTMLInputElement;
       if (!el) throw new Error('Date picker not found');
-      
+
       el.removeAttribute('readonly');
       el.value = value;
-      
+
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
       el.dispatchEvent(new Event('blur', { bubbles: true }));
     }, inputSelector, date);
-    
+
     await this.page.waitForTimeout(300);
     logger.info(`✅ Date set`);
   } catch (error) {
@@ -342,11 +361,13 @@ async setDatePicker(
 ```
 
 **Examples:**
+
 - Contratos: Fecha Vencimiento
 - Viajes: Fecha Inicio/Fin
 - Cualquier fecha readonly
 
 **Rules:**
+
 - ❌ NEVER use `.fill()` on readonly
 - ✅ ALWAYS use JavaScript
 - ✅ Dispatch events
@@ -354,6 +375,7 @@ async setDatePicker(
 ---
 
 ## Decision Tree
+
 ```
 Need to select from dropdown?
 │
@@ -378,21 +400,24 @@ Need to select from dropdown?
 ## Common Issues (Universal Solutions)
 
 ### Issue: "Element not visible"
+
 ```typescript
 // Increase wait
 await page.waitForTimeout(1000);
 
 // Verify .show
-await page.waitForSelector('.dropdown-menu.show');
+await page.waitForSelector(".dropdown-menu.show");
 ```
 
 ### Issue: "Multiple elements found"
+
 ```typescript
 // Use .show to filter
-'.dropdown-menu.show .dropdown-item'  // Only open dropdown
+".dropdown-menu.show .dropdown-item"; // Only open dropdown
 ```
 
 ### Issue: "Option not found"
+
 ```typescript
 // Use .includes()
 if (text && text.trim().includes(optionText)) { ... }
@@ -402,6 +427,7 @@ logger.info('Options:', await Promise.all(options.map(o => o.textContent())));
 ```
 
 ### Issue: "Timeout on readonly"
+
 ```typescript
 // Use JavaScript, not .fill()
 await page.evaluate(/* ... */);
@@ -425,8 +451,9 @@ await page.evaluate(/* ... */);
 ## Module-Specific Configs
 
 For specific dropdown configurations per module, see:
+
 - **Contratos:** `docs/contratos-module.md`
-- **Viajes:** `docs/viajes-module.md`  
+- **Viajes:** `docs/viajes-module.md`
 - **Reportes:** `docs/reportes-module.md`
 
 ---

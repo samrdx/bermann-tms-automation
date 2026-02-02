@@ -1,68 +1,30 @@
-import { BrowserManager } from '../../../src/core/BrowserManager.js';
-import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
-import { DashboardPage } from '../../../src/modules/auth/pages/DashboardPage.js';
+import { test, expect } from '../../../src/fixtures/base.js';
 import { getTestUser } from '../../../src/config/credentials.js';
 import { logger } from '../../../src/utils/logger.js';
 
-async function testLogin() {
-  const browser = new BrowserManager();
-  
-  try {
-    logger.info('='.repeat(60));
-    logger.info('🚀 Starting Login Test');
-    logger.info('='.repeat(60));
+test.describe('Auth - Login', () => {
 
-    // Inicializar browser
-    await browser.initialize();
+  test('Should login successfully with valid credentials', async ({
+    loginPage,
+  }) => {
     
-    // Crear instancia de LoginPage
-    const loginPage = new LoginPage(browser.getPage());
-
-    // ========================================
-    // TEST 1: Login con credenciales válidas
-    // ========================================
-    logger.info('\n📝 TEST 1: Login with valid credentials');
-    
-    // Obtener usuario de test
+    // Test data
     const user = getTestUser('regular');
-    
     logger.info(`Using credentials: ${user.username}`);
-    
-    // Realizar login
-    await loginPage.loginAndWaitForDashboard(user.username, user.password);
-    
-    // Verificar éxito
-    const isSuccess = await loginPage.isLoginSuccessful();
-    
-    if (isSuccess) {
-      logger.info('✅ TEST 1 PASSED: Login successful');
-      await loginPage.takeScreenshot('login-success');
-    } else {
-      logger.error('❌ TEST 1 FAILED: Login unsuccessful');
-      await loginPage.takeScreenshot('login-failure');
-    }
 
-    // Esperar para ver el resultado
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    logger.info('\n' + '='.repeat(60));
-    logger.info('✅ Login Test Completed');
-    logger.info('='.repeat(60));
-
-  } catch (error) {
-    logger.error('❌ Test failed with error', error);
-    
-    // Tomar screenshot del error
-    const page = browser.getPage();
-    await page.screenshot({ 
-      path: `./reports/screenshots/test-error-${Date.now()}.png`,
-      fullPage: true 
+    await test.step('Phase 1: Login', async () => {
+        logger.info('🔐 PHASE 1: Login');
+        await loginPage.loginAndWaitForDashboard(user.username, user.password);
+        
+        const isSuccess = await loginPage.isLoginSuccessful();
+        expect(isSuccess).toBe(true);
+        if (isSuccess) {
+            await loginPage.takeScreenshot('login-success');
+            logger.info('✅ Login successful');
+        } else {
+            await loginPage.takeScreenshot('login-failure');
+            logger.error('❌ Login unsuccessful');
+        }
     });
-    
-    throw error;
-  } finally {
-    await browser.close();
-  }
-}
-
-testLogin();
+  });
+});

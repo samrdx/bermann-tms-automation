@@ -68,7 +68,7 @@ export class VehiculoFormPage extends BasePage {
       await this.page.click(this.selectors.transportistaButton);
 
       // Wait for specific dropdown menu to appear
-      const dropdownMenu = dropdownContainer.locator('.dropdown-menu.show').first();
+      const dropdownMenu = dropdownContainer.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       // CRITICAL: Wait for dropdown options to load (AJAX call)
@@ -128,13 +128,22 @@ export class VehiculoFormPage extends BasePage {
   async selectTipoVehiculo(tipo: string): Promise<void> {
     logger.info(`Selecting tipo vehículo: ${tipo}`);
     try {
-      await this.page.click(this.selectors.tipoVehiculoButton);
+      const btn = this.page.locator(this.selectors.tipoVehiculoButton);
+      await btn.click();
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo });
+      // Debug: Log options
+      const options = await dropdownMenu.locator('.dropdown-item').allTextContents();
+      logger.info(`Available Tipo Vehiculo options: ${options.map(o => o.trim()).join(', ')}`);
+
+      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
+      if (await option.count() === 0) {
+        throw new Error(`Option "${tipo}" not found in Tipo Vehiculo dropdown. Available: ${options.map(o => o.trim()).join(', ')}`);
+      }
       await option.click();
 
       logger.info(`✅ Tipo vehículo "${tipo}" selected`);
@@ -148,33 +157,54 @@ export class VehiculoFormPage extends BasePage {
   async selectTipoRampla(tipo: string): Promise<void> {
     logger.info(`Selecting tipo rampla: ${tipo}`);
     try {
-      await this.page.click(this.selectors.tipoRamplaButton);
+      if (!await this.page.locator(this.selectors.tipoRamplaButton).isVisible()) {
+          logger.warn('Tipo Rampla dropdown not visible, skipping selection');
+          return;
+      }
+      const btn = this.page.locator(this.selectors.tipoRamplaButton);
+      await btn.click();
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo });
+      // Debug: Log options
+      const options = await dropdownMenu.locator('.dropdown-item').allTextContents();
+      logger.info(`Available Tipo Rampla options: ${options.map(o => o.trim()).join(', ')}`);
+
+      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
+      if (await option.count() === 0) {
+        throw new Error(`Option "${tipo}" not found in Tipo Rampla dropdown. Available: ${options.map(o => o.trim()).join(', ')}`);
+      }
       await option.click();
 
       logger.info(`✅ Tipo rampla "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select tipo rampla: ${tipo}`, error);
       await this.takeScreenshot('select-tipo-rampla-error');
+      // Optional field, don't throw? Or strictly require?
+      // Since it's dynamic, maybe throw if visible but failed.
       throw error;
     }
+
   }
 
   async selectCapacidad(capacidad: string): Promise<void> {
     logger.info(`Selecting capacidad: ${capacidad}`);
     try {
-      await this.page.click(this.selectors.capacidadButton);
+      const btn = this.page.locator(this.selectors.capacidadButton);
+      await btn.click();
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: capacidad });
+      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: capacidad }).first();
+      if (await option.count() === 0) {
+        throw new Error(`Option "${capacidad}" not found in Capacidad dropdown`);
+      }
       await option.click();
 
       logger.info(`✅ Capacidad "${capacidad}" selected`);

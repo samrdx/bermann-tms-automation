@@ -19,20 +19,24 @@ Este proyecto automatiza los flujos críticos del sistema TMS (Transport Managem
 - **Gemini API** - Inteligencia artificial
 
 ## 📁 Estructura del Proyecto
+
 ```
 qa-automation-framework/
 ├── AGENTS.md           # Skills system index
-├── claude.md           # This file (Claude context)
-├── gemini.md           # Gemini context
+├── CLAUDE.md           # Claude context
+├── GEMINI.md           # Gemini context
 ├── .cursorrules        # Cursor IDE optimization
+├── .github/workflows/  # CI/CD pipelines
 ├── skills/             # AI agent skills (anti-hallucination)
-│   ├── tms-selectors/
-│   ├── tms-dropdowns/
-│   ├── tms-page-objects/
-│   └── tms-tests/
 ├── src/
-│   ├── core/           # BasePage, BrowserManager, StagehandManager
-│   ├── pages/          # Page Objects
+│   ├── modules/        # Modular Architecture (Domain-Driven)
+│   │   ├── auth/       # Login/Logout
+│   │   ├── contracts/  # Contratos management
+│   │   ├── planning/   # Viajes (Planificar/Asignar)
+│   │   ├── transport/  # Transport resources
+│   │   └── commercial/ # Clients
+│   ├── core/           # BasePage, BrowserManager
+│   ├── fixtures/       # Playwright Fixtures
 │   ├── utils/          # Logger and utilities
 │   └── config/         # Environment, credentials
 ├── tests/              # Executable tests
@@ -43,6 +47,7 @@ qa-automation-framework/
 ## 🚀 Instalación
 
 ### Prerequisitos
+
 - Node.js v18 o superior
 - npm o yarn
 - Cuenta de Google Cloud (para Gemini API)
@@ -50,27 +55,32 @@ qa-automation-framework/
 ### Pasos
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone https://github.com/samrdx/qa-automation-framework.git
 cd qa-automation-framework
 ```
 
 2. **Instalar dependencias**
+
 ```bash
 npm install
 ```
 
 3. **Configurar variables de entorno**
+
 ```bash
 cp .env.example .env
 ```
 
 Edita `.env` y agrega tu API key de Gemini:
+
 ```env
 GEMINI_API_KEY=tu_api_key_aqui
 ```
 
 4. **Instalar navegadores de Playwright**
+
 ```bash
 npx playwright install
 ```
@@ -78,16 +88,19 @@ npx playwright install
 ## 🎮 Uso
 
 ### Ejecutar test de ejemplo
+
 ```bash
 npm run test
 ```
 
 ### Ejecutar con navegador visible (modo headed)
+
 ```bash
 npm run test:headed
 ```
 
 ### Limpiar archivos generados
+
 ```bash
 npm run clean
 ```
@@ -95,6 +108,7 @@ npm run clean
 ## 📝 Configuración
 
 El archivo `.env` contiene:
+
 ```env
 # API
 GEMINI_API_KEY=tu_api_key
@@ -131,13 +145,16 @@ LOG_LEVEL=info
 - [x] Sistema de logging
 - [x] Page Object Model para Login
 - [x] Integración con Stagehand
-- [x] Automatización de flujos críticos TMS (Login, Contratos, Planificar Viajes)
-- [ ] Sistema de reportes ejecutivos
-- [ ] CI/CD con GitHub Actions
+- [x] Automatización de flujos críticos TMS (Login, Contratos, Planificar, Asignar)
+- [x] Sistema de reportes ejecutivos (HTML Reports)
+- [x] CI/CD con GitHub Actions
+- [ ] Data-Driven Tests
+- [ ] Dashboard de métricas históricas
 
 ## 👤 Autor
 
 **Samuel Rodriguez**
+
 - GitHub: [@samrdx](https://github.com/samrdx)
 - Email: samuelrodriguez.it@gmail.com
 
@@ -150,6 +167,7 @@ Este proyecto es propiedad de Bermann - Uso interno exclusivo.
 ## 🔄 Multi-Site Setup (Casa/Trabajo)
 
 ### First Time Setup (New Machine)
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/samrdx/bermann-tms-automation.git
@@ -171,6 +189,7 @@ npm run test:all
 ### Daily Workflow
 
 **Before leaving (Casa/Trabajo):**
+
 ```bash
 git add .
 git commit -m "Day X: progress"
@@ -178,6 +197,7 @@ git push origin main
 ```
 
 **When arriving:**
+
 ```bash
 git pull origin main
 npm run test:all
@@ -188,6 +208,7 @@ npm run test:all
 ### Updating Credentials
 
 If you need to update credentials:
+
 ```bash
 nano .env  # Edit your local .env
 # Changes stay local, never pushed to Git

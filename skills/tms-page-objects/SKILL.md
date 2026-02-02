@@ -28,6 +28,7 @@ allowed-tools: Read, Edit, Write, Bash
 **Scope:** Generic structure - applies to Contratos, Viajes, Reportes, and all future modules.
 
 **Benefits:**
+
 - ✅ 80% less code duplication
 - ✅ 90% easier to maintain
 - ✅ 95% faster onboarding
@@ -38,6 +39,7 @@ allowed-tools: Read, Edit, Write, Bash
 ## When to Use This Skill
 
 ✅ **Always use when:**
+
 - Creating ANY new Page Object (any module)
 - Adding methods to existing Page Object
 - Refactoring Page Object code
@@ -45,6 +47,7 @@ allowed-tools: Read, Edit, Write, Bash
 - Onboarding developers to framework
 
 ❌ **Not needed when:**
+
 - Writing test files (use tms-tests skill)
 - Working with BasePage core (already defined)
 - Pure utility functions (use helpers)
@@ -52,10 +55,11 @@ allowed-tools: Read, Edit, Write, Bash
 ---
 
 ## Mandatory Structure (Universal Template)
+
 ```typescript
-import { BasePage } from '../core/BasePage.js';
+import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('[ModuleName]Page');
 
@@ -64,7 +68,7 @@ const logger = createLogger('[ModuleName]Page');
  * URL: /[module]/[action]
  */
 export class [ModuleName]Page extends BasePage {
-  
+
   // 1. SELECTORS (Private, from Confluence)
   private readonly selectors = {
     // Group by functionality
@@ -113,6 +117,7 @@ export class [ModuleName]Page extends BasePage {
 ## File Naming Conventions
 
 ### File Names
+
 ```
 [ModuleName]Page.ts         ← PascalCase
 [ModuleName]FormPage.ts     ← For create/edit forms
@@ -120,25 +125,37 @@ export class [ModuleName]Page extends BasePage {
 ```
 
 **Examples:**
+
 - `ContratosFormPage.ts`
 - `ViajesListPage.ts`
 - `ReportesGeneratePage.ts`
 
 ### Class Names
+
 ```typescript
-export class ContratosFormPage extends BasePage { }
-export class ViajesListPage extends BasePage { }
+export class ContratosFormPage extends BasePage {}
+export class ViajesListPage extends BasePage {}
 ```
 
 ### Location
+
 ```
-src/pages/
-├── LoginPage.ts
-├── DashboardPage.ts
-├── ContratosFormPage.ts
-├── ContratosListPage.ts
-├── ViajesFormPage.ts
-└── ViajesListPage.ts
+src/modules/
+├── auth/
+│   └── pages/
+│       ├── LoginPage.ts
+│       └── DashboardPage.ts
+├── contracts/
+│   └── pages/
+│       ├── ContratosPage.ts
+│       └── ContratosListPage.ts
+├── planning/
+│   └── pages/
+│       ├── PlanificarPage.ts
+│       └── AsignarPage.ts
+└── transport/
+    └── pages/
+        └── VehiculoPage.ts
 ```
 
 ---
@@ -146,28 +163,30 @@ src/pages/
 ## Section 1: Selectors Object (Mandatory)
 
 ### Rules
+
 - ✅ ALWAYS private readonly
 - ✅ ALWAYS object literal
 - ✅ Group by functionality
 - ✅ Descriptive names (no abbreviations)
 - ✅ Reference Confluence IDs in comments
+
 ```typescript
 private readonly selectors = {
   // Basic Fields
   nroContrato: '#contrato-nro_contrato',  // Confluence: CONT-001
   valorHora: '#contrato-valor_hora',       // Confluence: CONT-002
-  
+
   // Dropdowns (Bootstrap Select)
   tipoButton: '.filter-option-inner-inner',  // Confluence: CONT-003
   transportistaButton: 'button[data-id="contrato-transportista_id"]',  // CONT-004
-  
+
   // Date Pickers (readonly)
   fechaVencimiento: '#contrato-fecha_vencimiento',  // Confluence: CONT-005
-  
+
   // Actions
   btnGuardar: '#btn_guardar',              // Confluence: CONT-006
   btnVolver: 'a.btn[href="/contrato/index"]',  // CONT-007
-  
+
   // Validation
   invalidField: '[aria-invalid="true"]',
   errorMessage: '.help-block.badge.badge-danger',
@@ -175,6 +194,7 @@ private readonly selectors = {
 ```
 
 ### Grouping Strategy
+
 1. **Basic fields** (text inputs, textareas)
 2. **Dropdowns** (selects, Bootstrap selects)
 3. **Date/Time pickers**
@@ -185,6 +205,7 @@ private readonly selectors = {
 ---
 
 ## Section 2: Constructor (Standard)
+
 ```typescript
 constructor(page: Page) {
   super(page);
@@ -194,6 +215,7 @@ constructor(page: Page) {
 ```
 
 **Rules:**
+
 - ✅ ALWAYS call `super(page)`
 - ❌ NO additional logic
 - ❌ NO property initialization beyond super
@@ -201,6 +223,7 @@ constructor(page: Page) {
 ---
 
 ## Section 3: Navigation Method
+
 ```typescript
 async navigate(): Promise<void> {
   await this.page.goto('https://moveontruckqa.bermanntms.cl/[module]/[action]');
@@ -209,12 +232,13 @@ async navigate(): Promise<void> {
 ```
 
 **Variations:**
+
 ```typescript
 // With verification
 async navigate(): Promise<void> {
   await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/crear');
   await this.page.waitForLoadState('domcontentloaded');
-  
+
   // Verify key element loaded
   await this.page.waitForSelector(this.selectors.nroContrato, {
     state: 'visible',
@@ -235,19 +259,20 @@ async navigateToEdit(id: string): Promise<void> {
 
 ### Naming Conventions
 
-| Action | Method Name | Example |
-|--------|-------------|---------|
-| Fill input | `fill[FieldName]` | `fillNroContrato()` |
-| Click button | `click[ButtonName]` | `clickGuardar()` |
-| Select dropdown | `select[FieldName]` | `selectTipo()` |
-| Check checkbox | `check[FieldName]` | `checkActivo()` |
-| Upload file | `upload[FieldName]` | `uploadArchivo()` |
+| Action          | Method Name         | Example             |
+| --------------- | ------------------- | ------------------- |
+| Fill input      | `fill[FieldName]`   | `fillNroContrato()` |
+| Click button    | `click[ButtonName]` | `clickGuardar()`    |
+| Select dropdown | `select[FieldName]` | `selectTipo()`      |
+| Check checkbox  | `check[FieldName]`  | `checkActivo()`     |
+| Upload file     | `upload[FieldName]` | `uploadArchivo()`   |
 
 ### Template
+
 ```typescript
 async fillNroContrato(nro: string): Promise<void> {
   logger.info(`Filling contract number: ${nro}`);
-  
+
   try {
     await this.fill(this.selectors.nroContrato, nro);
   } catch (error) {
@@ -261,6 +286,7 @@ async fillNroContrato(nro: string): Promise<void> {
 ### Patterns
 
 **Simple field:**
+
 ```typescript
 async fillValorHora(valor: string): Promise<void> {
   logger.info(`Filling hourly rate: ${valor}`);
@@ -275,6 +301,7 @@ async fillValorHora(valor: string): Promise<void> {
 ```
 
 **Dropdown (use tms-dropdowns skill):**
+
 ```typescript
 async selectTipo(tipo: 'Costo' | 'Venta'): Promise<void> {
   logger.info(`Selecting tipo: ${tipo}`);
@@ -293,6 +320,7 @@ async selectTipo(tipo: 'Costo' | 'Venta'): Promise<void> {
 ```
 
 **Date picker (use tms-dropdowns Pattern 5):**
+
 ```typescript
 async setFechaVencimiento(fecha: string): Promise<void> {
   logger.info(`Setting fecha: ${fecha}`);
@@ -317,21 +345,22 @@ async setFechaVencimiento(fecha: string): Promise<void> {
 
 ### Naming Conventions
 
-| Check | Method Name | Returns |
-|-------|-------------|---------|
-| Boolean check | `is[Condition]` | `boolean` |
-| Has element | `has[Element]` | `boolean` |
-| Get value | `get[Value]` | `string \| number` |
-| Get elements | `get[Elements]` | `Locator[]` |
+| Check         | Method Name     | Returns            |
+| ------------- | --------------- | ------------------ |
+| Boolean check | `is[Condition]` | `boolean`          |
+| Has element   | `has[Element]`  | `boolean`          |
+| Get value     | `get[Value]`    | `string \| number` |
+| Get elements  | `get[Elements]` | `Locator[]`        |
 
 ### Template
+
 ```typescript
 async isFormSaved(): Promise<boolean> {
   try {
     // Check URL changed
     const url = this.page.url();
     if (!url.includes('/index')) return false;
-    
+
     // Check success message
     const notification = await this.page.$('[role="status"]');
     return notification !== null;
@@ -362,16 +391,17 @@ async getErrorMessages(): Promise<string[]> {
 ---
 
 ## Complete Example
-```typescript
-import { BasePage } from '../core/BasePage.js';
-import type { Page } from 'playwright';
-import { createLogger } from '../utils/logger.js';
 
-const logger = createLogger('ContratosFormPage');
+```typescript
+import { BasePage } from "../core/BasePage.js";
+import type { Page } from "playwright";
+import { createLogger } from "../utils/logger.js";
+
+const logger = createLogger("ContratosFormPage");
 
 export interface ContractData {
   nroContrato: string;
-  tipo: 'Costo' | 'Venta';
+  tipo: "Costo" | "Venta";
   transportista?: string;
   fechaVencimiento?: string;
   valorHora: string;
@@ -379,12 +409,12 @@ export interface ContractData {
 
 export class ContratosFormPage extends BasePage {
   private readonly selectors = {
-    nroContrato: '#contrato-nro_contrato',
-    tipoButton: '.filter-option-inner-inner',
+    nroContrato: "#contrato-nro_contrato",
+    tipoButton: ".filter-option-inner-inner",
     transportistaButton: 'button[data-id="contrato-transportista_id"]',
-    fechaVencimiento: '#contrato-fecha_vencimiento',
-    valorHora: '#contrato-valor_hora',
-    btnGuardar: '#btn_guardar',
+    fechaVencimiento: "#contrato-fecha_vencimiento",
+    valorHora: "#contrato-valor_hora",
+    btnGuardar: "#btn_guardar",
   };
 
   constructor(page: Page) {
@@ -392,8 +422,8 @@ export class ContratosFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/crear');
-    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.goto("https://moveontruckqa.bermanntms.cl/contrato/crear");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async fillNroContrato(nro: string): Promise<void> {
@@ -401,53 +431,55 @@ export class ContratosFormPage extends BasePage {
     try {
       await this.fill(this.selectors.nroContrato, nro);
     } catch (error) {
-      logger.error('Failed to fill nro', error);
-      await this.takeScreenshot('fill-nro-error');
+      logger.error("Failed to fill nro", error);
+      await this.takeScreenshot("fill-nro-error");
       throw error;
     }
   }
 
-  async selectTipo(tipo: 'Costo' | 'Venta'): Promise<void> {
+  async selectTipo(tipo: "Costo" | "Venta"): Promise<void> {
     logger.info(`Selecting tipo: ${tipo}`);
     try {
       await this.page.click(this.selectors.tipoButton);
       await this.page.waitForTimeout(500);
-      await this.page.waitForSelector('.dropdown-menu.show');
-      await this.page.click(`.dropdown-menu.show .dropdown-item:has-text("${tipo}")`);
+      await this.page.waitForSelector(".dropdown-menu.show");
+      await this.page.click(
+        `.dropdown-menu.show .dropdown-item:has-text("${tipo}")`,
+      );
     } catch (error) {
-      logger.error('Failed to select tipo', error);
-      await this.takeScreenshot('select-tipo-error');
+      logger.error("Failed to select tipo", error);
+      await this.takeScreenshot("select-tipo-error");
       throw error;
     }
   }
 
   async fillCompleteForm(data: ContractData): Promise<void> {
-    logger.info('Filling complete contract form');
-    
+    logger.info("Filling complete contract form");
+
     await this.fillNroContrato(data.nroContrato);
     await this.selectTipo(data.tipo);
-    
+
     if (data.transportista) {
       await this.page.waitForTimeout(1500); // Cascade wait
       await this.selectTransportista(data.transportista);
     }
-    
+
     if (data.fechaVencimiento) {
       await this.setFechaVencimiento(data.fechaVencimiento);
     }
-    
+
     await this.fillValorHora(data.valorHora);
-    
-    logger.info('✅ Form filled successfully');
+
+    logger.info("✅ Form filled successfully");
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info('Clicking save button');
+    logger.info("Clicking save button");
     try {
       await this.click(this.selectors.btnGuardar);
     } catch (error) {
-      logger.error('Failed to save', error);
-      await this.takeScreenshot('save-error');
+      logger.error("Failed to save", error);
+      await this.takeScreenshot("save-error");
       throw error;
     }
   }
@@ -456,7 +488,7 @@ export class ContratosFormPage extends BasePage {
     try {
       await this.page.waitForTimeout(2000);
       const url = this.page.url();
-      return url.includes('/index') || url.includes('/editar');
+      return url.includes("/index") || url.includes("/editar");
     } catch {
       return false;
     }
@@ -469,9 +501,11 @@ export class ContratosFormPage extends BasePage {
 ## When to Create Helper Methods
 
 ### Create when:
+
 - ✅ Filling multiple related fields
 - ✅ Complex multi-step interactions
 - ✅ Common workflows (create full entity)
+
 ```typescript
 // Good: Helper for complete form
 async createContract(data: ContractData): Promise<void> {
@@ -483,6 +517,7 @@ async createContract(data: ContractData): Promise<void> {
 ```
 
 ### Don't create when:
+
 - ❌ Single field operations (use direct methods)
 - ❌ One-time actions
 - ❌ Test-specific logic (belongs in test file)
@@ -492,6 +527,7 @@ async createContract(data: ContractData): Promise<void> {
 ## Refactoring to BasePage
 
 **Move to BasePage when method used by 3+ Page Objects:**
+
 ```typescript
 // Before: Duplicated in 3 pages
 export class ContratosFormPage extends BasePage {

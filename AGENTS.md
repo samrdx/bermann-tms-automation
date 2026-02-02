@@ -12,20 +12,22 @@
 ## Available Skills
 
 ### TMS-Specific Skills
-| Skill | Description | URL |
-|-------|-------------|-----|
-| `tms-selectors` | Confluence selector database, priority rules | [SKILL.md](skills/tms-selectors/SKILL.md) |
-| `tms-dropdowns` | Bootstrap dropdown automation (proven patterns) | [SKILL.md](skills/tms-dropdowns/SKILL.md) |
-| `tms-page-objects` | Page Object Model structure for TMS | [SKILL.md](skills/tms-page-objects/SKILL.md) |
-| `tms-tests` | Test file structure, assertions, logging | [SKILL.md](skills/tms-tests/SKILL.md) |
+
+| Skill              | Description                                     | URL                                          |
+| ------------------ | ----------------------------------------------- | -------------------------------------------- |
+| `tms-selectors`    | Confluence selector database, priority rules    | [SKILL.md](skills/tms-selectors/SKILL.md)    |
+| `tms-dropdowns`    | Bootstrap dropdown automation (proven patterns) | [SKILL.md](skills/tms-dropdowns/SKILL.md)    |
+| `tms-page-objects` | Page Object Model structure for TMS             | [SKILL.md](skills/tms-page-objects/SKILL.md) |
+| `tms-tests`        | Test file structure, assertions, logging        | [SKILL.md](skills/tms-tests/SKILL.md)        |
 
 ### Generic Skills (From Anthropic)
-| Skill | Description | URL |
-|-------|-------------|-----|
+
+| Skill        | Description               | URL                            |
+| ------------ | ------------------------- | ------------------------------ |
 | `playwright` | Playwright best practices | /mnt/skills/public/playwright/ |
-| `docx` | Word document automation | /mnt/skills/public/docx/ |
-| `xlsx` | Excel automation | /mnt/skills/public/xlsx/ |
-| `pptx` | PowerPoint automation | /mnt/skills/public/pptx/ |
+| `docx`       | Word document automation  | /mnt/skills/public/docx/       |
+| `xlsx`       | Excel automation          | /mnt/skills/public/xlsx/       |
+| `pptx`       | PowerPoint automation     | /mnt/skills/public/pptx/       |
 
 ---
 
@@ -33,19 +35,19 @@
 
 When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
-| Action | Skill |
-|--------|-------|
-| Creating new Page Object for any TMS module | `tms-page-objects` |
-| Working with Bootstrap Select dropdowns | `tms-dropdowns` |
-| Selecting ANY element in TMS pages | `tms-selectors` |
-| Writing new test file | `tms-tests` |
-| Handling date pickers or time fields | `tms-dropdowns` |
-| Creating contract automation | `tms-selectors`, `tms-dropdowns` |
-| Planificar viajes automation | `tms-selectors`, `tms-page-objects` |
-| Asignar viajes automation | `tms-selectors`, `tms-page-objects` |
-| Any cascading dropdown (tipo → transportista) | `tms-dropdowns` |
-| Debugging selector issues | `tms-selectors` |
-| Adding new module to framework | `tms-page-objects`, `tms-tests` |
+| Action                                        | Skill                               |
+| --------------------------------------------- | ----------------------------------- |
+| Creating new Page Object for any TMS module   | `tms-page-objects`                  |
+| Working with Bootstrap Select dropdowns       | `tms-dropdowns`                     |
+| Selecting ANY element in TMS pages            | `tms-selectors`                     |
+| Writing new test file                         | `tms-tests`                         |
+| Handling date pickers or time fields          | `tms-dropdowns`                     |
+| Creating contract automation                  | `tms-selectors`, `tms-dropdowns`    |
+| Planificar viajes automation                  | `tms-selectors`, `tms-page-objects` |
+| Asignar viajes automation                     | `tms-selectors`, `tms-page-objects` |
+| Any cascading dropdown (tipo → transportista) | `tms-dropdowns`                     |
+| Debugging selector issues                     | `tms-selectors`                     |
+| Adding new module to framework                | `tms-page-objects`, `tms-tests`     |
 
 ---
 
@@ -66,17 +68,21 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 Bermann TMS QA Automation Framework for transport management system testing.
 
-| Component | Location | Tech Stack |
-|-----------|----------|------------|
-| Page Objects | `src/pages/` | TypeScript, Playwright |
-| Tests | `tests/` | TypeScript, Playwright |
-| Core | `src/core/` | BasePage, BrowserManager |
-| Utils | `src/utils/` | Winston logger |
-| Config | `src/config/` | Credentials, environment |
+| Component    | Location                        | Tech Stack                  |
+| ------------ | ------------------------------- | --------------------------- |
+| Page Objects | `src/modules/<domain>/pages/`   | TypeScript, Playwright      |
+| Tests        | `tests/e2e/`                    | TypeScript, Playwright      |
+| Actions      | `src/modules/<domain>/actions/` | TypeScript (Business Logic) |
+| Flows        | `src/modules/<domain>/flows/`   | TypeScript (Orchestration)  |
+| Core         | `src/core/`                     | BasePage, BrowserManager    |
+| Fixtures     | `src/fixtures/`                 | Playwright Custom Fixtures  |
+| Utils        | `src/utils/`                    | Winston logger              |
+| Config       | `src/config/`                   | Credentials, environment    |
 
 ---
 
 ## Development Workflow
+
 ```bash
 # Before creating ANY code
 1. Check AGENTS.md for relevant skills
@@ -99,18 +105,21 @@ git push origin main
 ## Quick Reference
 
 ### Before asking Claude/Gemini/AI:
+
 ```
 ❌ BAD:  "Create ContratosPage"
 ✅ GOOD: "Using @tms-page-objects and @tms-selectors skills, create ContratosPage"
 ```
 
 ### Before writing selector:
+
 ```
 ❌ BAD:  Use XPath or guess class names
 ✅ GOOD: Check Confluence → Use data-id or ID → Document in Confluence
 ```
 
 ### Before handling dropdown:
+
 ```
 ❌ BAD:  Try .click() and hope it works
 ✅ GOOD: Read @tms-dropdowns skill → Use proven pattern → Handle scrolling
@@ -133,6 +142,7 @@ git push origin main
 - **TMS QA Environment:** https://moveontruckqa.bermanntms.cl
 - **GitHub Repository:** https://github.com/samrdx/bermann-tms-automation
 - **Project Documentation:** README.md, LEARNING.md, claude.md, gemini.md
+
 ## How to Use This Guide
 
 - Source of Truth: This file is the entry point for ALL AI Agents (Claude & Gemini).
@@ -146,21 +156,23 @@ git push origin main
 ## Available Skills
 
 ### TMS-Specific Skills
-| Skill | Description | URL |
-|-------|-------------|-----|
-| `tms-selectors` | Confluence selector database, priority rules | [SKILL.md](skills/tms-selectors/SKILL.md) |
-| `tms-dropdowns` | Bootstrap dropdown automation (proven patterns) | [SKILL.md](skills/tms-dropdowns/SKILL.md) |
-| `tms-page-objects` | Page Object Model structure for TMS | [SKILL.md](skills/tms-page-objects/SKILL.md) |
-| `tms-tests` | Test file structure, assertions, logging | [SKILL.md](skills/tms-tests/SKILL.md) |
-| `tms-data` | Test data generation and management | [SKILL.md](skills/tms-data/SKILL.md) |
+
+| Skill              | Description                                     | URL                                          |
+| ------------------ | ----------------------------------------------- | -------------------------------------------- |
+| `tms-selectors`    | Confluence selector database, priority rules    | [SKILL.md](skills/tms-selectors/SKILL.md)    |
+| `tms-dropdowns`    | Bootstrap dropdown automation (proven patterns) | [SKILL.md](skills/tms-dropdowns/SKILL.md)    |
+| `tms-page-objects` | Page Object Model structure for TMS             | [SKILL.md](skills/tms-page-objects/SKILL.md) |
+| `tms-tests`        | Test file structure, assertions, logging        | [SKILL.md](skills/tms-tests/SKILL.md)        |
+| `tms-data`         | Test data generation and management             | [SKILL.md](skills/tms-data/SKILL.md)         |
 
 ### Generic Skills (From Anthropic)
-| Skill | Description | URL |
-|-------|-------------|-----|
+
+| Skill        | Description               | URL                            |
+| ------------ | ------------------------- | ------------------------------ |
 | `playwright` | Playwright best practices | /mnt/skills/public/playwright/ |
-| `docx` | Word document automation | /mnt/skills/public/docx/ |
-| `xlsx` | Excel automation | /mnt/skills/public/xlsx/ |
-| `pptx` | PowerPoint automation | /mnt/skills/public/pptx/ |
+| `docx`       | Word document automation  | /mnt/skills/public/docx/       |
+| `xlsx`       | Excel automation          | /mnt/skills/public/xlsx/       |
+| `pptx`       | PowerPoint automation     | /mnt/skills/public/pptx/       |
 
 ---
 
@@ -168,22 +180,22 @@ git push origin main
 
 When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
-| Action | Skill |
-|--------|-------|
-| Creating new Page Object for any TMS module | `tms-page-objects` |
-| Working with Bootstrap Select dropdowns | `tms-dropdowns` |
-| Selecting ANY element in TMS pages | `tms-selectors` |
-| Writing new test file | `tms-tests` |
-| Generating test data (contracts, users, dates) | `tms-data` |
-| Handling date pickers or time fields | `tms-dropdowns` |
-| Creating contract automation | `tms-selectors`, `tms-dropdowns` |
-| Planificar viajes automation | `tms-selectors`, `tms-page-objects` |
-| Asignar viajes automation | `tms-selectors`, `tms-page-objects` |
-| Planificar viajes automation | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
-| Asignar viajes automation | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
-| Any cascading dropdown (tipo → transportista) | `tms-dropdowns` |
-| Debugging selector issues | `tms-selectors` |
-| Adding new module to framework | `tms-page-objects`, `tms-tests` |
+| Action                                         | Skill                                                |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| Creating new Page Object for any TMS module    | `tms-page-objects`                                   |
+| Working with Bootstrap Select dropdowns        | `tms-dropdowns`                                      |
+| Selecting ANY element in TMS pages             | `tms-selectors`                                      |
+| Writing new test file                          | `tms-tests`                                          |
+| Generating test data (contracts, users, dates) | `tms-data`                                           |
+| Handling date pickers or time fields           | `tms-dropdowns`                                      |
+| Creating contract automation                   | `tms-selectors`, `tms-dropdowns`                     |
+| Planificar viajes automation                   | `tms-selectors`, `tms-page-objects`                  |
+| Asignar viajes automation                      | `tms-selectors`, `tms-page-objects`                  |
+| Planificar viajes automation                   | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
+| Asignar viajes automation                      | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
+| Any cascading dropdown (tipo → transportista)  | `tms-dropdowns`                                      |
+| Debugging selector issues                      | `tms-selectors`                                      |
+| Adding new module to framework                 | `tms-page-objects`, `tms-tests`                      |
 
 ---
 
@@ -204,36 +216,36 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 Bermann TMS QA Automation Framework for transport management system testing.
 
-| Component | Location | Tech Stack |
-|-----------|----------|------------|
-| Page Objects | `src/pages/` | TypeScript, Playwright |
-| Tests | `tests/` | TypeScript, Playwright |
-| Core | `src/core/` | BasePage, BrowserManager |
-| Utils | `src/utils/` | Winston logger |
-| Config | `src/config/` | Credentials, environment |
+| Component    | Location      | Tech Stack               |
+| ------------ | ------------- | ------------------------ |
+| Page Objects | `src/pages/`  | TypeScript, Playwright   |
+| Tests        | `tests/`      | TypeScript, Playwright   |
+| Core         | `src/core/`   | BasePage, BrowserManager |
+| Utils        | `src/utils/`  | Winston logger           |
+| Config       | `src/config/` | Credentials, environment |
 
 ## Project Structure
-```
+
+````
 qa-automation-framework/
 ├── AGENTS.md           # Skills system index
 ├── CLAUDE.md           # Claude context
 ├── GEMINI.md           # Gemini context
+├── .github/workflows/  # CI/CD pipelines
 ├── skills/             # AI agent skills
 ├── src/
+│   ├── modules/        # Domain-driven architecture
+│   │   ├── auth/       # Login/Logout
+│   │   ├── contracts/  # Contratos management
+│   │   ├── planning/   # Viajes (Planificar/Asignar)
+│   │   └── commercial/ # Clients
 │   ├── core/           # BasePage, BrowserManager
-│   ├── pages/          # Page Objects
-│   ├── flows/          # Business flows
+│   ├── fixtures/       # Playwright Fixtures
 │   ├── utils/          # Logger and utilities
 │   └── config/         # Environment, credentials
 ├── tests/              # Executable tests
 ├── reports/            # Screenshots, videos
 └── logs/               # Execution logs
-└── docs/               # Documentation & AI Context
-```
-
----
-
-## Development Workflow
 ```bash
 # Before creating ANY code
 1. Check AGENTS.md for relevant skills
@@ -249,25 +261,28 @@ npm run test:all  # Run all tests
 git add .
 git commit -m "feat(module): description"  # Conventional commits
 git push origin main
-```
+````
 
 ---
 
 ## Quick Reference
 
 ### Before asking Claude/Gemini/AI:
+
 ```
 ❌ BAD:  "Create ContratosPage"
 ✅ GOOD: "Using @tms-page-objects and @tms-selectors skills, create ContratosPage"
 ```
 
 ### Before writing selector:
+
 ```
 ❌ BAD:  Use XPath or guess class names
 ✅ GOOD: Check Confluence → Use data-id or ID → Document in Confluence
 ```
 
 ### Before handling dropdown:
+
 ```
 ❌ BAD:  Try .click() and hope it works
 ✅ GOOD: Read @tms-dropdowns skill → Use proven pattern → Handle scrolling
@@ -289,4 +304,4 @@ git push origin main
 - **Confluence Selectors:** [Internal TMS Selector Database]
 - **TMS QA Environment:** https://moveontruckqa.bermanntms.cl
 - **GitHub Repository:** https://github.com/samrdx/bermann-tms-automation
-- **Project Documentation:** README.md, .cursorrules 
+- **Project Documentation:** README.md, .cursorrules

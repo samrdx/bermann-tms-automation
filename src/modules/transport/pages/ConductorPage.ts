@@ -169,13 +169,35 @@ export class ConductorFormPage extends BasePage {
   async selectLicencia(tipo: string): Promise<void> {
     logger.info(`Selecting licencia: ${tipo}`);
     try {
-      await this.page.click(this.selectors.licenciaButton);
+      // Click dropdown button (try parent div if button click is iffy)
+      const btn = this.page.locator(this.selectors.licenciaButton);
+      const parent = this.page.locator('div.dropdown').filter({ has: btn }).first();
+      
+      // Click dropdown button using dispatchEvent to force it
+      await btn.dispatchEvent('click');
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      // Verify if open
+      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
+      const menu = container.locator('.dropdown-menu.show').first();
+      
+      if (!await menu.isVisible()) {
+         logger.warn('Dropdown not open after dispatchEvent, trying standard click');
+         await btn.click({ force: true });
+         await this.page.waitForTimeout(500);
+      }
+
+      const dropdownMenu = container.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo });
+      // Debug: Log options
+      const options = await dropdownMenu.locator('.dropdown-item').allTextContents();
+      logger.info(`Available Licencia options: ${options.map(o => o.trim()).join(', ')}`);
+
+      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
+      if (await option.count() === 0) {
+         throw new Error(`Option "${tipo}" not found in Licencia dropdown. Available: ${options.map(o => o.trim()).join(', ')}`);
+      }
       await option.click();
 
       logger.info(`✅ Licencia "${tipo}" selected`);

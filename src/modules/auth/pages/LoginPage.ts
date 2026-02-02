@@ -44,13 +44,38 @@ export class LoginPage extends BasePage {
     username: string,
     password: string
   ): Promise<void> {
+    logger.info(`Attempting login for user: ${username} and waiting for dashboard...`);
     await this.login(username, password);
-    await this.page.waitForLoadState('networkidle');
-
-    if (!(await this.isLoginSuccessful())) {
-      const error = await this.getErrorMessage();
-      throw new Error(`Login failed: ${error}`);
+    
+    // Wait for either the URL to change to /site OR the error message to appear
+    try {
+      await Promise.race([
+        this.page.waitForURL((url) => url.toString().includes('/site'), { timeout: 20000 }),
+        this.page.waitForSelector(this.selectors.errorMessage, { state: 'visible', timeout: 10000 })
+      ]);
+    } catch (error) {
+      logger.warn('Login wait timed out (neither dashboard nor error appeared quickly)', error);
     }
+
+    // Check specific failure first
+    if (await this.hasErrorMessage()) {
+      const errorMsg = await this.getErrorMessage();
+      logger.error(`Login failed with error: ${errorMsg}`);
+      await this.takeScreenshot('login-failed-error');
+      throw new Error(`Login failed: ${errorMsg}`);
+    }
+
+    // Check success
+    if (await this.isLoginSuccessful()) {
+      logger.info('Login confirmed: User is on dashboard');
+      return;
+    }
+
+    // Verification failed (stuck on login page without error, or somewhere else)
+    const currentUrl = this.page.url();
+    logger.error(`Login failed. Current URL: ${currentUrl}`);
+    await this.takeScreenshot('login-failed-unknown');
+    throw new Error(`Login failed: Stuck on URL ${currentUrl} without specific error message`);
   }
 
   /* ===================== ASSERTIONS ===================== */
