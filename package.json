@@ -32,8 +32,7 @@
       "// Viajes Tests": "",
       "test:viajes:planificar": "cross-env HEADLESS=false tsx tests/e2e/viajes/viajes-planificar.test.ts",
       "test:viajes:planificar:headless": "cross-env HEADLESS=true tsx tests/e2e/viajes/viajes-planificar.test.ts",
-      "test:viajes:asignar": "cross-env HEADLESS=false tsx tests/e2e/viajes/viajes-asignar.test.ts",
-      "test:viajes:asignar:headless": "cross-env HEADLESS=true tsx tests/e2e/viajes/viajes-asignar.test.ts",
+
 
       "// Complete Flow Tests": "",
       "test:complete-flow": "cross-env HEADLESS=false tsx tests/e2e/flows/complete-business-flow.test.ts",
