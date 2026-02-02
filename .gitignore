@@ -1,6 +1,6 @@
 # Dependencias
 node_modules/
-package-lock.json
+# package-lock.json - NOW TRACKED for reproducible builds
 
 # Variables de entorno (NUNCA subir API keys)
 .env
