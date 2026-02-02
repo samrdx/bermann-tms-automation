@@ -246,6 +246,13 @@ export class PlanificarViajesPage extends BasePage {
       // Click Agregar Ruta button
       const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
       
+      // Remove any modal backdrops that might be intercepting
+      await this.page.evaluate(() => {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(bd => bd.remove());
+      });
+      await this.page.waitForTimeout(500);
+      
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           await btnAgregar.click({ timeout: 5000 });
