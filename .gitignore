@@ -31,7 +31,8 @@ reports/videos/
 Thumbs.db
 
 # IDEs
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo

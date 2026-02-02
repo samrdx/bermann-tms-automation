@@ -1,0 +1,30 @@
+{
+    "files.exclude": {
+        "**/.gemini": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/logs": true,
+        "**/reports": true
+    },
+    "search.exclude": {
+        "**/.gemini": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/logs": true
+    },
+    "files.watcherExclude": {
+        "**/.gemini/**": true,
+        "**/node_modules/**": true,
+        "**/dist/**": true,
+        "**/logs/**": true,
+        "**/reports/**": true
+    },
+    "scm.folders": [
+        "${workspaceFolder}"
+    ],
+    "scm.repositories": [
+        {
+            "path": "${workspaceFolder}"
+        }
+    ]
+}
