@@ -185,9 +185,15 @@ export function generateCompanyName(): string {
  * Example: "Transportes SpA" or "Logistica SpA"
  */
 export function generateShortCompanyName(): string {
-  const words = ['Transportes', 'Logística', 'Cargo', 'Envíos', 'Distribución', 'Ruta', 'Express', 'Veloz', 'Norte', 'Sur'];
-  const word = words[Math.floor(Math.random() * words.length)];
-  return `${word} Express SpA`;
+  const concepts = [
+    'Logística', 'Austral', 'Andino', 'Pacífico', 'Ruta', 'Camino', 
+    'Vía', 'Cargo', 'Express', 'Veloz', 'Trans', 'Inter', 
+    'Nacional', 'Regional', 'Global', 'Cordillera', 'Horizonte',
+    'Meridional', 'Polar', 'Solar', 'Estelar', 'Lunar'
+  ];
+  const concept = concepts[Math.floor(Math.random() * concepts.length)];
+  const timestamp = new Date().toTimeString().split(' ')[0].replace(/:/g, '');
+  return `${concept} Transportes SpA - ${timestamp}`;
 }
 
 /**
@@ -217,4 +223,54 @@ export function generateChileanStreet(): string {
  */
 export function generateApartmentNumber(): string {
   return Math.floor(Math.random() * 900 + 100).toString();
+}
+
+/**
+ * Generates a generic username with prefix + random numbers
+ * Format: prefix + 2 digits (e.g., manuh12)
+ */
+export function generateGenericUser(prefixLength: number = 6): string {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    let prefix = '';
+    for (let i = 0; i < prefixLength; i++) {
+        prefix += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const digits = Math.floor(Math.random() * 90 + 10); // 10-99
+    return `${prefix}${digits}`;
+}
+
+/**
+ * Generates a random Chilean driver's license type
+ */
+export function generateLicenseType(): string {
+    const types = ['A1', 'A2', 'A3', 'A4', 'A5'];
+    return types[Math.floor(Math.random() * types.length)];
+}
+
+/**
+ * Generates a document number based on type
+ */
+export function generateDocument(type: 'RUT' | 'EXTRANJERO'): string {
+    if (type === 'RUT') {
+        const rawRut = generateValidChileanRUT();
+        return rawRut.replace(/^(\d{1,2})(\d{3})(\d{3})(-[\dkK])$/, '$1.$2.$3$4');
+    } else {
+        // Extranjero: 90M+ range usually
+        const num = Math.floor(Math.random() * 5000000) + 90000000;
+        return num.toString();
+    }
+}
+
+/**
+ * Generates a random contract number (6 digits)
+ */
+export function generateContractNumber(): string {
+    return Math.floor(Math.random() * 900000 + 100000).toString();
+}
+
+/**
+ * Generates a random hourly rate (100 - 20000)
+ */
+export function generateValorHora(): string {
+    return Math.floor(Math.random() * (20000 - 100 + 1) + 100).toString();
 }

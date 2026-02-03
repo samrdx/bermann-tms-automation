@@ -27,6 +27,11 @@ export class VehiculoFormPage extends BasePage {
     super(page);
   }
 
+  async getSelectedTipoVehiculo(): Promise<string> {
+    const btn = this.page.locator(this.selectors.tipoVehiculoButton);
+    return (await btn.textContent())?.trim() || '';
+  }
+
   async navigate(): Promise<void> {
     await this.page.goto('https://moveontruckqa.bermanntms.cl/vehiculos/crear');
     await this.page.waitForLoadState('domcontentloaded');
@@ -157,9 +162,12 @@ export class VehiculoFormPage extends BasePage {
   async selectTipoRampla(tipo: string): Promise<void> {
     logger.info(`Selecting tipo rampla: ${tipo}`);
     try {
-      if (!await this.page.locator(this.selectors.tipoRamplaButton).isVisible()) {
-          logger.warn('Tipo Rampla dropdown not visible, skipping selection');
-          return;
+      // Wait for the button to appear (it shows up after selecting RAMPLA)
+      try {
+        await this.page.waitForSelector(this.selectors.tipoRamplaButton, { state: 'visible', timeout: 5000 });
+      } catch (e) {
+        logger.warn('Tipo Rampla dropdown did not appear within 5s. Skipping selection (or field is disabled).');
+        return;
       }
       const btn = this.page.locator(this.selectors.tipoRamplaButton);
       await btn.click();

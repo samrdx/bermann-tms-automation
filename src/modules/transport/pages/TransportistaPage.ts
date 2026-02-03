@@ -65,7 +65,8 @@ export class TransportistaFormPage extends BasePage {
   async fillDocumento(documento: string): Promise<void> {
     logger.info(`Filling documento (RUT): ${documento}`);
     try {
-      await this.fill(this.selectors.documento, documento);
+      // Use fillRutWithVerify to ensure robustness (Requirement: Global RUT Fix)
+      await this.fillRutWithVerify(this.selectors.documento, documento);
     } catch (error) {
       logger.error('Failed to fill documento', error);
       await this.takeScreenshot('fill-documento-error');

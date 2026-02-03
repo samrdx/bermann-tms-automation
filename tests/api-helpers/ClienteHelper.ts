@@ -7,89 +7,90 @@ import {
     generateStreetNumber
 } from '../../src/utils/rutGenerator.js';
 import { config } from '../../src/config/environment.js';
-import { TransportistaFormPage } from '../../src/modules/transport/pages/TransportistaPage.js';
+import { ClienteFormPage } from '../../src/modules/commercial/pages/ClientePage.js';
 
-export interface Transportista {
+export interface Cliente {
     id: string;
     nombre: string;
-    baseNombre: string;
-    documento: string;
-    razonSocial: string;
+    nombreFantasia: string;
+    rut: string;
+    email: string;
 }
 
-export class TransportistaHelper {
+export class ClienteHelper {
 
     /**
-     * Creates a Transportista via UI Interactions using the Page Object.
-     * Use this when API seeding is unreliable or silent.
+     * Creates a Cliente via UI interactions using the Page Object.
      * 
      * @param page Playwright Page object
-     * @param type 'Propio' | 'Tercero'
+     * @param transportistaAsociado - Name of Transportista to associate (from dropdown)
      */
-    static async createTransportistaViaUI(
+    static async createClienteViaUI(
         page: Page,
-        type: 'Propio' | 'Tercero' = 'Propio'
-    ): Promise<Transportista> {
+        transportistaAsociado?: string
+    ): Promise<Cliente> {
         const baseUrl = config.get().baseUrl;
-        const transportistaPage = new TransportistaFormPage(page);
+        const clientePage = new ClienteFormPage(page);
 
         // Data Generation
-        const nombre = generateShortCompanyName();
-        const baseNombre = nombre.split(' - ')[0];
+        const baseName = generateShortCompanyName().replace(/ - \d+$/,  ''); // Remove timestamp if exists
+        const nombre = `${baseName} Logistics SpA`;
+        const nombreFantasia = `${baseName.split(' ')[0]} SpA`; // e.g. "Andina SpA"
         const rawRut = generateValidChileanRUT();
-        const documento = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
-
-        const razonSocial = nombre;
+        const rut = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
         const calle = generateChileanStreet();
-        const altura = generateStreetNumber();
+        const email = `${baseName.toLowerCase().replace(/\s/g, '')}@test.cl`;
+        const telefono = '+569' + Math.floor(10000000 + Math.random() * 90000000).toString();
 
-        logger.info(`🌱 UI Seeding Transportista: [${nombre}] RUT: ${documento}...`);
+        logger.info(`🌱 UI Seeding Cliente: [${nombre}] RUT: ${rut}...`);
 
         // 1. Navigate
-        await transportistaPage.navigate();
+        await clientePage.navigate();
 
         // 2. Fill Form
-        await transportistaPage.fillNombre(nombre);
-        await transportistaPage.fillRazonSocial(razonSocial);
-        await transportistaPage.fillDocumento(documento);
-
-        // Select Type
-        if (type === 'Propio') {
-            await transportistaPage.selectTipoTransportista('Propio Con Flota No Genera');
-        } else {
-            await transportistaPage.selectTipoTransportista('Terceros Con Flota Si Genera');
-        }
-
-        await page.waitForTimeout(500);
+        await clientePage.fillNombre(nombre);
+        await clientePage.fillRut(rut);
+        await clientePage.fillNombreFantasia(nombreFantasia);
+        
+        // Select Tipo Cliente
+        await clientePage.selectTipoCliente('Distribución');
 
         // Location
-        await transportistaPage.selectRandomRegion();
-        await transportistaPage.selectRandomCiudad();
-        await transportistaPage.selectRandomComuna();
+        await clientePage.selectRandomRegion();
+        await clientePage.selectRandomCiudad();
+        await clientePage.selectRandomComuna();
 
-        await transportistaPage.fillCalle(calle);
-        await transportistaPage.fillAltura(altura);
+        await clientePage.fillCalle(calle);
+        // Skip Altura (optional)
 
-        // Optional fields
-        await transportistaPage.selectFormaPago('Contado');
-        await transportistaPage.selectTercerizar('No');
+        // Poligonos
+        await clientePage.selectAllPoligonos();
+
+        // Transportista Asociado (if provided)
+        if (transportistaAsociado) {
+            await clientePage.selectTransportista(transportistaAsociado);
+        }
+
+        // Contact
+        await clientePage.fillEmail(email);
+        await clientePage.fillTelefono(telefono);
 
         // 3. Save & Intercept Response
-        logger.info('💾 Saving Transportista via UI...');
+        logger.info('💾 Saving Cliente via UI...');
 
         let savedId = '';
 
         try {
             const [response] = await Promise.all([
-                page.waitForResponse(resp => resp.url().includes('/transportistas/crear') && resp.request().method() === 'POST', { timeout: 10000 }),
-                transportistaPage.clickGuardar()
+                page.waitForResponse(resp => resp.url().includes('/clientes/crear') && resp.request().method() === 'POST', { timeout: 10000 }),
+                clientePage.clickGuardar()
             ]);
 
             const respText = await response.text();
             try {
                 const json = JSON.parse(respText);
                 if (json.id) savedId = json.id;
-                else if (json.transportistaId) savedId = json.transportistaId;
+                else if (json.clienteId) savedId = json.clienteId;
             } catch (e) {
                 const location = response.headers()['location'];
                 if (location && location.match(/\/(ver|view|editar|edit|update)\//)) {
@@ -120,29 +121,29 @@ export class TransportistaHelper {
                 logger.info(`✅ ID Rescued from URL: ${id}`);
             }
         } else {
-            // Redirected to Index - Execute RUT-based Grid Rescue
+            // Redirected to Index - RUT-based Grid Rescue
             logger.info('⚠️ Redirected to Index. Executing RUT-based Grid Rescue...');
 
-            await page.goto(`${baseUrl}/transportistas/index`);
+            await page.goto(`${baseUrl}/clientes/index`);
             await page.waitForTimeout(2000);
 
-            // PRIMARY STRATEGY: Search by RUT (Documento) - immutable and reliable
-            logger.info(`🔍 Searching by RUT: ${documento}`);
+            // PRIMARY STRATEGY: Search by RUT - immutable and reliable
+            logger.info(`🔍 Searching by RUT: ${rut}`);
             
-            const rutFilterInput = page.locator('input[name*="[documento]"]')
-                .or(page.locator('input[name*="[rut]"]'))
-                .or(page.locator('thead th:has-text("RUT") + th input, thead input').first())
+            const rutFilterInput = page.locator('input[name*="[rut]"]')
+                .or(page.locator('input[name*="ClienteSearch[rut]"]'))
+                .or(page.locator('input[name*="ClientesSearch[rut]"]'))
                 .first();
 
             let foundViaRut = false;
             if (await rutFilterInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-                // Clean RUT for search (remove formatting)
-                const searchRut = documento.replace(/[.-]/g, '');
+                // Clean RUT for search (remove formatting like dots and hyphens)
+                const searchRut = rut.replace(/[.-]/g, '');
                 await rutFilterInput.fill(searchRut);
                 await rutFilterInput.press('Enter');
                 await page.waitForTimeout(1500);
                 
-                // Look for row containing the RUT
+                // Look for row containing the RUT (partial match on first 6 digits)
                 const rutRow = page.locator('table tbody tr').filter({ hasText: new RegExp(searchRut.slice(0, 6), 'i') }).first();
                 
                 if (await rutRow.count() > 0) {
@@ -165,74 +166,63 @@ export class TransportistaHelper {
                     }
                 }
             }
-
-            // FALLBACK STRATEGY: Search by Name (less reliable due to TMS normalization)
+            
+            // FALLBACK STRATEGY: Search by Name
             if (!foundViaRut) {
                 logger.warn('⚠️ RUT search failed, falling back to name-based search...');
                 
-                const filterInput = page.locator('input[name*="[nombre]"]')
+                const nameFilterInput = page.locator('input[name*="[nombre]"]')
                     .or(page.locator('.dataTables_filter input'))
-                    .or(page.locator('thead input').first())
                     .first();
 
-                if (await filterInput.isVisible()) {
-                    logger.info(`🔍 Searching by name: ${baseNombre}`);
-                    await filterInput.fill(baseNombre);
-                    await filterInput.press('Enter');
+                if (await nameFilterInput.isVisible()) {
+                    logger.info(`🔍 Searching by name: ${nombre}`);
+                    await nameFilterInput.fill(nombre);
+                    await nameFilterInput.press('Enter');
                     await page.waitForTimeout(1500);
                 }
 
-                // Case-insensitive search through rows
                 try {
-                    const allRows = page.locator('table tbody tr');
-                    const rowCount = await allRows.count();
-                    
-                    for (let i = 0; i < rowCount; i++) {
-                        const currentRow = allRows.nth(i);
-                        const text = await currentRow.innerText();
-                        
-                        if (text.toLowerCase().includes(baseNombre.toLowerCase())) {
-                            const dataKey = await currentRow.getAttribute('data-key');
-                            if (dataKey) {
-                                id = dataKey;
-                                logger.info(`✅ Rescued ID via name search: ${id}`);
-                                break;
-                            }
-                            
-                            const actionLink = currentRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
+                    const row = page.locator('table tbody tr').filter({ hasText: nombre.split(' ')[0] }).first();
+                    if (await row.count() > 0) {
+                        const dataKey = await row.getAttribute('data-key');
+                        if (dataKey) {
+                            id = dataKey;
+                            logger.info(`✅ Rescued ID via name search: ${id}`);
+                        } else {
+                            const actionLink = row.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
                             if (await actionLink.count() > 0) {
                                 const href = await actionLink.getAttribute('href');
                                 const match = href?.match(/(\d+)/);
                                 if (match) {
                                     id = match[1];
                                     logger.info(`✅ Rescued ID via name search (link): ${id}`);
-                                    break;
                                 }
                             }
                         }
                     }
                 } catch (e) {
-                    logger.error(`❌ FAILED to find record in grid by name: ${baseNombre}`, e);
+                    logger.error(`❌ FAILED to find record in grid by name: ${nombre}`, e);
                 }
             }
-
+            
             if (!id) {
-                await page.screenshot({ path: `./reports/screenshots/rescue-id-failed-${Date.now()}.png` });
+                await page.screenshot({ path: `./reports/screenshots/cliente-rescue-id-failed-${Date.now()}.png` });
             }
         }
 
         if (!id) {
-            logger.warn('⚠️ UI Seeding: Could not determine ID of created Transportista. Returning Name only.');
+            logger.warn('⚠️ UI Seeding: Could not determine ID of created Cliente. Returning data only.');
         } else {
-            logger.info(`✅ Successfully seeded Transportista [${nombre}] ID: ${id}`);
+            logger.info(`✅ Successfully seeded Cliente [${nombre}] ID: ${id}`);
         }
 
         return {
             id,
             nombre,
-            baseNombre,
-            documento,
-            razonSocial
+            nombreFantasia,
+            rut,
+            email
         };
     }
 }
