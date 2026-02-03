@@ -203,14 +203,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting forma de pago: ${formaPago}`);
     try {
       const button = this.page.locator(this.selectors.formaPagoButton);
-      
+
       // Check if button exists and is visible
       const isVisible = await button.isVisible({ timeout: 5000 }).catch(() => false);
       if (!isVisible) {
         logger.warn('⚠️ Forma Pago field not visible - skipping (may be conditional)');
         return;
       }
-      
+
       await button.click();
       await this.page.waitForTimeout(500);
 
@@ -231,13 +231,23 @@ export class TransportistaFormPage extends BasePage {
   async selectTercerizar(value: string): Promise<void> {
     logger.info(`Selecting tercerizar viajes: ${value}`);
     try {
-      await this.page.click(this.selectors.tercerizarButton);
+      const button = this.page.locator(this.selectors.tercerizarButton);
+
+      // Check if button exists and is visible (Conditional field)
+      const isVisible = await button.isVisible({ timeout: 5000 }).catch(() => false);
+      if (!isVisible) {
+        logger.warn('⚠️ Tercerizar field not visible - skipping (may be conditional)');
+        return;
+      }
+
+      await button.click();
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: value }).first();
+      // Use exact match to avoid matching "Normal", "Norte" etc. when value is "No"
+      const option = dropdownMenu.locator('.dropdown-item').getByText(value, { exact: true });
       await option.click();
 
       logger.info(`✅ Tercerizar viajes "${value}" selected`);
@@ -281,15 +291,15 @@ export class TransportistaFormPage extends BasePage {
   }
 
   // Random Selection Methods
-  
+
   // Random Selection Methods
-  
+
   // Random Selection Methods
-  
+
   // Random Selection Methods
-  
+
   // Scoped Dropdown Selection (Pattern: Button Parent -> Menu)
-  
+
   async selectRandomRegion(): Promise<void> {
     logger.info('Selecting random Region');
     try {
@@ -302,7 +312,7 @@ export class TransportistaFormPage extends BasePage {
       for (let i = 0; i < 3; i++) {
         await button.click({ force: true });
         await this.page.waitForTimeout(500);
-        
+
         // Check for SHOWING menu inside this specific wrapper
         const menu = parent.locator('.dropdown-menu.inner.show');
         if (await menu.isVisible()) {
@@ -316,15 +326,15 @@ export class TransportistaFormPage extends BasePage {
       if (!isOpened) {
         throw new Error('Failed to open region dropdown after 3 attempts');
       }
-      
+
       const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
       const options = await dropdownMenu.locator('.dropdown-item').all();
-      
+
       const validOptions = [];
       for (const option of options) {
-          if (await option.isVisible()) {
-              validOptions.push(option);
-          }
+        if (await option.isVisible()) {
+          validOptions.push(option);
+        }
       }
 
       if (validOptions.length === 0) {
@@ -334,10 +344,10 @@ export class TransportistaFormPage extends BasePage {
       const randomIndex = Math.floor(Math.random() * validOptions.length);
       const randomOption = validOptions[randomIndex];
       const optionText = await randomOption.innerText();
-      
+
       await randomOption.click();
       logger.info(`✅ Random Region selected: "${optionText}"`);
-      
+
       await this.page.waitForTimeout(1500); // Cascade wait
     } catch (error) {
       logger.error('Failed to select random region', error);
@@ -358,7 +368,7 @@ export class TransportistaFormPage extends BasePage {
       for (let i = 0; i < 3; i++) {
         await button.click({ force: true });
         await this.page.waitForTimeout(500);
-        
+
         const menu = parent.locator('.dropdown-menu.inner.show');
         if (await menu.isVisible()) {
           isOpened = true;
@@ -368,30 +378,30 @@ export class TransportistaFormPage extends BasePage {
       }
 
       if (!isOpened) {
-          throw new Error('Failed to open Ciudad dropdown');
+        throw new Error('Failed to open Ciudad dropdown');
       }
 
       const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
       const options = await dropdownMenu.locator('.dropdown-item').all();
-      
+
       const validOptions = [];
       for (const option of options) {
-          if (await option.isVisible()) {
-              validOptions.push(option);
-          }
+        if (await option.isVisible()) {
+          validOptions.push(option);
+        }
       }
 
       if (validOptions.length === 0) {
-          throw new Error('No visible ciudad options found');
+        throw new Error('No visible ciudad options found');
       }
 
       const randomIndex = Math.floor(Math.random() * validOptions.length);
       const randomOption = validOptions[randomIndex];
       const optionText = await randomOption.innerText();
-      
+
       await randomOption.click();
       logger.info(`✅ Random Ciudad selected: "${optionText}"`);
-      
+
       await this.page.waitForTimeout(1500); // Cascade wait
     } catch (error) {
       logger.error('Failed to select random ciudad', error);
@@ -403,23 +413,23 @@ export class TransportistaFormPage extends BasePage {
   async selectRandomComuna(): Promise<boolean> {
     logger.info('Selecting random Comuna');
     try {
-       const button = this.page.locator(this.selectors.comunaButton);
-       
-       // Check if button is enabled (cascade check)
-       const isEnabled = await button.isEnabled({ timeout: 5000 }).catch(() => false);
-       if (!isEnabled) {
-         logger.warn('⚠️ Comuna dropdown is disabled - skipping (field is optional)');
-         return false;
-       }
-       
-       await button.scrollIntoViewIfNeeded();
-       const parent = button.locator('..');
+      const button = this.page.locator(this.selectors.comunaButton);
 
-       let isOpened = false;
+      // Check if button is enabled (cascade check)
+      const isEnabled = await button.isEnabled({ timeout: 5000 }).catch(() => false);
+      if (!isEnabled) {
+        logger.warn('⚠️ Comuna dropdown is disabled - skipping (field is optional)');
+        return false;
+      }
+
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      let isOpened = false;
       for (let i = 0; i < 3; i++) {
         await button.click({ force: true });
         await this.page.waitForTimeout(500);
-        
+
         const menu = parent.locator('.dropdown-menu.inner.show');
         if (await menu.isVisible()) {
           isOpened = true;
@@ -429,29 +439,29 @@ export class TransportistaFormPage extends BasePage {
       }
 
       if (!isOpened) {
-          logger.warn('⚠️ Failed to open Comuna dropdown - skipping (field is optional)');
-          return false;
+        logger.warn('⚠️ Failed to open Comuna dropdown - skipping (field is optional)');
+        return false;
       }
 
       const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
       const options = await dropdownMenu.locator('.dropdown-item').all();
-      
+
       const validOptions = [];
       for (const option of options) {
-          if (await option.isVisible()) {
-              validOptions.push(option);
-          }
+        if (await option.isVisible()) {
+          validOptions.push(option);
+        }
       }
 
       if (validOptions.length === 0) {
-          logger.warn('⚠️ No Comuna options available - skipping (field is optional)');
-          return false;
+        logger.warn('⚠️ No Comuna options available - skipping (field is optional)');
+        return false;
       }
 
       const randomIndex = Math.floor(Math.random() * validOptions.length);
       const randomOption = validOptions[randomIndex];
       const optionText = await randomOption.innerText();
-      
+
       await randomOption.click();
       logger.info(`✅ Random Comuna selected: "${optionText}"`);
       return true;
