@@ -1,13 +1,13 @@
-import { test, expect } from '../../../src/fixtures/base.js';
-import { getTestUser } from '../../../src/config/credentials.js';
+import { test, expect } from '../../../../../src/fixtures/base.js';
+import { getTestUser } from '../../../../../src/config/credentials.js';
 
 test.describe('Contract Management (Refactor)', () => {
   // Now we inject 'contractLifecycleFlow' and 'contratosActions' directly
-  test('Should create a new contract successfully', async ({ 
-    contractLifecycleFlow, 
-    contratosActions 
+  test('Should create a new contract successfully', async ({
+    contractLifecycleFlow,
+    contratosActions
   }) => {
-    
+
     const user = getTestUser('regular');
     const contractData = {
       nroContrato: Date.now().toString().slice(-8),
