@@ -1,95 +1,45 @@
-import { test, expect } from '../../../../../src/fixtures/base.js';
-import { getTestUser } from '../../../../../src/config/credentials.js';
-import { logger } from '../../../../../src/utils/logger.js';
+import { test, expect } from '@playwright/test';
+import { ContratosPage } from '../pages/ContratosPage.js';
 
-test.describe('Contracts - Create Contract', () => {
+test.describe('Step 5: Contract Creation', () => {
+    let contratosPage: ContratosPage;
 
-  test('Should create a new Contract successfully', async ({
-    page,
-    loginPage,
-    dashboardPage,
-    contratosPage
-  }) => {
+    test('Create Contract with RUT Search and Specific Route 715', async ({ page }) => {
+        contratosPage = new ContratosPage(page);
 
-    // Test data
-    const user = getTestUser('regular');
-    const testData = {
-      nroContrato: Date.now().toString().slice(-8),
-      valorHora: '25000',
-      tarifaViaje: '150000',
-      tarifaConductor: '50000',
-    };
+        // 1. Data Preparation
+        // Target Transportista: ID 258 / 24618893-9
+        const transportistaRut = '24618893-9'; 
+        const clienteName = 'Cliente Standard'; 
+        const tarifaConductor = '20000';
+        const tarifaViaje = '50000';
 
-    await test.step('Phase 1: Login', async () => {
-      logger.info('🔐 PHASE 1: Login');
-      await loginPage.loginAndWaitForDashboard(user.username, user.password);
-      expect(await dashboardPage.isOnDashboard()).toBe(true);
-      logger.info('✅ Login successful');
-    });
+        // 2. Navigate
+        await contratosPage.navigateToCreate();
 
-    await test.step('Phase 2: Navigate', async () => {
-      logger.info('Compass PHASE 2: Navigate to Contratos Form');
-      await contratosPage.navigate();
-      logger.info('✅ Navigation successful');
-    });
+        // 3. Fill Main Form (RUT Based Selection)
+        console.log(`Selecting Transportista with RUT: ${transportistaRut}`);
+        await contratosPage.fillMainForm(clienteName, transportistaRut, '2025-08-05', '2025-08-10');
 
-    await test.step('Phase 3: Fill Form', async () => {
-      logger.info('📝 PHASE 3: Fill Contract Form');
-      await contratosPage.fillNroContrato(testData.nroContrato);
-      await contratosPage.selectTipoContrato('Costo');
-      await contratosPage.selectTransportista('Transportadora S.A.I');
-      await contratosPage.setFechaVencimiento('2026-02-28');
-      await contratosPage.fillValorHora(testData.valorHora);
+        // 4. Add Route & Cargo (Specific IDs + JS Injection)
+        console.log('Adding Route 715 and Cargo 715_3...');
+        await contratosPage.addSpecificRouteAndCargo(tarifaConductor, tarifaViaje);
 
-      logger.info('✅ Basic fields filled');
-      await page.screenshot({ path: './reports/screenshots/contratos-03-form-filled.png', fullPage: true });
-    });
+        // 5. Save and Rescue ID
+        const contractId = await contratosPage.saveAndExtractId();
+        console.log(`Contract Created Successfully. ID: ${contractId}`);
+        expect(contractId).toBeTruthy();
 
-    await test.step('Phase 4: Save & Edit', async () => {
-      logger.info('💾 PHASE 4: Save Contract');
-      await contratosPage.clickGuardar();
-
-      // Wait for redirect to edit page
-      try {
-        await expect(page).toHaveURL(/\/contrato\/editar\//, { timeout: 15000 });
-        logger.info('✅ Redirected to edit page');
-
-        // Phase 5 actions
-        logger.info('✏️ PHASE 5: Edit Contract Actions');
-        await contratosPage.clickOutlineSuccessButton();
-        await page.waitForTimeout(2000);
-        await contratosPage.clickPlus715Button();
-        await page.waitForTimeout(2000);
-
-        await contratosPage.clickCerrarModal();
-        await page.waitForTimeout(1000);
-
-        await contratosPage.clickAddCarga();
-        await page.waitForTimeout(1000);
-        await contratosPage.clickAddRuta();
-        await page.waitForTimeout(1000);
-        await contratosPage.clickCerrarModal(); // Closing modal after adding
-
-        await contratosPage.fillTarifaViaje(testData.tarifaViaje);
-        await contratosPage.fillTarifaConductor(testData.tarifaConductor);
-
-        await contratosPage.clickGuardar();
-        logger.info('✅ Final save clicked');
-        await page.waitForTimeout(3000);
-
-      } catch (e) {
-        logger.warn('⚠️ Did not redirect to edit page or failed during edit actions');
-        if (await contratosPage.hasValidationErrors()) {
-          logger.error('Validation errors detected');
-          await page.screenshot({ path: './reports/screenshots/contratos-validation-error.png', fullPage: true });
+        // 6. Final Verification
+        // Navigate to view page if not already there
+        if (!page.url().includes(`/contratos/ver/${contractId}`)) {
+            await page.goto(`/contratos/ver/${contractId}`);
         }
-        throw e;
-      }
-    });
+        
+        // Verify Route 715 (05082025-1) is assigned
+        await expect(page.getByText('05082025-1')).toBeVisible();
 
-    await test.step('Phase 5: Verify', async () => {
-      await page.screenshot({ path: './reports/screenshots/contratos-05-final-result.png', fullPage: true });
-      logger.info('✅ Test Complete');
+        // Store ID for Step 6
+        process.env.CREATED_CONTRACT_ID = contractId;
     });
-  });
 });

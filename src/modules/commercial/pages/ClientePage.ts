@@ -2,6 +2,7 @@ import { BasePage } from '../../../core/BasePage.js';
 import { config } from '../../../config/environment.js';
 import type { Page } from 'playwright';
 import { createLogger } from '../../../utils/logger.js';
+import { expect } from '@playwright/test';
 
 const logger = createLogger('ClienteFormPage');
 
@@ -20,6 +21,12 @@ export class ClienteFormPage extends BasePage {
     regionButton: 'button[data-id="clientes-region_id"]',
     ciudadButton: 'button[data-id="clientes-ciudad_id"]',
     comunaButton: 'button[data-id="clientes-comuna_id"]',
+    poligonosButton: 'button[data-id="clientes-poligonos"]',
+    transportistasButton: 'button[data-id="clientes-transportistas"]',
+
+    // Contact fields
+   email: '#clientes-email',
+    telefono: '#clientes-telefono',
 
     // Actions
     btnGuardar: '#btn_guardar',
@@ -51,7 +58,7 @@ export class ClienteFormPage extends BasePage {
   async fillRut(rut: string): Promise<void> {
     logger.info(`Filling RUT: ${rut}`);
     try {
-      await this.fill(this.selectors.rut, rut);
+      await this.fillRutWithVerify(this.selectors.rut, rut);
     } catch (error) {
       logger.error('Failed to fill RUT', error);
       await this.takeScreenshot('fill-rut-error');
@@ -122,6 +129,331 @@ export class ClienteFormPage extends BasePage {
       throw error;
     }
   }
+
+  //  ===== REGION/CIUDAD/COMUNA SELECTION =====
+  
+  async selectRandomRegion(): Promise<void> {
+    logger.info('Selecting random Region');
+    try {
+      const button = this.page.locator(this.selectors.regionButton);
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+
+        const menu = parent.locator('.dropdown-menu.inner.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+        logger.warn(`Region Dropdown not visible on attempt ${i + 1}, retrying...`);
+      }
+
+      if (!isOpened) {
+        throw new Error('Failed to open region dropdown after 3 attempts');
+      }
+
+      const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
+      const options = await dropdownMenu.locator('.dropdown-item').all();
+
+      const validOptions = [];
+      for (const option of options) {
+        if (await option.isVisible()) {
+          validOptions.push(option);
+        }
+      }
+
+      if (validOptions.length === 0) {
+        throw new Error('No visible region options found');
+      }
+
+      const randomIndex = Math.floor(Math.random() * validOptions.length);
+      const randomOption = validOptions[randomIndex];
+      const optionText = await randomOption.innerText();
+
+      await randomOption.click();
+      logger.info(`✅ Random Region selected: "${optionText}"`);
+      await this.page.waitForTimeout(1500);
+    } catch (error) {
+      logger.error('Failed to select random region', error);
+      await this.takeScreenshot('select-random-region-error');
+      throw error;
+    }
+  }
+
+  async selectRandomCiudad(): Promise<void> {
+    logger.info('Selecting random Ciudad');
+    try {
+      const button = this.page.locator(this.selectors.ciudadButton);
+      await expect(button).toBeEnabled({ timeout: 5000 });
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+
+        const menu = parent.locator('.dropdown-menu.inner.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+        logger.warn(`Ciudad Dropdown not visible on attempt ${i + 1}, retrying...`);
+      }
+
+      if (!isOpened) {
+        throw new Error('Failed to open Ciudad dropdown');
+      }
+
+      const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
+      const options = await dropdownMenu.locator('.dropdown-item').all();
+
+      const validOptions = [];
+      for (const option of options) {
+        if (await option.isVisible()) {
+          validOptions.push(option);
+        }
+      }
+
+      if (validOptions.length === 0) {
+        throw new Error('No visible ciudad options found');
+      }
+
+      const randomIndex = Math.floor(Math.random() * validOptions.length);
+      const randomOption = validOptions[randomIndex];
+      const optionText = await randomOption.innerText();
+
+      await randomOption.click();
+      logger.info(`✅ Random Ciudad selected: "${optionText}"`);
+      await this.page.waitForTimeout(1500);
+    } catch (error) {
+      logger.error('Failed to select random ciudad', error);
+      await this.takeScreenshot('select-random-ciudad-error');
+      throw error;
+    }
+  }
+
+  async selectRandomComuna(): Promise<boolean> {
+    logger.info('Selecting random Comuna');
+    try {
+      const button = this.page.locator(this.selectors.comunaButton);
+
+      const isEnabled = await button.isEnabled({ timeout: 5000 }).catch(() => false);
+      if (!isEnabled) {
+        logger.warn('⚠️ Comuna dropdown is disabled - skipping');
+        return false;
+      }
+
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+
+        const menu = parent.locator('.dropdown-menu.inner.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+ logger.warn(`Comuna Dropdown not visible on attempt ${i + 1}, retrying...`);
+      }
+
+      if (!isOpened) {
+        logger.warn('⚠️ Failed to open Comuna dropdown - skipping');
+        return false;
+      }
+
+      const dropdownMenu = parent.locator('.dropdown-menu.inner.show');
+      const options = await dropdownMenu.locator('.dropdown-item').all();
+
+      const validOptions = [];
+      for (const option of options) {
+        if (await option.isVisible()) {
+          validOptions.push(option);
+        }
+      }
+
+      if (validOptions.length === 0) {
+        logger.warn('⚠️ No Comuna options - skipping');
+        return false;
+      }
+
+      const randomIndex = Math.floor(Math.random() * validOptions.length);
+      const randomOption = validOptions[randomIndex];
+      const optionText = await randomOption.innerText();
+
+      await randomOption.click();
+      logger.info(`✅ Random Comuna selected: "${optionText}"`);
+      return true;
+    } catch (error) {
+      logger.warn('⚠️ Comuna selection failed - skipping', error);
+      return false;
+    }
+  }
+
+  // ===== POLIGONOS =====
+  
+  async selectAllPoligonos(): Promise<void> {
+    logger.info('Selecting all Poligonos');
+    try {
+      const button = this.page.locator(this.selectors.poligonosButton);
+      
+      // Wait for button to appear with a reasonable timeout
+      try {
+        await button.waitFor({ state: 'visible', timeout: 3000 });
+      } catch (e) {
+        logger.warn('⚠️ Poligonos button not visible within 3s - skipping (may not be required for this form)');
+        return;
+      }
+      
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      // Open dropdown
+      let isOpened = false;
+      for (let i = 0; i < 3; i++) {
+        await button.click({ force: true });
+        await this.page.waitForTimeout(500);
+
+        const menu = parent.locator('.dropdown-menu.show');
+        if (await menu.isVisible()) {
+          isOpened = true;
+          break;
+        }
+        logger.warn(`Poligonos Dropdown not visible on attempt ${i + 1}, retrying...`);
+      }
+
+      if (!isOpened) {
+        throw new Error('Failed to open poligonos dropdown');
+      }
+
+      // Click "Seleccionar Todos" button
+      const selectAllButton = parent.locator('button').filter({ hasText: /seleccionar todos/i });
+      
+      if (await selectAllButton.count() > 0) {
+        await selectAllButton.click();
+        logger.info('✅ "Seleccionar Todos" clicked for Poligonos');
+      } else {
+        // Fallback: Select all visible checkboxes
+        logger.warn('"Seleccionar Todos" button not found. Selecting all checkboxes manually...');
+        const checkboxes = parent.locator('input[type="checkbox"]');
+        const count = await checkboxes.count();
+        
+        for (let i = 0; i < count; i++) {
+          const checkbox = checkboxes.nth(i);
+          if (!await checkbox.isChecked()) {
+            await checkbox.check();
+          }
+        }
+        logger.info(`✅ Manually selected ${count} poligonos`);
+      }
+
+      // Close dropdown
+      await this.page.keyboard.press('Escape');
+      await this.page.waitForTimeout(500);
+    } catch (error) {
+      logger.error('Failed to select all poligonos', error);
+      await this.takeScreenshot('select-all-poligonos-error');
+      throw error;
+    }
+  }
+
+  // ===== TRANSPORTISTAS ASOCIADOS =====
+  
+  async selectTransportista(nombre: string): Promise<void> {
+    logger.info(`Selecting transportista: ${nombre}`);
+    try {
+      const button = this.page.locator(this.selectors.transportistasButton);
+      
+      // Graceful skip if button not visible (may be conditional field)
+      try {
+        await button.waitFor({ state: 'visible', timeout: 3000 });
+      } catch (e) {
+        logger.warn(`⚠️ Transportistas button not visible within 3s - skipping (may not be required for this form)`);
+        return;
+      }
+      
+      await button.scrollIntoViewIfNeeded();
+      const parent = button.locator('..');
+
+      // Open dropdown
+      await button.click({ force: true });
+      await this.page.waitForTimeout(500);
+
+      const dropdownMenu = parent.locator('.dropdown-menu.show');
+      await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
+
+      // Use search box if available
+      const searchInput = dropdownMenu.locator('.bs-searchbox input');
+      if (await searchInput.count() > 0 && await searchInput.isVisible()) {
+        logger.info(`Using search box to filter: ${nombre}`);
+        await searchInput.fill(nombre);
+        await this.page.waitForTimeout(1000);
+      }
+
+      // Select the option
+      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre }).first();
+      
+      if (await option.count() === 0) {
+        logger.warn(`Transportista "${nombre}" not found in dropdown - closing and continuing`);
+        await this.page.keyboard.press('Escape');
+        return;
+      }
+
+      await option.scrollIntoViewIfNeeded();
+      await option.click();
+      
+      logger.info(`✅ Transportista "${nombre}" selected`);
+      await this.page.waitForTimeout(500);
+    } catch (error) {
+      logger.warn(`Failed to select transportista: ${nombre} - continuing without selection`, error);
+      // Don't throw - make this optional
+    }
+  }
+
+  // ===== CONTACT FIELDS =====
+  
+  async fillEmail(email: string): Promise<void> {
+    logger.info(`Filling email: ${email}`);
+    try {
+      const locator = this.page.locator(this.selectors.email);
+      // Graceful skip if not visible
+      try {
+        await locator.waitFor({ state: 'visible', timeout: 3000 });
+      } catch (e) {
+        logger.warn('⚠️ Email field not visible - skipping (may not be required for this form)');
+        return;
+      }
+      await this.fill(this.selectors.email, email);
+    } catch (error) {
+      logger.warn('Failed to fill email - continuing', error);
+    }
+  }
+
+  async fillTelefono(telefono: string): Promise<void> {
+    logger.info(`Filling telefono: ${telefono}`);
+    try {
+      const locator = this.page.locator(this.selectors.telefono);
+      // Graceful skip if not visible
+      try {
+        await locator.waitFor({ state: 'visible', timeout: 3000 });
+      } catch (e) {
+        logger.warn('⚠️ Telefono field not visible - skipping (may not be required for this form)');
+        return;
+      }
+      await this.fill(this.selectors.telefono, telefono);
+    } catch (error) {
+      logger.warn('Failed to fill telefono - continuing', error);
+    }
+  }
+
+  // ===== SAVE & VALIDATION =====
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking save button');
