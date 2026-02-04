@@ -1,6 +1,7 @@
 import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
 import { createLogger } from '../../../utils/logger.js';
+import { config } from '../../../config/environment.js';
 
 const logger = createLogger('ContratosFormPage');
 
@@ -10,35 +11,51 @@ export class ContratosFormPage extends BasePage {
     nroContrato: '#contrato-nro_contrato',
     tipoContratoDropdown: '.filter-option-inner-inner',
     tipoContratoOption: '.dropdown-item[role="option"]',
-    
-    // Transportista
+
+    // Cliente (Select2)
+    clienteContainer: '#select2-cliente_id-container',
+    select2SearchField: '.select2-search__field',
+    select2Result: '.select2-results__option',
+    select2Highlighted: '.select2-results__option--highlighted',
+
+    // Transportista (Select2)
+    transportistaContainer: '#select2-transportista_id-container',
     transportistaButton: 'button[data-id="contrato-transportista_id"]',
     transportistaOptions: '.dropdown-menu.show .dropdown-item',
-    
+
+    // Dates
+    fechaInicio: '#fecha_inicio',
+    fechaFin: '#fecha_fin',
     fechaVencimiento: '#contrato-fecha_vencimiento',
     valorHora: '#contrato-valor_hora',
-    modalidadButton: '.btn.dropdown-toggle.btn-light[data-id="modalidad_contrato"]',
-    modalidadOption: '.dropdown-item.selected.active',
-    archivosAdjuntos: 'input[type="file"][name="adjuntos[]"]',
-    
+
+    // Route Modal
+    btnAddRuta: '#btn_add_ruta',
+    modalRutas: '#modal_rutas',
+    btnRoute715: 'a#btn_plus_715',
+    btnCargo715_3: 'a#btn_plus_ruta_715_3',
+    btnCargo715_19: '#btn_plus_ruta_715_19',
+    tarifaConductor: '#tarifa_conductor',
+    tarifaViaje: '#tarifa_viaje',
+    btnGuardarRutaModal: '#btn_guardar_ruta_modal',
+
+    // Specific Route Inputs (for JS injection if needed)
+    inputTarifaViaje715: '#txt_tarifa_extra_715',
+    inputTarifaConductor715: '#txt_tarifa_conductor_715',
+
     // Actions
     btnGuardar: '#btn_guardar',
+    btnGuardarContrato: '#btn_guardar_contrato',
     btnVolver: 'a.btn.btn-primary[href="/contrato/index"]',
-    
+
+    // Modals
+    modal: '.modal',
+    modalBackdrop: '.modal-backdrop',
+    btnCerrarModal: '.btn.btn-secondary.waves-effect.waves-light',
+
     // Validations
     invalidField: '[aria-invalid="true"]',
     helpBlock: '.help-block.badge.badge-danger',
-    
-    // Edit Mode Actions
-    btnOutlineSuccess: '.btn.btn-outline-success.btn-sm',
-    btnPlus715: '#btn_plus_715',
-    
-    // Additional Edit Actions
-    btnCerrarModal: '.btn.btn-secondary.waves-effect.waves-light',
-    btnAddCarga: '#btn_click_715',
-    btnAddRuta: '#btn_plus_ruta_715_19',
-    inputTarifaViaje: '#txt_tarifa_extra_715',
-    inputTarifaConductor: '#txt_tarifa_conductor_715',
   };
 
   constructor(page: Page) {
@@ -46,15 +63,431 @@ export class ContratosFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/crear');
+    await this.page.goto('https://moveontruckqa.bermanntms.cl/contratos/crear');
     await this.page.waitForLoadState('domcontentloaded');
   }
 
+  /**
+   * Navigate to contract creation page with URL discovery
+   * Discovers the correct "Create" URL by inspecting the index page
+   */
+  async navigateToCreate(): Promise<void> {
+    logger.info('🧭 Navigating to contract creation page');
 
+    // Step 1: Navigate to contracts index first
+    const indexUrl = `${config.get().baseUrl}/contrato/index`;
+    logger.info(`First navigating to index: ${indexUrl}`);
+    await this.page.goto(indexUrl);
+    await this.page.waitForLoadState('networkidle');
+
+    // Step 2: Find the "Crear" / "Nuevo" / "Añadir" button
+    try {
+      // Try common button selectors for "Create"
+      const createButtonSelectors = [
+        'a:has-text("Crear")',
+        'a:has-text("Nuevo")',
+        'a:has-text("Añadir")',
+        'a[href*="/crear"]',
+        'button:has-text("Crear")',
+        '.btn:has-text("Crear")',
+      ];
+
+      let createUrl: string | null = null;
+
+      for (const selector of createButtonSelectors) {
+        const btn = this.page.locator(selector).first();
+        if (await btn.count() > 0 && await btn.isVisible()) {
+          createUrl = await btn.getAttribute('href');
+          if (createUrl) {
+            logger.info(`✅ Found create button with URL: ${createUrl}`);
+            break;
+          }
+        }
+      }
+
+      // Step 3: Navigate to the discovered URL or fallback
+      if (createUrl) {
+        // If relative URL, make it absolute
+        if (createUrl.startsWith('/')) {
+          createUrl = `${config.get().baseUrl}${createUrl}`;
+        }
+        logger.info(`Navigating to discovered create URL: ${createUrl}`);
+        await this.page.goto(createUrl);
+      } else {
+        // Fallback to known URL pattern (SINGULAR form confirmed from trace)
+        const fallbackUrl = 'https://moveontruckqa.bermanntms.cl/contrato/crear';
+        logger.warn(`⚠️ Could not discover create URL, using fallback: ${fallbackUrl}`);
+        await this.page.goto(fallbackUrl);
+      }
+
+      await this.page.waitForLoadState('networkidle');
+      logger.info('✅ Navigation to create page complete');
+
+      // Verify page title doesn't contain "Error"
+      const pageTitle = await this.page.title();
+      if (/error/i.test(pageTitle)) {
+        logger.error(`❌ Page title contains 'Error': ${pageTitle}`);
+        throw new Error(`Navigation failed: Page title is "${pageTitle}"`);
+      }
+
+      // Validate: Check if we landed on an error page
+      const currentUrl = this.page.url();
+      logger.info(`Current URL: ${currentUrl}`);
+      if (currentUrl.includes('error') || currentUrl.includes('404')) {
+        logger.error(`❌ Landed on error page: ${currentUrl}`);
+        throw new Error('Navigation failed: Page returned an error (404 or error page)');
+      }
+
+      // Check for error heading
+      const errorHeading = this.page.locator('h1:has-text("Error"), h1:has-text("404"), h1:has-text("no encontrada")');
+      if (await errorHeading.isVisible().catch(() => false)) {
+        const errorText = await errorHeading.textContent();
+        logger.error(`❌ Error page detected: ${errorText}`);
+        throw new Error(`Navigation failed: Error page with heading "${errorText}"`);
+      }
+
+      logger.info('✅ Page loaded successfully, no errors detected');
+
+    } catch (error) {
+      logger.error('Failed to navigate to create page', error);
+      throw error;
+    }
+  }
+
+  /**
+   * PHASE 1: Fill basic contract information on /contrato/crear
+   * This creates the initial contract and redirects to /contrato/editar/{id}
+   * 
+   * @param nroContrato - Contract number (integers only, e.g., "00101")
+   * @param transportistaNombre - Transportista name (e.g., "Camino Transportes SpA")
+   */
+  async fillBasicContractInfo(
+    nroContrato: string,
+    transportistaNombre: string
+  ): Promise<string> {
+    logger.info('📝 Filling basic contract information (Phase 1)');
+
+    try {
+      // 1. Fill Nro Contrato (integers only)
+      logger.info(`Filling Nro Contrato: ${nroContrato}`);
+      await this.page.fill('#contrato-nro_contrato', nroContrato);
+      await this.page.waitForTimeout(300);
+      logger.info('✅ Nro Contrato filled');
+
+      // 2. Select Tipo Contrato = "Costo" (value="1")
+      logger.info('Selecting Tipo Contrato: Costo');
+      const tipoContratoSelect = this.page.locator('select#contrato-tipo_tarifa_contrato_id');
+      await tipoContratoSelect.selectOption({ value: '1' }); // 1 = Costo
+      await this.page.waitForTimeout(1000); // Wait for transportista dropdown to appear
+      logger.info('✅ Selected Tipo Contrato: Costo');
+
+      // 3. Wait for Transportista dropdown (#contrato-transportista_id)
+      logger.info(`Waiting for Transportista dropdown and searching name: ${transportistaNombre}...`);
+      const transportistaSelect = this.page.locator('select#contrato-transportista_id');
+      await transportistaSelect.waitFor({ state: 'visible', timeout: 5000 });
+      logger.info('✅ Transportista dropdown visible');
+
+      // 4. Find and select transportista by name (direct select, bypass Bootstrap-select UI)
+      logger.info(`Selecting transportista with name: ${transportistaNombre}`);
+
+      // Find the option containing the transportista name and get its value
+      const transportistaOptionLocator = this.page.locator(`select#contrato-transportista_id option:has-text("${transportistaNombre}")`).first();
+      await transportistaOptionLocator.waitFor({ state: 'attached', timeout: 5000 });
+
+      const transportistaValue = await transportistaOptionLocator.getAttribute('value');
+
+      if (!transportistaValue) {
+        throw new Error(`Transportista with name "${transportistaNombre}" not found in dropdown`);
+      }
+
+      // Select directly using the value
+      await transportistaSelect.selectOption({ value: transportistaValue });
+      await this.page.waitForTimeout(500);
+
+      // Trigger change event for Bootstrap-select
+      await this.page.evaluate(() => {
+        const select = document.querySelector('#contrato-transportista_id') as HTMLSelectElement;
+        if (select) {
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+
+      logger.info('✅ Transportista selected');
+
+      // 5. Skip optional fields (Fecha vencimiento, Valor Hora, Modalidad=Por Ruta)
+      logger.info('⏭️ Skipping optional fields (using defaults: Modalidad = Por Ruta)');
+
+      // 6. Save the contract (this will redirect to /contrato/editar/{id})
+      logger.info('💾 Saving basic contract...');
+      await this.page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
+
+      // Wait for navigation to edit page
+      await this.page.waitForURL(/\/contrato\/editar\/\d+/, { timeout: 10000 });
+
+      // Extract contract ID from URL
+      const currentUrl = this.page.url();
+      const contractIdMatch = currentUrl.match(/\/contrato\/editar\/(\d+)/);
+
+      if (!contractIdMatch) {
+        throw new Error(`Failed to extract contract ID from URL: ${currentUrl}`);
+      }
+
+      const contractId = contractIdMatch[1];
+      logger.info(`✅ Contract created successfully with ID: ${contractId}`);
+      logger.info(`📍 Redirected to: ${currentUrl}`);
+
+      return contractId;
+
+    } catch (error) {
+      logger.error('Failed to fill basic contract info', error);
+      await this.takeScreenshot('fill-basic-contract-error');
+      throw error;
+    }
+  }
+
+  /**
+   * Fills the main contract form using RUT-based search for Transportista
+   * @param clienteName - Name of the client to search
+   * @param transportistaRut - RUT of transportista (e.g., "24618893-9")
+   * @param fechaInicio - Start date (YYYY-MM-DD)
+   * @param fechaFin - End date (YYYY-MM-DD)
+   */
+  async fillMainForm(
+    clienteName: string,
+    transportistaRut: string,
+    fechaInicio: string,
+    fechaFin: string
+  ): Promise<void> {
+    logger.info('📝 Filling main contract form');
+
+    try {
+      // 1. Select Client using SURGICAL Select2 strategy (Click → Wait → Type → Enter)
+      logger.info(`Selecting client: ${clienteName}`);
+
+      // Step 1: Wait for Select2 to initialize, then click the container to open dropdown
+      const clientContainer = this.page.locator(this.selectors.clienteContainer);
+      await clientContainer.waitFor({ state: 'visible', timeout: 10000 });
+      logger.info('✅ Cliente Select2 container visible');
+
+      await clientContainer.click();
+      logger.info('✅ Clicked cliente container');
+
+      // Step 2: Wait for search field to be visible
+      const searchField = this.page.locator(this.selectors.select2SearchField);
+      await searchField.waitFor({ state: 'visible', timeout: 5000 });
+      logger.info('✅ Search field visible');
+
+      // Step 3: Type client name with delay
+      await this.page.keyboard.type(clienteName, { delay: 100 });
+      await this.page.waitForTimeout(500);
+      logger.info(`✅ Typed client name: ${clienteName}`);
+
+      // Step 4: Press Enter to select
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(500);
+      logger.info('✅ Client selected via Enter key');
+
+      // 2. Select Transportista using RUT (Select2 with search)
+      logger.info(`Searching transportista by RUT: ${transportistaRut}`);
+      await this.page.click(this.selectors.transportistaContainer);
+      await this.page.waitForTimeout(300);
+
+      const transportistaSearchField = this.page.locator(this.selectors.select2SearchField);
+      await transportistaSearchField.fill(transportistaRut);
+
+      // Wait for the specific result to appear (highlighted)
+      await this.page.waitForSelector(this.selectors.select2Highlighted, {
+        state: 'visible',
+        timeout: 10000
+      });
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(500);
+
+      logger.info('✅ Transportista selected via RUT');
+
+      // 3. Fill Dates using JavaScript (to bypass datepicker)
+      logger.info(`Setting dates: ${fechaInicio} to ${fechaFin}`);
+      await this.setDateViaJS(this.selectors.fechaInicio, fechaInicio);
+      await this.setDateViaJS(this.selectors.fechaFin, fechaFin);
+
+      logger.info('✅ Main form filled successfully');
+    } catch (error) {
+      logger.error('Failed to fill main form', error);
+      await this.takeScreenshot('fill-main-form-error');
+      throw error;
+    }
+  }
+
+  /**
+   * Sets a date field value using JavaScript to bypass datepicker restrictions
+   */
+  private async setDateViaJS(selector: string, dateValue: string): Promise<void> {
+    await this.page.evaluate(
+      ({ sel, val }) => {
+        const element = document.querySelector(sel) as HTMLInputElement;
+        if (element) {
+          element.value = val;
+          element.dispatchEvent(new Event('change', { bubbles: true }));
+          element.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      },
+      { sel: selector, val: dateValue }
+    );
+    await this.page.waitForTimeout(300);
+  }
+
+  /**
+   * Opens modal, selects Route 715 & Cargo 715_3, fills tariffs, and force-closes modal
+   * @param tarifaConductor - Driver tariff (e.g., "20000")
+   * @param tarifaViaje - Trip tariff (e.g., "50000")
+   */
+  async addSpecificRouteAndCargo(
+    tarifaConductor: string,
+    tarifaViaje: string
+  ): Promise<void> {
+    logger.info('🛣️ Adding specific Route 715 and Cargo 715_3');
+
+    try {
+      // Step A: Click "Añadir Ruta" button
+      logger.info('Clicking "Añadir Ruta" button');
+      await this.page.click(this.selectors.btnAddRuta);
+      await this.page.waitForSelector(this.selectors.modalRutas, {
+        state: 'visible',
+        timeout: 5000
+      });
+      await this.page.waitForTimeout(1000); // Wait for modal animation
+
+      // Step B: Click the green plus button for Route 715
+      logger.info('Selecting Route 715 (05082025-1)');
+      const btnRoute = this.page.locator(this.selectors.btnRoute715);
+      await btnRoute.scrollIntoViewIfNeeded();
+      await btnRoute.click();
+      await this.page.waitForTimeout(500);
+
+      // Step C: Click "Añadir Carga" button (opens sub-modal)
+      logger.info('Clicking "Añadir Carga" for Route 715');
+      const btnAddCarga = this.page.locator('#btn_click_715');
+      await btnAddCarga.waitFor({ state: 'visible', timeout: 5000 });
+      await btnAddCarga.click();
+      await this.page.waitForTimeout(500);
+
+      // Select Specific Cargo: Cargo ID 3 (715_3)
+      logger.info('Selecting Cargo 715_3');
+      const btnCargo = this.page.locator(this.selectors.btnCargo715_3);
+      await btnCargo.waitFor({ state: 'visible', timeout: 5000 });
+      await btnCargo.scrollIntoViewIfNeeded();
+      await btnCargo.click();
+      await this.page.waitForTimeout(500);
+
+      // Step D: Fill Tariffs
+      logger.info(`Filling tariffs: Conductor=${tarifaConductor}, Viaje=${tarifaViaje}`);
+
+      // Try the specific 715 input fields first
+      try {
+        await this.page.fill(this.selectors.inputTarifaConductor715, tarifaConductor);
+        await this.page.fill(this.selectors.inputTarifaViaje715, tarifaViaje);
+      } catch (e) {
+        // Fallback to generic tariff fields
+        logger.info('Using generic tariff fields');
+        await this.page.fill(this.selectors.tarifaConductor, tarifaConductor);
+        await this.page.fill(this.selectors.tarifaViaje, tarifaViaje);
+      }
+
+      await this.page.waitForTimeout(500);
+
+      // Add to grid (save within modal)
+      logger.info('Saving route to grid');
+      await this.page.click(this.selectors.btnGuardarRutaModal);
+      await this.page.waitForTimeout(1000);
+
+      // JS Injection: Force close modal and remove backdrop (Master Key)
+      logger.info('🔧 Forcing modal closure via JS injection');
+      await this.forceCloseModal();
+
+      logger.info('✅ Route 715 and Cargo 715_3 added successfully');
+    } catch (error) {
+      logger.error('Failed to add route and cargo', error);
+      await this.takeScreenshot('add-route-cargo-error');
+      throw error;
+    }
+  }
+
+  /**
+   * JS Injection Master Key: Forces Bootstrap modal to close and cleanup
+   */
+  private async forceCloseModal(): Promise<void> {
+    await this.page.evaluate(() => {
+      // Force hide all modals using jQuery if available
+      // @ts-ignore
+      if (typeof $ !== 'undefined') {
+        // @ts-ignore
+        $('.modal').modal('hide');
+      }
+
+      // Manual cleanup of modal classes and backdrop
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        const modalElement = modal as HTMLElement;
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+      });
+
+      // Remove all backdrops
+      const backdrops = document.querySelectorAll('.modal-backdrop');
+      backdrops.forEach(backdrop => backdrop.remove());
+
+      // Remove modal-open class from body
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    });
+
+    await this.page.waitForTimeout(500); // Allow UI to settle
+  }
+
+  /**
+   * Saves the contract and extracts the ID from the redirect URL
+   * @returns Contract ID
+   */
+  async saveAndExtractId(): Promise<string> {
+    logger.info('💾 Saving contract and extracting ID');
+
+    try {
+      // Try both possible save button selectors
+      const saveBtn = this.page.locator(this.selectors.btnGuardarContrato)
+        .or(this.page.locator(this.selectors.btnGuardar))
+        .first();
+
+      await saveBtn.click();
+      await this.page.waitForLoadState('networkidle', { timeout: 15000 });
+      await this.page.waitForTimeout(2000);
+
+      const url = this.page.url();
+      logger.info(`Current URL after save: ${url}`);
+
+      // Extract ID from URL patterns: /contratos/ver/123 or /contratos/editar/123
+      const match = url.match(/\/contratos\/(?:ver|editar)\/(\d+)/);
+
+      if (match && match[1]) {
+        const contractId = match[1];
+        logger.info(`✅ Contract ID extracted: ${contractId}`);
+        return contractId;
+      } else {
+        logger.error(`Failed to extract contract ID from URL: ${url}`);
+        throw new Error('Could not extract contract ID from URL');
+      }
+    } catch (error) {
+      logger.error('Failed to save and extract ID', error);
+      await this.takeScreenshot('save-extract-id-error');
+      throw error;
+    }
+  }
+
+  // Additional utility methods from original ContratosFormPage
 
   async fillNroContrato(nro: string): Promise<void> {
     logger.info(`Filling contract number: ${nro}`);
-    
     try {
       await this.fill(this.selectors.nroContrato, nro);
     } catch (error) {
@@ -66,147 +499,23 @@ export class ContratosFormPage extends BasePage {
 
   async selectTipoContrato(tipo: string): Promise<void> {
     logger.info(`Selecting contract type: ${tipo}`);
-    
     try {
-      // Click en el dropdown para abrirlo
       await this.page.click('.filter-option-inner-inner');
       await this.page.waitForTimeout(500);
-      
-      // Esperar que el dropdown esté visible
-      await this.page.waitForSelector('.dropdown-item[role="option"]', { 
+
+      await this.page.waitForSelector('.dropdown-item[role="option"]', {
         state: 'visible',
-        timeout: 5000 
+        timeout: 5000
       });
-      
-      // Click en la opción específica usando el texto
+
       const optionSelector = `.dropdown-item[role="option"]:has-text("${tipo}")`;
       await this.page.click(optionSelector);
-      
+
       await this.page.waitForTimeout(500);
-      
       logger.info(`✅ Contract type "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select contract type: ${tipo}`, error);
       await this.takeScreenshot(`select-tipo-contrato-error`);
-      throw error;
-    }
-  }
-
-  async selectTransportista(nombre: string): Promise<void> {
-    logger.info(`Selecting transportista: ${nombre}`);
-    
-    try {
-      // Esperar que el dropdown de transportista aparezca
-      await this.page.waitForSelector(this.selectors.transportistaButton, { state: 'visible' });
-      
-      // Identificar el contenedor específico del dropdown (padre del botón)
-      const dropdownContainer = this.page.locator('div.dropdown')
-        .filter({ has: this.page.locator(this.selectors.transportistaButton) });
-
-      // Click en el dropdown de transportista
-      await this.page.click(this.selectors.transportistaButton);
-      
-      // Esperar que el menú ESPECÍFICO se despliegue
-      const dropdownMenu = dropdownContainer.locator('.dropdown-menu.show').first();
-      await dropdownMenu.waitFor({ state: 'visible' });
-      
-      // Intentar usar la búsqueda si existe (para listas largas)
-      const searchInput = dropdownMenu.locator('.bs-searchbox input');
-      if (await searchInput.count() > 0 && await searchInput.isVisible()) {
-        logger.info('Using search box to filter transportista');
-        await searchInput.fill(nombre);
-        await this.page.waitForTimeout(500); // Esperar filtrado
-      }
-      
-      // Buscar la opción usando locator y filtro de texto dentro del menú específico
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre }).first();
-      
-      // Verificar si existe
-      if (await option.count() === 0) {
-        throw new Error(`Transportista "${nombre}" not found in dropdown`);
-      }
-      
-      // Click en la opción
-      await option.scrollIntoViewIfNeeded();
-      await option.click();
-      
-      logger.info(`✅ Transportista "${nombre}" selected`);
-      await this.page.waitForTimeout(1000);
-      
-    } catch (error) {
-      logger.error(`Failed to select transportista: ${nombre}`, error);
-      await this.takeScreenshot('select-transportista-error');
-      throw error;
-    }
-  }
-
-  async setFechaVencimiento(fecha: string): Promise<void> {
-    logger.info(`Setting expiration date: ${fecha}`);
-    try {
-      // Try to fill directly first
-      try {
-        await this.fill(this.selectors.fechaVencimiento, fecha);
-        logger.info(`✅ Expiration date set: ${fecha}`);
-        return;
-      } catch (error) {
-        logger.info('Field might be readonly, using JavaScript to set value');
-      }
-
-      // Use JavaScript to set value
-      await this.page.evaluate(
-        ({ selector, value }) => {
-          const element = document.querySelector(selector) as HTMLInputElement;
-          if (element) {
-            element.value = value;
-            element.dispatchEvent(new Event('change', { bubbles: true }));
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        },
-        { selector: this.selectors.fechaVencimiento, value: fecha }
-      );
-      
-      await this.page.waitForTimeout(500);
-      logger.info(`✅ Expiration date set via JavaScript: ${fecha}`);
-    } catch (error) {
-      logger.error('Failed to set expiration date (ignoring to prevent crash)', error);
-      await this.takeScreenshot('set-fecha-vencimiento-error');
-      // Don't throw if it's not critical, but usually it is for validation
-      // throw error; 
-    }
-  }
-
-  async fillValorHora(valor: string): Promise<void> {
-    logger.info(`Filling hourly rate: ${valor}`);
-    
-    try {
-      await this.fill(this.selectors.valorHora, valor);
-    } catch (error) {
-      logger.error('Failed to fill hourly rate', error);
-      await this.takeScreenshot('fill-valor-hora-error');
-      throw error;
-    }
-  }
-
-  async clickGuardar(): Promise<void> {
-    logger.info('Clicking save button');
-    
-    try {
-      await this.click(this.selectors.btnGuardar);
-    } catch (error) {
-      logger.error('Failed to click save button', error);
-      await this.takeScreenshot('click-guardar-error');
-      throw error;
-    }
-  }
-
-  async clickVolver(): Promise<void> {
-    logger.info('Clicking back button');
-    
-    try {
-      await this.click(this.selectors.btnVolver);
-    } catch (error) {
-      logger.error('Failed to click back button', error);
-      await this.takeScreenshot('click-volver-error');
       throw error;
     }
   }
@@ -218,101 +527,6 @@ export class ContratosFormPage extends BasePage {
     } catch (error) {
       logger.error('Failed to check validation errors', error);
       return false;
-    }
-  }
-
-  async clickOutlineSuccessButton(): Promise<void> {
-    logger.info('Clicking outline success button');
-    try {
-      await this.waitForElement(this.selectors.btnOutlineSuccess);
-      await this.click(this.selectors.btnOutlineSuccess);
-    } catch (error) {
-      logger.error('Failed to click outline success button', error);
-      await this.takeScreenshot('click-outline-success-error');
-      throw error;
-    }
-  }
-
-  async clickPlus715Button(): Promise<void> {
-    logger.info('Clicking plus 715 button');
-    try {
-      await this.waitForElement(this.selectors.btnPlus715);
-      await this.click(this.selectors.btnPlus715);
-    } catch (error) {
-      logger.error('Failed to click plus 715 button', error);
-      await this.takeScreenshot('click-plus-715-error');
-      throw error;
-    }
-  }
-
-  async clickCerrarModal(): Promise<void> {
-    logger.info('Clicking close modal button');
-    try {
-      // Target the visible 'Cerrar' button specifically
-      // Using :visible pseudo-class to ignore hidden instances from other modals
-      const button = this.page.locator(`${this.selectors.btnCerrarModal}:visible`)
-        .filter({ hasText: 'Cerrar' })
-        .first();
-      
-      await button.waitFor({ state: 'visible', timeout: 10000 });
-      await button.scrollIntoViewIfNeeded();
-      await button.click();
-    } catch (error) {
-      logger.error('Failed to click close modal button', error);
-      await this.takeScreenshot('click-cerrar-modal-error');
-      throw error;
-    }
-  }
-
-  async clickAddCarga(): Promise<void> {
-    logger.info('Clicking add carga button');
-    try {
-      await this.waitForElement(this.selectors.btnAddCarga);
-      await this.click(this.selectors.btnAddCarga);
-    } catch (error) {
-      logger.error('Failed to click add carga button', error);
-      await this.takeScreenshot('click-add-carga-error');
-      throw error;
-    }
-  }
-
-  async clickAddRuta(): Promise<void> {
-    logger.info('Clicking add ruta button');
-    try {
-      await this.waitForElement(this.selectors.btnAddRuta);
-      await this.click(this.selectors.btnAddRuta);
-    } catch (error) {
-      logger.error('Failed to click add ruta button', error);
-      await this.takeScreenshot('click-add-ruta-error');
-      throw error;
-    }
-  }
-
-  async fillTarifaViaje(valor: string): Promise<void> {
-    logger.info(`Filling tarifa viaje: ${valor}`);
-    try {
-      await this.fill(this.selectors.inputTarifaViaje, valor);
-      // Press Enter to ensure value is committed/formatted by the system
-      await this.page.press(this.selectors.inputTarifaViaje, 'Enter');
-      await this.page.waitForTimeout(500);
-    } catch (error) {
-      logger.error('Failed to fill tarifa viaje', error);
-      await this.takeScreenshot('fill-tarifa-viaje-error');
-      throw error;
-    }
-  }
-
-  async fillTarifaConductor(valor: string): Promise<void> {
-    logger.info(`Filling tarifa conductor: ${valor}`);
-    try {
-      await this.fill(this.selectors.inputTarifaConductor, valor);
-      // Press Enter to ensure value is committed/formatted by the system
-      await this.page.press(this.selectors.inputTarifaConductor, 'Enter');
-      await this.page.waitForTimeout(500);
-    } catch (error) {
-      logger.error('Failed to fill tarifa conductor', error);
-      await this.takeScreenshot('fill-tarifa-conductor-error');
-      throw error;
     }
   }
 }
