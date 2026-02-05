@@ -1,31 +1,43 @@
 {
-  "createdAt": "2026-02-05T00:08:32.940Z",
+  "createdAt": "2026-02-05T20:56:35.312Z",
   "transportista": {
     "id": "",
-    "nombre": "Meridional Transportes SpA - 210832",
-    "rut": "31687161-5",
-    "razonSocial": "Meridional Transportes SpA - 210832",
+    "nombre": "Meridional Transportes SpA - 175635",
+    "rut": "69221793-4",
+    "razonSocial": "Meridional Transportes SpA - 175635",
     "baseNombre": "Meridional Transportes SpA"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "Camino Transportes SpA Logistics SpA",
-    "rut": "23246279-5",
-    "email": "caminotransportesspa@test.cl"
+    "nombre": "Pacífico Transportes SpA Logistics SpA",
+    "rut": "53072495-6",
+    "email": "pacíficotransportesspa@test.cl"
   },
   "vehiculo": {
-    "patente": "QPPA-42",
-    "muestra": "VEH-1770250150107",
-    "transportistaNombre": "Meridional Transportes SpA - 210832",
+    "patente": "WODE-68",
+    "muestra": "VEH-1770325037202",
+    "transportistaNombre": "Meridional Transportes SpA - 175635",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "José",
-    "apellido": "Silva",
-    "rut": "16.766.852-6",
-    "email": "josésilva@test.com",
-    "telefono": "+56947887721",
-    "transportistaNombre": "Meridional Transportes SpA - 210832"
+    "nombre": "María",
+    "apellido": "Contreras",
+    "rut": "42.157.615-7",
+    "email": "maríacontreras@test.com",
+    "telefono": "+56959039584",
+    "transportistaNombre": "Meridional Transportes SpA - 175635"
   },
-  "executionTimeSeconds": 70.26
+  "executionTimeSeconds": 80.25,
+  "contratoCliente": {
+    "id": "770",
+    "nroContrato": "51945",
+    "tipo": "Venta",
+    "clienteNombre": "Pacífico Transportes SpA Logistics SpA"
+  },
+  "viaje": {
+    "nroViaje": "64876",
+    "cliente": "Pacífico Transportes SpA Logistics SpA",
+    "ruta": "05082025-1",
+    "status": "PLANIFICADO"
+  }
 }

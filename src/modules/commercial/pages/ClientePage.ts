@@ -302,20 +302,71 @@ export class ClienteFormPage extends BasePage {
   async selectAllPoligonos(): Promise<void> {
     logger.info('Selecting all Poligonos');
     try {
-      const button = this.page.locator(this.selectors.poligonosButton);
+      const button = this.page.locator("button[title='Polígonos']").first();
       
-      // Wait for button to appear with a reasonable timeout
       try {
         await button.waitFor({ state: 'visible', timeout: 3000 });
       } catch (e) {
-        logger.warn('⚠️ Poligonos button not visible within 3s - skipping (may not be required for this form)');
+        logger.warn('⚠️ Poligonos button not visible within 3s');
         return;
       }
       
       await button.scrollIntoViewIfNeeded();
-      const parent = button.locator('..');
 
       // Open dropdown
+      await button.click({ force: true });
+      await this.page.waitForTimeout(500);
+
+      // Try user suggested selectors for "Seleccionar Todos"
+      // 1. Specific XPath inside dropdown-menu
+      const selAll1 = this.page.locator("//div[contains(@class, 'dropdown-menu') and contains(@class, 'show')]//button[@type='button'][normalize-space()='Seleccionar Todos']");
+      
+      // 2. Global XPath (first one visible)
+      const selAll2 = this.page.locator("(//button[@type='button'][normalize-space()='Seleccionar Todos'])[1]");
+      
+      // 3. CSS Selector
+      const selAll3 = this.page.locator("div.bs-actionsbox button.bs-select-all");
+
+      let clicked = false;
+      if (await selAll1.isVisible()) {
+          await selAll1.click();
+          clicked = true;
+          logger.info('✅ Clicked "Seleccionar Todos" (Selector 1)');
+      } else if (await selAll2.isVisible()) {
+          await selAll2.click();
+          clicked = true;
+          logger.info('✅ Clicked "Seleccionar Todos" (Selector 2)');
+      } else if (await selAll3.isVisible()) {
+          await selAll3.click();
+          clicked = true;
+          logger.info('✅ Clicked "Seleccionar Todos" (Selector 3)');
+      }
+
+      if (!clicked) {
+        logger.warn('⚠️ "Seleccionar Todos" button not found. Selecting checkboxes manually...');
+        // Fallback to manual selection
+        const checkboxes = this.page.locator('.dropdown-menu.show li:not(.disabled) a[role="option"]');
+        const count = await checkboxes.count();
+        for (let i = 0; i < count; i++) {
+            const option = checkboxes.nth(i);
+            const isSelected = await option.getAttribute('class').then(c => c?.includes('selected'));
+            if (!isSelected) await option.click();
+        }
+      }
+
+      // Close dropdown
+      await this.page.keyboard.press('Escape');
+      await this.page.waitForTimeout(500);
+      
+    } catch (error) {
+      logger.error('Failed to select all poligonos', error);
+      await this.takeScreenshot('select-all-poligonos-error');
+      throw error;
+    }
+  }
+
+  // Helper for opening Bootstrap dropdowns reliably
+  private async robustOpenDropdown(button: any, parent: any, name: string): Promise<void> {
       let isOpened = false;
       for (let i = 0; i < 3; i++) {
         await button.click({ force: true });
@@ -326,42 +377,9 @@ export class ClienteFormPage extends BasePage {
           isOpened = true;
           break;
         }
-        logger.warn(`Poligonos Dropdown not visible on attempt ${i + 1}, retrying...`);
+        logger.warn(`${name} Dropdown not visible on attempt ${i + 1}, retrying...`);
       }
-
-      if (!isOpened) {
-        throw new Error('Failed to open poligonos dropdown');
-      }
-
-      // Click "Seleccionar Todos" button
-      const selectAllButton = parent.locator('button').filter({ hasText: /seleccionar todos/i });
-      
-      if (await selectAllButton.count() > 0) {
-        await selectAllButton.click();
-        logger.info('✅ "Seleccionar Todos" clicked for Poligonos');
-      } else {
-        // Fallback: Select all visible checkboxes
-        logger.warn('"Seleccionar Todos" button not found. Selecting all checkboxes manually...');
-        const checkboxes = parent.locator('input[type="checkbox"]');
-        const count = await checkboxes.count();
-        
-        for (let i = 0; i < count; i++) {
-          const checkbox = checkboxes.nth(i);
-          if (!await checkbox.isChecked()) {
-            await checkbox.check();
-          }
-        }
-        logger.info(`✅ Manually selected ${count} poligonos`);
-      }
-
-      // Close dropdown
-      await this.page.keyboard.press('Escape');
-      await this.page.waitForTimeout(500);
-    } catch (error) {
-      logger.error('Failed to select all poligonos', error);
-      await this.takeScreenshot('select-all-poligonos-error');
-      throw error;
-    }
+      if (!isOpened) throw new Error(`Failed to open ${name} dropdown`);
   }
 
   // ===== TRANSPORTISTAS ASOCIADOS =====

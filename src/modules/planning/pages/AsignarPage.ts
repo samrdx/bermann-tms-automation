@@ -133,7 +133,7 @@ export class AsignarPage extends BasePage {
       const row = await this.findViajeRow(nroViaje);
 
       if (!row) {
-        // Try pagination
+        // Try pagination if not on first page
         const found = await this.searchWithPagination(nroViaje);
         if (!found) {
           throw new Error(`Viaje ${nroViaje} not found in any page`);
@@ -141,11 +141,34 @@ export class AsignarPage extends BasePage {
         return true;
       }
 
-      // Click on the row to select it
-      await row.click();
-      await this.page.waitForTimeout(500);
+      // 1. Scroll row into view
+      await row.scrollIntoViewIfNeeded();
 
-      logger.info(`Selected viaje ${nroViaje}`);
+      // 2. Click "Editar" icon (User Instruction: "Click the Action/Edit button")
+      // We prioritize the pencil icon as that is the standard "Edit" action in this system.
+      const editIcon = row.locator('i.fa-pencil, i.fa-edit, i.mdi-pencil, [class*="pencil"], [class*="edit"]').first();
+      
+      if (await editIcon.count() > 0 && await editIcon.isVisible()) {
+          logger.info('Clicking "Editar" icon to open assignment form');
+          await editIcon.locator('..').click();
+      } else {
+          // Fallback only if icon is missing (unlikely based on logs)
+          logger.warn('Edit icon not found, clicking row as fallback');
+          await row.click();
+      }
+
+      // 3. Wait for the Assignment Form
+      // User emphasized focusing on Transportista dropdown as the key signal
+      logger.info('Waiting for Transportista dropdown...');
+      try {
+        await this.page.waitForSelector("button[title='Transportista'], button[data-id='transportista']", { state: 'visible', timeout: 15000 });
+        logger.info('Assignment Form is ready');
+      } catch (e) {
+          // Sometimes it takes a moment if navigation occurs
+          logger.error('Transportista dropdown did not appear. Check if "Editar" triggered navigation or modal.');
+          throw e;
+      }
+
       return true;
     } catch (error) {
       logger.error(`Failed to select viaje row: ${nroViaje}`, error);
@@ -241,7 +264,7 @@ export class AsignarPage extends BasePage {
    * Selects an option from a Bootstrap Select dropdown
    * Handles search box if present for long lists
    */
-  private async selectBootstrapDropdown(
+  private async selectBSDropdown(
     buttonSelector: string,
     optionText: string,
     useSearch: boolean = true
@@ -252,15 +275,37 @@ export class AsignarPage extends BasePage {
         .locator('div.dropdown, div.bootstrap-select')
         .filter({ has: this.page.locator(buttonSelector) });
 
-      // Click button to open dropdown
-      await this.page.click(buttonSelector);
-      await this.page.waitForTimeout(500);
-
-      // Wait for dropdown menu to open
+      // Click button to open dropdown with retry
+      const btn = this.page.locator(buttonSelector);
+      await btn.waitFor({ state: 'visible', timeout: 10000 });
+      
       const dropdownMenu = dropdownContainer
-        .locator('.dropdown-menu.show, .dropdown-menu.inner.show')
+        .locator('.dropdown-menu.show, .dropdown-menu.inner.show') // Look for the visible menu container
         .first();
-      await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
+
+      let menuVisible = false;
+      for (let attempt = 0; attempt < 3; attempt++) {
+          logger.info(`Opening dropdown attempt ${attempt + 1}`);
+          
+          // Only click if not already open
+          if (!await dropdownMenu.isVisible()) {
+             await btn.click({ force: true });
+             await this.page.waitForTimeout(500);
+          }
+
+          try {
+              await dropdownMenu.waitFor({ state: 'visible', timeout: 2000 });
+              menuVisible = true;
+              break;
+          } catch (e) {
+              logger.warn('Dropdown menu did not open, retrying click...');
+              await this.page.waitForTimeout(500);
+          }
+      }
+
+      if (!menuVisible) {
+          throw new Error(`Dropdown menu for ${buttonSelector} failed to open after 3 attempts`);
+      }
 
       // Try using search box if available
       if (useSearch) {
@@ -269,14 +314,31 @@ export class AsignarPage extends BasePage {
           logger.info(`Using search box for: ${optionText}`);
           await searchInput.fill(optionText);
           await this.page.waitForTimeout(500);
+          
+          // Click the specific result after search
+          const option = dropdownMenu.locator('a, span.text').filter({ hasText: optionText }).first();
+          await option.scrollIntoViewIfNeeded();
+          await option.click();
+          await dropdownMenu.waitFor({ state: 'hidden', timeout: 3000 });
+          return;
         }
       }
 
-      // Find and click the option
-      const option = dropdownMenu
+      // Find and click the option - try multiple selectors
+      // Pattern 1: Standard Bootstrap dropdown-item
+      let option = dropdownMenu
         .locator('.dropdown-item')
         .filter({ hasText: optionText })
         .first();
+
+      // Pattern 2: Bootstrap Select with a[role='option'] (used after cascade)
+      if ((await option.count()) === 0) {
+        logger.info('Trying a[role="option"] selector (cascaded dropdown pattern)');
+        option = this.page
+          .locator("div[aria-expanded='true'] a[role='option']")
+          .filter({ hasText: optionText })
+          .first();
+      }
 
       if ((await option.count()) === 0) {
         throw new Error(`Option "${optionText}" not found in dropdown`);
@@ -285,125 +347,134 @@ export class AsignarPage extends BasePage {
       await option.scrollIntoViewIfNeeded();
       await option.click();
       await this.page.waitForTimeout(300);
+
+      // Wait for dropdown to close (try both patterns)
+      try {
+        await dropdownMenu.waitFor({ state: 'hidden', timeout: 3000 });
+      } catch {
+        // Dropdown might already be hidden or using different structure
+        logger.debug('Dropdown close wait skipped');
+      }
+      
     } catch (error) {
       logger.error(`Failed to select "${optionText}" from dropdown`, error);
       throw error;
     }
   }
 
+  /**
+   * Selects an option from a Bootstrap Select dropdown using a container locator
+   * This is useful when the button doesn't have a stable data-id but the container has identifiable text
+   */
+  private async selectBSDropdownByContainer(
+    containerLocator: Locator,
+    optionText: string,
+    useSearch: boolean = true
+  ): Promise<void> {
+    try {
+      // Find the button within the container
+      const btn = containerLocator.locator('button').first();
+      await btn.waitFor({ state: 'visible', timeout: 10000 });
+      
+      const dropdownMenu = containerLocator
+        .locator('.dropdown-menu.show, .dropdown-menu.inner.show')
+        .first();
+
+      let menuVisible = false;
+      for (let attempt = 0; attempt < 3; attempt++) {
+          logger.info(`Opening dropdown attempt ${attempt + 1}`);
+          
+          if (!await dropdownMenu.isVisible()) {
+             await btn.click({ force: true });
+             await this.page.waitForTimeout(500);
+          }
+
+          try {
+              await dropdownMenu.waitFor({ state: 'visible', timeout: 2000 });
+              menuVisible = true;
+              break;
+          } catch (e) {
+              logger.warn('Dropdown menu did not open, retrying click...');
+              await this.page.waitForTimeout(500);
+          }
+      }
+
+      if (!menuVisible) {
+          throw new Error(`Dropdown menu failed to open after 3 attempts`);
+      }
+
+      // Try using search box if available
+      if (useSearch) {
+        const searchInput = dropdownMenu.locator('.bs-searchbox input');
+        if ((await searchInput.count()) > 0 && (await searchInput.isVisible())) {
+          logger.info(`Using search box for: ${optionText}`);
+          await searchInput.fill(optionText);
+          await this.page.waitForTimeout(500);
+          
+          const option = dropdownMenu.locator('a, span.text').filter({ hasText: optionText }).first();
+          await option.scrollIntoViewIfNeeded();
+          await option.click();
+          await dropdownMenu.waitFor({ state: 'hidden', timeout: 3000 });
+          return;
+        }
+      }
+
+      // Find and click the option - try multiple selectors
+      // Pattern 1: Standard Bootstrap dropdown-item
+      let option = dropdownMenu
+        .locator('.dropdown-item')
+        .filter({ hasText: optionText })
+        .first();
+
+      // Pattern 2: Bootstrap Select with a[role='option'] (used after cascade)
+      if ((await option.count()) === 0) {
+        logger.info('Trying a[role="option"] selector (cascaded dropdown pattern)');
+        option = this.page
+          .locator("div[aria-expanded='true'] a[role='option']")
+          .filter({ hasText: optionText })
+          .first();
+      }
+
+      if ((await option.count()) === 0) {
+        throw new Error(`Option "${optionText}" not found in dropdown`);
+      }
+
+      await option.scrollIntoViewIfNeeded();
+      await option.click();
+      await this.page.waitForTimeout(300);
+
+      // Wait for dropdown to close (try both patterns)
+      try {
+        await dropdownMenu.waitFor({ state: 'hidden', timeout: 3000 });
+      } catch {
+        // Dropdown might already be hidden or using different structure
+        logger.debug('Dropdown close wait skipped');
+      }
+      
+    } catch (error) {
+      logger.error(`Failed to select "${optionText}" from dropdown`, error);
+      throw error;
+    }
+  }
+
+  // Wrappers to maintain interface but use new logic if needed
   async selectTransportista(nombre: string): Promise<void> {
-    logger.info(`Selecting Transportista: ${nombre}`);
-
-    try {
-      await this.selectBootstrapDropdown(
-        this.selectors.assignment.transportistaBtn,
-        nombre,
-        true
-      );
-      logger.info(`Transportista "${nombre}" selected`);
-
-      // CRITICAL: Wait for cascade to vehículo and conductor dropdowns
-      logger.info('Waiting 1.5s for cascade to vehículo/conductor...');
-      await this.page.waitForTimeout(1500);
-    } catch (error) {
-      logger.error(`Failed to select transportista: ${nombre}`, error);
-      await this.takeScreenshot('select-transportista-error');
-      throw error;
-    }
+      // Replaced by direct call in assignViaje but kept for compatibility
+      logger.info(`Selecting Transportista (Legacy Wrapper): ${nombre}`);
+      await this.selectBSDropdown("button[title='Transportista'], button[data-id='transportista']", nombre);
   }
-
-  async selectVehiculoPrincipal(patente: string): Promise<void> {
-    logger.info(`Selecting Vehículo Principal: ${patente}`);
-
-    try {
-      // Verify dropdown is enabled (after transportista selection)
-      const btn = this.page.locator(this.selectors.assignment.patentePrincipalBtn);
-      const isDisabled = await btn.evaluate((el) => el.hasAttribute('disabled'));
-
-      if (isDisabled) {
-        throw new Error(
-          'Vehículo Principal dropdown is disabled. Select Transportista first.'
-        );
-      }
-
-      await this.selectBootstrapDropdown(
-        this.selectors.assignment.patentePrincipalBtn,
-        patente,
-        true
-      );
-      logger.info(`Vehículo Principal "${patente}" selected`);
-    } catch (error) {
-      logger.error(`Failed to select vehículo principal: ${patente}`, error);
-      await this.takeScreenshot('select-vehiculo-principal-error');
-      throw error;
-    }
+  async selectVehiculoPrincipal(patente: string): Promise<void> { 
+      await this.selectBSDropdown("button[title='Vehículo'], button[data-id='viajes-patente_principal_id']", patente);
   }
-
-  async selectVehiculoSecundario(patente: string): Promise<void> {
-    logger.info(`Selecting Vehículo Secundario: ${patente}`);
-
-    try {
-      await this.selectBootstrapDropdown(
-        this.selectors.assignment.patenteSecundariaBtn,
-        patente,
-        true
-      );
-      logger.info(`Vehículo Secundario "${patente}" selected`);
-    } catch (error) {
-      logger.error(`Failed to select vehículo secundario: ${patente}`, error);
-      await this.takeScreenshot('select-vehiculo-secundario-error');
-      throw error;
-    }
-  }
-
   async selectConductor(nombre: string): Promise<void> {
-    logger.info(`Selecting Conductor: ${nombre}`);
-
-    try {
-      // Verify dropdown is enabled (after transportista selection)
-      const btn = this.page.locator(this.selectors.assignment.conductoresBtn);
-      const isDisabled = await btn.evaluate((el) => el.hasAttribute('disabled'));
-
-      if (isDisabled) {
-        throw new Error(
-          'Conductor dropdown is disabled. Select Transportista first.'
-        );
-      }
-
-      await this.selectBootstrapDropdown(
-        this.selectors.assignment.conductoresBtn,
-        nombre,
-        true
-      );
-      logger.info(`Conductor "${nombre}" selected`);
-    } catch (error) {
-      logger.error(`Failed to select conductor: ${nombre}`, error);
-      await this.takeScreenshot('select-conductor-error');
-      throw error;
-    }
-  }
-
-  async selectPerfilTemperatura(perfil: string): Promise<void> {
-    logger.info(`Selecting Perfil Temperatura: ${perfil}`);
-
-    try {
-      await this.selectBootstrapDropdown(
-        this.selectors.assignment.perfilTemperaturaBtn,
-        perfil,
-        false
-      );
-      logger.info(`Perfil Temperatura "${perfil}" selected`);
-    } catch (error) {
-      logger.error(`Failed to select perfil temperatura: ${perfil}`, error);
-      throw error;
-    }
+      await this.selectBSDropdown("button[data-id='viajes-conductor_id']", nombre);
   }
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking Guardar button');
 
     try {
-      const btnGuardar = this.page.locator(this.selectors.assignment.btnGuardar);
+      const btnGuardar = this.page.locator('#btn_guardar_form, #guardar');
 
       // Wait for button to be visible
       await btnGuardar.waitFor({ state: 'visible', timeout: 5000 });
@@ -429,111 +500,105 @@ export class AsignarPage extends BasePage {
       throw error;
     }
   }
-
+  
   async clickCerrar(): Promise<void> {
-    logger.info('Clicking Cerrar button');
-
-    try {
-      await this.click(this.selectors.assignment.btnCerrar);
-      await this.page.waitForTimeout(500);
-    } catch (error) {
-      logger.error('Failed to click Cerrar', error);
-      throw error;
-    }
+    await this.page.locator(this.selectors.assignment.btnCerrar).click();
   }
-
-  // ========== VERIFICATION METHODS ==========
-
-  async isAsignacionComplete(): Promise<boolean> {
-    logger.info('Checking if assignment is complete');
-
-    try {
-      await this.page.waitForTimeout(2000);
-
-      // Check for success alert/toast
-      const successAlert = await this.page
-        .locator(
-          '.alert-success, .toast-success, [role="alert"].bg-success, .swal2-success'
-        )
-        .first()
-        .isVisible({ timeout: 3000 })
-        .catch(() => false);
-
-      if (successAlert) {
-        const alertText = await this.page
-          .locator('.alert-success, .toast-success, .swal2-content')
-          .first()
-          .textContent()
-          .catch(() => '');
-        logger.info(`Success alert: ${alertText}`);
-        return true;
-      }
-
-      // Check if dropdowns reset to default (sign of successful save)
-      const transportistaBtn = this.page.locator(
-        this.selectors.assignment.transportistaBtn
-      );
-      const btnText = await transportistaBtn.textContent();
-
-      if (btnText?.includes('Seleccionar')) {
-        logger.info('Dropdowns reset, assignment likely successful');
-        return true;
-      }
-
-      return false;
-    } catch {
-      return false;
-    }
-  }
-
-  // ========== COMBINED ASSIGNMENT METHOD ==========
 
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {
     logger.info(`=== Starting assignment for viaje ${nroViaje} ===`);
 
     try {
-      // Step 1: Select the viaje row
-      logger.info('STEP 1: Selecting viaje row');
+      // Step 1: Find and Enter Assignment Form
+      logger.info('STEP 1: Find and Enter Assignment Form');
       await this.selectViajeRow(nroViaje);
-      await this.page.screenshot({
-        path: './reports/screenshots/asignar-step1-row-selected.png',
-      });
+      
+      // Step 2: Transportista Selection (THE TRIGGER)
+      logger.info(`STEP 2: Select Transportista (${data.transportista})`);
+      // Using robust selector for the button
+      const transportistaSelector = "button[title='Transportista'], button[data-id='transportista']"; 
+      
+      // Select using the helper
+      await this.selectBSDropdown(transportistaSelector, data.transportista);
+      logger.info('Transportista selected. Triggering cascade...');
 
-      // Step 2: Select Transportista
-      logger.info('STEP 2: Selecting Transportista');
-      await this.selectTransportista(data.transportista);
-      await this.page.screenshot({
-        path: './reports/screenshots/asignar-step2-transportista.png',
-      });
+      // Step 3: WAIT FOR CASCADE (MANDATORY)
+      logger.info('STEP 3: Waiting for resource cascade to populate Vehicle dropdown...');
+      await this.page.waitForTimeout(2000); // Initial wait for cascade
 
-      // Step 3: Select Vehículo Principal
-      logger.info('STEP 3: Selecting Vehículo Principal');
-      await this.selectVehiculoPrincipal(data.vehiculoPrincipal);
-      await this.page.screenshot({
-        path: './reports/screenshots/asignar-step3-vehiculo.png',
-      });
+      // Wait for Vehicle button to become enabled
+      const vehiculoSelector = ".bootstrap-select:has(button[title*='Vehículo']) button, button[data-id='patente_principal']";
 
-      // Step 4: Select Vehículo Secundario (optional)
-      if (data.vehiculoSecundario) {
-        logger.info('STEP 4: Selecting Vehículo Secundario');
-        await this.selectVehiculoSecundario(data.vehiculoSecundario);
-      }
+      logger.info('Waiting for Vehicle dropdown to become ready...');
+      await this.page.waitForFunction(
+        () => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const vehButton = buttons.find(b =>
+            b.getAttribute('title')?.includes('Vehículo') ||
+            b.getAttribute('data-id') === 'patente_principal'
+          );
 
-      // Step 5: Select Conductor
-      logger.info('STEP 5: Selecting Conductor');
-      await this.selectConductor(data.conductor);
-      await this.page.screenshot({
-        path: './reports/screenshots/asignar-step5-conductor.png',
-      });
+          if (!vehButton) return false;
 
-      // Step 6: Click Guardar
+          const isDisabled = vehButton.hasAttribute('disabled') ||
+                            vehButton.classList.contains('disabled');
+          return !isDisabled;
+        },
+        { timeout: 15000 }
+      );
+      logger.info('Vehicle dropdown is ready');
+
+      // Step 4: Click Vehicle dropdown and select option
+      logger.info(`STEP 4: Select Vehículo (${data.vehiculoPrincipal})`);
+
+      // Click the Vehicle button to open dropdown
+      const vehButton = this.page.locator('button').filter({ hasText: /vehículo/i }).or(
+        this.page.locator("button[data-id='patente_principal']")
+      ).first();
+
+      await vehButton.click();
+      await this.page.waitForTimeout(500);
+
+      // Now select the option using the expanded dropdown selector
+      logger.info(`Looking for vehicle option: ${data.vehiculoPrincipal}`);
+      const vehOption = this.page.locator("div[aria-expanded='true'] a[role='option']")
+        .filter({ hasText: data.vehiculoPrincipal })
+        .first();
+
+      await vehOption.waitFor({ state: 'visible', timeout: 5000 });
+      await vehOption.click();
+      logger.info('Vehículo selected');
+
+      // Step 5: Select Conductor (also populated by cascade)
+      logger.info(`STEP 5: Select Conductor (${data.conductor})`);
+
+      // Click the Conductor button to open dropdown
+      const condButton = this.page.locator('button').filter({ hasText: /conductor/i }).or(
+        this.page.locator("button[data-id='conductores']")
+      ).first();
+
+      await condButton.waitFor({ state: 'visible', timeout: 5000 });
+      await condButton.click();
+      await this.page.waitForTimeout(500);
+
+      // Select the option using the expanded dropdown selector
+      logger.info(`Looking for conductor option: ${data.conductor}`);
+      const condOption = this.page.locator("div[aria-expanded='true'] a[role='option']")
+        .filter({ hasText: data.conductor })
+        .first();
+
+      await condOption.waitFor({ state: 'visible', timeout: 5000 });
+      await condOption.click();
+      logger.info('Conductor selected');
+
+      // Step 6: Guardar
       logger.info('STEP 6: Clicking Guardar');
       await this.clickGuardar();
-      await this.page.screenshot({
-        path: './reports/screenshots/asignar-step6-saved.png',
-      });
-
-      logger.info(`=== Assignment complete for viaje ${nroViaje} ===`);
+      
+      // Post-save wait
+      await this.page.waitForLoadState('networkidle');
+      
+      logger.info(`=== Assignment flow complete for viaje ${nroViaje} ===`);
       return true;
     } catch (error) {
       logger.error(`Failed to assign viaje ${nroViaje}`, error);
