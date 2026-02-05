@@ -1,0 +1,73 @@
+import { Page } from '@playwright/test';
+import { logger } from '../../src/utils/logger.js';
+import { generatePatente } from '../../src/utils/rutGenerator.js';
+import { VehiculoFormPage } from '../../src/modules/transport/pages/VehiculoPage.js';
+
+export interface Vehiculo {
+    patente: string;
+    muestra: string;
+    transportistaName: string;
+}
+
+export class VehiculoHelper {
+
+    /**
+     * Creates a Vehiculo via UI Interactions using the Page Object.
+     * 
+     * @param page Playwright Page object
+     * @param transportistaName The exact name of the Transportista to link this Vehiculo to
+     */
+    static async createVehiculoViaUI(
+        page: Page,
+        transportistaName: string
+    ): Promise<Vehiculo> {
+        const vehiculoPage = new VehiculoFormPage(page);
+
+        // Data Generation
+        const patente = generatePatente();
+        const muestra = `VEH-${Date.now()}`; // Unique identifier
+
+        logger.info(`🌱 UI Seeding Vehiculo: Patente [${patente}] for Transportista: ${transportistaName}`);
+
+        // 1. Navigate
+        await vehiculoPage.navigate();
+
+        // 2. Fill Form
+        await vehiculoPage.fillPatente(patente);
+        await vehiculoPage.fillMuestra(muestra);
+
+        // 3. Select Transportista (Critical: Name based selection)
+        await vehiculoPage.selectTransportista(transportistaName);
+
+        // 4. Select Vehicle Type and Configuration
+        // Using RAMPLA as a standard type for integration tests
+        await vehiculoPage.selectTipoVehiculo('RAMPLA');
+
+        // Wait for cascading dropdown
+        await page.waitForTimeout(1500);
+
+        // Select Tipo Rampla (conditional field)
+        await vehiculoPage.selectTipoRampla('Plana');
+
+        // 5. Select Capacity
+        // Using '3 KG' as shown in the dropdown
+        await vehiculoPage.selectCapacidad('3 KG');
+
+        // 6. Save
+        await vehiculoPage.clickGuardar();
+
+        // Verify success via URL redirection
+        await page.waitForTimeout(2000);
+        if (!await vehiculoPage.isFormSaved()) {
+            logger.warn('⚠️ Vehiculo save might have failed or redirection is slow.');
+        } else {
+            logger.info('✅ Vehiculo created successfully');
+        }
+
+        return {
+            patente,
+            muestra,
+            transportistaName
+        };
+    }
+}

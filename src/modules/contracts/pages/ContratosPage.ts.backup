@@ -339,9 +339,9 @@ export class ContratosFormPage extends BasePage {
     );
     await this.page.waitForTimeout(300);
   }
+
   /**
    * Opens modal, selects Route 715 & Cargo 715_19, fills tariffs, and force-closes modal
-   * CORRECT ORDER: Add cargo -> Close modal -> Fill tariffs in GRID
    * @param tarifaConductor - Driver tariff (e.g., "20000")
    * @param tarifaViaje - Trip tariff (e.g., "50000")
    */
@@ -397,81 +397,46 @@ export class ContratosFormPage extends BasePage {
       const btnAddCarga = this.page.locator('#btn_click_715');
       await btnAddCarga.waitFor({ state: 'visible', timeout: 5000 });
       await btnAddCarga.click();
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(500);
 
-      // Step D: Select Specific Cargo: Cargo ID 19 (715_19)
+      // Select Specific Cargo: Cargo ID 19 (715_19)
       logger.info('Selecting Cargo 715_19');
       const btnCargo = this.page.locator(this.selectors.btnCargo715_19);
       await btnCargo.waitFor({ state: 'visible', timeout: 5000 });
       await btnCargo.scrollIntoViewIfNeeded();
       await btnCargo.click();
-      await this.page.waitForTimeout(1000);
-
-      // Step E: CLOSE MODAL BEFORE FILLING TARIFFS (CRITICAL!)
-      logger.info('🔧 Closing cargo modal via JS injection');
-      await this.forceCloseModal();
-      await this.page.waitForTimeout(1500); // Wait for modal to fully close and grid to update
-
-      // Step F: Fill Tariffs in the GRID (after modal is closed)
-      logger.info(`Filling tariffs in grid: Conductor=${tarifaConductor}, Viaje=${tarifaViaje}`);
-
-      // Fill Conductor Tariff SLOWLY (trigger JS listeners)
-      logger.info('Filling Tarifa Conductor with slow typing...');
-      const conductorInput = this.page.locator(this.selectors.inputTarifaConductor715);
-      await conductorInput.click();
-      await conductorInput.clear();
-      await this.page.keyboard.type(tarifaConductor, { delay: 200 });
-      await this.page.keyboard.press('Tab'); // Trigger blur
-      logger.info(`✅ Tarifa Conductor filled: ${tarifaConductor}`);
       await this.page.waitForTimeout(500);
 
-      // Fill Viaje Tariff SLOWLY (trigger JS listeners)
-      logger.info('Filling Tarifa Viaje with slow typing...');
-      const viajeInput = this.page.locator(this.selectors.inputTarifaViaje715);
-      await viajeInput.click();
-      await viajeInput.clear();
-      await this.page.keyboard.type(tarifaViaje, { delay: 200 });
-      await this.page.keyboard.press('Tab'); // Trigger blur
-      logger.info(`✅ Tarifa Viaje filled: ${tarifaViaje}`);
-      await this.page.waitForTimeout(500);
+      // Step D: Fill Tariffs
+      logger.info(`Filling tariffs: Conductor=${tarifaConductor}, Viaje=${tarifaViaje}`);
 
-      // Manually trigger change/blur events to ensure calculations run
-      logger.info('Triggering manual change events for tariff calculation...');
-      await this.page.evaluate(() => {
-        document.querySelectorAll('input[id^="txt_tarifa_"]').forEach(el => {
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-          el.dispatchEvent(new Event('blur', { bubbles: true }));
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-      });
-      await this.page.waitForTimeout(1000); // Wait for calculation
-
-      // Verify total was calculated (should not be 0)
-      const totalTarifa = (parseInt(tarifaConductor) + parseInt(tarifaViaje)).toString();
-      logger.info(`Expected total tariff: ${totalTarifa}`);
-
+      // Try the specific 715 input fields first
       try {
-        const totalInput = this.page.locator(`//tr[td[3][contains(., '05082025-1')]]//td[10]//input[@type='text']`);
-        await totalInput.waitFor({ state: 'visible', timeout: 3000 });
-        const actualTotal = await totalInput.inputValue();
-        logger.info(`Actual total tariff from grid: ${actualTotal}`);
+        await this.page.fill(this.selectors.inputTarifaConductor715, tarifaConductor);
+        await this.page.fill(this.selectors.inputTarifaViaje715, tarifaViaje);
 
-        if (actualTotal === '0' || actualTotal === '') {
-          logger.warn(`⚠️ Total not calculated automatically, filling manually: ${totalTarifa}`);
-          await totalInput.click();
-          await totalInput.clear();
-          await this.page.keyboard.type(totalTarifa, { delay: 200 });
-          await this.page.keyboard.press('Tab');
-        } else {
-          logger.info(`✅ Total tariff automatically calculated: ${actualTotal}`);
-        }
+        // Calculate and fill total tariff (Conductor + Viaje)
+        const totalTarifa = (parseInt(tarifaConductor) + parseInt(tarifaViaje)).toString();
+        logger.info(`Filling total tariff: ${totalTarifa}`);
+
+        // Fill total tariff in column 10 using XPath (locate by route 05082025-1)
+        const totalInput = this.page.locator(`//tr[td[3][contains(., '05082025-1')]]//td[10]//input[@type='text']`);
+        await totalInput.fill(totalTarifa);
+
       } catch (e) {
-        logger.warn('⚠️ Could not verify total tariff field');
+        // Fallback to generic tariff fields
+        logger.info('Using generic tariff fields');
+        await this.page.fill(this.selectors.tarifaConductor, tarifaConductor);
+        await this.page.fill(this.selectors.tarifaViaje, tarifaViaje);
       }
 
       await this.page.waitForTimeout(1000);
 
-      logger.info('✅ Route 715 and Cargo 715_19 added successfully with tariffs');
+      // Tariffs might auto-save - just close any open modals
+      logger.info('🔧 Forcing modal closure via JS injection');
+      await this.forceCloseModal();
+
+      logger.info('✅ Route 715 and Cargo 715_19 added successfully');
     } catch (error) {
       logger.error('Failed to add route and cargo', error);
       await this.takeScreenshot('add-route-cargo-error');
