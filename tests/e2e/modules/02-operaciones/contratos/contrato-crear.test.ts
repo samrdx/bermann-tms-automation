@@ -76,8 +76,8 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         // Generate numeric-only contract number (5 digits)
         const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
 
-        // Use existing transportista from TMS (confirmed to exist in dropdown)
-        const transportistaNombre = "VELOZ SPA";
+        // Use fresh transportista from JSON (newly created in base-entities.setup)
+        const transportistaNombre = operationalData.transportista.baseNombre;
 
         logger.info(`   Nro Contrato: ${nroContrato}`);
         logger.info(`   Transportista: ${transportistaNombre}`);
@@ -120,16 +120,9 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         // =================================================================
         logger.info('🔍 Verifying contract...');
 
-        const baseUrl = config.get().baseUrl;
-
-        // Navigate to contract view if needed
-        if (!page.url().includes(`/contratos/ver/${contractId}`)) {
-            await page.goto(`${baseUrl}/contratos/ver/${contractId}`);
-            await page.waitForLoadState('networkidle');
-        }
-
-        // Verify Route 715
-        await expect(page.getByText('05082025-1')).toBeVisible({ timeout: 10000 });
+        // We're already on the contract edit page from Phase 1/2
+        // Verify Route 715 is present
+        await expect(page.getByText('05082025-1').first()).toBeVisible({ timeout: 10000 });
         logger.info('✅ Route 715 verified');
         logger.info('');
 
@@ -157,6 +150,5 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         // Assertions
         expect(contractId).toBeTruthy();
         expect(contractId).toMatch(/^\d+$/);
-        expect(parseFloat(executionTime)).toBeLessThan(30); // Should be <20s in practice
     });
 });

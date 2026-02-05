@@ -1,0 +1,31 @@
+{
+  "createdAt": "2026-02-05T00:08:32.940Z",
+  "transportista": {
+    "id": "",
+    "nombre": "Meridional Transportes SpA - 210832",
+    "rut": "31687161-5",
+    "razonSocial": "Meridional Transportes SpA - 210832",
+    "baseNombre": "Meridional Transportes SpA"
+  },
+  "cliente": {
+    "id": "N/A",
+    "nombre": "Camino Transportes SpA Logistics SpA",
+    "rut": "23246279-5",
+    "email": "caminotransportesspa@test.cl"
+  },
+  "vehiculo": {
+    "patente": "QPPA-42",
+    "muestra": "VEH-1770250150107",
+    "transportistaNombre": "Meridional Transportes SpA - 210832",
+    "capacity": "3 KG"
+  },
+  "conductor": {
+    "nombre": "José",
+    "apellido": "Silva",
+    "rut": "16.766.852-6",
+    "email": "josésilva@test.com",
+    "telefono": "+56947887721",
+    "transportistaNombre": "Meridional Transportes SpA - 210832"
+  },
+  "executionTimeSeconds": 70.26
+}
