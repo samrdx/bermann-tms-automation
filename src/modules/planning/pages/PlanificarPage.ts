@@ -66,7 +66,7 @@ export class PlanificarPage extends BasePage {
   async navigate(): Promise<void> {
     logger.info('Navigating to Planificar Viajes page');
     await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/crear');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   // ========== CAMPOS BÁSICOS ==========
@@ -134,6 +134,10 @@ export class PlanificarPage extends BasePage {
           if (optionValue) {
             await selectLoc.selectOption(optionValue);
           } else {
+            const allOptions = await selectLoc.evaluate((sel: HTMLSelectElement) => 
+              Array.from(sel.options).map(o => o.textContent?.trim() || '')
+            );
+            logger.warn(`Option with text "${textOrValue}" not found. Available: ${allOptions.join(', ')}`);
             throw new Error(`Option with text "${textOrValue}" not found`);
           }
         } else {
@@ -320,7 +324,7 @@ export class PlanificarPage extends BasePage {
   async selectOrigen(origen: string = '1_agunsa_lampa_RM'): Promise<void> {
     logger.info(`Selecting Origen: ${origen}`);
     try {
-      await this.robustSelect(this.selectors.origen, origen, true);
+      await this.robustSelect(this.selectors.origen, origen, false); // false = value
       logger.info('✅ Origen selected');
     } catch (error) {
       logger.error('Failed to select Origen', error);
@@ -332,7 +336,7 @@ export class PlanificarPage extends BasePage {
   async selectDestino(destino: string = '225_Starken_Sn Bernardo'): Promise<void> {
     logger.info(`Selecting Destino: ${destino}`);
     try {
-      await this.robustSelect(this.selectors.destino, destino, true);
+      await this.robustSelect(this.selectors.destino, destino, false); // false = value
       logger.info('✅ Destino selected');
     } catch (error) {
       logger.error('Failed to select Destino', error);

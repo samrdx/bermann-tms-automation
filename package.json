@@ -20,6 +20,7 @@
     "// === OPERATION TESTS (02-operaciones) ===": "",
     "test:contrato": "playwright test tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts",
     "test:contrato:debug": "playwright test tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts --project=chromium --headed",
+    "test:contrato2cliente": "playwright test tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts",
     "test:viajes:planificar": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts",
     "test:viajes:asignar": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts",
     "// === FULL FLOWS ===": "",

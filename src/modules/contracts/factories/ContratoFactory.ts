@@ -33,36 +33,40 @@ export class ContratoFactory {
 
     const defaultData = this.generateDefaultData(data.transportistaNombre);
     const contratoData = { ...defaultData, ...data };
-    
+
     const contratoPage = new ContratosFormPage(this.page);
 
     try {
       logger.info(`Creating contrato: ${contratoData.nroContrato} for ${contratoData.transportistaNombre}`);
-      await contratoPage.navigate();
+
+      // Navigate to create page
+      await contratoPage.navigateToCreate();
       await this.page.waitForTimeout(1000);
 
-      await contratoPage.fillNroContrato(contratoData.nroContrato);
-      await contratoPage.selectTipoContrato(contratoData.tipo);
-      await this.page.waitForTimeout(1500); // Wait for cascade
+      // Use the existing fillBasicContractInfo method which handles:
+      // - Filling nroContrato
+      // - Selecting tipo = "Costo"
+      // - Selecting transportista
+      // - Saving and extracting contract ID
+      const contractId = await contratoPage.fillBasicContractInfo(
+        contratoData.nroContrato,
+        contratoData.transportistaNombre
+      );
 
-      await contratoPage.selectTransportista(contratoData.transportistaNombre);
-      await contratoPage.fillValorHora(contratoData.valorHora);
-
-      await contratoPage.clickGuardar();
-      await this.page.waitForTimeout(3000);
+      logger.info(`✅ Contrato created with ID: ${contractId}`);
 
       // Navigate to index to confirm
       await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/index');
       await this.page.waitForTimeout(2000);
 
-      logger.info(`✅ Contrato created: ${contratoData.nroContrato}`);
+      logger.info(`✅ Verified contrato: ${contratoData.nroContrato}`);
       return contratoData;
 
     } catch (error) {
       logger.error('Failed to create contrato', error);
-      await this.page.screenshot({ 
+      await this.page.screenshot({
         path: `./reports/screenshots/create-contrato-error-${Date.now()}.png`,
-        fullPage: true 
+        fullPage: true
       });
       throw error;
     }

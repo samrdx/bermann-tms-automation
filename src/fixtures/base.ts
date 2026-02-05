@@ -6,8 +6,6 @@ import { AuthActions } from '../modules/auth/actions/AuthActions.js';
 
 // Contracts Module
 import { ContratosFormPage } from '../modules/contracts/pages/ContratosPage.js';
-import { ContratosActions } from '../modules/contracts/actions/ContratosActions.js';
-import { ContractLifecycleFlow } from '../modules/contracts/flows/ContractLifecycleFlow.js';
 import { ContratoFactory } from '../modules/contracts/factories/ContratoFactory.js';
 import { DashboardPage } from '../modules/auth/pages/DashboardPage.js';
 import { TransportistaFormPage } from '../modules/transport/pages/TransportistaPage.js';
@@ -53,10 +51,6 @@ type MyFixtures = {
 
   // Actions
   authActions: AuthActions;
-  contratosActions: ContratosActions;
-
-  // Flows
-  contractLifecycleFlow: ContractLifecycleFlow;
 
   // Factories
   transportistaFactory: TransportistaFactory;
@@ -101,14 +95,6 @@ export const test = base.extend<MyFixtures>({
   // Actions
   authActions: async ({ loginPage }, use) => {
     await use(new AuthActions(loginPage));
-  },
-  contratosActions: async ({ contratosPage }, use) => {
-    await use(new ContratosActions(contratosPage));
-  },
-
-  // Flows
-  contractLifecycleFlow: async ({ authActions, contratosActions }, use) => {
-    await use(new ContractLifecycleFlow(authActions, contratosActions));
   },
 
   // Factories

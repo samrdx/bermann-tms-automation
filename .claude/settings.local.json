@@ -9,7 +9,17 @@
       "Bash(npm run test:login:*)",
       "Bash(if not exist \"c:\\\\projects\\\\qa-automation-framework\\\\reports\\\\screenshots\" mkdir \"c:\\\\projects\\\\qa-automation-framework\\\\reports\\\\screenshots\")",
       "Bash(npm run test:inspect:asignar:*)",
-      "Bash(npm run test:complete-flow:*)"
+      "Bash(npm run test:complete-flow:*)",
+      "mcp__plugin_playwright_playwright__browser_type",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(npm run test:contrato2cliente:*)",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "Bash(npx playwright test:*)",
+      "mcp__plugin_playwright_playwright__browser_wait_for"
     ]
   }
 }

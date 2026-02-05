@@ -482,7 +482,7 @@ export class ContratosFormPage extends BasePage {
   /**
    * JS Injection Master Key: Forces Bootstrap modal to close and cleanup
    */
-  private async forceCloseModal(): Promise<void> {
+  public async forceCloseModal(): Promise<void> {
     await this.page.evaluate(() => {
       // Force hide all modals using jQuery if available
       // @ts-ignore
