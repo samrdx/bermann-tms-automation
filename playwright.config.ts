@@ -2,8 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
-  workers: 1,
+  fullyParallel: true,  // Enable parallel execution
+  workers: 3,           // One worker per browser for controlled parallelism
   timeout: 60000,
   retries: 0,
   use: {
@@ -16,15 +16,35 @@ export default defineConfig({
   projects: [
     {
       name: 'setup',
-      testMatch: /.*\.setup\.ts/,
+      testMatch: /auth\.setup\.ts/,  // Only auth setup
     },
+    // Separate base-entities setup for each browser (worker isolation)
+    {
+      name: 'base-entities-chromium',
+      testMatch: /base-entities\.setup\.ts/,
+      use: devices['Desktop Chrome'],
+      dependencies: ['setup'],
+    },
+    {
+      name: 'base-entities-firefox',
+      testMatch: /base-entities\.setup\.ts/,
+      use: devices['Desktop Firefox'],
+      dependencies: ['setup'],
+    },
+    {
+      name: 'base-entities-webkit',
+      testMatch: /base-entities\.setup\.ts/,
+      use: devices['Desktop Safari'],
+      dependencies: ['setup'],
+    },
+    // Browser test projects
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
       },
-      // dependencies: ['setup'], // REMOVED: Tests now run in isolation with explicit login
+      dependencies: ['setup', 'base-entities-chromium'],
     },
     {
       name: 'firefox',
@@ -32,7 +52,7 @@ export default defineConfig({
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
       },
-      // dependencies: ['setup'], // REMOVED: Tests now run in isolation with explicit login
+      dependencies: ['setup', 'base-entities-firefox'],
     },
     {
       name: 'webkit',
@@ -40,7 +60,7 @@ export default defineConfig({
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json',
       },
-      // dependencies: ['setup'], // REMOVED: Tests now run in isolation with explicit login
+      dependencies: ['setup', 'base-entities-webkit'],
     },
   ],
 });

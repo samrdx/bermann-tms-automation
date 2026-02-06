@@ -189,8 +189,20 @@ export class ContratosFormPage extends BasePage {
       // 4. Find and select transportista by name (direct select, bypass Bootstrap-select UI)
       logger.info(`Selecting transportista with name: ${transportistaNombre}`);
 
+      // DEBUG: Log all available options to see what's actually in the dropdown
+      const allOptions = await this.page.locator('select#contrato-transportista_id option').allTextContents();
+      logger.info(`Available transportista options (${allOptions.length}): ${allOptions.slice(0, 10).join(', ')}${allOptions.length > 10 ? '...' : ''}`);
+
       // Find the option containing the transportista name and get its value
-      const transportistaOptionLocator = this.page.locator(`select#contrato-transportista_id option:has-text("${transportistaNombre}")`).first();
+      // Note: transportistaNombre may be the base name (without timestamp), so we use partial matching
+      const transportistaOptionLocator = this.page.locator(`select#contrato-transportista_id option`).filter({ hasText: transportistaNombre }).first();
+
+      // Check if option exists before waiting
+      const optionCount = await transportistaOptionLocator.count();
+      if (optionCount === 0) {
+        throw new Error(`Transportista "${transportistaNombre}" not found in dropdown. Available options: ${allOptions.slice(0, 5).join(', ')}`);
+      }
+
       await transportistaOptionLocator.waitFor({ state: 'attached', timeout: 5000 });
 
       const transportistaValue = await transportistaOptionLocator.getAttribute('value');

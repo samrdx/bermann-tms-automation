@@ -3,6 +3,7 @@ import { logger } from '../../../../../src/utils/logger.js';
 import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { config } from '../../../../../src/config/environment.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -22,7 +23,7 @@ import path from 'path';
 test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
     test.setTimeout(60000); // 60 seconds (increased for Select2 rendering)
 
-    test('Create Contract using Pre-existing Entities from JSON', async ({ page }) => {
+    test('Create Contract using Pre-existing Entities from JSON', async ({ page }, testInfo) => {
         const startTime = Date.now();
         logger.info('🚀 Starting OPTIMIZED Contract Creation (Step 5 Only)');
         logger.info('='.repeat(80));
@@ -30,12 +31,13 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         // =================================================================
         // STEP 1: Load Existing Entity Data
         // =================================================================
-        logger.info('📂 Loading existing entity data from last-run-data.json...');
-        const dataPath = path.join(process.cwd(), 'last-run-data.json');
+        logger.info('📂 Loading existing entity data from worker-specific JSON...');
+        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(
-                '❌ last-run-data.json not found!\n' +
+                '❌ Worker-specific data file not found!\n' +
+                `Expected: ${dataPath}\n` +
                 'Please run base entities setup first:\n' +
                 'npm run test:base'
             );
@@ -146,6 +148,20 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
 
         // Save contract ID for potential next steps
         process.env.CREATED_CONTRACT_ID = contractId;
+
+        // Update JSON with Costo Contract (for cross-test persistence)
+        logger.info('📝 Updating last-run-data.json with contratoCosto...');
+
+        operationalData.contratoCosto = {
+            id: contractId,
+            nroContrato: nroContrato,
+            tipo: 'Costo',
+            transportistaNombre: transportistaNombre
+        };
+
+        fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
+        logger.info(`✅ Saved contratoCosto.id: ${contractId}`);
+        logger.info('');
 
         // Assertions
         expect(contractId).toBeTruthy();

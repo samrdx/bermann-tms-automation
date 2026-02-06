@@ -3,6 +3,7 @@ import { logger } from '../../../../../src/utils/logger.js';
 import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { config } from '../../../../../src/config/environment.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -20,7 +21,7 @@ import path from 'path';
 test.describe('Step 5: Contract Creation with Base Entities', () => {
     test.setTimeout(90000); // 90 seconds
 
-    test('Create Contract for Route 715 using Base Entities Data', async ({ page }) => {
+    test('Create Contract for Route 715 using Base Entities Data', async ({ page }, testInfo) => {
         logger.info('🚀 Starting Step 5: Contract Creation');
         logger.info('='.repeat(80));
 
@@ -36,13 +37,14 @@ test.describe('Step 5: Contract Creation with Base Entities', () => {
         // =================================================================
         // STEP 1: Load Base Entities Data
         // =================================================================
-        logger.info('📂 Loading operational data from last-run-data.json...');
-        const dataPath = path.join(process.cwd(), 'last-run-data.json');
+        logger.info('📂 Loading operational data from worker-specific JSON...');
+        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(
-                '❌ last-run-data.json not found! Please run base-entities.setup.ts first:\n' +
-                'npx playwright test tests/e2e/suites/base-entities.setup.ts --project=chromium'
+                '❌ Worker-specific data file not found! Please run base-entities.setup.ts first:\n' +
+                `Expected: ${dataPath}\n` +
+                'npx playwright test tests/e2e/suites/base-entities.setup.ts'
             );
         }
 

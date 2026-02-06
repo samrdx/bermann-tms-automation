@@ -1,0 +1,39 @@
+{
+  "createdAt": "2026-02-06T19:25:13.955Z",
+  "workerIndex": 2,
+  "projectName": "base-entities-firefox",
+  "transportista": {
+    "id": "",
+    "nombre": "MegaLogística Central - 405913",
+    "rut": "25981180-5",
+    "razonSocial": "MegaLogística Central - 405913",
+    "baseNombre": "MegaLogística Central"
+  },
+  "cliente": {
+    "id": "N/A",
+    "nombre": "InterModal Sur Logistics SpA",
+    "rut": "32855177-2",
+    "email": "intermodalsur@test.cl"
+  },
+  "vehiculo": {
+    "patente": "XLUI-73",
+    "muestra": "VEH-1770405952039",
+    "transportistaNombre": "MegaLogística Central - 405913",
+    "capacity": "3 KG"
+  },
+  "conductor": {
+    "nombre": "Luis",
+    "apellido": "Rodríguez",
+    "rut": "60.519.083-9",
+    "email": "luisrodríguez@test.com",
+    "telefono": "+56983487330",
+    "transportistaNombre": "MegaLogística Central - 405913"
+  },
+  "executionTimeSeconds": 73.16,
+  "contratoCosto": {
+    "id": "774",
+    "nroContrato": "30727",
+    "tipo": "Costo",
+    "transportistaNombre": "MegaLogística Central"
+  }
+}

@@ -181,19 +181,40 @@ export function generateCompanyName(): string {
 }
 
 /**
- * Generates a short company name with "SpA" suffix
- * Example: "Transportes SpA" or "Logistica SpA"
+ * Generates a unique transportista company name with shortened Unix timestamp
+ * Format: "[Company Name] - [6-digit timestamp]"
+ * Example: "TransSur Logística - 792595"
+ *
+ * NOTE: Uses last 6 digits of Unix epoch seconds (modulo 1000000) for shorter names
+ * while maintaining uniqueness during test execution. The delimiter ' - ' is preserved
+ * for backward compatibility with split() operations.
  */
 export function generateShortCompanyName(): string {
-  const concepts = [
-    'Logística', 'Austral', 'Andino', 'Pacífico', 'Ruta', 'Camino', 
-    'Vía', 'Cargo', 'Express', 'Veloz', 'Trans', 'Inter', 
-    'Nacional', 'Regional', 'Global', 'Cordillera', 'Horizonte',
-    'Meridional', 'Polar', 'Solar', 'Estelar', 'Lunar'
+  const companies = [
+    'TransSur Logística',
+    'Cordillera Express',
+    'Pacific Cargo SpA',
+    'Rutas del Maule',
+    'LogiChile Connect',
+    'Andes Transport Services',
+    'Austral Freight',
+    'Vía Rápida SpA',
+    'MegaLogística Central',
+    'Transportes Atacama',
+    'EcoTrans Innovación',
+    'Global Shipping Chile',
+    'Fletes El Roble',
+    'Horizonte Logístico',
+    'Delta Transportes',
+    'Prime Cargo Solutions',
+    'Logística 360 SpA',
+    'Ruta Nacional Express',
+    'InterModal Sur',
+    'Titanium Logistics'
   ];
-  const concept = concepts[Math.floor(Math.random() * concepts.length)];
-  const timestamp = new Date().toTimeString().split(' ')[0].replace(/:/g, '');
-  return `${concept} Transportes SpA - ${timestamp}`;
+  const company = companies[Math.floor(Math.random() * companies.length)];
+  const unixSeconds = Math.floor(Date.now() / 1000) % 1000000; // Last 6 digits for shorter names
+  return `${company} - ${unixSeconds}`;
 }
 
 /**
