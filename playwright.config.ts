@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: ['**/examples/**'],  // Explicitly ignore examples directory
   fullyParallel: true,  // Enable parallel execution
   workers: 3,           // One worker per browser for controlled parallelism
   timeout: 60000,

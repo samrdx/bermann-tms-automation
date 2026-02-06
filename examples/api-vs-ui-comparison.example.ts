@@ -9,10 +9,11 @@
  */
 
 import { test } from '@playwright/test';
-import { TransportistaHelper } from '../api-helpers/TransportistaHelper.js';
-import { TmsApiClient } from '../api-helpers/TmsApiClient.js';
-import { TransportistaFactory } from '../../src/modules/transport/factories/TransportistaFactory.js';
-import { logger } from '../../src/utils/logger.js';
+import { TransportistaHelper } from '../tests/api-helpers/TransportistaHelper.js';
+import { TmsApiClient } from '../tests/api-helpers/TmsApiClient.js';
+import { TransportistaFactory } from '../src/modules/transport/factories/TransportistaFactory.js';
+import { logger } from '../src/utils/logger.js';
+import { generateShortCompanyName, generateValidChileanRUT } from '../src/utils/rutGenerator.js';
 
 test.describe('Performance Comparison: UI vs API @performance', () => {
 
@@ -73,7 +74,14 @@ test.describe('Performance Comparison: UI vs API @performance', () => {
     for (let i = 0; i < 4; i++) {
       const entityStartTime = Date.now();
 
-      const data = TransportistaFactory.create();
+      // Generate test data manually (TransportistaFactory requires Page instance)
+      const data = {
+        nombre: generateShortCompanyName(),
+        documento: generateValidChileanRUT(),
+        razonSocial: generateShortCompanyName(),
+        calle: 'Av. Test',
+        altura: '123'
+      };
       const transportistaId = await apiClient.createTransportista(data);
 
       const entityTime = ((Date.now() - entityStartTime) / 1000).toFixed(2);
@@ -121,7 +129,14 @@ test.describe('Performance Comparison: UI vs API @performance', () => {
     await apiClient.initialize();
 
     const apiStartTime = Date.now();
-    const data = TransportistaFactory.create();
+    // Generate test data manually (TransportistaFactory requires Page instance)
+    const data = {
+      nombre: generateShortCompanyName(),
+      documento: generateValidChileanRUT(),
+      razonSocial: generateShortCompanyName(),
+      calle: 'Av. Test',
+      altura: '123'
+    };
     const apiTransportistaId = await apiClient.createTransportista(data);
     const apiTime = ((Date.now() - apiStartTime) / 1000).toFixed(2);
 
