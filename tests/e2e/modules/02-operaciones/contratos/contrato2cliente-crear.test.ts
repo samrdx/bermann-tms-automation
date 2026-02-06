@@ -1,11 +1,8 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
-import { config } from '../../../../../src/config/environment.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
-import path from 'path';
 
 /**
  * Step 5.5: Cliente Contract Creation (Type: Venta)
@@ -49,17 +46,10 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         logger.info(`   Cliente: ${operationalData.cliente.nombre} (${operationalData.cliente.rut})`);
         logger.info('');
 
-        // =================================================================
-        // STEP 2: Session Hardening - Explicit Login
-        // =================================================================
-        logger.info('Ensuring active session...');
-        const loginPage = new LoginPage(page);
-        await loginPage.loginAndWaitForDashboard('arivas', 'arivas');
-        logger.info('Session active');
-        logger.info('');
+        // Note: Already authenticated via storageState from setup project
 
         // =================================================================
-        // STEP 3: Navigate to Contract Creation
+        // STEP 2: Navigate to Contract Creation
         // =================================================================
         logger.info('Navigating to contract creation...');
         const contratosPage = new ContratosFormPage(page);

@@ -1,5 +1,4 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
-import { getTestUser } from '../../../../../src/config/credentials.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { TransportistaHelper } from '../../../../../tests/api-helpers/TransportistaHelper.js';
 import { 
@@ -33,11 +32,9 @@ test.describe('Transport - Conductor Creation', () => {
         }
     });
 
-    test('Should create a new Conductor and link to Transportista', async ({ 
-        page, 
-        loginPage, 
-        dashboardPage,
-        conductorPage 
+    test('Should create a new Conductor and link to Transportista', async ({
+        page,
+        conductorPage
     }) => {
 
         const testData = {
@@ -52,17 +49,13 @@ test.describe('Transport - Conductor Creation', () => {
             vencimiento: '2026-12-31'
         };
 
-        await test.step('Phase 1: Login', async () => {
-             const user = getTestUser('regular');
-             await loginPage.loginAndWaitForDashboard(user.username, user.password);
-             expect(await dashboardPage.isOnDashboard()).toBe(true);
-        });
+        // Note: Already authenticated via storageState from setup project
 
-        await test.step('Phase 2: Navigate to Conductor Creation', async () => {
+        await test.step('Phase 1: Navigate to Conductor Creation', async () => {
             await conductorPage.navigate();
         });
 
-        await test.step('Phase 3: Fill Form', async () => {
+        await test.step('Phase 2: Fill Form', async () => {
             logger.info(`📝 Filling Conductor Form for: ${testData.nombre} ${testData.apellido}`);
             
             await conductorPage.fillUsuario(testData.usuario);
@@ -81,7 +74,7 @@ test.describe('Transport - Conductor Creation', () => {
             await conductorPage.selectTransportista(transportistaName);
         });
 
-        await test.step('Phase 4: Save and Verify', async () => {
+        await test.step('Phase 3: Save and Verify', async () => {
             await conductorPage.clickGuardar();
             expect(await conductorPage.isFormSaved()).toBeTruthy();
             logger.info('✅ Conductor Created and Saved Successfully');

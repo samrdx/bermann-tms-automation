@@ -1,11 +1,9 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { config } from '../../../../../src/config/environment.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
-import path from 'path';
 
 /**
  * Step 5: Contract Creation using Base Operational Suite Data
@@ -25,14 +23,7 @@ test.describe('Step 5: Contract Creation with Base Entities', () => {
         logger.info('🚀 Starting Step 5: Contract Creation');
         logger.info('='.repeat(80));
 
-        // =================================================================
-        // STEP 0: Login
-        // =================================================================
-        logger.info('🔐 Authenticating...');
-        const loginPage = new LoginPage(page);
-        await loginPage.loginAndWaitForDashboard('arivas', 'arivas');
-        logger.info('✅ Authenticated');
-        logger.info('');
+        // Note: Already authenticated via storageState from setup project
 
         // =================================================================
         // STEP 1: Load Base Entities Data
