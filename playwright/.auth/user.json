@@ -2,17 +2,17 @@
   "cookies": [
     {
       "name": "PHPSESSID",
-      "value": "jjkhuvrf36vjpi9hbodmunoo3p",
+      "value": "7hrn18ovmfu6bqp60og1od246r",
       "domain": "moveontruckqa.bermanntms.cl",
       "path": "/",
-      "expires": 1770413098.014399,
+      "expires": 1770416670.347419,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "_csrf",
-      "value": "5d0f1ed4b221092b2516fe47da5d6fd8dd30eef6a8c10df3f8b335f5761a7ebca%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%222W_frAErsOpmyGSX-fvkPh7H1Vh9A5rc%22%3B%7D",
+      "value": "508a9d560b6cd404d0d2a862f9cb9fbddb842ab2ee05161b48885727491d3052a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22yQd689F7BapEBEzhxcjcgyb8rWCJxY5V%22%3B%7D",
       "domain": "moveontruckqa.bermanntms.cl",
       "path": "/",
       "expires": -1,
@@ -22,7 +22,7 @@
     },
     {
       "name": "_cfuvid",
-      "value": "ojBUvuLMeDyb6knSwUGdJQBf1qurZ6AxaeElqdG.Gmg-1770405898909-0.0.1.1-604800000",
+      "value": "9yLFNcJaSwJ6.WKfujXS9YB.pLXQeXHIhHpdxTenjUQ-1770409470954-0.0.1.1-604800000",
       "domain": ".highcharts.com",
       "path": "/",
       "expires": -1,

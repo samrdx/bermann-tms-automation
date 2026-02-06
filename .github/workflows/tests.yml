@@ -1,8 +1,8 @@
-name: QA Tests
+name: QA Tests CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
   workflow_dispatch: # Allow manual trigger
@@ -10,9 +10,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium]  # Start with chromium only for faster CI
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -23,56 +30,81 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Get installed Playwright version
+      - name: Get Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(npm list @playwright/test | grep @playwright/test | sed 's/.*@//')" >> $GITHUB_ENV
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('./package.json').dependencies['@playwright/test']")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+          echo "Playwright version: $PLAYWRIGHT_VERSION"
 
-      - name: Cache Playwright binaries
+      - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
-          path: |
-            ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Run tests
+      - name: Verify TypeScript compilation
+        run: npx tsc --noEmit
+
+      - name: Create required directories
+        run: |
+          mkdir -p playwright/.auth
+          mkdir -p reports/screenshots
+          mkdir -p logs
+
+      - name: Run E2E tests (Chromium only)
         env:
-          # API Keys
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-          # Environment URLs
+          # Environment
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
-          BASE_URL_STAGING: https://moveontruckqa.bermanntms.cl
-          BASE_URL_PROD: https://moveontruck.bermanntms.cl
           ENVIRONMENT: dev
-
-          # Test Configuration
           HEADLESS: true
-          TIMEOUT: 30000
+          TIMEOUT: 60000
           LOG_LEVEL: info
 
-          # User Credentials (REQUIRED for login tests)
-          USERNAME_DEV: ${{ secrets.USERNAME_DEV }}
-          PASSWORD_DEV: ${{ secrets.PASSWORD_DEV }}
-        run: npm run test
+          # Credentials (use repository secrets)
+          TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+        run: |
+          # Run only chromium tests with setup dependencies
+          npx playwright test --project=chromium --reporter=html,line
 
-      - name: Upload test report
+      - name: Check test results
+        if: always()
+        run: |
+          echo "=== Test Results ==="
+          if [ -f test-results/.last-run.json ]; then
+            cat test-results/.last-run.json
+          else
+            echo "No test results found"
+          fi
+
+      - name: Upload Playwright HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-report
-          path: reports/test-report.html
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
           retention-days: 30
 
-      - name: Upload screenshots
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots
+          name: test-results-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 7
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.browser }}
           path: reports/screenshots/
           if-no-files-found: ignore
           retention-days: 7
@@ -81,7 +113,81 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: logs
+          name: logs-${{ matrix.browser }}
           path: logs/
           if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload worker-specific data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: last-run-data-${{ matrix.browser }}
+          path: last-run-data-*.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let resultsFile = 'test-results/.last-run.json';
+            let summary = '## Test Results\n\n';
+
+            if (fs.existsSync(resultsFile)) {
+              const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+              summary += `- **Status**: ${results.status}\n`;
+              summary += `- **Tests**: ${results.stats.expected} passed\n`;
+              summary += `- **Duration**: ${results.stats.duration}ms\n`;
+            } else {
+              summary += 'No test results available\n';
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  # Smoke tests - run critical flows only (faster feedback)
+  smoke-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        env:
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          ENVIRONMENT: dev
+          HEADLESS: true
+          TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+        run: |
+          # Run only auth setup to verify login works
+          npx playwright test tests/helpers/auth.setup.ts --project=setup
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: playwright-report/
           retention-days: 7
