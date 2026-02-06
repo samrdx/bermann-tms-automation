@@ -4,7 +4,7 @@ import path from 'path';
 dotenv.config();
 
 export interface EnvironmentConfig {
-  geminiApiKey: string;
+  geminiApiKey?: string;  // Optional - Gemini/Stagehand removed from project
   baseUrl: string;
   environment: 'dev' | 'staging' | 'prod';
   headless: boolean;
@@ -43,9 +43,7 @@ class ConfigManager {
   }
 
   private validateConfig(): void {
-    if (!this.config.geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is required in .env file');
-    }
+    // GEMINI_API_KEY validation removed - Stagehand/Gemini no longer used in project
     if (!this.config.baseUrl) {
       throw new Error('BASE_URL is not configured for environment: ' + this.config.environment);
     }
