@@ -1,0 +1,39 @@
+{
+  "createdAt": "2026-02-06T19:25:08.972Z",
+  "workerIndex": 3,
+  "projectName": "base-entities-chromium",
+  "transportista": {
+    "id": "",
+    "nombre": "EcoTrans Innovación - 405908",
+    "rut": "69055231-0",
+    "razonSocial": "EcoTrans Innovación - 405908",
+    "baseNombre": "EcoTrans Innovación"
+  },
+  "cliente": {
+    "id": "N/A",
+    "nombre": "EcoTrans Innovación Logistics SpA",
+    "rut": "33037926-K",
+    "email": "ecotransinnovación@test.cl"
+  },
+  "vehiculo": {
+    "patente": "HEZD-75",
+    "muestra": "VEH-1770405947733",
+    "transportistaNombre": "EcoTrans Innovación - 405908",
+    "capacity": "3 KG"
+  },
+  "conductor": {
+    "nombre": "Rosa",
+    "apellido": "Soto",
+    "rut": "65.209.583-6",
+    "email": "rosasoto@test.com",
+    "telefono": "+56942133664",
+    "transportistaNombre": "EcoTrans Innovación - 405908"
+  },
+  "executionTimeSeconds": 71.43,
+  "contratoCosto": {
+    "id": "773",
+    "nroContrato": "26976",
+    "tipo": "Costo",
+    "transportistaNombre": "EcoTrans Innovación"
+  }
+}

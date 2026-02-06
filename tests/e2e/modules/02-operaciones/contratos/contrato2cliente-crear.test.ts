@@ -3,6 +3,7 @@ import { logger } from '../../../../../src/utils/logger.js';
 import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { config } from '../../../../../src/config/environment.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -22,7 +23,7 @@ import path from 'path';
 test.describe('Cliente Contract Creation (Venta Type)', () => {
     test.setTimeout(60000);
 
-    test('Create Cliente Contract using Pre-existing Entities from JSON', async ({ page }) => {
+    test('Create Cliente Contract using Pre-existing Entities from JSON', async ({ page }, testInfo) => {
         const startTime = Date.now();
         logger.info('Starting STEP 5.5: Cliente Contract (Venta)');
         logger.info('='.repeat(80));
@@ -30,12 +31,13 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         // =================================================================
         // STEP 1: Load Existing Entity Data
         // =================================================================
-        logger.info('Loading existing entity data from last-run-data.json...');
-        const dataPath = path.join(process.cwd(), 'last-run-data.json');
+        logger.info('Loading existing entity data from worker-specific JSON...');
+        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(
-                'last-run-data.json not found!\n' +
+                'Worker-specific data file not found!\n' +
+                `Expected: ${dataPath}\n` +
                 'Please run base entities setup first:\n' +
                 'npm run test:base'
             );
@@ -197,7 +199,7 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         // =================================================================
         // STEP 7: Update JSON with Cliente Contract
         // =================================================================
-        logger.info('Updating last-run-data.json with contratoCliente...');
+        logger.info('Updating worker-specific JSON with contratoCliente...');
 
         operationalData.contratoCliente = {
             id: contractId,

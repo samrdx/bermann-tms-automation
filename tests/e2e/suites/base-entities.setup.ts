@@ -1,6 +1,7 @@
 import { test } from '../../../src/fixtures/base.js';
 import { logger } from '../../../src/utils/logger.js';
 import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
+import { DataPathHelper } from '../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -13,15 +14,20 @@ import { ConductorHelper } from '../../api-helpers/ConductorHelper.js';
 /**
  * Base Operational Suite - Steps 1-4
  * Creates foundational entities: Transportista, Cliente, Vehiculo, Conductor
- * Exports data to last-run-data.json for reuse in other tests
+ * Exports data to worker-specific JSON (last-run-data-worker-N.json) for parallel execution
  * Target: Complete in under 90 seconds (increased from 60s for stability)
  */
 test.describe('Base Operational Suite - Entity Creation', () => {
     test.setTimeout(90000); // 90 seconds for stability (4 entities x ~15s each + margin)
 
-    test('Create Base Operational Entities (Steps 1-4)', async ({ page }) => {
+    test('Create Base Operational Entities (Steps 1-4)', async ({ page }, testInfo) => {
         const startTime = Date.now();
+        const workerIndex = DataPathHelper.getWorkerIndex(testInfo);
+        const projectName = DataPathHelper.getProjectIdentifier(testInfo);
+        const browserName = DataPathHelper.getBrowserName(testInfo);
+
         logger.info('🚀 Starting Base Operational Suite - Steps 1-4');
+        logger.info(`🔧 Worker ${workerIndex} | Browser: ${browserName} | Project: ${projectName}`);
         logger.info('='.repeat(80));
 
         // =================================================================
@@ -36,6 +42,8 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         // Data structure for export
         const operationalData = {
             createdAt: new Date().toISOString(),
+            workerIndex: 0,
+            projectName: '',
             transportista: {} as any,
             cliente: {} as any,
             vehiculo: {} as any,
@@ -117,18 +125,21 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         logger.info('');
 
         // =================================================================
-        // Export Data to JSON
+        // Export Data to Worker-Specific JSON
         // =================================================================
         const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
         operationalData['executionTimeSeconds'] = parseFloat(elapsedTime);
+        operationalData['workerIndex'] = workerIndex;
+        operationalData['projectName'] = projectName;
 
-        const outputPath = path.join(process.cwd(), 'last-run-data.json');
+        const outputPath = DataPathHelper.getWorkerDataPath(testInfo);
         fs.writeFileSync(outputPath, JSON.stringify(operationalData, null, 2), 'utf-8');
 
         logger.info('='.repeat(80));
-        logger.info('💾 OPERATIONAL DATA EXPORTED');
+        logger.info('💾 OPERATIONAL DATA EXPORTED (Browser-Isolated)');
         logger.info('='.repeat(80));
-        logger.info(`📁 File: ${outputPath}`);
+        logger.info(`📁 Browser: ${browserName} | File: ${outputPath}`);
+        logger.info(`🌐 Worker ${workerIndex} | Project: ${projectName}`);
         logger.info('');
         logger.info('📦 Summary:');
         logger.info(`   Transportista: ${operationalData.transportista.nombre} (${operationalData.transportista.rut})`);

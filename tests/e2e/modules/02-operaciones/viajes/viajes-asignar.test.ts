@@ -1,35 +1,36 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { getTestUser } from '../../../../../src/config/credentials.js';
 import { logger } from '../../../../../src/utils/logger.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
 
 test.describe('Viajes - Asignar (Dynamic)', () => {
-    let lastRunData: any;
 
-    test.beforeAll(async () => {
-        try {
-            const dataPath = path.resolve('last-run-data.json');
-            if (fs.existsSync(dataPath)) {
-                logger.info(`Reading data from ${dataPath}`);
-                const rawData = fs.readFileSync(dataPath, 'utf-8');
-                lastRunData = JSON.parse(rawData);
-            } else {
-                logger.warn('last-run-data.json not found in root');
-            }
-        } catch (error) {
-            logger.error('Error reading last-run-data.json', error);
-        }
-    });
 
     test('Should assign Trip 46221 to Transportista/Resources from JSON', async ({
         viajesAsignarPage,
         loginPage,
         dashboardPage
-    }) => {
-        // 1. Data Validation
+    }, testInfo) => {
+        // 1. Load worker-specific data
+        let lastRunData: any;
+        try {
+            const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+            if (fs.existsSync(dataPath)) {
+                logger.info(`Reading worker-specific data from ${dataPath}`);
+                const rawData = fs.readFileSync(dataPath, 'utf-8');
+                lastRunData = JSON.parse(rawData);
+            } else {
+                logger.warn(`Worker-specific data file not found: ${dataPath}`);
+            }
+        } catch (error) {
+            logger.error('Error reading worker-specific data file', error);
+        }
+
+        // 2. Data Validation
         if (!lastRunData?.viaje?.nroViaje) {
-            test.skip(true, 'Skipping: No Nro Viaje found in last-run-data.json');
+            test.skip(true, 'Skipping: No Nro Viaje found in worker-specific JSON');
             return;
         }
 
@@ -66,12 +67,12 @@ test.describe('Viajes - Asignar (Dynamic)', () => {
 
         // 5. Verify
         await test.step('Phase 4: Verify Status', async () => {
-             const isAssigned = await viajesAsignarPage.verifyViajeAsignado(nroViaje);
-             expect(isAssigned).toBeTruthy();
-             
-             const status = await viajesAsignarPage.getViajeStatus(nroViaje);
-             logger.info(`Final Status: ${status}`);
-             expect(status.toUpperCase()).toContain('ASIGNADO');
+            const isAssigned = await viajesAsignarPage.verifyViajeAsignado(nroViaje);
+            expect(isAssigned).toBeTruthy();
+
+            const status = await viajesAsignarPage.getViajeStatus(nroViaje);
+            logger.info(`Final Status: ${status}`);
+            expect(status.toUpperCase()).toContain('ASIGNADO');
         });
     });
 });

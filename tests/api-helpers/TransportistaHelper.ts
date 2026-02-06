@@ -53,12 +53,8 @@ export class TransportistaHelper {
         await transportistaPage.fillRazonSocial(razonSocial);
         await transportistaPage.fillDocumento(documento);
 
-        // Select Type
-        if (type === 'Propio') {
-            await transportistaPage.selectTipoTransportista('Propio Con Flota No Genera');
-        } else {
-            await transportistaPage.selectTipoTransportista('Terceros Con Flota Si Genera');
-        }
+        // Select Type - Always use "Terceros Con Flota Si Genera Contrato" for contract generation
+        await transportistaPage.selectTipoTransportista('Terceros Con Flota Si Genera Contrato');
 
         await page.waitForTimeout(500);
 
