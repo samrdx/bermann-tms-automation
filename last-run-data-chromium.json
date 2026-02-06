@@ -1,39 +1,45 @@
 {
-  "createdAt": "2026-02-06T19:25:08.972Z",
-  "workerIndex": 3,
+  "createdAt": "2026-02-06T20:24:39.717Z",
+  "workerIndex": 1,
   "projectName": "base-entities-chromium",
   "transportista": {
     "id": "",
-    "nombre": "EcoTrans Innovación - 405908",
-    "rut": "69055231-0",
-    "razonSocial": "EcoTrans Innovación - 405908",
-    "baseNombre": "EcoTrans Innovación"
+    "nombre": "MegaLogística Central - 409479",
+    "rut": "22983086-4",
+    "razonSocial": "MegaLogística Central - 409479",
+    "baseNombre": "MegaLogística Central"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "EcoTrans Innovación Logistics SpA",
-    "rut": "33037926-K",
-    "email": "ecotransinnovación@test.cl"
+    "nombre": "Vía Rápida SpA Logistics SpA",
+    "rut": "21846346-0",
+    "email": "víarápidaspa@test.cl"
   },
   "vehiculo": {
-    "patente": "HEZD-75",
-    "muestra": "VEH-1770405947733",
-    "transportistaNombre": "EcoTrans Innovación - 405908",
+    "patente": "NYQL-99",
+    "muestra": "VEH-1770409515971",
+    "transportistaNombre": "MegaLogística Central - 409479",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Rosa",
-    "apellido": "Soto",
-    "rut": "65.209.583-6",
-    "email": "rosasoto@test.com",
-    "telefono": "+56942133664",
-    "transportistaNombre": "EcoTrans Innovación - 405908"
+    "nombre": "Luis",
+    "apellido": "Pérez",
+    "rut": "67.949.563-1",
+    "email": "luispérez@test.com",
+    "telefono": "+56940149252",
+    "transportistaNombre": "MegaLogística Central - 409479"
   },
-  "executionTimeSeconds": 71.43,
-  "contratoCosto": {
-    "id": "773",
-    "nroContrato": "26976",
-    "tipo": "Costo",
-    "transportistaNombre": "EcoTrans Innovación"
+  "executionTimeSeconds": 68.37,
+  "contratoCliente": {
+    "id": "775",
+    "nroContrato": "69950",
+    "tipo": "Venta",
+    "clienteNombre": "Vía Rápida SpA Logistics SpA"
+  },
+  "viaje": {
+    "nroViaje": "66560",
+    "cliente": "Vía Rápida SpA Logistics SpA",
+    "ruta": "05082025-1",
+    "status": "PLANIFICADO"
   }
 }
