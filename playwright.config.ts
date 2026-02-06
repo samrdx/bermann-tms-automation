@@ -8,7 +8,7 @@ export default defineConfig({
   timeout: 60000,
   retries: 0,
   use: {
-    headless: false,
+    headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),  // Auto-headless in CI
     trace: 'on',
     screenshot: 'on',
     video: 'on',
