@@ -1,9 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
-import path from 'path';
 
 /**
  * Step 6: Planificar Viaje (Trip Planning)
@@ -24,7 +22,6 @@ test.describe('Viajes - Planificar (Create)', () => {
   test.setTimeout(90000);
 
   test('Should planificar a new Viaje using entities from JSON', async ({
-    page,
     viajesPlanificarPage
   }, testInfo) => {
     const startTime = Date.now();
@@ -71,29 +68,21 @@ test.describe('Viajes - Planificar (Create)', () => {
 
     logger.info(`Generated Nro Viaje: ${nroViaje}`);
 
-    // =================================================================
-    // PHASE 1: Login with arivas
-    // =================================================================
-    await test.step('Phase 1: Login', async () => {
-      logger.info('PHASE 1: Login');
-      const loginPage = new LoginPage(page);
-      await loginPage.loginAndWaitForDashboard('arivas', 'arivas');
-      logger.info('Login successful with arivas credentials');
-    });
+    // Note: Already authenticated via storageState from setup project
 
     // =================================================================
-    // PHASE 2: Navigate to Planificar Viajes
+    // PHASE 1: Navigate to Planificar Viajes
     // =================================================================
-    await test.step('Phase 2: Navigate', async () => {
+    await test.step('Phase 1: Navigate', async () => {
       logger.info('PHASE 2: Navigate to Planificar Viajes');
       await viajesPlanificarPage.navigate();
       logger.info('Navigation successful');
     });
 
     // =================================================================
-    // PHASE 3: Fill Form with dynamic data
+    // PHASE 2: Fill Form with dynamic data
     // =================================================================
-    await test.step('Phase 3: Fill Form', async () => {
+    await test.step('Phase 2: Fill Form', async () => {
       logger.info('PHASE 3: Fill Complete Viaje Form');
 
       // Basic info
@@ -123,18 +112,18 @@ test.describe('Viajes - Planificar (Create)', () => {
     });
 
     // =================================================================
-    // PHASE 4: Save Viaje
+    // PHASE 3: Save Viaje
     // =================================================================
-    await test.step('Phase 4: Save', async () => {
+    await test.step('Phase 3: Save', async () => {
       logger.info('PHASE 4: Save Viaje');
       await viajesPlanificarPage.clickGuardar();
       logger.info('Save clicked');
     });
 
     // =================================================================
-    // PHASE 5: Verification
+    // PHASE 4: Verification
     // =================================================================
-    await test.step('Phase 5: Verify', async () => {
+    await test.step('Phase 4: Verify', async () => {
       logger.info('PHASE 5: Verification');
 
       const isSaved = await viajesPlanificarPage.isFormSaved();

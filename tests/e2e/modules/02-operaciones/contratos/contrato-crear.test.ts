@@ -1,11 +1,8 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
-import { config } from '../../../../../src/config/environment.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
-import path from 'path';
 
 /**
  * OPTIMIZED Step 5: Contract Creation (No Entity Seeding)
@@ -52,17 +49,10 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         logger.info(`   Conductor: ${operationalData.conductor.nombre} ${operationalData.conductor.apellido}`);
         logger.info('');
 
-        // =================================================================
-        // STEP 2: Session Hardening - Explicit Login
-        // =================================================================
-        logger.info('🔐 Ensuring active session...');
-        const loginPage = new LoginPage(page);
-        await loginPage.loginAndWaitForDashboard('arivas', 'arivas');
-        logger.info('✅ Session active');
-        logger.info('');
+        // Note: Already authenticated via storageState from setup project
 
         // =================================================================
-        // STEP 3: Navigate to Contract Creation with URL Discovery
+        // STEP 2: Navigate to Contract Creation with URL Discovery
         // =================================================================
         logger.info('📄 Navigating to contract creation...');
         const contratosPage = new ContratosFormPage(page);
@@ -122,10 +112,13 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         // =================================================================
         logger.info('🔍 Verifying contract...');
 
-        // We're already on the contract edit page from Phase 1/2
-        // Verify Route 715 is present
-        await expect(page.getByText('05082025-1').first()).toBeVisible({ timeout: 10000 });
-        logger.info('✅ Route 715 verified');
+        // After save, system redirects to /contrato/index (contract list)
+        await expect(page).toHaveURL(/\/contrato\/index/, { timeout: 10000 });
+
+        // Verify contract appears in the list
+        const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato });
+        await expect(contractRow).toBeVisible({ timeout: 10000 });
+        logger.info(`✅ Contract ${nroContrato} verified in contract list`);
         logger.info('');
 
         // =================================================================

@@ -10,13 +10,7 @@ test.describe('Cliente - Create', () => {
   test.setTimeout(120000);
   
   test('should create a new client with all required fields', async ({ page }) => {
-    logger.info('🔐 Initial Login');
-
-    // Login
-    const loginPage = new LoginPage(page);
-    const testUser = getTestUser('regular');
-    await loginPage.loginAndWaitForDashboard(testUser.username, testUser.password);
-
+    // Note: Already authenticated via storageState from setup project
     logger.info('📋 PHASE 1: Seeding Transportista (for association)...');
     
     // Seed a Transportista first (required for "Transportistas Asociados" form field)

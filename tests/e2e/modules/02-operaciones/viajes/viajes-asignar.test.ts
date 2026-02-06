@@ -1,17 +1,13 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
-import { getTestUser } from '../../../../../src/config/credentials.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
-import path from 'path';
 
 test.describe('Viajes - Asignar (Dynamic)', () => {
 
 
     test('Should assign Trip 46221 to Transportista/Resources from JSON', async ({
-        viajesAsignarPage,
-        loginPage,
-        dashboardPage
+        viajesAsignarPage
     }, testInfo) => {
         // 1. Load worker-specific data
         let lastRunData: any;
@@ -43,21 +39,16 @@ test.describe('Viajes - Asignar (Dynamic)', () => {
 
         logger.info(`📋 Test Params: Viaje=${nroViaje}, Trans=${transportistaName}, Patente=${patente}, Cond=${conductorName}`);
 
-        // 2. Login
-        const user = getTestUser('regular');
-        await test.step('Phase 1: Login', async () => {
-            await loginPage.loginAndWaitForDashboard(user.username, user.password);
-            expect(await dashboardPage.isOnDashboard()).toBe(true);
-        });
+        // Note: Already authenticated via storageState from setup project
 
-        // 3. Navigate
-        await test.step('Phase 2: Navigate to Asignar', async () => {
+        // 2. Navigate
+        await test.step('Phase 1: Navigate to Asignar', async () => {
             await viajesAsignarPage.navigate();
             await viajesAsignarPage.waitForTableLoad();
         });
 
-        // 4. Assign
-        await test.step('Phase 3: Assign Resources', async () => {
+        // 3. Assign
+        await test.step('Phase 2: Assign Resources', async () => {
             await viajesAsignarPage.assignViaje(nroViaje, {
                 transportista: transportistaName,
                 vehiculoPrincipal: patente,
@@ -65,8 +56,8 @@ test.describe('Viajes - Asignar (Dynamic)', () => {
             });
         });
 
-        // 5. Verify
-        await test.step('Phase 4: Verify Status', async () => {
+        // 4. Verify
+        await test.step('Phase 3: Verify Status', async () => {
             const isAssigned = await viajesAsignarPage.verifyViajeAsignado(nroViaje);
             expect(isAssigned).toBeTruthy();
 

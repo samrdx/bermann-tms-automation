@@ -19,6 +19,13 @@ export default defineConfig({
       name: 'setup',
       testMatch: /auth\.setup\.ts/,  // Only auth setup
     },
+    // Auth tests - run WITHOUT storageState (test login from scratch)
+    {
+      name: 'auth-tests',
+      testMatch: /tests\/e2e\/auth\/.+\.test\.ts/,
+      use: devices['Desktop Chrome'],
+      // NO storageState - these tests need to test login from scratch
+    },
     // Separate base-entities setup for each browser (worker isolation)
     {
       name: 'base-entities-chromium',
