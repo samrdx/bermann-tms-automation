@@ -45,11 +45,11 @@ jobs:
           echo "Step 1: Running Base Entities Setup..."
           npx playwright test --project=base-entities-chromium --reporter=line
           
-          echo "Step 2: Running Contract Tests..."
+          echo "Step 2: Running Contract Tests (sequential to avoid interference)..."
           npx playwright test \
             tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
             tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
-            --project=chromium --reporter=line
+            --project=chromium --workers=1 --reporter=line
           
           echo "Step 3: Running Viajes Tests..."
           npx playwright test \
