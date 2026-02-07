@@ -102,8 +102,8 @@ test.describe('Viajes - Planificar (Create)', () => {
       await viajesPlanificarPage.selectTipoServicio('tclp2210');
       await viajesPlanificarPage.selectTipoViaje('1');
       await viajesPlanificarPage.selectUnidadNegocio('1');
-      // Use default cargo code (system provides it)
-      await viajesPlanificarPage.selectCodigoCarga();
+      // Use Cargo 19 to match contracts (confirmed by user: Pallet_Furgon_Frio_10ton)
+      await viajesPlanificarPage.selectCodigoCarga('Pallet_Furgon_Frio_10ton');
 
       // Route modal - uses Route 715 linked to contracts
       await viajesPlanificarPage.agregarRuta('05082025-1');
