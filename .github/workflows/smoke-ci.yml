@@ -27,7 +27,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Base Entities Setup
+      - name: Run Base Entities Setup + Contract Tests
         env:
           # Environment
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
@@ -42,8 +42,13 @@ jobs:
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          echo "Running Base Entities Setup..."
-          npx playwright test --project=base-entities-chromium --reporter=html,line
+          echo "Running Base Entities Setup + Contract Tests..."
+          npx playwright test \
+            --project=base-entities-chromium \
+            tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
+            tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
+            --reporter=html,line
+
 
       - name: List Generated Files (Debug)
         if: always()
