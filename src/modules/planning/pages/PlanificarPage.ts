@@ -164,16 +164,21 @@ export class PlanificarPage extends BasePage {
         }
 
         // Use Bootstrap-select's selectpicker('val') API for proper event propagation
+        // ALSO trigger inline onchange handlers (e.g. getTiposServicio(), getZones())
+        // which selectpicker('val') does NOT trigger automatically
         await this.page.evaluate((args: { sel: string; val: string }) => {
           const $ = (window as any).$;
           const selectEl = document.querySelector(args.sel) as HTMLSelectElement;
           if ($ && selectEl && $(selectEl).selectpicker) {
             $(selectEl).selectpicker('val', args.val);
-          } else {
-            // Fallback: set value + dispatch change if selectpicker not available
-            if (selectEl) {
-              selectEl.value = args.val;
-              selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          } else if (selectEl) {
+            selectEl.value = args.val;
+          }
+          // Trigger inline onchange handlers (critical for cascading AJAX)
+          if (selectEl) {
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            if (typeof selectEl.onchange === 'function') {
+              selectEl.onchange(new Event('change'));
             }
           }
         }, { sel: selector, val: valueToSet });
