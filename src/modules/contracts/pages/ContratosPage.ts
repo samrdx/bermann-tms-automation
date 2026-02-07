@@ -31,7 +31,7 @@ export class ContratosFormPage extends BasePage {
 
     // Route Modal
     btnAddRuta: 'button:has-text("Añadir Ruta")',
-    modalRutas: '#modal_rutas',
+    modalRutas: '#modalRutas',
     btnRoute715: 'a#btn_plus_715',
     btnCargo715_19: 'a#btn_plus_ruta_715_19',
     tarifaConductor: '#tarifa_conductor',
@@ -443,13 +443,13 @@ export class ContratosFormPage extends BasePage {
           state: 'visible',
           timeout: 3000
         });
-        logger.info('✅ Modal found with #modal_rutas');
+        logger.info('✅ Modal found with #modalRutas');
       } catch (e) {
         // Fallback: try generic modal selector
-        logger.info('⚠️ #modal_rutas not found, trying generic .modal');
+        logger.info('⚠️ #modalRutas not found, trying generic .modal');
         await this.page.waitForSelector('.modal.show, .modal.fade.show', {
           state: 'visible',
-          timeout: 3000
+          timeout: 5000
         });
         logger.info('✅ Modal found with generic selector');
       }
