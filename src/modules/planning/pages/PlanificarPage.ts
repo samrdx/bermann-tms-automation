@@ -229,11 +229,35 @@ export class PlanificarPage extends BasePage {
     }
   }
 
-  async selectCodigoCarga(carga: string = 'CONT-Bobinas-Sider14'): Promise<void> {
-    logger.info(`Selecting Codigo Carga: ${carga}`);
+  async selectCodigoCarga(carga?: string): Promise<void> {
     try {
-      await this.robustSelect(this.selectors.codigoCarga, carga, true);
-      logger.info('✅ Codigo Carga selected');
+      const selectLoc = this.page.locator(this.selectors.codigoCarga);
+
+      if (!carga) {
+        // Select first available option (skip empty/placeholder)
+        logger.info('Selecting first available Codigo Carga...');
+
+        const firstOption = await selectLoc.evaluate((sel: HTMLSelectElement) => {
+          const options = Array.from(sel.options);
+          // Skip first option if it's empty or placeholder
+          const validOption = options.find(opt => opt.value && opt.value.trim() !== '' && opt.textContent?.trim());
+          return validOption ? { value: validOption.value, text: validOption.textContent?.trim() } : null;
+        });
+
+        if (!firstOption) {
+          throw new Error('No valid Codigo Carga options available');
+        }
+
+        logger.info(`Found first available: ${firstOption.text} (value: ${firstOption.value})`);
+        await selectLoc.selectOption(firstOption.value);
+        await this.page.waitForTimeout(900);
+        logger.info('✅ First available Codigo Carga selected');
+      } else {
+        // Select specific cargo by text
+        logger.info(`Selecting Codigo Carga: ${carga}`);
+        await this.robustSelect(this.selectors.codigoCarga, carga, true);
+        logger.info('✅ Codigo Carga selected');
+      }
     } catch (error) {
       logger.error('Failed to select Codigo Carga', error);
       await this.takeScreenshot('select-carga-error');
