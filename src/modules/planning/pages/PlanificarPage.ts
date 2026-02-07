@@ -122,6 +122,21 @@ export class PlanificarPage extends BasePage {
     // Wait for select to be visible
     await selectLoc.waitFor({ state: 'visible', timeout: 5000 });
 
+    // If searching by text, wait for the dropdown to have options loaded (AJAX may populate them)
+    if (searchByText) {
+      logger.info(`Waiting for options to load in ${selector}...`);
+      await this.page.waitForFunction(
+        (sel: string) => {
+          const selectEl = document.querySelector(sel) as HTMLSelectElement;
+          return selectEl && selectEl.options.length > 1;
+        },
+        selector,
+        { timeout: 10000 }
+      ).catch(() => {
+        logger.warn(`Timeout waiting for options in ${selector}, proceeding anyway`);
+      });
+    }
+
     for (let retry = 0; retry < 3; retry++) {
       try {
         let valueToSet: string;
@@ -177,7 +192,7 @@ export class PlanificarPage extends BasePage {
         }
       } catch (error) {
         if (retry === 2) throw error;
-        await this.page.waitForTimeout(500);
+        await this.page.waitForTimeout(1000);
       }
     }
 
