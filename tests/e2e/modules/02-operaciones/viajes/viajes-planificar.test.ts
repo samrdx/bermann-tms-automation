@@ -94,10 +94,11 @@ test.describe('Viajes - Planificar (Create)', () => {
       // 1. Basic info - Nro Viaje
       await viajesPlanificarPage.fillNroViaje(nroViaje);
 
-      // 2. Cliente FIRST - use cliente from JSON (created in base-entities)
-      const clientePartial = clienteNombre.split(' ')[0];
-      logger.info(`Selecting Cliente: ${clientePartial} (from ${clienteNombre})`);
-      await viajesPlanificarPage.selectCliente(clientePartial);
+      // 2. Cliente FIRST - use FULL unique name from JSON (includes timestamp)
+      // CRITICAL: We must use the FULL name to avoid selecting duplicate clients like "Delta Spa"
+      // The timestamp suffix makes the name unique (e.g., "Delta Logistics SpA 123456")
+      logger.info(`Selecting Cliente: ${clienteNombre} (full unique name)`);
+      await viajesPlanificarPage.selectCliente(clienteNombre);
 
       // 3. Código Carga - ALL contracts use code 715 (Pallet_Furgon_Frio_10ton)
       logger.info('Selecting Codigo Carga: Pallet_Furgon_Frio_10ton (715)');

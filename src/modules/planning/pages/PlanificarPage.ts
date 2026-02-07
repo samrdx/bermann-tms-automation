@@ -281,13 +281,27 @@ export class PlanificarPage extends BasePage {
     try {
       const selectLoc = this.page.locator(this.selectors.codigoCarga);
 
+      // Wait for dropdown to be ready
+      await selectLoc.waitFor({ state: 'attached', timeout: 10000 });
+
+      // VALIDATION: Check if dropdown has no options (empty = client has no active contracts)
+      const optionsCount = await selectLoc.evaluate((sel: HTMLSelectElement) => {
+        // Count non-empty options (skip placeholder/empty first option)
+        return Array.from(sel.options).filter(o => o.value && o.value.trim() !== '').length;
+      });
+
+      logger.info(`Codigo Carga dropdown has ${optionsCount} cargo options`);
+
+      if (optionsCount === 0) {
+        logger.error('❌ Codigo Carga dropdown is EMPTY - selected client has no active contracts!');
+        await this.takeScreenshot('codigo-carga-empty');
+        throw new Error('Codigo Carga dropdown has no options. The selected client has no active contracts with cargo codes.');
+      }
+
       // If a specific cargo code is provided (e.g., "Pallet_Furgon_Frio_10ton"),
       // use robustSelect directly - it handles waiting for options internally
       if (carga) {
         logger.info(`Selecting specific Codigo Carga: ${carga}`);
-
-        // Wait for dropdown to be ready
-        await selectLoc.waitFor({ state: 'attached', timeout: 10000 });
 
         // Use robustSelect which handles Bootstrap-select and events
         await this.robustSelect(this.selectors.codigoCarga, carga, true);
