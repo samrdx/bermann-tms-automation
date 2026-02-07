@@ -178,6 +178,14 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         await contratosPage.forceCloseModal();
         await page.waitForTimeout(500);
 
+        // Wait for any pending AJAX to complete before save
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+            logger.warn('Network not idle before save, proceeding anyway...');
+        });
+
+        // Take diagnostic screenshot before save
+        await page.screenshot({ path: `./reports/screenshots/pre-save-cliente-${Date.now()}.png` });
+
         // Save basic contract - may redirect to /editar or /index
         // Retry click if URL doesn't change
         logger.info('Clicking Guardar button...');
