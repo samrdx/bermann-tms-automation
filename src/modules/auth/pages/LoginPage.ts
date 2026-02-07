@@ -81,10 +81,17 @@ export class LoginPage extends BasePage {
   /* ===================== ASSERTIONS ===================== */
 
   async isLoginSuccessful(): Promise<boolean> {
-    return (
-      this.page.url().includes('/site') &&
-      (await this.isVisible(this.selectors.logoMin))
-    );
+    try {
+      // Explicit wait with CI-friendly timeout
+      await this.page.waitForSelector(this.selectors.logoMin, {
+        state: 'visible',
+        timeout: 10000  // Increased from 3s to 10s for CI environments
+      });
+      return this.page.url().includes('/site');
+    } catch (error) {
+      logger.warn('Logo not visible after 10s, login may have failed');
+      return false;
+    }
   }
 
   async isOnLoginPage(): Promise<boolean> {

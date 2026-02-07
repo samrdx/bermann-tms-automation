@@ -91,22 +91,26 @@ async getLoggedUserName(): Promise<string> {
    */
   async logout(): Promise<void> {
     logger.info('Attempting logout');
-    
+
     try {
       // Abrir dropdown de usuario
       await this.openUserDropdown();
-      
+
       // Esperar un momento para que el menú se renderice completamente
       await this.page.waitForTimeout(1000);
-      
+
       // Click en logout
       await this.waitForElement(this.selectors.logoutButton);
+
+      // Start navigation promise before clicking
+      const navigationPromise = this.page.waitForURL(/\/login/, { timeout: 15000 });
+
       await this.click(this.selectors.logoutButton);
-      
-      // Esperar navegación a login
-      await this.page.waitForTimeout(2000);
-      
-      logger.info('✅ Logout successful');
+
+      // Wait for actual navigation to /login
+      await navigationPromise;
+
+      logger.info('✅ Logout successful - navigated to login page');
     } catch (error) {
       logger.error('Logout failed', error);
       await this.takeScreenshot('logout-error');

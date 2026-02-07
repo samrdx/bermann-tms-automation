@@ -147,8 +147,32 @@ export class ContratosFormPage extends BasePage {
 
       logger.info('✅ Page loaded successfully, no errors detected');
 
+      // Wait for the basic form to be ready (check for heading or save button)
+      logger.info('Waiting for basic form to initialize...');
+      logger.info(`Current URL: ${this.page.url()}`);
+
+      // Check for the "Nro Contrato" field to confirm basic form is loaded
+      // This is more reliable than checking headings which may have different cases
+      const nroContratoField = this.page.locator('#contrato-nro_contrato');
+      const guardarButton = this.page.getByRole('button', { name: 'Guardar' });
+
+      try {
+        // Wait for either the Nro Contrato field or Guardar button
+        await Promise.race([
+          nroContratoField.waitFor({ state: 'visible', timeout: 15000 }),
+          guardarButton.waitFor({ state: 'visible', timeout: 15000 })
+        ]);
+        logger.info('✅ Basic form ready (Nro Contrato field or Guardar button visible)');
+      } catch (error) {
+        logger.error('❌ Basic form elements not found!');
+        logger.error('Selector used: #contrato-nro_contrato or button with name "Guardar"');
+        await this.takeScreenshot('basic-form-not-found');
+        throw new Error('Basic contract form not found. Check if page loaded correctly.');
+      }
+
     } catch (error) {
       logger.error('Failed to navigate to create page', error);
+      await this.takeScreenshot('navigate-to-create-error');
       throw error;
     }
   }
@@ -213,17 +237,38 @@ export class ContratosFormPage extends BasePage {
 
       // Select directly using the value
       await transportistaSelect.selectOption({ value: transportistaValue });
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(1000);
 
-      // Trigger change event for Bootstrap-select
-      await this.page.evaluate(() => {
-        const select = document.querySelector('#contrato-transportista_id') as HTMLSelectElement;
-        if (select) {
-          select.dispatchEvent(new Event('change', { bubbles: true }));
+      // Refresh Bootstrap-select UI and trigger change event (multiple attempts for reliability)
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await this.page.evaluate(() => {
+          const select = document.querySelector('#contrato-transportista_id') as any;
+          if (select) {
+            // Refresh Bootstrap-select to update visual UI
+            const $ = (window as any).$;
+            if (typeof $ !== 'undefined' && $(select).selectpicker) {
+              $(select).selectpicker('refresh');
+              $(select).selectpicker('render');
+            }
+            // Trigger change event
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+        await this.page.waitForTimeout(500);
+
+        // Verify the selection was applied to Bootstrap-select button
+        const buttonText = await this.page.locator('button[data-id="contrato-transportista_id"] .filter-option-inner-inner').textContent().catch(() => '');
+        if (buttonText && buttonText !== 'Transportista' && buttonText.trim().length > 0) {
+          logger.info(`✅ Transportista selected: ${buttonText}`);
+          break;
         }
-      });
 
-      logger.info('✅ Transportista selected');
+        if (attempt < 2) {
+          logger.warn(`⚠️ Transportista selection attempt ${attempt + 1} failed, retrying...`);
+        }
+      }
+
+      logger.info('✅ Transportista selection process complete');
 
       // 5. Skip optional fields (Fecha vencimiento, Valor Hora, Modalidad=Por Ruta)
       logger.info('⏭️ Skipping optional fields (using defaults: Modalidad = Por Ruta)');

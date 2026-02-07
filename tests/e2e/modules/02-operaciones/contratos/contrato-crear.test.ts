@@ -99,30 +99,38 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         logger.info('');
 
         // ===================================================================
-        // STEP 6: Save Contract
+        // PHASE 3: Save Contract
         // ===================================================================
-        logger.info('💾 Saving contract...');
+        logger.info('💾 PHASE 3: Saving contract...');
         await contratosPage.saveAndExtractId(); // Final save
 
         logger.info(`✅ Contract saved! ID: ${contractId}`);
         logger.info('');
 
         // =================================================================
-        // STEP 7: Verification
+        // PHASE 4: Verification
         // =================================================================
-        logger.info('🔍 Verifying contract...');
+        logger.info('🔍 PHASE 4: Verifying contract...');
 
-        // After save, system redirects to /contrato/index (contract list)
+        // After final save, system should auto-redirect to /contrato/index
+        logger.info('Waiting for auto-redirect to contract index...');
         await expect(page).toHaveURL(/\/contrato\/index/, { timeout: 10000 });
+        logger.info('✅ Auto-redirected to contract index');
 
-        // Verify contract appears in the list
+        // Search for the contract using the search box
+        logger.info(`Searching for contract: ${nroContrato}`);
+        const searchBox = page.locator('input[type="search"]');
+        await searchBox.fill(nroContrato);
+        await page.waitForTimeout(1000); // Wait for search to filter
+
+        // Verify contract appears in the filtered results
         const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato });
         await expect(contractRow).toBeVisible({ timeout: 10000 });
         logger.info(`✅ Contract ${nroContrato} verified in contract list`);
         logger.info('');
 
         // =================================================================
-        // STEP 8: Final Summary
+        // Final Summary
         // =================================================================
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
 
@@ -138,23 +146,6 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         logger.info(`   Transportista: ${operationalData.transportista.nombre}`);
         logger.info(`   Status: ACTIVO`);
         logger.info('='.repeat(80));
-
-        // Save contract ID for potential next steps
-        process.env.CREATED_CONTRACT_ID = contractId;
-
-        // Update JSON with Costo Contract (for cross-test persistence)
-        logger.info('📝 Updating last-run-data.json with contratoCosto...');
-
-        operationalData.contratoCosto = {
-            id: contractId,
-            nroContrato: nroContrato,
-            tipo: 'Costo',
-            transportistaNombre: transportistaNombre
-        };
-
-        fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
-        logger.info(`✅ Saved contratoCosto.id: ${contractId}`);
-        logger.info('');
 
         // Assertions
         expect(contractId).toBeTruthy();

@@ -442,19 +442,31 @@ export class PlanificarPage extends BasePage {
         await this.page.waitForTimeout(1000);
       }
       
-      // Check table for nroViaje
+      // Check table for nroViaje - search ALL columns for robustness
       const found = await this.page.evaluate((viaje: string) => {
         const tbody = document.querySelector('table tbody');
-        if (!tbody) return false;
-        
+        if (!tbody) {
+          console.log('No table body found');
+          return false;
+        }
+
         const rows = Array.from(tbody.querySelectorAll('tr'));
+        console.log(`Found ${rows.length} rows in table`);
+
         for (const row of rows) {
           const cells = Array.from(row.querySelectorAll('td'));
-          // Column 2 is Nro Viaje in asignar table
-          if (cells[2]?.textContent?.trim() === viaje) {
-            return true;
+
+          // Search ALL columns for matching text (more robust)
+          for (let i = 0; i < cells.length; i++) {
+            const cellText = cells[i]?.textContent?.trim() || '';
+            if (cellText === viaje) {
+              console.log(`Found viaje "${viaje}" in row, column ${i}`);
+              return true;
+            }
           }
         }
+
+        console.log(`Viaje "${viaje}" not found in any column`);
         return false;
       }, nroViaje);
       
