@@ -248,7 +248,10 @@ export class ConductorFormPage extends BasePage {
   async clickGuardar(): Promise<void> {
     logger.info('Clicking save button');
     try {
-      await this.click(this.selectors.btnGuardar);
+      await Promise.all([
+        this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 }),
+        this.click(this.selectors.btnGuardar),
+      ]);
     } catch (error) {
       logger.error('Failed to click save button', error);
       await this.takeScreenshot('click-guardar-error');
@@ -268,9 +271,11 @@ export class ConductorFormPage extends BasePage {
 
   async isFormSaved(): Promise<boolean> {
     try {
-      await this.page.waitForTimeout(2000);
-      const url = this.page.url();
-      return url.includes('/conductores/index') || url.includes('/conductores/ver');
+      await this.page.waitForURL(
+        url => url.toString().includes('/conductores/index') || url.toString().includes('/conductores/ver'),
+        { timeout: 15000 }
+      );
+      return true;
     } catch (error) {
       logger.error('Failed to check if form saved', error);
       return false;
