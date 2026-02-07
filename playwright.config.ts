@@ -48,6 +48,10 @@ export default defineConfig({
     // Browser test projects (with base-entities dependency for CI)
     {
       name: 'chromium',
+      testMatch: [
+        /tests\/e2e\/modules\/.+\.test\.ts/,  // Only operational tests (modules)
+        /tests\/e2e\/suites\/.+\.test\.ts/,   // And suite tests (if any)
+      ],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
@@ -56,6 +60,10 @@ export default defineConfig({
     },
     {
       name: 'firefox',
+      testMatch: [
+        /tests\/e2e\/modules\/.+\.test\.ts/,  // Only operational tests (modules)
+        /tests\/e2e\/suites\/.+\.test\.ts/,   // And suite tests (if any)
+      ],
       use: {
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
@@ -64,6 +72,10 @@ export default defineConfig({
     },
     {
       name: 'webkit',
+      testMatch: [
+        /tests\/e2e\/modules\/.+\.test\.ts/,  // Only operational tests (modules)
+        /tests\/e2e\/suites\/.+\.test\.ts/,   // And suite tests (if any)
+      ],
       use: {
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json',
