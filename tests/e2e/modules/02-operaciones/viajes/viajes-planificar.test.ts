@@ -94,13 +94,14 @@ test.describe('Viajes - Planificar (Create)', () => {
       // 1. Basic info - Nro Viaje
       await viajesPlanificarPage.fillNroViaje(nroViaje);
 
-      // 2. Cliente FIRST - this loads the Codigo Carga options
+      // 2. Cliente FIRST - use cliente from JSON (created in base-entities)
       const clientePartial = clienteNombre.split(' ')[0];
-      logger.info(`Selecting Cliente: ${clientePartial} (derived from ${clienteNombre})`);
+      logger.info(`Selecting Cliente: ${clientePartial} (from ${clienteNombre})`);
       await viajesPlanificarPage.selectCliente(clientePartial);
 
-      // 3. Código Carga - options are now available from Cliente selection
-      await viajesPlanificarPage.selectCodigoCarga();
+      // 3. Código Carga - ALL contracts use code 715 (Pallet_Furgon_Frio_10ton)
+      logger.info('Selecting Codigo Carga: Pallet_Furgon_Frio_10ton (715)');
+      await viajesPlanificarPage.selectCodigoCarga('Pallet_Furgon_Frio_10ton');
 
       // 4. Tipo Operación
       await viajesPlanificarPage.selectTipoOperacion('tclp2210');
