@@ -429,29 +429,45 @@ export class ContratosFormPage extends BasePage {
     logger.info('🛣️ Adding specific Route 715 and Cargo 715_19');
 
     try {
-      // Step A: Click "Añadir Ruta" button
+      // Step A: Click "Añadir Ruta" button with retry
       logger.info('Clicking "Añadir Ruta" button');
-      await this.page.click(this.selectors.btnAddRuta);
 
-      // Wait for JavaScript execution and modal to appear
-      await this.page.waitForTimeout(1500);
+      let modalFound = false;
+      for (let attempt = 0; attempt < 3 && !modalFound; attempt++) {
+        if (attempt > 0) {
+          logger.info(`Retry ${attempt + 1}/3: Re-clicking "Añadir Ruta" button...`);
+        }
 
-      // Try to detect modal with multiple selectors
-      logger.info('Waiting for route modal to appear...');
-      try {
-        await this.page.waitForSelector(this.selectors.modalRutas, {
-          state: 'visible',
-          timeout: 3000
-        });
-        logger.info('✅ Modal found with #modalRutas');
-      } catch (e) {
-        // Fallback: try generic modal selector
-        logger.info('⚠️ #modalRutas not found, trying generic .modal');
-        await this.page.waitForSelector('.modal.show, .modal.fade.show', {
-          state: 'visible',
-          timeout: 5000
-        });
-        logger.info('✅ Modal found with generic selector');
+        // Force close any stray modals first
+        await this.forceCloseModal();
+        await this.page.waitForTimeout(300);
+
+        // Click the button
+        const btnAddRuta = this.page.locator(this.selectors.btnAddRuta);
+        await btnAddRuta.waitFor({ state: 'visible', timeout: 5000 });
+        await btnAddRuta.click();
+
+        // Wait for modal with increased timeout
+        await this.page.waitForTimeout(1500);
+
+        // Try to detect modal with multiple selectors
+        try {
+          await this.page.waitForSelector('#modalRutas.show, #modalRutas.in, .modal.show, .modal.fade.show', {
+            state: 'visible',
+            timeout: 5000
+          });
+          modalFound = true;
+          logger.info('✅ Modal found');
+        } catch (e) {
+          if (attempt < 2) {
+            logger.warn(`Modal not found on attempt ${attempt + 1}, retrying...`);
+          }
+        }
+      }
+
+      if (!modalFound) {
+        await this.takeScreenshot('modal-not-found');
+        throw new Error('Route modal did not appear after 3 attempts');
       }
 
       await this.page.waitForTimeout(1000); // Wait for modal animation
