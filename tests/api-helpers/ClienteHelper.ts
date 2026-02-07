@@ -32,9 +32,10 @@ export class ClienteHelper {
         const baseUrl = config.get().baseUrl;
         const clientePage = new ClienteFormPage(page);
 
-        // Data Generation
-        const baseName = generateShortCompanyName().replace(/ - \d+$/,  ''); // Remove timestamp if exists
-        const nombre = `${baseName} Logistics SpA`;
+        // Data Generation - UNIQUE NAME with timestamp to avoid duplicate client issues
+        const timestamp = Date.now().toString().slice(-6); // Last 6 digits for readability
+        const baseName = generateShortCompanyName().replace(/ - \d+$/, ''); // Remove timestamp if exists
+        const nombre = `${baseName} Logistics SpA ${timestamp}`; // Unique name with timestamp
         const nombreFantasia = `${baseName.split(' ')[0]} SpA`; // e.g. "Andina SpA"
         const rawRut = generateValidChileanRUT();
         const rut = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
@@ -51,7 +52,7 @@ export class ClienteHelper {
         await clientePage.fillNombre(nombre);
         await clientePage.fillRut(rut);
         await clientePage.fillNombreFantasia(nombreFantasia);
-        
+
         // Select Tipo Cliente
         await clientePage.selectTipoCliente('Distribución');
 
@@ -131,7 +132,7 @@ export class ClienteHelper {
 
             // PRIMARY STRATEGY: Search by RUT - immutable and reliable
             logger.info(`🔍 Searching by RUT: ${rut}`);
-            
+
             const rutFilterInput = page.locator('input[name*="[rut]"]')
                 .or(page.locator('input[name*="ClienteSearch[rut]"]'))
                 .or(page.locator('input[name*="ClientesSearch[rut]"]'))
@@ -144,10 +145,10 @@ export class ClienteHelper {
                 await rutFilterInput.fill(searchRut);
                 await rutFilterInput.press('Enter');
                 await page.waitForTimeout(1500);
-                
+
                 // Look for row containing the RUT (partial match on first 6 digits)
                 const rutRow = page.locator('table tbody tr').filter({ hasText: new RegExp(searchRut.slice(0, 6), 'i') }).first();
-                
+
                 if (await rutRow.count() > 0) {
                     const dataKey = await rutRow.getAttribute('data-key');
                     if (dataKey) {
@@ -168,11 +169,11 @@ export class ClienteHelper {
                     }
                 }
             }
-            
+
             // FALLBACK STRATEGY: Search by Name
             if (!foundViaRut) {
                 logger.warn('⚠️ RUT search failed, falling back to name-based search...');
-                
+
                 const nameFilterInput = page.locator('input[name*="[nombre]"]')
                     .or(page.locator('.dataTables_filter input'))
                     .first();
@@ -207,7 +208,7 @@ export class ClienteHelper {
                     logger.error(`❌ FAILED to find record in grid by name: ${nombre}`, e);
                 }
             }
-            
+
             if (!id) {
                 await page.screenshot({ path: `./reports/screenshots/cliente-rescue-id-failed-${Date.now()}.png` });
             }
