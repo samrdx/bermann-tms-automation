@@ -85,27 +85,36 @@ test.describe('Viajes - Planificar (Create)', () => {
 
     // =================================================================
     // PHASE 2: Fill Form with dynamic data
+    // CORRECT ORDER: Cliente → Código Carga → Tipo Operación → Tipo Servicio → Unidad Negocio → Ruta
+    // NOTE: Código Carga options are loaded from Cliente selection, NOT from the full cascade
     // =================================================================
     await test.step('Phase 2: Fill Form', async () => {
-      logger.info('PHASE 3: Fill Complete Viaje Form');
+      logger.info('PHASE 2: Fill Complete Viaje Form');
 
-      // Basic info
+      // 1. Basic info - Nro Viaje
       await viajesPlanificarPage.fillNroViaje(nroViaje);
-      await viajesPlanificarPage.selectTipoOperacion('tclp2210');
 
-      // Dynamic cliente from JSON
-      // Use first word for partial match (Dropdown often abbreviates names, e.g. "CAMINO SPA")
+      // 2. Cliente FIRST - this loads the Codigo Carga options
       const clientePartial = clienteNombre.split(' ')[0];
       logger.info(`Selecting Cliente: ${clientePartial} (derived from ${clienteNombre})`);
       await viajesPlanificarPage.selectCliente(clientePartial);
 
-      await viajesPlanificarPage.selectTipoServicio('tclp2210');
-      await viajesPlanificarPage.selectTipoViaje('1');
-      await viajesPlanificarPage.selectUnidadNegocio('1');
-      // Select first available Codigo Carga (dynamic based on cascading dropdowns)
+      // 3. Código Carga - options are now available from Cliente selection
       await viajesPlanificarPage.selectCodigoCarga();
 
-      // Route modal - uses Route 715 linked to contracts
+      // 4. Tipo Operación
+      await viajesPlanificarPage.selectTipoOperacion('tclp2210');
+
+      // 5. Tipo Servicio
+      await viajesPlanificarPage.selectTipoServicio('tclp2210');
+
+      // 6. Tipo Viaje (optional, using default)
+      await viajesPlanificarPage.selectTipoViaje('1');
+
+      // 7. Unidad Negocio
+      await viajesPlanificarPage.selectUnidadNegocio('1');
+
+      // 8. Route modal - uses Route 715 linked to contracts
       await viajesPlanificarPage.agregarRuta('05082025-1');
 
       // Origen and Destino are auto-filled by Route selection (per user instruction)

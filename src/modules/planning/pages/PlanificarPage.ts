@@ -281,15 +281,16 @@ export class PlanificarPage extends BasePage {
     try {
       const selectLoc = this.page.locator(this.selectors.codigoCarga);
 
-      // Wait for dropdown options to load (populated dynamically via AJAX after
-      // Tipo Operación + Cliente + Tipo Servicio + Unidad Negocio are selected)
-      logger.info('Waiting for Codigo Carga options to load...');
-      // Wait for any pending AJAX from cascade chain to complete
-      await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+      // Codigo Carga options are loaded from CLIENTE selection (not the full cascade)
+      // After selecting Cliente, the dropdown should have options available
+      logger.info('Waiting for Codigo Carga options to load (from Cliente selection)...');
+
+      // Wait for network to settle after Cliente selection
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
         logger.warn('Network idle timeout before Codigo Carga wait, proceeding...');
       });
 
-      // Increased timeout (40s) for CI environment with retry
+      // Wait for options with reasonable timeout (depends only on Cliente)
       let optionsLoaded = false;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
@@ -298,14 +299,16 @@ export class PlanificarPage extends BasePage {
               const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
               return sel && sel.options.length > 1;
             },
-            { timeout: 40000 }
+            { timeout: 15000 }
           );
           optionsLoaded = true;
           break;
         } catch (waitError) {
           if (attempt === 0) {
             logger.warn('First attempt to load Codigo Carga options timed out, retrying...');
-            await this.page.waitForTimeout(2000);
+            // Click on the dropdown to trigger load if needed
+            await selectLoc.click().catch(() => { });
+            await this.page.waitForTimeout(1500);
           }
         }
       }
