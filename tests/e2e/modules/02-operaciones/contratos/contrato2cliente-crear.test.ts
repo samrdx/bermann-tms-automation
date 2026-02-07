@@ -179,13 +179,48 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         await page.waitForTimeout(500);
 
         // Save basic contract - may redirect to /editar or /index
+        // Retry click if URL doesn't change
         logger.info('Clicking Guardar button...');
-        await page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
 
-        // Wait for navigation (give time for save to process)
-        await page.waitForTimeout(3000);
+        let currentUrl = page.url();
+        for (let saveAttempt = 0; saveAttempt < 3; saveAttempt++) {
+            if (saveAttempt > 0) {
+                logger.warn(`Save attempt ${saveAttempt + 1}/3 - URL hasn't changed yet`);
+            }
 
-        const currentUrl = page.url();
+            // Check for validation errors before clicking
+            const validationErrors = await page.locator('.help-block.badge-danger, .invalid-feedback:visible, [aria-invalid="true"]').count();
+            if (validationErrors > 0) {
+                const errorText = await page.locator('.help-block.badge-danger, .invalid-feedback:visible').first().textContent().catch(() => '');
+                logger.error(`Form validation error detected: ${errorText}`);
+                await page.screenshot({ path: `./reports/screenshots/validation-error-${Date.now()}.png` });
+            }
+
+            // Force close modals again
+            await contratosPage.forceCloseModal();
+            await page.waitForTimeout(300);
+
+            // Click save button with multiple selectors
+            const saveBtn = page.locator('button.btn-success:has-text("Guardar"), #btn_guardar').first();
+            await saveBtn.waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
+            await saveBtn.click({ force: true }).catch(async () => {
+                // JS fallback
+                await page.evaluate(() => {
+                    const btn = document.querySelector('button.btn-success, #btn_guardar') as HTMLElement;
+                    if (btn) btn.click();
+                });
+            });
+
+            // Wait for navigation
+            await page.waitForTimeout(3000);
+            currentUrl = page.url();
+
+            // Check if we've navigated away from /crear
+            if (!currentUrl.includes('/contrato/crear')) {
+                break;
+            }
+        }
+
         logger.info(`Post-save URL: ${currentUrl}`);
 
         let contractId: string;
@@ -223,6 +258,10 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
             } else {
                 throw new Error(`Could not extract contract ID from grid. ViewHref: ${viewHref}`);
             }
+        } else if (currentUrl.includes('/contrato/crear')) {
+            // Still on create page - save likely failed
+            await page.screenshot({ path: `./reports/screenshots/save-failed-${Date.now()}.png` });
+            throw new Error(`Save failed: URL still at ${currentUrl}. Check for validation errors.`);
         } else {
             throw new Error(`Unexpected URL after save: ${currentUrl}`);
         }
