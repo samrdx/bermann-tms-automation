@@ -328,16 +328,16 @@ export class ClienteFormPage extends BasePage {
       const selAll3 = this.page.locator("div.bs-actionsbox button.bs-select-all");
 
       let clicked = false;
-      if (await selAll1.isVisible()) {
-          await selAll1.click();
+      if (await selAll1.first().isVisible()) {
+          await selAll1.first().click();
           clicked = true;
           logger.info('✅ Clicked "Seleccionar Todos" (Selector 1)');
-      } else if (await selAll2.isVisible()) {
-          await selAll2.click();
+      } else if (await selAll2.first().isVisible()) {
+          await selAll2.first().click();
           clicked = true;
           logger.info('✅ Clicked "Seleccionar Todos" (Selector 2)');
-      } else if (await selAll3.isVisible()) {
-          await selAll3.click();
+      } else if (await selAll3.first().isVisible()) {
+          await selAll3.first().click();
           clicked = true;
           logger.info('✅ Clicked "Seleccionar Todos" (Selector 3)');
       }

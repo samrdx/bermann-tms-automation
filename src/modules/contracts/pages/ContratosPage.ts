@@ -278,24 +278,59 @@ export class ContratosFormPage extends BasePage {
       await this.forceCloseModal();
       await this.page.waitForTimeout(500);
 
-      // 6. Save the contract (this will redirect to /contrato/editar/{id})
+      // 6. Save the contract (may redirect to /contrato/editar/{id} OR /contrato/index)
       logger.info('💾 Saving basic contract...');
       await this.page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
 
-      // Wait for navigation to edit page
-      await this.page.waitForURL(/\/contrato\/editar\/\d+/, { timeout: 10000 });
+      // Wait for navigation (give time for save to process)
+      await this.page.waitForTimeout(3000);
 
-      // Extract contract ID from URL
       const currentUrl = this.page.url();
-      const contractIdMatch = currentUrl.match(/\/contrato\/editar\/(\d+)/);
+      logger.info(`Post-save URL: ${currentUrl}`);
 
-      if (!contractIdMatch) {
-        throw new Error(`Failed to extract contract ID from URL: ${currentUrl}`);
+      let contractId: string;
+
+      // Try to extract from /contrato/editar/{id} URL
+      const editMatch = currentUrl.match(/\/contrato\/editar\/(\d+)/);
+      if (editMatch) {
+        contractId = editMatch[1];
+        logger.info(`✅ Contract created! ID: ${contractId} (redirected to edit page)`);
+      } else if (currentUrl.includes('/contrato/index')) {
+        // Redirected to index - need to search for the contract
+        logger.info('⚠️ Redirected to index page - searching for created contract...');
+
+        // Get nroContrato from the previously filled field
+        const nroContrato = await this.page.locator('#contrato-nro_contrato').inputValue();
+
+        // Search by contract number in the grid
+        const searchBox = this.page.locator('input[type="search"]');
+        await searchBox.fill(nroContrato);
+        await this.page.waitForTimeout(1500);
+
+        // Find the contract row and extract ID from view/edit link
+        const contractRow = this.page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
+        await contractRow.waitFor({ state: 'visible', timeout: 5000 });
+
+        const viewLink = contractRow.locator('a[href*="/contrato/view/"]').first();
+        const viewHref = await viewLink.getAttribute('href');
+
+        const viewMatch = viewHref?.match(/\/contrato\/view\/(\d+)/);
+        if (viewMatch) {
+          contractId = viewMatch[1];
+          logger.info(`✅ Contract created! ID: ${contractId} (found in grid)`);
+
+          // Navigate to edit page
+          logger.info(`Navigating to edit page for contract ${contractId}...`);
+          await this.page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
+          await this.page.waitForTimeout(1500);
+        } else {
+          throw new Error(`Could not extract contract ID from grid. ViewHref: ${viewHref}`);
+        }
+      } else {
+        throw new Error(`Unexpected URL after save: ${currentUrl}`);
       }
 
-      const contractId = contractIdMatch[1];
-      logger.info(`✅ Contract created successfully with ID: ${contractId}`);
-      logger.info(`📍 Redirected to: ${currentUrl}`);
+      logger.info(`📍 Now on edit page for contract ID: ${contractId}`);
 
       return contractId;
 
