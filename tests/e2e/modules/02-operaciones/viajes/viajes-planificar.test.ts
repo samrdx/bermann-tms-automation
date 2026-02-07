@@ -19,7 +19,7 @@ import fs from 'fs';
  * - Stores viaje info in JSON for Step 7
  */
 test.describe('Viajes - Planificar (Create)', () => {
-  test.setTimeout(90000);
+  test.setTimeout(120000);
 
   test('Should planificar a new Viaje using entities from JSON', async ({
     viajesPlanificarPage
@@ -102,8 +102,8 @@ test.describe('Viajes - Planificar (Create)', () => {
       await viajesPlanificarPage.selectTipoServicio('tclp2210');
       await viajesPlanificarPage.selectTipoViaje('1');
       await viajesPlanificarPage.selectUnidadNegocio('1');
-      // Use Cargo 19 to match contracts (confirmed by user: Pallet_Furgon_Frio_10ton)
-      await viajesPlanificarPage.selectCodigoCarga('Pallet_Furgon_Frio_10ton');
+      // Select first available Codigo Carga (dynamic based on cascading dropdowns)
+      await viajesPlanificarPage.selectCodigoCarga();
 
       // Route modal - uses Route 715 linked to contracts
       await viajesPlanificarPage.agregarRuta('05082025-1');

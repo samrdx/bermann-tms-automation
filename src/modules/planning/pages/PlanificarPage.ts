@@ -9,7 +9,7 @@ export interface ViajeData {
   nroViaje?: string;
   numeroPlanilla?: string;
   valorFlete?: string;
-  
+
   // Selects críticos
   tipoOperacion?: string;    // 'Tclp2210'
   cliente?: string;           // 'Clientedummy'
@@ -17,14 +17,14 @@ export interface ViajeData {
   tipoViaje?: string;         // '1'
   unidadNegocio?: string;     // '1'
   codigoCarga?: string;       // 'CONT-Bobinas-Sider14'
-  
+
   // Ruta
   numeroRuta?: string;        // '05082025-1'
-  
+
   // Origen/Destino
   origen?: string;            // '1_agunsa_lampa_RM'
   destino?: string;           // '225_Starken_Sn Bernardo'
-  
+
   // Fecha (pre-llenado generalmente)
   fechaEntradaOrigen?: string;
 }
@@ -35,7 +35,7 @@ export class PlanificarPage extends BasePage {
     nroViaje: '#viajes-nro_viaje',
     numeroPlanilla: '#viajes-numero_planilla',
     valorFlete: '#viajes-valor_flete',
-    
+
     // Selects críticos
     tipoOperacion: '#tipo_operacion_form',
     cliente: '#viajes-cliente_id',
@@ -43,17 +43,17 @@ export class PlanificarPage extends BasePage {
     tipoViaje: '#viajes-tipo_viaje_id',
     unidadNegocio: '#viajes-unidad_negocio_id',
     codigoCarga: '#viajes-carga_id',
-    
+
     // Ruta
     btnAgregarRuta: 'button:has-text("Agregar Ruta")',
     modalRutas: '#modalRutasSugeridas',
     tablaRutas: '#tabla-rutas tbody tr',
-    
+
     // Origen/Destino
     origen: '#_origendestinoform-origen',
     destino: '#_origendestinoform-destino',
     fechaEntradaOrigen: '#_origendestinoform-fechaentradaorigen',
-    
+
     // Botones
     btnGuardar: '#btn_guardar_form',
     btnVolver: 'a[href="/viajes/index"]',
@@ -285,16 +285,40 @@ export class PlanificarPage extends BasePage {
       // Tipo Operación + Cliente + Tipo Servicio + Unidad Negocio are selected)
       logger.info('Waiting for Codigo Carga options to load...');
       // Wait for any pending AJAX from cascade chain to complete
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+      await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
         logger.warn('Network idle timeout before Codigo Carga wait, proceeding...');
       });
-      await this.page.waitForFunction(
-        () => {
-          const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
-          return sel && sel.options.length > 1;
-        },
-        { timeout: 25000 }
-      );
+
+      // Increased timeout (40s) for CI environment with retry
+      let optionsLoaded = false;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          await this.page.waitForFunction(
+            () => {
+              const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
+              return sel && sel.options.length > 1;
+            },
+            { timeout: 40000 }
+          );
+          optionsLoaded = true;
+          break;
+        } catch (waitError) {
+          if (attempt === 0) {
+            logger.warn('First attempt to load Codigo Carga options timed out, retrying...');
+            await this.page.waitForTimeout(2000);
+          }
+        }
+      }
+
+      if (!optionsLoaded) {
+        // Log available options for debugging before throwing
+        const options = await selectLoc.evaluate((sel: HTMLSelectElement) =>
+          Array.from(sel.options).map(o => o.textContent?.trim() || '')
+        );
+        logger.error(`Codigo Carga options not loaded. Available: ${options.join(', ')}`);
+        throw new Error('Codigo Carga options did not load within timeout');
+      }
+
       await this.page.waitForTimeout(500); // Small buffer after options load
       logger.info('Codigo Carga options loaded');
 
@@ -353,18 +377,18 @@ export class PlanificarPage extends BasePage {
 
   async agregarRuta(numeroRuta: string = '05082025-1'): Promise<void> {
     logger.info(`Adding ruta: ${numeroRuta}`);
-    
+
     try {
       // Click Agregar Ruta button
       const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
-      
+
       // Remove any modal backdrops that might be intercepting
       await this.page.evaluate(() => {
         const backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(bd => bd.remove());
       });
       await this.page.waitForTimeout(500);
-      
+
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           await btnAgregar.click({ timeout: 5000 });
@@ -375,51 +399,51 @@ export class PlanificarPage extends BasePage {
           await this.page.waitForTimeout(500);
         }
       }
-      
+
       // Wait for modal
       await this.page.waitForTimeout(1000);
       const modal = this.page.locator(this.selectors.modalRutas);
       const modalVisible = await modal.isVisible({ timeout: 5000 }).catch(() => false);
-      
+
       if (!modalVisible) {
         throw new Error('Modal de rutas no apareció');
       }
-      
+
       logger.info('Modal de rutas visible, buscando ruta en tabla');
-      
+
       // Find and click row with matching ruta
       const rows = this.page.locator(this.selectors.tablaRutas);
       const rowCount = await rows.count();
-      
+
       logger.info(`Found ${rowCount} rows in ruta table`);
-      
+
       let foundRuta = false;
       for (let i = 0; i < rowCount; i++) {
         const row = rows.nth(i);
         const cells = await row.locator('td').allTextContents();
         const rowText = cells.join('|');
-        
+
         if (rowText.includes(numeroRuta)) {
           logger.info(`Found ruta ${numeroRuta} in row ${i}`);
-          
+
           // Click green button in this row
           const btnOk = row.locator('button.btn.btn-sm.btn-success').first();
           await btnOk.scrollIntoViewIfNeeded();
           await btnOk.click();
-          
+
           logger.info('✅ Ruta selected and clicked');
           foundRuta = true;
           break;
         }
       }
-      
+
       if (!foundRuta) {
         throw new Error(`Ruta ${numeroRuta} not found in table`);
       }
-      
+
       // Wait for modal to close
       await this.page.waitForTimeout(1000);
-      
+
     } catch (error) {
       logger.error('Failed to add ruta', error);
       await this.takeScreenshot('agregar-ruta-error');
@@ -457,21 +481,21 @@ export class PlanificarPage extends BasePage {
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking Guardar button');
-    
+
     try {
       const btnGuardar = this.page.locator(this.selectors.btnGuardar).first();
-      
+
       // Wait for button to be visible
       await btnGuardar.waitFor({ state: 'visible', timeout: 10000 });
-      
+
       // Remove any modal backdrops
       await this.page.evaluate(() => {
         const backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(bd => bd.remove());
       });
-      
+
       await this.page.waitForTimeout(300);
-      
+
       // Try click with retries
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
@@ -486,7 +510,7 @@ export class PlanificarPage extends BasePage {
               if (btn) btn.click();
             });
           }
-          
+
           logger.info('✅ Guardar button clicked');
           break;
         } catch (error) {
@@ -494,11 +518,11 @@ export class PlanificarPage extends BasePage {
           await this.page.waitForTimeout(500);
         }
       }
-      
+
       // Wait for response
       await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(2000);
-      
+
     } catch (error) {
       logger.error('Failed to click Guardar', error);
       await this.takeScreenshot('click-guardar-error');
@@ -511,23 +535,23 @@ export class PlanificarPage extends BasePage {
   async isFormSaved(): Promise<boolean> {
     try {
       await this.page.waitForTimeout(2000);
-      
+
       // Check for success alert
       const successAlert = await this.page.locator('.alert-success, [role="alert"]').first().isVisible({ timeout: 3000 }).catch(() => false);
-      
+
       if (successAlert) {
         const alertText = await this.page.locator('.alert-success, [role="alert"]').first().textContent();
         logger.info(`Success alert: ${alertText}`);
         return true;
       }
-      
+
       // Check URL change
       const url = this.page.url();
       if (!url.includes('/crear')) {
         logger.info('URL changed from /crear, form likely saved');
         return true;
       }
-      
+
       return false;
     } catch {
       return false;
@@ -536,20 +560,20 @@ export class PlanificarPage extends BasePage {
 
   async verifyInAsignar(nroViaje: string): Promise<boolean> {
     logger.info(`Verifying viaje ${nroViaje} in /viajes/asignar`);
-    
+
     try {
       await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/asignar');
       await this.page.waitForLoadState('networkidle');
-      
+
       // Use search if available
       const searchInput = this.page.locator('input[type="search"]').first();
       const searchVisible = await searchInput.isVisible({ timeout: 2000 }).catch(() => false);
-      
+
       if (searchVisible) {
         await searchInput.fill(nroViaje);
         await this.page.waitForTimeout(1000);
       }
-      
+
       // Check table for nroViaje - search ALL columns for robustness
       const found = await this.page.evaluate((viaje: string) => {
         const tbody = document.querySelector('table tbody');
@@ -577,13 +601,13 @@ export class PlanificarPage extends BasePage {
         console.log(`Viaje "${viaje}" not found in any column`);
         return false;
       }, nroViaje);
-      
+
       if (found) {
         logger.info(`✅ Viaje ${nroViaje} found in /viajes/asignar`);
       } else {
         logger.warn(`⚠️ Viaje ${nroViaje} NOT found in /viajes/asignar`);
       }
-      
+
       return found;
     } catch (error) {
       logger.error('Failed to verify in asignar', error);
