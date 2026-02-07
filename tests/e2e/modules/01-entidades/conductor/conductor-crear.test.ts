@@ -18,7 +18,11 @@ test.describe('Transport - Conductor Creation', () => {
 
     test.beforeAll(async ({ browser }) => {
         // 1. Seed Transportista (Prerequisite)
-        const page = await browser.newPage();
+        // Use newContext with storageState to ensure authentication
+        const context = await browser.newContext({
+            storageState: 'playwright/.auth/user.json'
+        });
+        const page = await context.newPage();
         try {
             logger.info('🏗️ Seeding Transportista for Conductor Test...');
             const transportista = await TransportistaHelper.createTransportistaViaUI(page, 'Propio');
@@ -29,6 +33,7 @@ test.describe('Transport - Conductor Creation', () => {
             throw e;
         } finally {
             await page.close();
+            await context.close();
         }
     });
 

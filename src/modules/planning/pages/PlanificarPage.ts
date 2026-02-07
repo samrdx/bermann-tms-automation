@@ -265,6 +265,11 @@ export class PlanificarPage extends BasePage {
     logger.info('Selecting Unidad Negocio');
     try {
       await this.robustSelect(this.selectors.unidadNegocio, value, false);
+      // CRITICAL: Wait for getContractModality() AJAX to complete
+      // This is the last cascade trigger before Codigo Carga loads
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        logger.warn('Network idle timeout after Unidad Negocio, proceeding...');
+      });
       logger.info('✅ Unidad Negocio selected');
     } catch (error) {
       logger.error('Failed to select Unidad Negocio', error);
@@ -279,12 +284,16 @@ export class PlanificarPage extends BasePage {
       // Wait for dropdown options to load (populated dynamically via AJAX after
       // Tipo Operación + Cliente + Tipo Servicio + Unidad Negocio are selected)
       logger.info('Waiting for Codigo Carga options to load...');
+      // Wait for any pending AJAX from cascade chain to complete
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        logger.warn('Network idle timeout before Codigo Carga wait, proceeding...');
+      });
       await this.page.waitForFunction(
         () => {
           const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
           return sel && sel.options.length > 1;
         },
-        { timeout: 15000 }
+        { timeout: 25000 }
       );
       await this.page.waitForTimeout(500); // Small buffer after options load
       logger.info('Codigo Carga options loaded');
