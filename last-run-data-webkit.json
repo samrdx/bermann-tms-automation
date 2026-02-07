@@ -1,33 +1,33 @@
 {
-  "createdAt": "2026-02-06T22:56:36.356Z",
+  "createdAt": "2026-02-07T18:42:32.604Z",
   "workerIndex": 1,
   "projectName": "base-entities-webkit",
   "transportista": {
     "id": "",
-    "nombre": "InterModal Sur - 418596",
-    "rut": "14513161-8",
-    "razonSocial": "InterModal Sur - 418596",
-    "baseNombre": "InterModal Sur"
+    "nombre": "Ruta Nacional Express - 489752",
+    "rut": "77256540-2",
+    "razonSocial": "Ruta Nacional Express - 489752",
+    "baseNombre": "Ruta Nacional Express"
   },
   "cliente": {
-    "id": "58",
-    "nombre": "Ruta Nacional Express Logistics SpA",
-    "rut": "63351673-1",
-    "email": "rutanacionalexpress@test.cl"
+    "id": "N/A",
+    "nombre": "Andes Transport Services Logistics SpA",
+    "rut": "51322041-3",
+    "email": "andestransportservices@test.cl"
   },
   "vehiculo": {
-    "patente": "VVQO-72",
-    "muestra": "VEH-1770418643867",
-    "transportistaNombre": "InterModal Sur - 418596",
+    "patente": "SLFL-65",
+    "muestra": "VEH-1770489802427",
+    "transportistaNombre": "Ruta Nacional Express - 489752",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Antonio",
-    "apellido": "Soto",
-    "rut": "11.705.132-3",
-    "email": "antoniosoto@test.com",
-    "telefono": "+56915271093",
-    "transportistaNombre": "InterModal Sur - 418596"
+    "nombre": "Carmen",
+    "apellido": "Martínez",
+    "rut": "50.770.472-7",
+    "email": "carmenmartínez@test.com",
+    "telefono": "+56984138371",
+    "transportistaNombre": "Ruta Nacional Express - 489752"
   },
-  "executionTimeSeconds": 88.23
+  "executionTimeSeconds": 90.81
 }

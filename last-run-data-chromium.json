@@ -1,45 +1,33 @@
 {
-  "createdAt": "2026-02-07T15:23:21.606Z",
-  "workerIndex": 1,
+  "createdAt": "2026-02-07T18:42:29.524Z",
+  "workerIndex": 3,
   "projectName": "base-entities-chromium",
   "transportista": {
     "id": "",
-    "nombre": "Vía Rápida SpA - 477801",
-    "rut": "60736662-4",
-    "razonSocial": "Vía Rápida SpA - 477801",
-    "baseNombre": "Vía Rápida SpA"
+    "nombre": "Rutas del Maule - 489749",
+    "rut": "71115930-4",
+    "razonSocial": "Rutas del Maule - 489749",
+    "baseNombre": "Rutas del Maule"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "Prime Cargo Solutions Logistics SpA",
-    "rut": "65285206-8",
-    "email": "primecargosolutions@test.cl"
+    "nombre": "LogiChile Connect Logistics SpA",
+    "rut": "27278443-4",
+    "email": "logichileconnect@test.cl"
   },
   "vehiculo": {
-    "patente": "FELT-68",
-    "muestra": "VEH-1770477838872",
-    "transportistaNombre": "Vía Rápida SpA - 477801",
+    "patente": "LMNJ-96",
+    "muestra": "VEH-1770489789997",
+    "transportistaNombre": "Rutas del Maule - 489749",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Carmen",
+    "nombre": "Antonio",
     "apellido": "Rojas",
-    "rut": "52.108.645-9",
-    "email": "carmenrojas@test.com",
-    "telefono": "+56926492916",
-    "transportistaNombre": "Vía Rápida SpA - 477801"
+    "rut": "12.335.052-9",
+    "email": "antoniorojas@test.com",
+    "telefono": "+56936648840",
+    "transportistaNombre": "Rutas del Maule - 489749"
   },
-  "executionTimeSeconds": 69.81,
-  "contratoCliente": {
-    "id": "787",
-    "nroContrato": "30107",
-    "tipo": "Venta",
-    "clienteNombre": "Prime Cargo Solutions Logistics SpA"
-  },
-  "viaje": {
-    "nroViaje": "11541",
-    "cliente": "Prime Cargo Solutions Logistics SpA",
-    "ruta": "05082025-1",
-    "status": "PLANIFICADO"
-  }
+  "executionTimeSeconds": 73.44
 }

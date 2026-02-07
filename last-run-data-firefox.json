@@ -1,39 +1,33 @@
 {
-  "createdAt": "2026-02-06T19:25:13.955Z",
+  "createdAt": "2026-02-07T18:42:34.578Z",
   "workerIndex": 2,
   "projectName": "base-entities-firefox",
   "transportista": {
     "id": "",
-    "nombre": "MegaLogística Central - 405913",
-    "rut": "25981180-5",
-    "razonSocial": "MegaLogística Central - 405913",
-    "baseNombre": "MegaLogística Central"
+    "nombre": "Prime Cargo Solutions - 489754",
+    "rut": "22022189-K",
+    "razonSocial": "Prime Cargo Solutions - 489754",
+    "baseNombre": "Prime Cargo Solutions"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "InterModal Sur Logistics SpA",
-    "rut": "32855177-2",
-    "email": "intermodalsur@test.cl"
+    "nombre": "TransSur Logística Logistics SpA",
+    "rut": "34346502-5",
+    "email": "transsurlogística@test.cl"
   },
   "vehiculo": {
-    "patente": "XLUI-73",
-    "muestra": "VEH-1770405952039",
-    "transportistaNombre": "MegaLogística Central - 405913",
+    "patente": "PJMY-96",
+    "muestra": "VEH-1770489794783",
+    "transportistaNombre": "Prime Cargo Solutions - 489754",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Luis",
-    "apellido": "Rodríguez",
-    "rut": "60.519.083-9",
-    "email": "luisrodríguez@test.com",
-    "telefono": "+56983487330",
-    "transportistaNombre": "MegaLogística Central - 405913"
+    "nombre": "María",
+    "apellido": "Soto",
+    "rut": "58.663.878-5",
+    "email": "maríasoto@test.com",
+    "telefono": "+56957786008",
+    "transportistaNombre": "Prime Cargo Solutions - 489754"
   },
-  "executionTimeSeconds": 73.16,
-  "contratoCosto": {
-    "id": "774",
-    "nroContrato": "30727",
-    "tipo": "Costo",
-    "transportistaNombre": "MegaLogística Central"
-  }
+  "executionTimeSeconds": 75
 }
