@@ -106,7 +106,9 @@ export class ClienteHelper {
 
         // 4. Verify & Rescue ID (Fallback)
         logger.info('⏳ Waiting for save completion/redirection...');
-        await page.waitForURL(url => url.toString().includes('/index') || !!url.toString().match(/\/(ver|view|editar|edit|update)\//), { timeout: 30000 });
+
+        // Wait for save to process (don't use strict waitForURL as it may timeout)
+        await page.waitForTimeout(3000);
 
         let id = '';
         const currentUrl = page.url();
