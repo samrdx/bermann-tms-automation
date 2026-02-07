@@ -281,34 +281,41 @@ export class PlanificarPage extends BasePage {
     try {
       const selectLoc = this.page.locator(this.selectors.codigoCarga);
 
-      // Codigo Carga options are loaded when clicking the dropdown (lazy load)
-      // Per user: "se despliegan solo seleccionando el dropdown Codigo de Carga"
+      // If a specific cargo code is provided (e.g., "Pallet_Furgon_Frio_10ton"),
+      // use robustSelect directly - it handles waiting for options internally
+      if (carga) {
+        logger.info(`Selecting specific Codigo Carga: ${carga}`);
+
+        // Wait for dropdown to be ready
+        await selectLoc.waitFor({ state: 'attached', timeout: 10000 });
+
+        // Use robustSelect which handles Bootstrap-select and events
+        await this.robustSelect(this.selectors.codigoCarga, carga, true);
+        logger.info('✅ Codigo Carga selected');
+        return;
+      }
+
+      // No specific cargo - select first available (original lazy-load logic)
       logger.info('Opening Codigo Carga dropdown to trigger lazy loading...');
 
-      // First, click the Bootstrap-select button to open the dropdown and trigger AJAX load
-      // The dropdown is a Bootstrap-select, so we need to click the visible button
       const pickerButton = this.page.locator('button[data-id="viajes-carga_id"]');
 
-      // Try clicking the picker button to trigger loading
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           await pickerButton.waitFor({ state: 'visible', timeout: 5000 });
           await pickerButton.click();
           logger.info('Clicked Codigo Carga dropdown button');
 
-          // Wait for AJAX to complete
           await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {
             logger.warn('Network idle timeout after clicking Codigo Carga, proceeding...');
           });
           await this.page.waitForTimeout(1500);
 
-          // Check if options loaded
           const optionsCount = await selectLoc.evaluate((sel: HTMLSelectElement) => sel.options.length);
           logger.info(`Codigo Carga has ${optionsCount} options after click`);
 
           if (optionsCount > 1) {
             logger.info('✅ Codigo Carga options loaded');
-            // Close dropdown by pressing Escape or clicking elsewhere
             await this.page.keyboard.press('Escape');
             await this.page.waitForTimeout(300);
             break;
@@ -319,7 +326,6 @@ export class PlanificarPage extends BasePage {
           }
         } catch (clickError) {
           if (attempt === 2) {
-            // Log available options for debugging
             const options = await selectLoc.evaluate((sel: HTMLSelectElement) =>
               Array.from(sel.options).map(o => o.textContent?.trim() || '')
             );
@@ -332,50 +338,32 @@ export class PlanificarPage extends BasePage {
 
       await this.page.waitForTimeout(500);
 
-      if (!carga) {
-        // Select first available option (skip empty/placeholder)
-        logger.info('Selecting first available Codigo Carga...');
+      // Select first available option
+      logger.info('Selecting first available Codigo Carga...');
 
-        const firstOption = await selectLoc.evaluate((sel: HTMLSelectElement) => {
-          const options = Array.from(sel.options);
-          // Skip first option if it's empty or placeholder
-          const validOption = options.find(opt => opt.value && opt.value.trim() !== '' && opt.textContent?.trim());
-          return validOption ? { value: validOption.value, text: validOption.textContent?.trim() } : null;
-        });
+      const firstOption = await selectLoc.evaluate((sel: HTMLSelectElement) => {
+        const options = Array.from(sel.options);
+        const validOption = options.find(opt => opt.value && opt.value.trim() !== '' && opt.textContent?.trim());
+        return validOption ? { value: validOption.value, text: validOption.textContent?.trim() } : null;
+      });
 
-        if (!firstOption) {
-          throw new Error('No valid Codigo Carga options available');
-        }
-
-        logger.info(`Found first available: ${firstOption.text} (value: ${firstOption.value})`);
-        // Use selectpicker API for consistency
-        await this.page.evaluate((args: { sel: string; val: string }) => {
-          const $ = (window as any).$;
-          const selectEl = document.querySelector(args.sel) as HTMLSelectElement;
-          if ($ && selectEl && $(selectEl).selectpicker) {
-            $(selectEl).selectpicker('val', args.val);
-          } else if (selectEl) {
-            selectEl.value = args.val;
-            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }, { sel: this.selectors.codigoCarga, val: firstOption.value });
-        await this.page.waitForTimeout(900);
-        logger.info('✅ First available Codigo Carga selected');
-      } else {
-        // Select specific cargo by text
-        logger.info(`Selecting Codigo Carga: ${carga}`);
-
-        // First, log all available options for debugging
-        const allOptions = await selectLoc.evaluate((sel: HTMLSelectElement) =>
-          Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent?.trim() || '' }))
-        );
-        logger.info(`Available Codigo Carga options (${allOptions.length}):`);
-        allOptions.slice(0, 10).forEach(opt => logger.info(`  - "${opt.text}" (value: ${opt.value})`));
-        if (allOptions.length > 10) logger.info(`  ... and ${allOptions.length - 10} more`);
-
-        await this.robustSelect(this.selectors.codigoCarga, carga, true);
-        logger.info('✅ Codigo Carga selected');
+      if (!firstOption) {
+        throw new Error('No valid Codigo Carga options available');
       }
+
+      logger.info(`Found first available: ${firstOption.text} (value: ${firstOption.value})`);
+      await this.page.evaluate((args: { sel: string; val: string }) => {
+        const $ = (window as any).$;
+        const selectEl = document.querySelector(args.sel) as HTMLSelectElement;
+        if ($ && selectEl && $(selectEl).selectpicker) {
+          $(selectEl).selectpicker('val', args.val);
+        } else if (selectEl) {
+          selectEl.value = args.val;
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }, { sel: this.selectors.codigoCarga, val: firstOption.value });
+      await this.page.waitForTimeout(900);
+      logger.info('✅ First available Codigo Carga selected');
     } catch (error) {
       logger.error('Failed to select Codigo Carga', error);
       await this.takeScreenshot('select-carga-error');
