@@ -46,14 +46,22 @@ test.describe('Viajes - Planificar (Create)', () => {
 
     const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
-    // Verify prerequisites
-    if (!operationalData.contratoCliente?.id) {
+    // Verify prerequisites - only Cliente needed for viajes-planificar
+    const missingEntities = [];
+
+    if (!operationalData.cliente?.nombre) {
+      missingEntities.push('cliente');
+    }
+
+    if (missingEntities.length > 0) {
       throw new Error(
-        'Cliente Contract not found!\n' +
-        'Run Step 5.5 first: npm run test:contrato2cliente'
+        `❌ Missing required entities: ${missingEntities.join(', ')}\n` +
+        `Data file: ${dataPath}\n` +
+        'Please run: npm run test:base (base entities)'
       );
     }
 
+    logger.info('✅ All prerequisites validated');
     logger.info('Loaded entities:');
     logger.info(`   Cliente: ${operationalData.cliente.nombre}`);
     logger.info(`   Cliente Contract ID: ${operationalData.contratoCliente.id}`);

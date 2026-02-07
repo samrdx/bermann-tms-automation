@@ -1,44 +1,44 @@
 {
-  "createdAt": "2026-02-06T20:24:39.717Z",
+  "createdAt": "2026-02-07T15:23:21.606Z",
   "workerIndex": 1,
   "projectName": "base-entities-chromium",
   "transportista": {
     "id": "",
-    "nombre": "MegaLogística Central - 409479",
-    "rut": "22983086-4",
-    "razonSocial": "MegaLogística Central - 409479",
-    "baseNombre": "MegaLogística Central"
+    "nombre": "Vía Rápida SpA - 477801",
+    "rut": "60736662-4",
+    "razonSocial": "Vía Rápida SpA - 477801",
+    "baseNombre": "Vía Rápida SpA"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "Vía Rápida SpA Logistics SpA",
-    "rut": "21846346-0",
-    "email": "víarápidaspa@test.cl"
+    "nombre": "Prime Cargo Solutions Logistics SpA",
+    "rut": "65285206-8",
+    "email": "primecargosolutions@test.cl"
   },
   "vehiculo": {
-    "patente": "NYQL-99",
-    "muestra": "VEH-1770409515971",
-    "transportistaNombre": "MegaLogística Central - 409479",
+    "patente": "FELT-68",
+    "muestra": "VEH-1770477838872",
+    "transportistaNombre": "Vía Rápida SpA - 477801",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Luis",
-    "apellido": "Pérez",
-    "rut": "67.949.563-1",
-    "email": "luispérez@test.com",
-    "telefono": "+56940149252",
-    "transportistaNombre": "MegaLogística Central - 409479"
+    "nombre": "Carmen",
+    "apellido": "Rojas",
+    "rut": "52.108.645-9",
+    "email": "carmenrojas@test.com",
+    "telefono": "+56926492916",
+    "transportistaNombre": "Vía Rápida SpA - 477801"
   },
-  "executionTimeSeconds": 68.37,
+  "executionTimeSeconds": 69.81,
   "contratoCliente": {
-    "id": "775",
-    "nroContrato": "69950",
+    "id": "787",
+    "nroContrato": "30107",
     "tipo": "Venta",
-    "clienteNombre": "Vía Rápida SpA Logistics SpA"
+    "clienteNombre": "Prime Cargo Solutions Logistics SpA"
   },
   "viaje": {
-    "nroViaje": "66560",
-    "cliente": "Vía Rápida SpA Logistics SpA",
+    "nroViaje": "11541",
+    "cliente": "Prime Cargo Solutions Logistics SpA",
     "ruta": "05082025-1",
     "status": "PLANIFICADO"
   }

@@ -1,33 +1,33 @@
 {
-  "createdAt": "2026-02-06T19:25:10.756Z",
+  "createdAt": "2026-02-06T22:56:36.356Z",
   "workerIndex": 1,
   "projectName": "base-entities-webkit",
   "transportista": {
-    "id": "347",
-    "nombre": "Andes Transport Services - 405910",
-    "rut": "95372732-3",
-    "razonSocial": "Andes Transport Services - 405910",
-    "baseNombre": "Andes Transport Services"
+    "id": "",
+    "nombre": "InterModal Sur - 418596",
+    "rut": "14513161-8",
+    "razonSocial": "InterModal Sur - 418596",
+    "baseNombre": "InterModal Sur"
   },
   "cliente": {
-    "id": "N/A",
-    "nombre": "Logística 360 SpA Logistics SpA",
-    "rut": "36556775-1",
-    "email": "logística360spa@test.cl"
+    "id": "58",
+    "nombre": "Ruta Nacional Express Logistics SpA",
+    "rut": "63351673-1",
+    "email": "rutanacionalexpress@test.cl"
   },
   "vehiculo": {
-    "patente": "DTAF-29",
-    "muestra": "VEH-1770405960844",
-    "transportistaNombre": "Andes Transport Services - 405910",
+    "patente": "VVQO-72",
+    "muestra": "VEH-1770418643867",
+    "transportistaNombre": "InterModal Sur - 418596",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Valentina",
+    "nombre": "Antonio",
     "apellido": "Soto",
-    "rut": "86.923.481-8",
-    "email": "valentinasoto@test.com",
-    "telefono": "+56939187150",
-    "transportistaNombre": "Andes Transport Services - 405910"
+    "rut": "11.705.132-3",
+    "email": "antoniosoto@test.com",
+    "telefono": "+56915271093",
+    "transportistaNombre": "InterModal Sur - 418596"
   },
-  "executionTimeSeconds": 90.82
+  "executionTimeSeconds": 88.23
 }
