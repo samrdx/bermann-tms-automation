@@ -281,49 +281,56 @@ export class PlanificarPage extends BasePage {
     try {
       const selectLoc = this.page.locator(this.selectors.codigoCarga);
 
-      // Codigo Carga options are loaded from CLIENTE selection (not the full cascade)
-      // After selecting Cliente, the dropdown should have options available
-      logger.info('Waiting for Codigo Carga options to load (from Cliente selection)...');
+      // Codigo Carga options are loaded when clicking the dropdown (lazy load)
+      // Per user: "se despliegan solo seleccionando el dropdown Codigo de Carga"
+      logger.info('Opening Codigo Carga dropdown to trigger lazy loading...');
 
-      // Wait for network to settle after Cliente selection
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-        logger.warn('Network idle timeout before Codigo Carga wait, proceeding...');
-      });
+      // First, click the Bootstrap-select button to open the dropdown and trigger AJAX load
+      // The dropdown is a Bootstrap-select, so we need to click the visible button
+      const pickerButton = this.page.locator('button[data-id="viajes-carga_id"]');
 
-      // Wait for options with reasonable timeout (depends only on Cliente)
-      let optionsLoaded = false;
-      for (let attempt = 0; attempt < 2; attempt++) {
+      // Try clicking the picker button to trigger loading
+      for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          await this.page.waitForFunction(
-            () => {
-              const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
-              return sel && sel.options.length > 1;
-            },
-            { timeout: 15000 }
-          );
-          optionsLoaded = true;
-          break;
-        } catch (waitError) {
-          if (attempt === 0) {
-            logger.warn('First attempt to load Codigo Carga options timed out, retrying...');
-            // Click on the dropdown to trigger load if needed
-            await selectLoc.click().catch(() => { });
-            await this.page.waitForTimeout(1500);
+          await pickerButton.waitFor({ state: 'visible', timeout: 5000 });
+          await pickerButton.click();
+          logger.info('Clicked Codigo Carga dropdown button');
+
+          // Wait for AJAX to complete
+          await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {
+            logger.warn('Network idle timeout after clicking Codigo Carga, proceeding...');
+          });
+          await this.page.waitForTimeout(1500);
+
+          // Check if options loaded
+          const optionsCount = await selectLoc.evaluate((sel: HTMLSelectElement) => sel.options.length);
+          logger.info(`Codigo Carga has ${optionsCount} options after click`);
+
+          if (optionsCount > 1) {
+            logger.info('✅ Codigo Carga options loaded');
+            // Close dropdown by pressing Escape or clicking elsewhere
+            await this.page.keyboard.press('Escape');
+            await this.page.waitForTimeout(300);
+            break;
+          } else if (attempt < 2) {
+            logger.warn(`Options not loaded on attempt ${attempt + 1}, retrying...`);
+            await this.page.keyboard.press('Escape');
+            await this.page.waitForTimeout(1000);
           }
+        } catch (clickError) {
+          if (attempt === 2) {
+            // Log available options for debugging
+            const options = await selectLoc.evaluate((sel: HTMLSelectElement) =>
+              Array.from(sel.options).map(o => o.textContent?.trim() || '')
+            );
+            logger.error(`Codigo Carga options not loaded after 3 attempts. Available: ${options.join(', ')}`);
+            throw new Error('Codigo Carga options did not load');
+          }
+          await this.page.waitForTimeout(1000);
         }
       }
 
-      if (!optionsLoaded) {
-        // Log available options for debugging before throwing
-        const options = await selectLoc.evaluate((sel: HTMLSelectElement) =>
-          Array.from(sel.options).map(o => o.textContent?.trim() || '')
-        );
-        logger.error(`Codigo Carga options not loaded. Available: ${options.join(', ')}`);
-        throw new Error('Codigo Carga options did not load within timeout');
-      }
-
-      await this.page.waitForTimeout(500); // Small buffer after options load
-      logger.info('Codigo Carga options loaded');
+      await this.page.waitForTimeout(500);
 
       if (!carga) {
         // Select first available option (skip empty/placeholder)
