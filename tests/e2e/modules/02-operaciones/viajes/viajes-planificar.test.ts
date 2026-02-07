@@ -64,10 +64,6 @@ test.describe('Viajes - Planificar (Create)', () => {
     logger.info('✅ All prerequisites validated');
     logger.info('Loaded entities:');
     logger.info(`   Cliente: ${operationalData.cliente.nombre}`);
-    logger.info(`   Cliente Contract ID: ${operationalData.contratoCliente.id}`);
-    logger.info(`   Transportista: ${operationalData.transportista.nombre}`);
-    logger.info(`   Vehiculo: ${operationalData.vehiculo.patente}`);
-    logger.info(`   Conductor: ${operationalData.conductor.nombre} ${operationalData.conductor.apellido}`);
     logger.info('');
 
     // Test data
