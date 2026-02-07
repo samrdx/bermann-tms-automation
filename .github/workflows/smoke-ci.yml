@@ -42,12 +42,15 @@ jobs:
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          echo "Running Base Entities Setup + Contract Tests..."
+          echo "Step 1: Running Base Entities Setup..."
+          npx playwright test --project=base-entities-chromium --reporter=line
+          
+          echo "Step 2: Running Contract Tests..."
           npx playwright test \
-            --project=base-entities-chromium \
             tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
             tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
-            --reporter=html,line
+            --project=chromium --reporter=html,line
+
 
 
       - name: List Generated Files (Debug)
