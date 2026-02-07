@@ -1,0 +1,71 @@
+name: Smoke CI (Recovery Mode)
+
+on:
+  push:
+    branches: [main, develop, fix/*, debug/*]
+  workflow_dispatch:
+
+jobs:
+  smoke-setup:
+    name: Smoke Setup (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Base Entities Setup
+        env:
+          # Environment
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          ENVIRONMENT: dev
+          HEADLESS: true
+          TIMEOUT: 60000
+          LOG_LEVEL: info
+          
+          # Credentials
+          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
+          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
+        run: |
+          echo "Running Base Entities Setup..."
+          npx playwright test --project=base-entities-chromium --reporter=html,line
+
+      - name: List Generated Files (Debug)
+        if: always()
+        run: |
+          echo "Listing root directory files:"
+          ls -la
+          echo "Searching for last-run-data files:"
+          find . -name "last-run-data-*.json"
+
+      - name: Upload Setup Data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: last-run-data-chromium
+          path: last-run-data-chromium.json
+          if-no-files-found: warn
+          retention-days: 5
+
+      - name: Upload Playwright Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          retention-days: 5
