@@ -235,37 +235,22 @@ export class ContratosFormPage extends BasePage {
         throw new Error(`Transportista with name "${transportistaNombre}" not found in dropdown`);
       }
 
-      // Select directly using the value
-      await transportistaSelect.selectOption({ value: transportistaValue });
+      // Use Bootstrap-select's native API (proven to work via live debugging)
+      // selectOption() + refresh/render does NOT sync properly - form validation rejects it
+      await this.page.evaluate((val: string) => {
+        const $ = (window as any).$;
+        if ($ && $('#contrato-transportista_id').selectpicker) {
+          $('#contrato-transportista_id').selectpicker('val', val);
+        }
+      }, transportistaValue);
       await this.page.waitForTimeout(1000);
 
-      // Refresh Bootstrap-select UI and trigger change event (multiple attempts for reliability)
-      for (let attempt = 0; attempt < 3; attempt++) {
-        await this.page.evaluate(() => {
-          const select = document.querySelector('#contrato-transportista_id') as any;
-          if (select) {
-            // Refresh Bootstrap-select to update visual UI
-            const $ = (window as any).$;
-            if (typeof $ !== 'undefined' && $(select).selectpicker) {
-              $(select).selectpicker('refresh');
-              $(select).selectpicker('render');
-            }
-            // Trigger change event
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        });
-        await this.page.waitForTimeout(500);
-
-        // Verify the selection was applied to Bootstrap-select button
-        const buttonText = await this.page.locator('button[data-id="contrato-transportista_id"] .filter-option-inner-inner').textContent().catch(() => '');
-        if (buttonText && buttonText !== 'Transportista' && buttonText.trim().length > 0) {
-          logger.info(`✅ Transportista selected: ${buttonText}`);
-          break;
-        }
-
-        if (attempt < 2) {
-          logger.warn(`⚠️ Transportista selection attempt ${attempt + 1} failed, retrying...`);
-        }
+      // Verify the selection was applied
+      const buttonText = await this.page.locator('button[data-id="contrato-transportista_id"] .filter-option-inner-inner').textContent().catch(() => '');
+      if (buttonText && buttonText !== 'Transportista' && buttonText.trim().length > 0) {
+        logger.info(`✅ Transportista selected via selectpicker API: ${buttonText}`);
+      } else {
+        logger.warn(`⚠️ Transportista selection may not have applied. Button text: ${buttonText}`);
       }
 
       logger.info('✅ Transportista selection process complete');
