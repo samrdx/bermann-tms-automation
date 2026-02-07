@@ -107,7 +107,10 @@ export class PlanificarPage extends BasePage {
   // ========== SELECTS ROBUSTOS (Pattern from old script) ==========
 
   /**
-   * Robust select that retries and uses fallback methods
+   * Robust select that uses Bootstrap-select's selectpicker('val') API.
+   * Playwright's selectOption() does NOT trigger Bootstrap-select change events,
+   * which breaks cascading AJAX calls. Using selectpicker('val') ensures proper
+   * event propagation and AJAX triggers.
    */
   private async robustSelect(
     selector: string,
@@ -115,43 +118,60 @@ export class PlanificarPage extends BasePage {
     searchByText = true
   ): Promise<void> {
     const selectLoc = this.page.locator(selector);
-    
+
     // Wait for select to be visible
     await selectLoc.waitFor({ state: 'visible', timeout: 5000 });
-    
+
     for (let retry = 0; retry < 3; retry++) {
       try {
+        let valueToSet: string;
+
         if (searchByText) {
-          // Find option by text content
+          // Find option value by text content
           const optionValue = await selectLoc.evaluate((sel: HTMLSelectElement, text: string) => {
             const opts = Array.from(sel.options || []);
-            const found = opts.find(o => 
+            const found = opts.find(o =>
               (o.textContent || '').toLowerCase().includes(text.toLowerCase())
             );
             return found ? found.value : null;
           }, textOrValue);
-          
-          if (optionValue) {
-            await selectLoc.selectOption(optionValue);
-          } else {
-            const allOptions = await selectLoc.evaluate((sel: HTMLSelectElement) => 
+
+          if (!optionValue) {
+            const allOptions = await selectLoc.evaluate((sel: HTMLSelectElement) =>
               Array.from(sel.options).map(o => o.textContent?.trim() || '')
             );
             logger.warn(`Option with text "${textOrValue}" not found. Available: ${allOptions.join(', ')}`);
             throw new Error(`Option with text "${textOrValue}" not found`);
           }
+          valueToSet = optionValue;
         } else {
-          // Select by value directly
-          await selectLoc.selectOption(textOrValue);
+          valueToSet = textOrValue;
         }
-        
-        // Wait and verify not invalid
-        await this.page.waitForTimeout(900);
-        const isInvalid = await selectLoc.evaluate(el => 
-          el.classList.contains('is-invalid') || 
+
+        // Use Bootstrap-select's selectpicker('val') API for proper event propagation
+        await this.page.evaluate((args: { sel: string; val: string }) => {
+          const $ = (window as any).$;
+          const selectEl = document.querySelector(args.sel) as HTMLSelectElement;
+          if ($ && selectEl && $(selectEl).selectpicker) {
+            $(selectEl).selectpicker('val', args.val);
+          } else {
+            // Fallback: set value + dispatch change if selectpicker not available
+            if (selectEl) {
+              selectEl.value = args.val;
+              selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+        }, { sel: selector, val: valueToSet });
+
+        // Wait for cascading effects (AJAX calls, dependent dropdowns loading)
+        await this.page.waitForTimeout(1000);
+
+        // Verify not invalid
+        const isInvalid = await selectLoc.evaluate(el =>
+          el.classList.contains('is-invalid') ||
           el.closest('.form-group, .form-control')?.classList.contains('has-error')
         );
-        
+
         if (!isInvalid) {
           return; // Success
         }
@@ -160,13 +180,16 @@ export class PlanificarPage extends BasePage {
         await this.page.waitForTimeout(500);
       }
     }
-    
-    // Fallback: set value via DOM
-    await selectLoc.evaluate((el: HTMLSelectElement, val: string) => {
-      el.value = val;
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, textOrValue);
-    
+
+    // Final fallback: set value via DOM + change event
+    await this.page.evaluate((args: { sel: string; val: string }) => {
+      const el = document.querySelector(args.sel) as HTMLSelectElement;
+      if (el) {
+        el.value = args.val;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }, { sel: selector, val: textOrValue });
+
     await this.page.waitForTimeout(500);
   }
 
@@ -241,7 +264,7 @@ export class PlanificarPage extends BasePage {
           const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
           return sel && sel.options.length > 1;
         },
-        { timeout: 10000 }
+        { timeout: 15000 }
       );
       await this.page.waitForTimeout(500); // Small buffer after options load
       logger.info('Codigo Carga options loaded');
@@ -262,7 +285,17 @@ export class PlanificarPage extends BasePage {
         }
 
         logger.info(`Found first available: ${firstOption.text} (value: ${firstOption.value})`);
-        await selectLoc.selectOption(firstOption.value);
+        // Use selectpicker API for consistency
+        await this.page.evaluate((args: { sel: string; val: string }) => {
+          const $ = (window as any).$;
+          const selectEl = document.querySelector(args.sel) as HTMLSelectElement;
+          if ($ && selectEl && $(selectEl).selectpicker) {
+            $(selectEl).selectpicker('val', args.val);
+          } else if (selectEl) {
+            selectEl.value = args.val;
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }, { sel: this.selectors.codigoCarga, val: firstOption.value });
         await this.page.waitForTimeout(900);
         logger.info('✅ First available Codigo Carga selected');
       } else {
