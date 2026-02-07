@@ -233,9 +233,18 @@ export class PlanificarPage extends BasePage {
     try {
       const selectLoc = this.page.locator(this.selectors.codigoCarga);
 
-      // Wait for dropdown to be fully loaded
-      await selectLoc.waitFor({ state: 'visible', timeout: 5000 });
-      await this.page.waitForTimeout(1500); // Extra wait for options to populate
+      // Wait for dropdown options to load (populated dynamically via AJAX after
+      // Tipo Operación + Cliente + Tipo Servicio + Unidad Negocio are selected)
+      logger.info('Waiting for Codigo Carga options to load...');
+      await this.page.waitForFunction(
+        () => {
+          const sel = document.querySelector('#viajes-carga_id') as HTMLSelectElement;
+          return sel && sel.options.length > 1;
+        },
+        { timeout: 10000 }
+      );
+      await this.page.waitForTimeout(500); // Small buffer after options load
+      logger.info('Codigo Carga options loaded');
 
       if (!carga) {
         // Select first available option (skip empty/placeholder)
