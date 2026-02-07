@@ -67,9 +67,11 @@ jobs:
           TIMEOUT: 60000
           LOG_LEVEL: info
 
-          # Credentials (use repository secrets)
-          TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          # Credentials (use repository secrets matching credentials.ts variable names)
+          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
+          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
           # Run only chromium tests with setup dependencies
           npx playwright test --project=chromium --reporter=html,line
@@ -178,8 +180,10 @@ jobs:
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           ENVIRONMENT: dev
           HEADLESS: true
-          TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
+          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
           # Run only auth setup to verify login works
           npx playwright test tests/helpers/auth.setup.ts --project=setup
