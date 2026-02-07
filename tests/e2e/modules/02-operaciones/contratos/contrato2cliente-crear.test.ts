@@ -75,10 +75,24 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         await page.waitForTimeout(300);
         logger.info('Nro Contrato filled');
 
-        // Select Tipo Contrato = "Venta" (value='2') - KEY DIFFERENCE
-        const tipoContratoSelect = page.locator('select#contrato-tipo_tarifa_contrato_id');
-        await tipoContratoSelect.selectOption({ value: '2' }); // 2 = Venta
-        await page.waitForTimeout(1000);
+        // Select Tipo Contrato = "Venta" (value='2') - uses selectpicker + onchange
+        await page.evaluate((val: string) => {
+            const $ = (window as any).$;
+            const selectEl = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
+            if ($ && selectEl && $(selectEl).selectpicker) {
+                $(selectEl).selectpicker('val', val);
+            } else if (selectEl) {
+                selectEl.value = val;
+            }
+            // CRITICAL: Trigger inline onchange="seleccionarEntidadContrato()"
+            if (selectEl) {
+                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof selectEl.onchange === 'function') {
+                    selectEl.onchange(new Event('change'));
+                }
+            }
+        }, '2');
+        await page.waitForTimeout(1500);
         logger.info('Selected Tipo Contrato: Venta');
 
         // After selecting "Venta", a new dropdown appears: "Tipo Contrato de Venta"
@@ -88,9 +102,23 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         const tipoContratoVentaSelect = page.locator('select#tipo');
         await tipoContratoVentaSelect.waitFor({ state: 'attached', timeout: 5000 });
 
-        // Select "Clientes" option (value="1")
-        await tipoContratoVentaSelect.selectOption({ value: '1' }); // 1 = Clientes
-        await page.waitForTimeout(1000);
+        // Select "Clientes" option (value="1") - uses selectpicker + onchange
+        await page.evaluate((val: string) => {
+            const $ = (window as any).$;
+            const selectEl = document.querySelector('#tipo') as HTMLSelectElement;
+            if ($ && selectEl && $(selectEl).selectpicker) {
+                $(selectEl).selectpicker('val', val);
+            } else if (selectEl) {
+                selectEl.value = val;
+            }
+            if (selectEl) {
+                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof selectEl.onchange === 'function') {
+                    selectEl.onchange(new Event('change'));
+                }
+            }
+        }, '1');
+        await page.waitForTimeout(1500);
         logger.info('Selected Tipo Contrato de Venta: Clientes');
 
         // Now the Cliente dropdown should appear
@@ -125,20 +153,25 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         const clienteText = await matchingOption.textContent();
         logger.info(`Found cliente: ${clienteText?.trim()} (value=${clienteValue})`);
 
-        // Select using the native select
+        // Select using selectpicker + onchange trigger
         if (clienteValue) {
-            await clienteSelect.selectOption({ value: clienteValue });
+            await page.evaluate((val: string) => {
+                const $ = (window as any).$;
+                const selectEl = document.querySelector('#contrato-cliente_id') as HTMLSelectElement;
+                if ($ && selectEl && $(selectEl).selectpicker) {
+                    $(selectEl).selectpicker('val', val);
+                } else if (selectEl) {
+                    selectEl.value = val;
+                }
+                if (selectEl) {
+                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (typeof selectEl.onchange === 'function') {
+                        selectEl.onchange(new Event('change'));
+                    }
+                }
+            }, clienteValue);
         }
-        await page.waitForTimeout(500);
-
-        // Trigger change event for Bootstrap-select to sync UI
-        await page.evaluate(() => {
-            const select = document.querySelector('#contrato-cliente_id') as HTMLSelectElement;
-            if (select) {
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
         logger.info('Cliente selected');
 
         // Force close any phantom modals before saving
