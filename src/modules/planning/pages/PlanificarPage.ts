@@ -233,6 +233,10 @@ export class PlanificarPage extends BasePage {
     try {
       const selectLoc = this.page.locator(this.selectors.codigoCarga);
 
+      // Wait for dropdown to be fully loaded
+      await selectLoc.waitFor({ state: 'visible', timeout: 5000 });
+      await this.page.waitForTimeout(1500); // Extra wait for options to populate
+
       if (!carga) {
         // Select first available option (skip empty/placeholder)
         logger.info('Selecting first available Codigo Carga...');
@@ -255,6 +259,15 @@ export class PlanificarPage extends BasePage {
       } else {
         // Select specific cargo by text
         logger.info(`Selecting Codigo Carga: ${carga}`);
+
+        // First, log all available options for debugging
+        const allOptions = await selectLoc.evaluate((sel: HTMLSelectElement) =>
+          Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent?.trim() || '' }))
+        );
+        logger.info(`Available Codigo Carga options (${allOptions.length}):`);
+        allOptions.slice(0, 10).forEach(opt => logger.info(`  - "${opt.text}" (value: ${opt.value})`));
+        if (allOptions.length > 10) logger.info(`  ... and ${allOptions.length - 10} more`);
+
         await this.robustSelect(this.selectors.codigoCarga, carga, true);
         logger.info('✅ Codigo Carga selected');
       }
