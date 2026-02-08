@@ -49,8 +49,8 @@ test.describe('Viajes - Planificar (Create)', () => {
     // Verify prerequisites - only Cliente needed for viajes-planificar
     const missingEntities = [];
 
-    if (!operationalData.cliente?.nombre) {
-      missingEntities.push('cliente');
+    if (!operationalData.cliente?.nombreFantasia) {
+      missingEntities.push('cliente (nombreFantasia)');
     }
 
     if (missingEntities.length > 0) {
@@ -63,12 +63,13 @@ test.describe('Viajes - Planificar (Create)', () => {
 
     logger.info('✅ All prerequisites validated');
     logger.info('Loaded entities:');
-    logger.info(`   Cliente: ${operationalData.cliente.nombre}`);
+    logger.info(`   Cliente: ${operationalData.cliente.nombreFantasia} (Nombre Fantasía)`);
     logger.info('');
 
     // Test data
     const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
-    const clienteNombre = operationalData.cliente.nombre;
+    // Use nombreFantasia — the TMS dropdown shows clients by Nombre de Fantasía, not Razón Social
+    const clienteNombre = operationalData.cliente.nombreFantasia;
 
     logger.info(`Generated Nro Viaje: ${nroViaje}`);
 
