@@ -382,6 +382,15 @@ export class PlanificarPage extends BasePage {
         // Use robustSelect which handles Bootstrap-select and events
         await this.robustSelect(this.selectors.codigoCarga, carga, true);
         logger.info('✅ Codigo Carga selected');
+
+        // Force the system to recognize the change — Playwright dispatchEvent ensures
+        // the DOM-level onchange fires (robustSelect uses JS evaluate which may not
+        // propagate to all listeners like the route calculation handler)
+        await this.page.locator(this.selectors.codigoCarga).dispatchEvent('change');
+        logger.info('Dispatched change event on Codigo Carga for route calculation');
+
+        // Wait for the backend to fetch routes and unlock the 'Agregar Ruta' button
+        await this.page.waitForTimeout(2000);
         return;
       }
 
