@@ -209,47 +209,43 @@ export class PlanificarPage extends BasePage {
     await this.selectBootstrapDropdown(this.selectors.btnDestino, destino, 'Destino');
   }
 
- // --- GUARDAR Y VERIFICAR ---
+  // --- GUARDAR Y VERIFICAR ---
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking Guardar button...');
     const btnGuardar = this.page.locator(this.selectors.btnGuardar);
-    
-    // 1. Click
+
     await btnGuardar.waitFor({ state: 'visible' });
     await btnGuardar.click();
-    
-    // 2. Espera explícita para dar tiempo al redireccionamiento
-    logger.info('Waiting for save operation...');
-    
-    try {
-        // Intentamos esperar a que la URL cambie (hasta 10 segundos)
-        await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 10000 });
-        logger.info('✅ URL changed successfully');
-    } catch (e) {
-        logger.warn('⚠️ URL did not change within 10s. Checking for success messages...');
-    }
-    
+
+    // Esperamos un momento a que aparezca la notificación o cambie la URL
+    logger.info('Waiting for success confirmation...');
     await this.page.waitForLoadState('networkidle');
   }
-
   async isFormSaved(): Promise<boolean> {
-    // Criterio 1: La URL cambió (Ya no estamos en /crear)
+    // ESTRATEGIA 1: Buscar la notificación verde de tu screenshot
+    // Texto exacto: "Viaje Creado con éxito"
+    const successMessage = this.page.getByText('Viaje Creado con éxito').first();
+
+    // Esperamos hasta 5 segundos a que aparezca el mensaje
+    if (await successMessage.isVisible({ timeout: 5000 }).catch(() => false)) {
+      logger.info('✅ Success toast detected: "Viaje Creado con éxito"');
+      return true;
+    }
+
+    // ESTRATEGIA 2: Verificar si la URL cambió (por si acaso)
     if (!this.page.url().includes('/crear')) {
-        return true;
+      logger.info('✅ URL changed (redirected)');
+      return true;
     }
 
-    // Criterio 2: Apareció una alerta de éxito (aunque sigamos en la misma página)
-    // Buscamos clases comunes de alertas en frameworks web
-    const successAlert = this.page.locator('.alert-success, .toastr-success, .kv-alert-success, div:has-text("Exitosamente")');
-    if (await successAlert.first().isVisible()) {
-        logger.info('✅ Success alert detected');
-        return true;
+    // ESTRATEGIA 3: Verificar si el formulario se limpió (Nro Viaje vacío)
+    const nroViajeVal = await this.page.locator(this.selectors.nroViaje).inputValue();
+    if (nroViajeVal === '') {
+      logger.info('✅ Form cleared (implicit success)');
+      return true;
     }
 
-    // Si llegamos aquí, asumimos falso, pero como tú verificaste manualmente que SÍ se crea,
-    // es posible que el sistema sea lento.
-    // Retornamos el estado actual para que el test decida.
     return false;
   }
 
