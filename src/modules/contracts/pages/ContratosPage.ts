@@ -197,63 +197,99 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(300);
       logger.info('✅ Nro Contrato filled');
 
-      // 2. Select Tipo Contrato = "Costo" (value="1")
+      // 2. Select Tipo Contrato = "Costo" (value="1") via selectpicker + inline onchange
+      // CRITICAL: Playwright's selectOption() does NOT trigger inline onchange="seleccionarEntidadContrato()"
+      // which controls the Transportista dropdown initialization
       logger.info('Selecting Tipo Contrato: Costo');
-      const tipoContratoSelect = this.page.locator('select#contrato-tipo_tarifa_contrato_id');
-      await tipoContratoSelect.selectOption({ value: '1' }); // 1 = Costo
-      await this.page.waitForTimeout(1000); // Wait for transportista dropdown to appear
-      logger.info('✅ Selected Tipo Contrato: Costo');
-
-      // 3. Wait for Transportista dropdown (#contrato-transportista_id)
-      logger.info(`Waiting for Transportista dropdown and searching name: ${transportistaNombre}...`);
-      const transportistaSelect = this.page.locator('select#contrato-transportista_id');
-      await transportistaSelect.waitFor({ state: 'visible', timeout: 5000 });
-      logger.info('✅ Transportista dropdown visible');
-
-      // 4. Find and select transportista by name (direct select, bypass Bootstrap-select UI)
-      logger.info(`Selecting transportista with name: ${transportistaNombre}`);
-
-      // DEBUG: Log all available options to see what's actually in the dropdown
-      const allOptions = await this.page.locator('select#contrato-transportista_id option').allTextContents();
-      logger.info(`Available transportista options (${allOptions.length}): ${allOptions.slice(0, 10).join(', ')}${allOptions.length > 10 ? '...' : ''}`);
-
-      // Find the option containing the transportista name and get its value
-      // Note: transportistaNombre may be the base name (without timestamp), so we use partial matching
-      const transportistaOptionLocator = this.page.locator(`select#contrato-transportista_id option`).filter({ hasText: transportistaNombre }).first();
-
-      // Check if option exists before waiting
-      const optionCount = await transportistaOptionLocator.count();
-      if (optionCount === 0) {
-        throw new Error(`Transportista "${transportistaNombre}" not found in dropdown. Available options: ${allOptions.slice(0, 5).join(', ')}`);
-      }
-
-      await transportistaOptionLocator.waitFor({ state: 'attached', timeout: 5000 });
-
-      const transportistaValue = await transportistaOptionLocator.getAttribute('value');
-
-      if (!transportistaValue) {
-        throw new Error(`Transportista with name "${transportistaNombre}" not found in dropdown`);
-      }
-
-      // Use Bootstrap-select's native API (proven to work via live debugging)
-      // selectOption() + refresh/render does NOT sync properly - form validation rejects it
       await this.page.evaluate((val: string) => {
         const $ = (window as any).$;
-        if ($ && $('#contrato-transportista_id').selectpicker) {
-          $('#contrato-transportista_id').selectpicker('val', val);
+        const selectEl = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
+        if ($ && selectEl && $(selectEl).selectpicker) {
+          $(selectEl).selectpicker('val', val);
+        } else if (selectEl) {
+          selectEl.value = val;
         }
-      }, transportistaValue);
-      await this.page.waitForTimeout(1000);
+        if (selectEl) {
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          if (typeof selectEl.onchange === 'function') {
+            selectEl.onchange(new Event('change'));
+          }
+        }
+      }, '1');
+      await this.page.waitForTimeout(1500); // Wait for seleccionarEntidadContrato() to complete
+      logger.info('✅ Selected Tipo Contrato: Costo (with onchange trigger)');
 
-      // Verify the selection was applied
-      const buttonText = await this.page.locator('button[data-id="contrato-transportista_id"] .filter-option-inner-inner').textContent().catch(() => '');
-      if (buttonText && buttonText !== 'Transportista' && buttonText.trim().length > 0) {
-        logger.info(`✅ Transportista selected via selectpicker API: ${buttonText}`);
+      // 3. Select Transportista via Bootstrap-select (picker button → liveSearch → keyboard)
+      logger.info(`Selecting Transportista: ${transportistaNombre}`);
+
+      // Click the Bootstrap-select picker button to open dropdown
+      const pickerBtn = this.page.locator('button[data-id="contrato-transportista_id"]');
+      await pickerBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await pickerBtn.click({ force: true });
+      await this.page.waitForTimeout(500);
+      logger.info('Opened Transportista dropdown');
+
+      // Check for liveSearch input
+      const searchInput = this.page.locator('.dropdown-menu.show .bs-searchbox input').first();
+      const hasSearch = await searchInput.isVisible({ timeout: 2000 }).catch(() => false);
+
+      if (hasSearch) {
+        // Type the full unique name and select via keyboard
+        logger.info(`Typing search: "${transportistaNombre}"`);
+        await this.page.keyboard.type(transportistaNombre, { delay: 100 });
+        await this.page.waitForTimeout(1000);
+        await this.page.keyboard.press('ArrowDown');
+        await this.page.waitForTimeout(200);
+        await this.page.keyboard.press('Enter');
+        logger.info('Transportista selected via search + keyboard');
       } else {
-        logger.warn(`⚠️ Transportista selection may not have applied. Button text: ${buttonText}`);
+        // No search — close dropdown, select programmatically
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(300);
+
+        // Find the matching option value by full unique name
+        const optionValue = await this.page.evaluate((name: string) => {
+          const select = document.querySelector('#contrato-transportista_id') as HTMLSelectElement;
+          if (!select) return null;
+          const upperName = name.toUpperCase();
+          for (const opt of Array.from(select.options)) {
+            if (opt.text.trim().toUpperCase().includes(upperName)) {
+              return opt.value;
+            }
+          }
+          return null;
+        }, transportistaNombre);
+
+        if (!optionValue) {
+          logger.error(`Transportista "${transportistaNombre}" not found in dropdown options`);
+          await this.takeScreenshot('transportista-not-found');
+          throw new Error(`Transportista "${transportistaNombre}" not found in dropdown`);
+        }
+
+        logger.info(`Found option value: ${optionValue}, setting via selectpicker`);
+        await this.page.evaluate((val: string) => {
+          const $ = (window as any).$;
+          const selectEl = document.querySelector('#contrato-transportista_id') as HTMLSelectElement;
+          if ($ && selectEl && $(selectEl).selectpicker) {
+            $(selectEl).selectpicker('val', val);
+          } else if (selectEl) {
+            selectEl.value = val;
+          }
+          if (selectEl) {
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }, optionValue);
+        logger.info('Transportista selected via programmatic selectpicker');
       }
 
-      logger.info('✅ Transportista selection process complete');
+      await this.page.waitForTimeout(500);
+
+      // Verify transportista was set
+      const transportistaValue = await this.page.evaluate(() => {
+        const el = document.querySelector('#contrato-transportista_id') as HTMLSelectElement;
+        return el ? { value: el.value, text: el.options[el.selectedIndex]?.text || '' } : null;
+      });
+      logger.info(`Transportista verification: value="${transportistaValue?.value}", text="${transportistaValue?.text}"`);
 
       // 5. Skip optional fields (Fecha vencimiento, Valor Hora, Modalidad=Por Ruta)
       logger.info('⏭️ Skipping optional fields (using defaults: Modalidad = Por Ruta)');
@@ -265,15 +301,28 @@ export class ContratosFormPage extends BasePage {
 
       // 6. Save the contract (may redirect to /contrato/editar/{id} OR /contrato/index)
       logger.info('💾 Saving basic contract...');
-      await this.page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
 
-      // Wait for navigation (give time for save to process)
-      await this.page.waitForTimeout(3000);
+      let currentUrl = '';
+      let contractId: string | undefined;
 
-      const currentUrl = this.page.url();
-      logger.info(`Post-save URL: ${currentUrl}`);
+      for (let saveAttempt = 0; saveAttempt < 2; saveAttempt++) {
+        if (saveAttempt > 0) {
+          logger.warn(`Save retry attempt ${saveAttempt + 1}/2 — still on /crear, retrying Guardar...`);
+          await this.forceCloseModal();
+          await this.page.waitForTimeout(500);
+        }
 
-      let contractId: string;
+        await this.page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
+
+        // Wait for navigation (give time for save to process)
+        await this.page.waitForTimeout(3000);
+
+        currentUrl = this.page.url();
+        logger.info(`Post-save URL (attempt ${saveAttempt + 1}): ${currentUrl}`);
+
+        // Check if we navigated away from /crear
+        if (!currentUrl.includes('/contrato/crear')) break;
+      }
 
       // Try to extract from /contrato/editar/{id} URL
       const editMatch = currentUrl.match(/\/contrato\/editar\/(\d+)/);
@@ -285,15 +334,15 @@ export class ContratosFormPage extends BasePage {
         logger.info('⚠️ Redirected to index page - searching for created contract...');
 
         // Get nroContrato from the previously filled field
-        const nroContrato = await this.page.locator('#contrato-nro_contrato').inputValue();
+        const nroContratoValue = await this.page.locator('#contrato-nro_contrato').inputValue().catch(() => nroContrato);
 
         // Search by contract number in the grid
         const searchBox = this.page.locator('input[type="search"]');
-        await searchBox.fill(nroContrato);
+        await searchBox.fill(nroContratoValue);
         await this.page.waitForTimeout(1500);
 
         // Find the contract row and extract ID from view/edit link
-        const contractRow = this.page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
+        const contractRow = this.page.locator('table tbody tr').filter({ hasText: nroContratoValue }).first();
         await contractRow.waitFor({ state: 'visible', timeout: 5000 });
 
         const viewLink = contractRow.locator('a[href*="/contrato/view/"]').first();
@@ -312,7 +361,24 @@ export class ContratosFormPage extends BasePage {
           throw new Error(`Could not extract contract ID from grid. ViewHref: ${viewHref}`);
         }
       } else {
-        throw new Error(`Unexpected URL after save: ${currentUrl}`);
+        // Still on /crear or unexpected URL — scrape validation errors for diagnostics
+        const errorMessages = await this.page.locator('.text-danger, .invalid-feedback, .alert-danger, .help-block.badge-danger').allTextContents();
+        logger.error(`Validation Errors Found: ${errorMessages.filter(m => m.trim()).join(' | ') || 'none visible'}`);
+
+        const transportistaVal = await this.page.evaluate(() => {
+          const el = document.querySelector('#contrato-transportista_id') as HTMLSelectElement;
+          return el ? el.value : 'element not found';
+        });
+        logger.error(`Transportista Field Value: "${transportistaVal}"`);
+
+        const tipoContratoVal = await this.page.evaluate(() => {
+          const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
+          return el ? el.value : 'element not found';
+        });
+        logger.error(`Tipo Contrato Field Value: "${tipoContratoVal}"`);
+
+        await this.takeScreenshot('unexpected-url-after-save');
+        throw new Error(`Unexpected URL after save: ${currentUrl}. Check logs for validation errors.`);
       }
 
       logger.info(`📍 Now on edit page for contract ID: ${contractId}`);

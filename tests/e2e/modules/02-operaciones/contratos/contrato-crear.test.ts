@@ -68,8 +68,9 @@ test.describe('Contract Creation - Optimized (Uses Existing Entities)', () => {
         // Generate numeric-only contract number (5 digits)
         const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
 
-        // Use fresh transportista from JSON (newly created in base-entities.setup)
-        const transportistaNombre = operationalData.transportista.baseNombre;
+        // Use FULL transportista nombre from JSON (includes unique timestamp suffix)
+        // CRITICAL: baseNombre ("LogiChile Connect") can match legacy entries — use full unique name
+        const transportistaNombre = operationalData.transportista.nombre;
 
         logger.info(`   Nro Contrato: ${nroContrato}`);
         logger.info(`   Transportista: ${transportistaNombre}`);
