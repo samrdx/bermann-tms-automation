@@ -209,15 +209,48 @@ export class PlanificarPage extends BasePage {
     await this.selectBootstrapDropdown(this.selectors.btnDestino, destino, 'Destino');
   }
 
-  // --- GUARDAR ---
+ // --- GUARDAR Y VERIFICAR ---
 
   async clickGuardar(): Promise<void> {
-    await this.page.click(this.selectors.btnGuardar);
+    logger.info('Clicking Guardar button...');
+    const btnGuardar = this.page.locator(this.selectors.btnGuardar);
+    
+    // 1. Click
+    await btnGuardar.waitFor({ state: 'visible' });
+    await btnGuardar.click();
+    
+    // 2. Espera explícita para dar tiempo al redireccionamiento
+    logger.info('Waiting for save operation...');
+    
+    try {
+        // Intentamos esperar a que la URL cambie (hasta 10 segundos)
+        await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 10000 });
+        logger.info('✅ URL changed successfully');
+    } catch (e) {
+        logger.warn('⚠️ URL did not change within 10s. Checking for success messages...');
+    }
+    
     await this.page.waitForLoadState('networkidle');
   }
 
   async isFormSaved(): Promise<boolean> {
-    return !(this.page.url().includes('/crear'));
+    // Criterio 1: La URL cambió (Ya no estamos en /crear)
+    if (!this.page.url().includes('/crear')) {
+        return true;
+    }
+
+    // Criterio 2: Apareció una alerta de éxito (aunque sigamos en la misma página)
+    // Buscamos clases comunes de alertas en frameworks web
+    const successAlert = this.page.locator('.alert-success, .toastr-success, .kv-alert-success, div:has-text("Exitosamente")');
+    if (await successAlert.first().isVisible()) {
+        logger.info('✅ Success alert detected');
+        return true;
+    }
+
+    // Si llegamos aquí, asumimos falso, pero como tú verificaste manualmente que SÍ se crea,
+    // es posible que el sistema sea lento.
+    // Retornamos el estado actual para que el test decida.
+    return false;
   }
 
   // --- VERIFICACIÓN FINAL ---
