@@ -64,7 +64,9 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
 
         // Generate numeric-only contract number (5 digits)
         const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
-        const clienteNombre = operationalData.cliente.nombre;
+        // Use nombreFantasia — TMS dropdown shows clients by Nombre de Fantasía, not Razón Social
+        // Fall back to nombre for backward compatibility with old JSON files
+        const clienteNombre = operationalData.cliente.nombreFantasia || operationalData.cliente.nombre;
 
         logger.info(`   Nro Contrato: ${nroContrato}`);
         logger.info(`   Cliente: ${clienteNombre}`);
@@ -121,58 +123,82 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         await page.waitForTimeout(1500);
         logger.info('Selected Tipo Contrato de Venta: Clientes');
 
-        // Now the Cliente dropdown should appear
-        // Dropdown shows abbreviated names (e.g., "CAMINO SPA" instead of full name)
-        // Extract first word from cliente name for partial matching
-        const searchTerm = clienteNombre.split(' ')[0].toUpperCase(); // e.g., "CAMINO"
-        logger.info(`Searching for cliente containing: "${searchTerm}"`);
+        // Now the Cliente dropdown should appear (Bootstrap-select)
+        // Use the FULL unique nombreFantasia to avoid matching legacy/duplicate clients
+        logger.info(`Selecting cliente: "${clienteNombre}" (full unique name)`);
 
-        // Wait for the select to have options loaded
+        // Wait for the cliente dropdown to be populated via AJAX
         const clienteSelect = page.locator('select#contrato-cliente_id');
         await clienteSelect.waitFor({ state: 'attached', timeout: 5000 });
-        await page.waitForTimeout(1000); // Wait for options to load
+        await page.waitForTimeout(1500);
 
-        // Find an option containing our search term (partial match)
-        const matchingOption = page.locator(`select#contrato-cliente_id option`).filter({
-            hasText: new RegExp(searchTerm, 'i')
-        }).first();
+        // Open the Bootstrap-select dropdown
+        const pickerBtn = page.locator('button[data-id="contrato-cliente_id"]');
+        await pickerBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await pickerBtn.click({ force: true });
+        await page.waitForTimeout(500);
+        logger.info('Opened cliente dropdown');
 
-        // Check if we found a matching option
-        const optionCount = await page.locator(`select#contrato-cliente_id option`).filter({
-            hasText: new RegExp(searchTerm, 'i')
-        }).count();
+        // Check if dropdown has a search box (liveSearch enabled)
+        const searchBox = page.locator('.dropdown-menu.show .bs-searchbox input').first();
+        const hasSearch = await searchBox.isVisible({ timeout: 2000 }).catch(() => false);
 
-        if (optionCount === 0) {
-            // Log available options for debugging
-            const allOptions = await page.locator('select#contrato-cliente_id option').allTextContents();
-            logger.warn(`No option found containing "${searchTerm}". Available: ${allOptions.slice(0, 10).join(', ')}...`);
-            throw new Error(`Cliente containing "${searchTerm}" not found in dropdown`);
-        }
+        if (hasSearch) {
+            // Type the full unique name and select via keyboard
+            await page.keyboard.type(clienteNombre, { delay: 100 });
+            await page.waitForTimeout(1000);
+            await page.keyboard.press('ArrowDown');
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Enter');
+            logger.info('Cliente selected via search + keyboard');
+        } else {
+            // No search box — close dropdown, select programmatically
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(300);
 
-        const clienteValue = await matchingOption.getAttribute('value');
-        const clienteText = await matchingOption.textContent();
-        logger.info(`Found cliente: ${clienteText?.trim()} (value=${clienteValue})`);
+            // Find the matching option by full unique name and select via selectpicker
+            const escapedName = clienteNombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const matchingOption = page.locator('select#contrato-cliente_id option').filter({
+                hasText: new RegExp(escapedName, 'i')
+            }).first();
 
-        // Select using selectpicker + onchange trigger
-        if (clienteValue) {
-            await page.evaluate((val: string) => {
-                const $ = (window as any).$;
-                const selectEl = document.querySelector('#contrato-cliente_id') as HTMLSelectElement;
-                if ($ && selectEl && $(selectEl).selectpicker) {
-                    $(selectEl).selectpicker('val', val);
-                } else if (selectEl) {
-                    selectEl.value = val;
-                }
-                if (selectEl) {
-                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
-                    if (typeof selectEl.onchange === 'function') {
-                        selectEl.onchange(new Event('change'));
+            const optionCount = await page.locator('select#contrato-cliente_id option').filter({
+                hasText: new RegExp(escapedName, 'i')
+            }).count();
+
+            if (optionCount === 0) {
+                const allOptions = await page.locator('select#contrato-cliente_id option').allTextContents();
+                logger.warn(`No option matching "${clienteNombre}". Available: ${allOptions.slice(0, 10).join(', ')}...`);
+                await page.screenshot({ path: `./reports/screenshots/cliente-not-found-${Date.now()}.png` });
+                throw new Error(`Cliente "${clienteNombre}" not found in dropdown`);
+            }
+
+            const clienteValue = await matchingOption.getAttribute('value');
+            const clienteText = await matchingOption.textContent();
+            logger.info(`Found match: ${clienteText?.trim()} (value=${clienteValue})`);
+
+            if (clienteValue) {
+                await page.evaluate((val: string) => {
+                    const $ = (window as any).$;
+                    const selectEl = document.querySelector('#contrato-cliente_id') as HTMLSelectElement;
+                    if ($ && selectEl && $(selectEl).selectpicker) {
+                        $(selectEl).selectpicker('val', val);
+                    } else if (selectEl) {
+                        selectEl.value = val;
                     }
-                }
-            }, clienteValue);
+                    if (selectEl) {
+                        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                        if (typeof selectEl.onchange === 'function') {
+                            selectEl.onchange(new Event('change'));
+                        }
+                    }
+                }, clienteValue);
+            }
+            logger.info('Cliente selected via programmatic match');
         }
+
         await page.waitForTimeout(1000);
-        logger.info('Cliente selected');
+        logger.info('Cliente selection complete');
 
         // Force close any phantom modals before saving
         await contratosPage.forceCloseModal();
