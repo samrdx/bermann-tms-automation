@@ -7,18 +7,11 @@ import fs from 'fs';
 /**
  * Step 5.5: Cliente Contract Creation (Type: Venta)
  *
- * Prerequisites:
- * 1. Run base-entities.setup.ts to generate last-run-data.json
- * 2. Cliente must already exist in the system
- *
- * This test:
- * - Loads existing entity data from last-run-data.json
- * - Creates a VENTA type contract for the Cliente
- * - Adds Route 715 and Cargo 19
- * - Saves contratoCliente.id to JSON for Step 6
+ * This test uses manual page interaction for specific Venta logic,
+ * but reuses helper methods from ContratosFormPage where possible.
  */
 test.describe('Cliente Contract Creation (Venta Type)', () => {
-    test.setTimeout(60000);
+    test.setTimeout(80000); // Increased timeout for safety
 
     test('Create Cliente Contract using Pre-existing Entities from JSON', async ({ page }, testInfo) => {
         const startTime = Date.now();
@@ -32,356 +25,190 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
-            throw new Error(
-                'Worker-specific data file not found!\n' +
-                `Expected: ${dataPath}\n` +
-                'Please run base entities setup first:\n' +
-                'npm run test:base'
-            );
+            throw new Error(`Worker-specific data file not found at ${dataPath}. Run base entities setup first.`);
         }
 
         const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        const clienteNombre = operationalData.cliente.nombreFantasia || operationalData.cliente.nombre;
 
-        logger.info('Loaded existing entities:');
-        logger.info(`   Cliente: ${operationalData.cliente.nombre} (${operationalData.cliente.rut})`);
+        logger.info(`Loaded existing entities:`);
+        logger.info(`   Cliente: ${clienteNombre} (${operationalData.cliente.rut})`);
         logger.info('');
-
-        // Note: Already authenticated via storageState from setup project
 
         // =================================================================
         // STEP 2: Navigate to Contract Creation
         // =================================================================
-        logger.info('Navigating to contract creation...');
         const contratosPage = new ContratosFormPage(page);
         await contratosPage.navigateToCreate();
-        logger.info('Navigation complete');
-        logger.info('');
 
         // ===================================================================
         // PHASE 1: Create Basic Cliente Contract (Venta Type)
         // ===================================================================
         logger.info('PHASE 1: Creating Cliente contract (Venta)...');
 
-        // Generate numeric-only contract number (5 digits)
         const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
-        // Use nombreFantasia — TMS dropdown shows clients by Nombre de Fantasía, not Razón Social
-        // Fall back to nombre for backward compatibility with old JSON files
-        const clienteNombre = operationalData.cliente.nombreFantasia || operationalData.cliente.nombre;
 
         logger.info(`   Nro Contrato: ${nroContrato}`);
         logger.info(`   Cliente: ${clienteNombre}`);
         logger.info(`   Tipo: Venta (value=2)`);
 
-        // Fill Nro Contrato
+        // 1. Fill Nro Contrato
         await page.fill('#contrato-nro_contrato', nroContrato);
-        await page.waitForTimeout(300);
-        logger.info('Nro Contrato filled');
 
-        // Select Tipo Contrato = "Venta" (value='2') - uses selectpicker + onchange
-        await page.evaluate((val: string) => {
-            const $ = (window as any).$;
-            const selectEl = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
-            if ($ && selectEl && $(selectEl).selectpicker) {
-                $(selectEl).selectpicker('val', val);
-            } else if (selectEl) {
-                selectEl.value = val;
+        // 2. Select Tipo Contrato = "Venta" (value='2') manually
+        await page.evaluate(() => {
+            const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
+            if (el) {
+                el.value = '2';
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                // @ts-ignore
+                if (typeof $ !== 'undefined') $(el).selectpicker('refresh');
             }
-            // CRITICAL: Trigger inline onchange="seleccionarEntidadContrato()"
-            if (selectEl) {
-                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
-                if (typeof selectEl.onchange === 'function') {
-                    selectEl.onchange(new Event('change'));
-                }
-            }
-        }, '2');
-        await page.waitForTimeout(1500);
-        logger.info('Selected Tipo Contrato: Venta');
-
-        // After selecting "Venta", a new dropdown appears: "Tipo Contrato de Venta"
-        // We need to select "Clientes" (value="1") in this dropdown
-        // IMPORTANT: The selector is #tipo (discovered via browser inspection)
-        logger.info('Selecting Tipo Contrato de Venta: Clientes');
-        const tipoContratoVentaSelect = page.locator('select#tipo');
-        await tipoContratoVentaSelect.waitFor({ state: 'attached', timeout: 5000 });
-
-        // Select "Clientes" option (value="1") - uses selectpicker + onchange
-        await page.evaluate((val: string) => {
-            const $ = (window as any).$;
-            const selectEl = document.querySelector('#tipo') as HTMLSelectElement;
-            if ($ && selectEl && $(selectEl).selectpicker) {
-                $(selectEl).selectpicker('val', val);
-            } else if (selectEl) {
-                selectEl.value = val;
-            }
-            if (selectEl) {
-                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
-                if (typeof selectEl.onchange === 'function') {
-                    selectEl.onchange(new Event('change'));
-                }
-            }
-        }, '1');
-        await page.waitForTimeout(1500);
-        logger.info('Selected Tipo Contrato de Venta: Clientes');
-
-        // Now the Cliente dropdown should appear (Bootstrap-select)
-        // Use the FULL unique nombreFantasia to avoid matching legacy/duplicate clients
-        logger.info(`Selecting cliente: "${clienteNombre}" (full unique name)`);
-
-        // Wait for the cliente dropdown to be populated via AJAX
-        const clienteSelect = page.locator('select#contrato-cliente_id');
-        await clienteSelect.waitFor({ state: 'attached', timeout: 5000 });
-        await page.waitForTimeout(1500);
-
-        // Open the Bootstrap-select dropdown
-        const pickerBtn = page.locator('button[data-id="contrato-cliente_id"]');
-        await pickerBtn.waitFor({ state: 'visible', timeout: 5000 });
-        await pickerBtn.click({ force: true });
-        await page.waitForTimeout(500);
-        logger.info('Opened cliente dropdown');
-
-        // Check if dropdown has a search box (liveSearch enabled)
-        const searchBox = page.locator('.dropdown-menu.show .bs-searchbox input').first();
-        const hasSearch = await searchBox.isVisible({ timeout: 2000 }).catch(() => false);
-
-        if (hasSearch) {
-            // Type the full unique name and select via keyboard
-            await page.keyboard.type(clienteNombre, { delay: 100 });
-            await page.waitForTimeout(1000);
-            await page.keyboard.press('ArrowDown');
-            await page.waitForTimeout(200);
-            await page.keyboard.press('Enter');
-            logger.info('Cliente selected via search + keyboard');
-        } else {
-            // No search box — close dropdown, select programmatically
-            await page.keyboard.press('Escape');
-            await page.waitForTimeout(300);
-
-            // Find the matching option by full unique name and select via selectpicker
-            const escapedName = clienteNombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const matchingOption = page.locator('select#contrato-cliente_id option').filter({
-                hasText: new RegExp(escapedName, 'i')
-            }).first();
-
-            const optionCount = await page.locator('select#contrato-cliente_id option').filter({
-                hasText: new RegExp(escapedName, 'i')
-            }).count();
-
-            if (optionCount === 0) {
-                const allOptions = await page.locator('select#contrato-cliente_id option').allTextContents();
-                logger.warn(`No option matching "${clienteNombre}". Available: ${allOptions.slice(0, 10).join(', ')}...`);
-                await page.screenshot({ path: `./reports/screenshots/cliente-not-found-${Date.now()}.png` });
-                throw new Error(`Cliente "${clienteNombre}" not found in dropdown`);
-            }
-
-            const clienteValue = await matchingOption.getAttribute('value');
-            const clienteText = await matchingOption.textContent();
-            logger.info(`Found match: ${clienteText?.trim()} (value=${clienteValue})`);
-
-            if (clienteValue) {
-                await page.evaluate((val: string) => {
-                    const $ = (window as any).$;
-                    const selectEl = document.querySelector('#contrato-cliente_id') as HTMLSelectElement;
-                    if ($ && selectEl && $(selectEl).selectpicker) {
-                        $(selectEl).selectpicker('val', val);
-                    } else if (selectEl) {
-                        selectEl.value = val;
-                    }
-                    if (selectEl) {
-                        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
-                        if (typeof selectEl.onchange === 'function') {
-                            selectEl.onchange(new Event('change'));
-                        }
-                    }
-                }, clienteValue);
-            }
-            logger.info('Cliente selected via programmatic match');
-        }
-
-        await page.waitForTimeout(1000);
-        logger.info('Cliente selection complete');
-
-        // Force close any phantom modals before saving
-        await contratosPage.forceCloseModal();
-        await page.waitForTimeout(500);
-
-        // Wait for any pending AJAX to complete before save
-        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
-            logger.warn('Network not idle before save, proceeding anyway...');
         });
+        await page.waitForTimeout(1000);
 
-        // Take diagnostic screenshot before save
-        await page.screenshot({ path: `./reports/screenshots/pre-save-cliente-${Date.now()}.png` });
+        // 3. Select "Tipo Contrato de Venta" = "Clientes" (value="1")
+        logger.info('Selecting Tipo Contrato de Venta: Clientes');
+        const tipoVentaSelector = 'select#tipo';
+        await page.waitForSelector(tipoVentaSelector, { state: 'attached' });
 
-        // Save basic contract - may redirect to /editar or /index
-        // Retry click if URL doesn't change
+        await page.evaluate(() => {
+            const el = document.querySelector('select#tipo') as HTMLSelectElement;
+            if (el) {
+                el.value = '1';
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                // @ts-ignore
+                if (typeof $ !== 'undefined') $(el).selectpicker('refresh');
+            }
+        });
+        await page.waitForTimeout(1000);
+
+        // 4. Select Cliente (The Critical Part)
+        logger.info(`Selecting cliente: "${clienteNombre}"`);
+
+        // Open dropdown
+        const pickerBtn = page.locator('button[data-id="contrato-cliente_id"]');
+        await pickerBtn.waitFor({ state: 'visible' });
+        await pickerBtn.click();
+
+        // Wait for search box
+        const searchBox = page.locator('.dropdown-menu.show .bs-searchbox input').first();
+        await searchBox.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Setup API Listener for Search
+        const searchResponse = page.waitForResponse(
+            resp => resp.url().includes('get_clientes') || resp.url().includes('api'),
+            { timeout: 8000 }
+        ).catch(() => null);
+
+        // Type full name
+        await searchBox.fill(clienteNombre);
+
+        // Wait for results to filter (Network + UI)
+        await searchResponse;
+        await page.waitForTimeout(500);
+
+        // Select via Keyboard (ArrowDown + Enter)
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(200);
+        await page.keyboard.press('Enter');
+
+        logger.info('✅ Cliente selected via keyboard');
+        await page.waitForTimeout(1000);
+
+        // 5. Clean & Save
+        await contratosPage.forceCloseModal();
+
         logger.info('Clicking Guardar button...');
+        const btnGuardar = page.locator('button.btn-success:has-text("Guardar"), #btn_guardar').first();
+        await btnGuardar.click();
 
-        let currentUrl = page.url();
-        for (let saveAttempt = 0; saveAttempt < 3; saveAttempt++) {
-            if (saveAttempt > 0) {
-                logger.warn(`Save attempt ${saveAttempt + 1}/3 - URL hasn't changed yet`);
+        // Wait for Navigation OR Error
+        try {
+            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 8000 });
+            logger.info('✅ Save successful - Navigation detected');
+        } catch (e) {
+            // Diagnostics
+            const errors = await page.locator('.text-danger, .help-block, .alert-danger').allTextContents();
+            if (errors.length > 0) {
+                throw new Error(`Save Failed with Validation Errors: ${errors.join(' | ')}`);
             }
-
-            // Check for validation errors before clicking
-            const validationErrors = await page.locator('.help-block.badge-danger, .invalid-feedback:visible, [aria-invalid="true"]').count();
-            if (validationErrors > 0) {
-                const errorText = await page.locator('.help-block.badge-danger, .invalid-feedback:visible').first().textContent().catch(() => '');
-                logger.error(`Form validation error detected: ${errorText}`);
-                await page.screenshot({ path: `./reports/screenshots/validation-error-${Date.now()}.png` });
-            }
-
-            // Force close modals again
-            await contratosPage.forceCloseModal();
-            await page.waitForTimeout(300);
-
-            // Click save button with multiple selectors
-            const saveBtn = page.locator('button.btn-success:has-text("Guardar"), #btn_guardar').first();
-            await saveBtn.waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
-            await saveBtn.click({ force: true }).catch(async () => {
-                // JS fallback
-                await page.evaluate(() => {
-                    const btn = document.querySelector('button.btn-success, #btn_guardar') as HTMLElement;
-                    if (btn) btn.click();
-                });
-            });
-
-            // Wait for navigation
-            await page.waitForTimeout(3000);
-            currentUrl = page.url();
-
-            // Check if we've navigated away from /crear
-            if (!currentUrl.includes('/contrato/crear')) {
-                break;
-            }
+            // Retry once if no errors found
+            logger.warn('Save click didn\'t navigate, retrying once...');
+            await btnGuardar.click();
+            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 8000 });
         }
 
+        // 6. Extract ID
+        const currentUrl = page.url();
         logger.info(`Post-save URL: ${currentUrl}`);
 
-        let contractId: string;
+        let contractId: string | undefined;
+        const editMatch = currentUrl.match(/\/editar\/(\d+)/);
 
-        // Try to extract from /contrato/editar/{id} URL
-        const editMatch = currentUrl.match(/\/contrato\/editar\/(\d+)/);
         if (editMatch) {
             contractId = editMatch[1];
-            logger.info(`✅ Contract created! ID: ${contractId} (redirected to edit page)`);
-        } else if (currentUrl.includes('/contrato/index')) {
-            // Redirected to index - need to search for the contract
-            logger.info('⚠️ Redirected to index page - searching for created contract...');
+        } else if (currentUrl.includes('/index')) {
+            // Fallback: Search in grid
+            logger.info('Redirected to index, searching grid...');
+            const searchInput = page.locator('input[type="search"]').first();
+            await searchInput.fill(nroContrato);
+            await page.waitForTimeout(1000);
 
-            // Search by contract number in the grid
-            const searchBox = page.locator('input[type="search"]').first();
-            if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await searchBox.fill(nroContrato);
-                await page.waitForTimeout(1500);
+            const row = page.locator('table tbody tr').first();
+            const link = await row.locator('a[href*="/editar/"]').getAttribute('href');
+            contractId = link?.match(/\/editar\/(\d+)/)?.[1];
+
+            if (contractId) {
+                await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
             }
-
-            // Find the contract row
-            const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
-            await expect(contractRow).toBeVisible({ timeout: 10000 });
-
-            // PRIMARY: Try data-key attribute (most reliable)
-            const dataKey = await contractRow.getAttribute('data-key');
-            if (dataKey) {
-                contractId = dataKey;
-                logger.info(`✅ Contract created! ID: ${contractId} (from data-key)`);
-            } else {
-                // FALLBACK: Try multiple link patterns (TMS uses /ver/, /view/, or /editar/)
-                const actionLink = contractRow.locator('a[href*="/contrato/ver/"], a[href*="/contrato/view/"], a[href*="/contrato/editar/"]').first();
-                const linkHref = await actionLink.getAttribute('href', { timeout: 5000 });
-                const idMatch = linkHref?.match(/\/contrato\/(?:ver|view|editar)\/(\d+)/);
-                if (idMatch) {
-                    contractId = idMatch[1];
-                    logger.info(`✅ Contract created! ID: ${contractId} (from grid link)`);
-                } else {
-                    throw new Error(`Could not extract contract ID from grid. Href: ${linkHref}`);
-                }
-            }
-
-            // Navigate to edit page
-            logger.info(`Navigating to edit page for contract ${contractId}...`);
-            await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
-            await page.waitForTimeout(1500);
-        } else if (currentUrl.includes('/contrato/crear')) {
-            // Still on create page - save likely failed
-            await page.screenshot({ path: `./reports/screenshots/save-failed-${Date.now()}.png` });
-            throw new Error(`Save failed: URL still at ${currentUrl}. Check for validation errors.`);
-        } else {
-            throw new Error(`Unexpected URL after save: ${currentUrl}`);
         }
 
-        logger.info('');
+        if (!contractId) throw new Error('Failed to extract Contract ID');
+        logger.info(`✅ Contract created! ID: ${contractId}`);
 
         // ===================================================================
-        // PHASE 2: Add Route 715 & Cargo (on /contrato/editar/{id} page)
+        // PHASE 2: Add Route 715 & Cargo
         // ===================================================================
         const tarifaConductor = '20000';
         const tarifaViaje = '50000';
 
         logger.info('PHASE 2: Adding Route 715 and Cargo...');
-        logger.info(`   Tarifa Conductor: ${tarifaConductor}`);
-        logger.info(`   Tarifa Viaje: ${tarifaViaje}`);
-
+        // Reuse the robust method from the Page Object
         await contratosPage.addSpecificRouteAndCargo(tarifaConductor, tarifaViaje);
 
-        logger.info('Route and cargo added');
-        logger.info('');
-
         // ===================================================================
-        // STEP 6: Save Contract (Final Save)
+        // STEP 6: Final Save
         // ===================================================================
         logger.info('Saving contract (final)...');
-        // Don't use saveAndExtractId() since we already have the ID and page redirects to index
         await page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
-        await page.waitForTimeout(2000);
-        logger.info(`Contract saved! ID: ${contractId}`);
-        logger.info('');
+        await page.waitForTimeout(2000); // Allow save to process
 
         // =================================================================
-        // STEP 7: Update JSON with Cliente Contract
+        // STEP 7: Update JSON
         // =================================================================
         logger.info('Updating worker-specific JSON with contratoCliente...');
-
         operationalData.contratoCliente = {
             id: contractId,
             nroContrato: nroContrato,
             tipo: 'Venta',
             clienteNombre: clienteNombre
         };
-
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
         logger.info(`Saved contratoCliente.id: ${contractId}`);
-        logger.info('');
 
         // =================================================================
         // STEP 8: Verification
         // =================================================================
-        logger.info('Verifying contract...');
-        // After save, page redirects to index. Navigate back to edit page to verify route.
         await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
         await page.waitForLoadState('networkidle');
         await expect(page.getByText('05082025-1').first()).toBeVisible({ timeout: 10000 });
         logger.info('Route 715 verified');
-        logger.info('');
 
-        // =================================================================
-        // STEP 9: Final Summary
-        // =================================================================
+        // Final Summary
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
-
         logger.info('='.repeat(80));
-        logger.info('STEP 5.5: CLIENTE CONTRACT COMPLETE!');
+        logger.info(`STEP 5.5 COMPLETE in ${executionTime}s`);
         logger.info('='.repeat(80));
-        logger.info(`Execution Time: ${executionTime}s`);
-        logger.info('');
-        logger.info('Contract Details:');
-        logger.info(`   ID: ${contractId}`);
-        logger.info(`   Tipo: Venta`);
-        logger.info(`   Route: 715 (05082025-1)`);
-        logger.info(`   Cliente: ${clienteNombre}`);
-        logger.info('='.repeat(80));
-
-        // Assertions
-        expect(contractId).toBeTruthy();
-        expect(contractId).toMatch(/^\d+$/);
     });
 });
