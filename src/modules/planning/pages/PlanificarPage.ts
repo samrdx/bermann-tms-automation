@@ -247,6 +247,20 @@ export class PlanificarPage extends BasePage {
     await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
       logger.warn('Network idle timeout after Cliente selection, proceeding...');
     });
+
+    // Post-selection validation: verify Codigo Carga populated (proves correct client was picked)
+    await this.page.waitForTimeout(3000);
+    const cargaOptions = await this.page.locator(this.selectors.codigoCarga).evaluate(
+      (sel: HTMLSelectElement) => Array.from(sel.options).filter(o => o.value && o.value.trim() !== '').length
+    );
+
+    if (cargaOptions === 0) {
+      logger.warn('Codigo Carga still empty after client selection — re-selecting client to force AJAX refresh');
+      await this.robustSelect(this.selectors.cliente, cliente, true);
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        logger.warn('Network idle timeout after re-selecting Cliente, proceeding...');
+      });
+    }
   }
 
   async selectTipoServicio(tipo: string = 'tclp2210'): Promise<void> {
@@ -296,18 +310,34 @@ export class PlanificarPage extends BasePage {
       // Wait for dropdown to be ready
       await selectLoc.waitFor({ state: 'attached', timeout: 10000 });
 
-      // VALIDATION: Check if dropdown has no options (empty = client has no active contracts)
-      const optionsCount = await selectLoc.evaluate((sel: HTMLSelectElement) => {
-        // Count non-empty options (skip placeholder/empty first option)
-        return Array.from(sel.options).filter(o => o.value && o.value.trim() !== '').length;
+      // Wait for networkidle before checking (CI/CD latency)
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        logger.warn('Network idle timeout before Codigo Carga check, proceeding...');
       });
+
+      // RETRY LOOP: Wait up to 15s for options to appear (CI/CD has higher latency)
+      let optionsCount = 0;
+      const maxWaitMs = 15000;
+      const pollIntervalMs = 2000;
+      const startWait = Date.now();
+
+      while (Date.now() - startWait < maxWaitMs) {
+        optionsCount = await selectLoc.evaluate((sel: HTMLSelectElement) => {
+          return Array.from(sel.options).filter(o => o.value && o.value.trim() !== '').length;
+        });
+
+        if (optionsCount > 0) break;
+
+        logger.warn(`Codigo Carga still empty, waiting... (${Math.round((Date.now() - startWait) / 1000)}s elapsed)`);
+        await this.page.waitForTimeout(pollIntervalMs);
+      }
 
       logger.info(`Codigo Carga dropdown has ${optionsCount} cargo options`);
 
       if (optionsCount === 0) {
-        logger.error('❌ Codigo Carga dropdown is EMPTY - selected client has no active contracts!');
+        logger.error('❌ Codigo Carga dropdown is EMPTY after 15s - selected client has no active contracts!');
         await this.takeScreenshot('codigo-carga-empty');
-        throw new Error('Codigo Carga dropdown has no options. The selected client has no active contracts with cargo codes.');
+        throw new Error('Codigo Carga dropdown has no options after 15s. The selected client has no active contracts with cargo codes.');
       }
 
       // If a specific cargo code is provided (e.g., "Pallet_Furgon_Frio_10ton"),

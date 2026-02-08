@@ -32,17 +32,12 @@ export class ClienteHelper {
         const baseUrl = config.get().baseUrl;
         const clientePage = new ClienteFormPage(page);
 
-        // Data Generation - UNIQUE NAME with timestamp to avoid duplicate client issues
-        const timestamp = Date.now().toString().slice(-6); // Last 6 digits for readability
-        // Clean the base name: remove any existing suffixes like "- 123456", "Logistics", "SpA", etc.
+        // Data Generation - UNIQUE NAME with full Unix seconds to guarantee uniqueness
+        const unixTs = Math.floor(Date.now() / 1000);
         const rawBaseName = generateShortCompanyName();
-        const baseName = rawBaseName
-            .replace(/ - \d+$/, '')           // Remove timestamp suffix
-            .replace(/\s*(Logistics|SpA|SA|Ltda|S\.A\.)\s*/gi, '')  // Remove company suffixes
-            .trim();
+        const baseName = rawBaseName.split(' - ')[0].trim(); // Company name before timestamp suffix
 
-        // Build unique name: BaseName + SpA + Timestamp (e.g., "Titanium SpA 123456")
-        const nombre = `${baseName} SpA ${timestamp}`;
+        const nombre = `${baseName} ${unixTs}`;
         const nombreFantasia = `${baseName.split(' ')[0]} SpA`; // e.g. "Titanium SpA"
         const rawRut = generateValidChileanRUT();
         const rut = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();

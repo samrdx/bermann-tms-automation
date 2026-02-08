@@ -30,6 +30,13 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         logger.info(`🔧 Worker ${workerIndex} | Browser: ${browserName} | Project: ${projectName}`);
         logger.info('='.repeat(80));
 
+        // Clean stale data file for this worker to ensure fresh state
+        const staleDataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        if (fs.existsSync(staleDataPath)) {
+            fs.unlinkSync(staleDataPath);
+            logger.info(`🗑️ Deleted stale data file: ${staleDataPath}`);
+        }
+
         // =================================================================
         // STEP 0: Login
         // =================================================================

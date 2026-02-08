@@ -33,9 +33,11 @@ export class TransportistaHelper {
         const baseUrl = config.get().baseUrl;
         const transportistaPage = new TransportistaFormPage(page);
 
-        // Data Generation
-        const nombre = generateShortCompanyName();
-        const baseNombre = nombre.split(' - ')[0];
+        // Data Generation - UNIQUE NAME with full Unix seconds to guarantee uniqueness
+        const unixTs = Math.floor(Date.now() / 1000);
+        const rawBaseName = generateShortCompanyName();
+        const baseNombre = rawBaseName.split(' - ')[0].trim();
+        const nombre = `${baseNombre} ${unixTs}`;
         const rawRut = generateValidChileanRUT();
         const documento = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
 
