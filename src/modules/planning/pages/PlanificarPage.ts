@@ -1,31 +1,36 @@
 import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
-import { expect } from '@playwright/test'; // CRÍTICO: Importar expect
+import { expect } from '@playwright/test';
 import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('PlanificarViajesPage');
 
 export class PlanificarPage extends BasePage {
   private readonly selectors = {
-    // Campos básicos
+    // Inputs Simples
     nroViaje: '#viajes-nro_viaje',
     numeroPlanilla: '#viajes-numero_planilla',
     valorFlete: '#viajes-valor_flete',
 
-    // Selects
-    tipoOperacion: '#tipo_operacion_form',
-    cliente: '#viajes-cliente_id',
-    tipoServicio: '#viajes-tipo_servicio_id',
-    tipoViaje: '#viajes-tipo_viaje_id',
-    unidadNegocio: '#viajes-unidad_negocio_id',
-    codigoCarga: '#viajes-carga_id',
+    // Botones de Dropdowns (Bootstrap Select)
+    // Usamos data-id para identificar el botón que abre el menú
+    btnTipoOperacion: 'button[data-id="tipo_operacion_form"]',
+    btnTipoServicio: 'button[data-id="viajes-tipo_servicio_id"]',
+    btnTipoViaje: 'button[data-id="viajes-tipo_viaje_id"]',
+    btnUnidadNegocio: 'button[data-id="viajes-unidad_negocio_id"]',
+    btnCodigoCarga: 'button[data-id="viajes-carga_id"]',
+    btnCliente: 'button[data-id="viajes-cliente_id"]',
 
     // Ruta
     btnAgregarRuta: 'button:has-text("Agregar Ruta")',
     modalRutas: '#modalRutasSugeridas',
     tablaRutas: '#tabla-rutas tbody tr',
 
-    // Botones
+    // Origen/Destino
+    btnOrigen: 'button[data-id="_origendestinoform-origen"]',
+    btnDestino: 'button[data-id="_origendestinoform-destino"]',
+
+    // Acciones
     btnGuardar: '#btn_guardar_form',
   };
 
@@ -38,99 +43,138 @@ export class PlanificarPage extends BasePage {
     await this.page.waitForLoadState('domcontentloaded');
   }
 
+  // --- MÉTODOS DE LLENADO SIMPLE ---
+
   async fillNroViaje(nro?: string): Promise<void> {
     const nroViaje = nro || String(Math.floor(10000 + Math.random() * 90000));
+    logger.info(`Filling Nro Viaje: ${nroViaje}`);
     await this.fill(this.selectors.nroViaje, nroViaje);
   }
 
-  // --- REFACTOR: SELECCIÓN DE CLIENTE (Teclado + API Wait) ---
-  async selectCliente(cliente: string): Promise<void> {
-    logger.info(`Selecting Cliente: ${cliente}`);
+  async fillNumeroPlanilla(numero: string): Promise<void> {
+    await this.fill(this.selectors.numeroPlanilla, numero);
+  }
+
+  async fillValorFlete(valor: string): Promise<void> {
+    await this.fill(this.selectors.valorFlete, valor);
+  }
+
+  // --- NUEVA ESTRATEGIA: SELECCIÓN NATIVA (Click UI) ---
+
+  /**
+   * Método universal para interactuar con Dropdowns de Bootstrap
+   * 1. Hace click en el botón del dropdown.
+   * 2. Espera a que el menú se abra.
+   * 3. Busca la opción por texto o selecciona la primera disponible.
+   */
+  private async selectBootstrapDropdown(buttonSelector: string, textToSelect?: string, fieldName: string = 'Dropdown'): Promise<void> {
+    logger.info(`Selecting ${fieldName}...`);
     try {
-      // 1. Abrir dropdown
-      const pickerBtn = this.page.locator('button[data-id="viajes-cliente_id"]');
-      await pickerBtn.waitFor({ state: 'visible' });
-      await pickerBtn.click();
+      const btn = this.page.locator(buttonSelector);
+      await btn.waitFor({ state: 'visible' });
+      await btn.click(); // Abrir menú
 
-      // 2. Esperar input de búsqueda
-      const searchInput = this.page.locator('.dropdown-menu.show .bs-searchbox input').first();
-      await searchInput.waitFor({ state: 'visible', timeout: 5000 });
+      const dropdownMenu = this.page.locator('.dropdown-menu.show');
+      await dropdownMenu.waitFor({ state: 'visible' });
 
-      // 3. Listener para la API de búsqueda (evita timeouts por lentitud)
-      const responsePromise = this.page.waitForResponse(
-        resp => resp.url().includes('get_clientes') || resp.url().includes('api'),
-        { timeout: 8000 }
-      ).catch(() => null);
+      if (textToSelect) {
+        // Opción A: Buscar por texto específico
+        // Usamos una búsqueda laxa para evitar problemas con espacios
+        const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
+        if (await option.isVisible()) {
+          await option.click();
+          logger.info(`✅ ${fieldName}: Selected "${textToSelect}"`);
+        } else {
+          // Si no encuentra el texto exacto, intenta búsqueda por teclado (si hay searchbox)
+          const searchBox = dropdownMenu.locator('.bs-searchbox input');
+          if (await searchBox.isVisible()) {
+            await searchBox.fill(textToSelect);
+            await this.page.waitForTimeout(500);
+            await this.page.keyboard.press('Enter');
+            logger.info(`✅ ${fieldName}: Selected via search "${textToSelect}"`);
+          } else {
+            throw new Error(`Option "${textToSelect}" not found in ${fieldName}`);
+          }
+        }
+      } else {
+        // Opción B: Seleccionar el primero disponible (que no esté oculto)
+        const firstOption = dropdownMenu.locator('li:not(.hidden):not(.disabled) a').first();
+        await firstOption.click();
+        logger.info(`✅ ${fieldName}: Selected first available option`);
+      }
 
-      // 4. Escribir nombre exacto
-      await searchInput.fill(cliente);
-
-      // 5. Esperar respuesta de red
-      await responsePromise;
-      await this.page.waitForTimeout(500);
-
-      // 6. NAVEGACIÓN POR TECLADO (Bypass de selectores CSS complejos)
-      await this.page.keyboard.press('ArrowDown');
-      await this.page.waitForTimeout(200);
-      await this.page.keyboard.press('Enter');
-
-      logger.info('✅ Cliente selected via keyboard');
+      // Pequeña pausa para animaciones y validaciones
+      await this.page.waitForTimeout(300);
 
     } catch (error) {
-      logger.error(`Failed to select cliente: ${cliente}`, error);
+      logger.error(`Failed to select ${fieldName}`, error);
       throw error;
     }
-
-    // 7. Esperar a que la cascada habilite el siguiente campo
-    logger.info('Waiting for Codigo Carga to unlock...');
-    await this.page.waitForFunction(
-      (sel) => {
-        const el = document.querySelector(sel) as HTMLSelectElement;
-        return el && !el.disabled;
-      },
-      this.selectors.codigoCarga,
-      { timeout: 15000 }
-    );
   }
 
-  // --- REFACTOR: CÓDIGO CARGA (Disparar evento change) ---
-  async selectCodigoCarga(carga?: string): Promise<void> {
-    logger.info('Selecting Codigo Carga...');
+  // --- IMPLEMENTACIÓN DE SELECTS USANDO UI NATIVA ---
 
-    // Usamos robustSelect (o lógica simple) para poner el valor
-    await this.robustSelect(this.selectors.codigoCarga, carga || '', !carga);
+  async selectTipoOperacion(tipo: string = 'tclp2210'): Promise<void> {
+    // Mapeo rápido si el texto visual difiere del valor interno, 
+    // pero intentaremos seleccionar por texto parcial que suele funcionar.
+    await this.selectBootstrapDropdown(this.selectors.btnTipoOperacion, tipo, 'Tipo Operacion');
+  }
 
-    // FIX CRÍTICO: Disparar evento change MANUALMENTE
-    // Esto es lo que despierta al backend para calcular rutas
-    logger.info('🔥 Forcing change event on Codigo Carga');
-    const selector = this.selectors.codigoCarga;
+  async selectTipoServicio(tipo: string = 'tclp2210'): Promise<void> {
+    // Si 'tclp2210' es un código interno y no texto visible, 
+    // ajusta esto al TEXTO que ve el usuario (ej. "Transporte Local")
+    await this.selectBootstrapDropdown(this.selectors.btnTipoServicio, tipo, 'Tipo Servicio');
+  }
 
-    await this.page.evaluate((sel) => {
-      const el = document.querySelector(sel);
-      if (el) el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, selector);
+  async selectTipoViaje(tipo: string = 'Normal'): Promise<void> {
+    await this.selectBootstrapDropdown(this.selectors.btnTipoViaje, tipo, 'Tipo Viaje');
+  }
 
-    // Esperar a que el backend procese (Cálculo de rutas)
+  async selectUnidadNegocio(unidad: string = 'Defecto'): Promise<void> {
+    await this.selectBootstrapDropdown(this.selectors.btnUnidadNegocio, unidad, 'Unidad Negocio');
+    // Esperar cascada (carga de contratos/configuraciones)
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(2000);
   }
 
-  // --- REFACTOR: AGREGAR RUTA (Esperar botón enabled) ---
+  async selectCliente(cliente: string): Promise<void> {
+    logger.info(`Selecting Cliente: ${cliente}`);
+    // Reusamos la lógica nativa, aprovechando el buscador si existe
+    await this.selectBootstrapDropdown(this.selectors.btnCliente, cliente, 'Cliente');
+
+    // Esperar a que la cascada habilite el siguiente campo (Código Carga)
+    logger.info('Waiting for cascading updates...');
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  async selectCodigoCarga(carga?: string): Promise<void> {
+    // Este es el que fallaba antes. Ahora usará click real.
+    await this.selectBootstrapDropdown(this.selectors.btnCodigoCarga, carga, 'Codigo Carga');
+
+    // CRÍTICO: Disparar evento de teclado para forzar validación y cálculo de rutas
+    await this.page.keyboard.press('Tab');
+
+    logger.info('Waiting for route calculation...');
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(2000); // Tiempo para que el botón "Agregar Ruta" se habilite
+  }
+
+  // --- MÉTODOS DE RUTA (Sin cambios mayores, solo esperas) ---
+
   async agregarRuta(numeroRuta: string): Promise<void> {
     logger.info(`Adding ruta: ${numeroRuta}`);
     const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
 
-    // ESPERA INTELIGENTE: Esperar a que el botón deje de estar 'disabled'
+    // Esperar a que el botón se habilite (ahora debería funcionar porque Codigo Carga se seleccionó bien)
     try {
       await expect(btnAgregar).toBeEnabled({ timeout: 15000 });
     } catch (e) {
-      throw new Error('Timeout: "Agregar Ruta" button never became enabled. Check if contract has valid routes.');
+      throw new Error(`Timeout: "Agregar Ruta" button never became enabled. The previous form fields (Tipo Operacion, Servicio, Carga) might be empty or invalid.`);
     }
 
     await btnAgregar.click();
     await this.page.waitForTimeout(1000);
 
-    // Buscar en la tabla (Lógica estándar)
+    // Buscar en la tabla
     const rows = this.page.locator(this.selectors.tablaRutas);
     const rowCount = await rows.count();
     let found = false;
@@ -149,51 +193,24 @@ export class PlanificarPage extends BasePage {
     await this.page.waitForTimeout(1000);
   }
 
-  // --- MÉTODOS DE APOYO (Robust Select Simplificado) ---
-  private async robustSelect(selector: string, textOrValue: string, searchByText = true): Promise<void> {
-    const selectLoc = this.page.locator(selector);
-    await selectLoc.waitFor({ state: 'attached' });
+  // --- ORIGEN Y DESTINO ---
 
-    await this.page.evaluate((args) => {
-      const $ = (window as any).$;
-      const el = document.querySelector(args.sel) as HTMLSelectElement;
-
-      // Estrategia 1: Bootstrap Select
-      if ($ && $(el).selectpicker) {
-        // Si es búsqueda por texto, encontrar el valor primero
-        let val = args.val;
-        if (args.search) {
-          const opt = Array.from(el.options).find(o => o.text.includes(args.val));
-          if (opt) val = opt.value;
-        }
-        $(el).selectpicker('val', val);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-      // Estrategia 2: Select Nativo
-      else {
-        el.value = args.val;
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    }, { sel: selector, val: textOrValue, search: searchByText });
-
-    await this.page.waitForTimeout(500);
+  async selectOrigen(origen: string): Promise<void> {
+    await this.selectBootstrapDropdown(this.selectors.btnOrigen, origen, 'Origen');
   }
 
-  // Métodos wrapper simples
-  async selectTipoOperacion(val: string) { await this.robustSelect(this.selectors.tipoOperacion, val, true); }
-  async selectTipoServicio(val: string) { await this.robustSelect(this.selectors.tipoServicio, val, true); }
-  async selectTipoViaje(val: string) { await this.robustSelect(this.selectors.tipoViaje, val, false); }
-  async selectUnidadNegocio(val: string) {
-    await this.robustSelect(this.selectors.unidadNegocio, val, false);
-    await this.page.waitForLoadState('networkidle'); // Cascada
+  async selectDestino(destino: string): Promise<void> {
+    await this.selectBootstrapDropdown(this.selectors.btnDestino, destino, 'Destino');
   }
 
-  async clickGuardar() {
+  // --- GUARDAR ---
+
+  async clickGuardar(): Promise<void> {
     await this.page.click(this.selectors.btnGuardar);
     await this.page.waitForLoadState('networkidle');
   }
 
-  async isFormSaved() {
+  async isFormSaved(): Promise<boolean> {
     return !(this.page.url().includes('/crear'));
   }
 }
