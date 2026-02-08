@@ -1,5 +1,6 @@
 import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
+import { expect } from '@playwright/test';
 import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('PlanificarViajesPage');
@@ -466,8 +467,15 @@ export class PlanificarPage extends BasePage {
     logger.info(`Adding ruta: ${numeroRuta}`);
 
     try {
-      // Click Agregar Ruta button
       const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
+
+      // Wait for route calculation to finish before clicking
+      await this.page.waitForLoadState('networkidle').catch(() => {
+        logger.warn('Network not idle before Agregar Ruta, proceeding...');
+      });
+      logger.info('Waiting for Agregar Ruta button to be enabled...');
+      await expect(btnAgregar).toBeEnabled({ timeout: 20000 });
+      logger.info('Agregar Ruta button is enabled');
 
       // Remove any modal backdrops that might be intercepting
       await this.page.evaluate(() => {
