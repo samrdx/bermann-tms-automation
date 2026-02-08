@@ -254,9 +254,34 @@ export class ContratosFormPage extends BasePage {
     logger.info('✅ Route and Cargo added');
   }
 
+  /**
+   * Método restaurado: Guarda el contrato finalmente y asegura que la operación termine.
+   * Usado en la Fase 3 de contrato-crear.test.ts
+   */
+  async saveAndExtractId(): Promise<string> {
+    logger.info('💾 Saving contract (Final Step)...');
+
+    // 1. Limpieza de seguridad
+    await this.forceCloseModal();
+
+    // 2. Click en Guardar
+    const saveBtn = this.page.locator(this.selectors.btnGuardar).first();
+    await saveBtn.click();
+
+    // 3. Esperar a que se procese
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(2000);
+
+    const currentUrl = this.page.url();
+    logger.info(`Final Save URL: ${currentUrl}`);
+
+    // 4. Intentar extraer ID
+    const match = currentUrl.match(/\/contrato\/(?:ver|editar)\/(\d+)/);
+    return match ? match[1] : '';
+  }
+
   // Método legacy de relleno de formulario principal (mantener si se usa en otros tests)
   async fillMainForm(clienteName: string, transportistaRut: string, fechaInicio: string, fechaFin: string): Promise<void> {
-    // ... (Mantén tu lógica existente aquí si la necesitas, o adáptala al nuevo estilo) ...
-    // Por brevedad, asumo que este método no es el que falla ahora mismo.
+    // Implementación legacy si se requiere
   }
 }
