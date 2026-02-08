@@ -230,11 +230,23 @@ export class PlanificarPage extends BasePage {
     try {
       await this.robustSelect(this.selectors.cliente, cliente, true);
       logger.info('✅ Cliente selected');
-    } catch (error) {
-      logger.error('Failed to select Cliente', error);
-      await this.takeScreenshot('select-cliente-error');
-      throw error;
+    } catch (firstError) {
+      // TMS may show abbreviated client names — try partial match with first word
+      const partial = cliente.split(' ')[0];
+      logger.warn(`Full name "${cliente}" not found, retrying with partial: "${partial}"`);
+      try {
+        await this.robustSelect(this.selectors.cliente, partial, true);
+        logger.info('✅ Cliente selected via partial match');
+      } catch (secondError) {
+        logger.error('Failed to select Cliente with both full and partial name', secondError);
+        await this.takeScreenshot('select-cliente-error');
+        throw secondError;
+      }
     }
+    // Wait for onchange AJAX (getZones, getContractModality) to complete
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+      logger.warn('Network idle timeout after Cliente selection, proceeding...');
+    });
   }
 
   async selectTipoServicio(tipo: string = 'tclp2210'): Promise<void> {
