@@ -56,7 +56,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup', 'base-entities-chromium'],  // Auth + entities setup
+      dependencies: ['setup'],  // Auth only — base-entities runs as separate CI step
     },
     {
       name: 'firefox',
@@ -68,7 +68,7 @@ export default defineConfig({
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup', 'base-entities-firefox'],  // Auth + entities setup
+      dependencies: ['setup'],  // Auth only — base-entities runs as separate CI step
     },
     {
       name: 'webkit',
@@ -80,7 +80,7 @@ export default defineConfig({
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup', 'base-entities-webkit'],  // Auth + entities setup
+      dependencies: ['setup'],  // Auth only — base-entities runs as separate CI step
     },
   ],
 });

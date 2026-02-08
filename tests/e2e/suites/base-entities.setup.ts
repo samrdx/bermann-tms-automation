@@ -87,6 +87,7 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         operationalData.cliente = {
             id: cliente.id || 'N/A',
             nombre: cliente.nombre,
+            nombreFantasia: cliente.nombreFantasia,
             rut: cliente.rut,
             email: cliente.email,
         };
