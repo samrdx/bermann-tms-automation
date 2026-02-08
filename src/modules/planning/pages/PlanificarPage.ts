@@ -209,7 +209,7 @@ export class PlanificarPage extends BasePage {
     await this.selectBootstrapDropdown(this.selectors.btnDestino, destino, 'Destino');
   }
 
-  // --- GUARDAR Y VERIFICAR ---
+  // --- GUARDAR Y VERIFICAR (Estrategia Robustez Toast) ---
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking Guardar button...');
@@ -218,34 +218,38 @@ export class PlanificarPage extends BasePage {
     await btnGuardar.waitFor({ state: 'visible' });
     await btnGuardar.click();
 
-    // Esperamos un momento a que aparezca la notificación o cambie la URL
-    logger.info('Waiting for success confirmation...');
+    // Esperamos un momento para asegurar que la acción se procese
     await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(1000);
   }
-  async isFormSaved(): Promise<boolean> {
-    // ESTRATEGIA 1: Buscar la notificación verde de tu screenshot
-    // Texto exacto: "Viaje Creado con éxito"
-    const successMessage = this.page.getByText('Viaje Creado con éxito').first();
 
-    // Esperamos hasta 5 segundos a que aparezca el mensaje
-    if (await successMessage.isVisible({ timeout: 5000 }).catch(() => false)) {
+  async isFormSaved(): Promise<boolean> {
+    logger.info('Checking save status...');
+
+    // 1. Detección del Toast de Éxito (Texto exacto de tu imagen)
+    // Usamos un selector flexible que busque el texto en cualquier parte
+    const successToast = this.page.locator('text="Viaje Creado con éxito"').first();
+    if (await successToast.isVisible()) {
       logger.info('✅ Success toast detected: "Viaje Creado con éxito"');
       return true;
     }
 
-    // ESTRATEGIA 2: Verificar si la URL cambió (por si acaso)
+    // 2. Detección de Limpieza de Formulario
+    // Si el Nro de Viaje está vacío, significa que se guardó y reseteó
+    const nroViajeVal = await this.page.locator(this.selectors.nroViaje).inputValue();
+    if (nroViajeVal === '') {
+      logger.info('✅ Form cleared (implicit success indicator)');
+      return true;
+    }
+
+    // 3. Detección de Redirección (Fallback)
     if (!this.page.url().includes('/crear')) {
       logger.info('✅ URL changed (redirected)');
       return true;
     }
 
-    // ESTRATEGIA 3: Verificar si el formulario se limpió (Nro Viaje vacío)
-    const nroViajeVal = await this.page.locator(this.selectors.nroViaje).inputValue();
-    if (nroViajeVal === '') {
-      logger.info('✅ Form cleared (implicit success)');
-      return true;
-    }
-
+    // Debugging: Si falla, imprimir qué vemos
+    logger.warn(`⚠️ Save check failed. NroViaje field value: "${nroViajeVal}"`);
     return false;
   }
 
