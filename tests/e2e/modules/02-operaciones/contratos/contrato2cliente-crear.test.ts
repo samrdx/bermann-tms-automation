@@ -243,29 +243,38 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
             logger.info('⚠️ Redirected to index page - searching for created contract...');
 
             // Search by contract number in the grid
-            const searchBox = page.locator('input[type="search"]');
-            await searchBox.fill(nroContrato);
-            await page.waitForTimeout(1500);
-
-            // Find the contract row and extract ID from view/edit link
-            const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
-            await expect(contractRow).toBeVisible({ timeout: 5000 });
-
-            const viewLink = contractRow.locator('a[href*="/contrato/view/"]').first();
-            const viewHref = await viewLink.getAttribute('href');
-
-            const viewMatch = viewHref?.match(/\/contrato\/view\/(\d+)/);
-            if (viewMatch) {
-                contractId = viewMatch[1];
-                logger.info(`✅ Contract created! ID: ${contractId} (found in grid)`);
-
-                // Navigate to edit page
-                logger.info(`Navigating to edit page for contract ${contractId}...`);
-                await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
+            const searchBox = page.locator('input[type="search"]').first();
+            if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await searchBox.fill(nroContrato);
                 await page.waitForTimeout(1500);
-            } else {
-                throw new Error(`Could not extract contract ID from grid. ViewHref: ${viewHref}`);
             }
+
+            // Find the contract row
+            const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
+            await expect(contractRow).toBeVisible({ timeout: 10000 });
+
+            // PRIMARY: Try data-key attribute (most reliable)
+            const dataKey = await contractRow.getAttribute('data-key');
+            if (dataKey) {
+                contractId = dataKey;
+                logger.info(`✅ Contract created! ID: ${contractId} (from data-key)`);
+            } else {
+                // FALLBACK: Try multiple link patterns (TMS uses /ver/, /view/, or /editar/)
+                const actionLink = contractRow.locator('a[href*="/contrato/ver/"], a[href*="/contrato/view/"], a[href*="/contrato/editar/"]').first();
+                const linkHref = await actionLink.getAttribute('href', { timeout: 5000 });
+                const idMatch = linkHref?.match(/\/contrato\/(?:ver|view|editar)\/(\d+)/);
+                if (idMatch) {
+                    contractId = idMatch[1];
+                    logger.info(`✅ Contract created! ID: ${contractId} (from grid link)`);
+                } else {
+                    throw new Error(`Could not extract contract ID from grid. Href: ${linkHref}`);
+                }
+            }
+
+            // Navigate to edit page
+            logger.info(`Navigating to edit page for contract ${contractId}...`);
+            await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
+            await page.waitForTimeout(1500);
         } else if (currentUrl.includes('/contrato/crear')) {
             // Still on create page - save likely failed
             await page.screenshot({ path: `./reports/screenshots/save-failed-${Date.now()}.png` });
