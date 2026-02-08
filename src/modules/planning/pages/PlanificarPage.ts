@@ -236,52 +236,42 @@ export class PlanificarPage extends BasePage {
         await pickerBtn.click({ force: true });
         await this.page.waitForTimeout(500);
 
-        // Check if any dropdown menu is now visible
         const menuVisible = await this.page.locator('.dropdown-menu.show').first().isVisible().catch(() => false);
         if (menuVisible) break;
         logger.warn(`Cliente dropdown not open on attempt ${attempt + 1}, retrying...`);
       }
 
-      // Step B: Focus the search input and type via keyboard with human-like delay
+      // Step B: Focus the search input
       const searchInput = this.page.locator('.dropdown-menu.show .bs-searchbox input').first();
-      if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-        logger.info(`Typing search query: "${cliente}"`);
-        await searchInput.click(); // Focus the search input
-        await searchInput.fill(''); // Clear any existing text
-        await this.page.keyboard.type(cliente, { delay: 150 });
-      } else {
-        logger.warn('No search box found in Cliente dropdown, falling back to robustSelect');
-        await this.page.keyboard.press('Escape');
-        await this.robustSelect(this.selectors.cliente, cliente, true);
-        await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-        return;
-      }
+      await searchInput.waitFor({ state: 'visible', timeout: 5000 });
+      await searchInput.click();
+      await searchInput.fill('');
 
-      // Step C: Wait for the server to respond to the search query
-      logger.info('Waiting for search API response...');
-      await this.page.waitForResponse(
+      // Step C: Register response listener BEFORE typing (catches AJAX fired during keystrokes)
+      logger.info('Registering search API listener...');
+      const responsePromise = this.page.waitForResponse(
         resp => resp.url().includes('get_clientes') || resp.url().includes('clientes') || resp.url().includes('api'),
         { timeout: 10000 }
       ).catch(() => {
-        logger.warn('No search API response detected, proceeding with client-side filter...');
+        logger.warn('No search API response detected, client-side filter only');
       });
+
+      // Type the full unique name with human-like delay
+      logger.info(`Typing search query: "${cliente}"`);
+      await this.page.keyboard.type(cliente, { delay: 150 });
+
+      // Wait for API response to settle (server-side search or client-side filter)
+      await responsePromise;
       await this.page.waitForTimeout(1000);
 
-      // Step D: Click the first visible result in the open dropdown menu
-      const resultOption = this.page.locator('.dropdown-menu.show li.active a, .dropdown-menu.show a').first();
+      // Step D: Click the first visible result (unique name = only one match)
+      const resultOption = this.page.locator('.dropdown-menu.show li:not(.hidden):not(.no-results) a').first();
+      await resultOption.waitFor({ state: 'visible', timeout: 5000 });
 
-      if (await resultOption.isVisible({ timeout: 5000 }).catch(() => false)) {
-        const resultText = await resultOption.textContent();
-        logger.info(`Clicking search result: "${resultText?.trim()}"`);
-        await resultOption.click();
-        logger.info('✅ Cliente selected via search');
-      } else {
-        logger.warn('No visible results after search, falling back to robustSelect');
-        await this.page.keyboard.press('Escape');
-        await this.page.waitForTimeout(300);
-        await this.robustSelect(this.selectors.cliente, cliente, true);
-        logger.info('✅ Cliente selected via robustSelect fallback');
-      }
+      const resultText = await resultOption.textContent();
+      logger.info(`Clicking search result: "${resultText?.trim()}"`);
+      await resultOption.click();
+      logger.info('✅ Cliente selected via search');
 
     } catch (error) {
       logger.error('Failed to select Cliente', error);
