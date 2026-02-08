@@ -39,7 +39,7 @@ export class ClienteHelper {
         const baseName = rawBaseName.split(' - ')[0].trim(); // Company name before timestamp suffix
 
         const nombre = `${baseName} ${unixTs}`;
-        const nombreFantasia = `${baseName.split(' ')[0]} SpA`; // e.g. "Titanium SpA"
+        const nombreFantasia = `${baseName.split(' ')[0]} SpA ${unixTs}`; // e.g. "Titanium SpA 489749"
         const rawRut = generateValidChileanRUT();
         const rut = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
         const calle = generateChileanStreet();
