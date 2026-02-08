@@ -264,14 +264,12 @@ export class PlanificarPage extends BasePage {
       await responsePromise;
       await this.page.waitForTimeout(1000);
 
-      // Step D: Click the first visible result (unique name = only one match)
-      const resultOption = this.page.locator('.dropdown-menu.show li:not(.hidden):not(.no-results) a').first();
-      await resultOption.waitFor({ state: 'visible', timeout: 5000 });
-
-      const resultText = await resultOption.textContent();
-      logger.info(`Clicking search result: "${resultText?.trim()}"`);
-      await resultOption.click();
-      logger.info('✅ Cliente selected via search');
+      // Step D: Keyboard navigation — ArrowDown to focus first result, Enter to select
+      // This bypasses CSS class matching entirely (no .hidden/.active/.dropdown-item variability)
+      await this.page.keyboard.press('ArrowDown');
+      await this.page.waitForTimeout(300);
+      await this.page.keyboard.press('Enter');
+      logger.info('✅ Cliente selected via keyboard navigation');
 
     } catch (error) {
       logger.error('Failed to select Cliente', error);
