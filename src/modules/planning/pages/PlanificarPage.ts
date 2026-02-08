@@ -232,28 +232,23 @@ export class PlanificarPage extends BasePage {
       const pickerBtn = this.page.locator('button[data-id="viajes-cliente_id"]');
       await pickerBtn.waitFor({ state: 'visible', timeout: 10000 });
 
-      const dropdownContainer = this.page
-        .locator('div.dropdown, div.bootstrap-select')
-        .filter({ has: pickerBtn });
-      const dropdownMenu = dropdownContainer
-        .locator('.dropdown-menu.show, .dropdown-menu.inner.show, .dropdown-menu')
-        .first();
-
       for (let attempt = 0; attempt < 3; attempt++) {
-        if (!await dropdownMenu.isVisible().catch(() => false)) {
-          await pickerBtn.click({ force: true });
-          await this.page.waitForTimeout(500);
-        }
-        if (await dropdownMenu.isVisible().catch(() => false)) break;
+        await pickerBtn.click({ force: true });
+        await this.page.waitForTimeout(500);
+
+        // Check if any dropdown menu is now visible
+        const menuVisible = await this.page.locator('.dropdown-menu.show').first().isVisible().catch(() => false);
+        if (menuVisible) break;
         logger.warn(`Cliente dropdown not open on attempt ${attempt + 1}, retrying...`);
       }
 
-      // Step B: Type the full unique name into the search box with delay
-      const searchInput = dropdownMenu.locator('.bs-searchbox input');
+      // Step B: Focus the search input and type via keyboard with human-like delay
+      const searchInput = this.page.locator('.dropdown-menu.show .bs-searchbox input').first();
       if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
         logger.info(`Typing search query: "${cliente}"`);
-        await searchInput.fill(''); // Clear first
-        await searchInput.pressSequentially(cliente, { delay: 150 });
+        await searchInput.click(); // Focus the search input
+        await searchInput.fill(''); // Clear any existing text
+        await this.page.keyboard.type(cliente, { delay: 150 });
       } else {
         logger.warn('No search box found in Cliente dropdown, falling back to robustSelect');
         await this.page.keyboard.press('Escape');
@@ -262,14 +257,18 @@ export class PlanificarPage extends BasePage {
         return;
       }
 
-      // Step C: Wait for the search/filter to settle (server-side or client-side filtering)
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-        logger.warn('Network idle timeout after typing client search, proceeding...');
+      // Step C: Wait for the server to respond to the search query
+      logger.info('Waiting for search API response...');
+      await this.page.waitForResponse(
+        resp => resp.url().includes('get_clientes') || resp.url().includes('clientes') || resp.url().includes('api'),
+        { timeout: 10000 }
+      ).catch(() => {
+        logger.warn('No search API response detected, proceeding with client-side filter...');
       });
       await this.page.waitForTimeout(1000);
 
-      // Step D: Click the first visible result in the dropdown
-      const resultOption = dropdownMenu.locator('li:not(.hidden):not(.no-results) a, li:not(.hidden):not(.no-results) span.text').first();
+      // Step D: Click the first visible result in the open dropdown menu
+      const resultOption = this.page.locator('.dropdown-menu.show li.active a, .dropdown-menu.show a').first();
 
       if (await resultOption.isVisible({ timeout: 5000 }).catch(() => false)) {
         const resultText = await resultOption.textContent();
