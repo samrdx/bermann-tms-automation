@@ -228,39 +228,85 @@ export class PlanificarPage extends BasePage {
   async selectCliente(cliente: string = 'Clientedummy'): Promise<void> {
     logger.info(`Selecting Cliente: ${cliente}`);
     try {
-      await this.robustSelect(this.selectors.cliente, cliente, true);
-      logger.info('✅ Cliente selected');
-    } catch (firstError) {
-      // TMS may show abbreviated client names — try partial match with first word
-      const partial = cliente.split(' ')[0];
-      logger.warn(`Full name "${cliente}" not found, retrying with partial: "${partial}"`);
-      try {
-        await this.robustSelect(this.selectors.cliente, partial, true);
-        logger.info('✅ Cliente selected via partial match');
-      } catch (secondError) {
-        logger.error('Failed to select Cliente with both full and partial name', secondError);
-        await this.takeScreenshot('select-cliente-error');
-        throw secondError;
+      // Step A: Click the Cliente dropdown picker button to open the search panel
+      const pickerBtn = this.page.locator('button[data-id="viajes-cliente_id"]');
+      await pickerBtn.waitFor({ state: 'visible', timeout: 10000 });
+
+      const dropdownContainer = this.page
+        .locator('div.dropdown, div.bootstrap-select')
+        .filter({ has: pickerBtn });
+      const dropdownMenu = dropdownContainer
+        .locator('.dropdown-menu.show, .dropdown-menu.inner.show, .dropdown-menu')
+        .first();
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (!await dropdownMenu.isVisible().catch(() => false)) {
+          await pickerBtn.click({ force: true });
+          await this.page.waitForTimeout(500);
+        }
+        if (await dropdownMenu.isVisible().catch(() => false)) break;
+        logger.warn(`Cliente dropdown not open on attempt ${attempt + 1}, retrying...`);
       }
+
+      // Step B: Type the full unique name into the search box with delay
+      const searchInput = dropdownMenu.locator('.bs-searchbox input');
+      if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+        logger.info(`Typing search query: "${cliente}"`);
+        await searchInput.fill(''); // Clear first
+        await searchInput.pressSequentially(cliente, { delay: 150 });
+      } else {
+        logger.warn('No search box found in Cliente dropdown, falling back to robustSelect');
+        await this.page.keyboard.press('Escape');
+        await this.robustSelect(this.selectors.cliente, cliente, true);
+        await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+        return;
+      }
+
+      // Step C: Wait for the search/filter to settle (server-side or client-side filtering)
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        logger.warn('Network idle timeout after typing client search, proceeding...');
+      });
+      await this.page.waitForTimeout(1000);
+
+      // Step D: Click the first visible result in the dropdown
+      const resultOption = dropdownMenu.locator('li:not(.hidden):not(.no-results) a, li:not(.hidden):not(.no-results) span.text').first();
+
+      if (await resultOption.isVisible({ timeout: 5000 }).catch(() => false)) {
+        const resultText = await resultOption.textContent();
+        logger.info(`Clicking search result: "${resultText?.trim()}"`);
+        await resultOption.click();
+        logger.info('✅ Cliente selected via search');
+      } else {
+        logger.warn('No visible results after search, falling back to robustSelect');
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(300);
+        await this.robustSelect(this.selectors.cliente, cliente, true);
+        logger.info('✅ Cliente selected via robustSelect fallback');
+      }
+
+    } catch (error) {
+      logger.error('Failed to select Cliente', error);
+      await this.takeScreenshot('select-cliente-error');
+      throw error;
     }
+
     // Wait for onchange AJAX (getZones, getContractModality) to complete
     await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
       logger.warn('Network idle timeout after Cliente selection, proceeding...');
     });
 
-    // Post-selection validation: verify Codigo Carga populated (proves correct client was picked)
-    await this.page.waitForTimeout(3000);
-    const cargaOptions = await this.page.locator(this.selectors.codigoCarga).evaluate(
-      (sel: HTMLSelectElement) => Array.from(sel.options).filter(o => o.value && o.value.trim() !== '').length
-    );
-
-    if (cargaOptions === 0) {
-      logger.warn('Codigo Carga still empty after client selection — re-selecting client to force AJAX refresh');
-      await this.robustSelect(this.selectors.cliente, cliente, true);
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-        logger.warn('Network idle timeout after re-selecting Cliente, proceeding...');
-      });
-    }
+    // Cascade guard: wait for Codigo Carga dropdown to become enabled (proves contracts loaded)
+    logger.info('Waiting for Codigo Carga dropdown to become enabled...');
+    await this.page.waitForFunction(
+      (sel: string) => {
+        const el = document.querySelector(sel) as HTMLSelectElement;
+        return el && !el.disabled;
+      },
+      this.selectors.codigoCarga,
+      { timeout: 15000 }
+    ).catch(() => {
+      logger.warn('Codigo Carga still disabled after 15s, proceeding...');
+    });
   }
 
   async selectTipoServicio(tipo: string = 'tclp2210'): Promise<void> {
