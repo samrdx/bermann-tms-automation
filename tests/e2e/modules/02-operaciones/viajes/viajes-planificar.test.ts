@@ -46,83 +46,71 @@ test.describe('Viajes - Planificar (Create)', () => {
 
     const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
-    // Verify prerequisites - only Cliente needed for viajes-planificar
-    const missingEntities = [];
-
-    if (!operationalData.cliente?.nombreFantasia) {
-      missingEntities.push('cliente (nombreFantasia)');
-    }
-
-    if (missingEntities.length > 0) {
-      throw new Error(
-        `❌ Missing required entities: ${missingEntities.join(', ')}\n` +
-        `Data file: ${dataPath}\n` +
-        'Please run: npm run test:base (base entities)'
-      );
+    // Verify prerequisites
+    if (!operationalData.cliente?.nombre) {
+      throw new Error('❌ Missing required entity: Cliente. Please run base entities setup.');
     }
 
     logger.info('✅ All prerequisites validated');
     logger.info('Loaded entities:');
-    logger.info(`   Cliente: ${operationalData.cliente.nombreFantasia} (Nombre Fantasía)`);
+    logger.info(`   Cliente: ${operationalData.cliente.nombre}`);
     logger.info('');
 
     // Test data
     const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
-    // Use nombreFantasia — the TMS dropdown shows clients by Nombre de Fantasía, not Razón Social
-    const clienteNombre = operationalData.cliente.nombreFantasia;
+    // Use nombreFantasia if available, otherwise nombre
+    const clienteNombre = operationalData.cliente.nombreFantasia || operationalData.cliente.nombre;
 
     logger.info(`Generated Nro Viaje: ${nroViaje}`);
-
-    // Note: Already authenticated via storageState from setup project
 
     // =================================================================
     // PHASE 1: Navigate to Planificar Viajes
     // =================================================================
     await test.step('Phase 1: Navigate', async () => {
-      logger.info('PHASE 2: Navigate to Planificar Viajes');
+      logger.info('PHASE 1: Navigate to Planificar Viajes');
       await viajesPlanificarPage.navigate();
       logger.info('Navigation successful');
     });
 
     // =================================================================
     // PHASE 2: Fill Form with dynamic data
-    // CORRECT ORDER: Cliente → Código Carga → Tipo Operación → Tipo Servicio → Unidad Negocio → Ruta
-    // NOTE: Código Carga options are loaded from Cliente selection, NOT from the full cascade
+    // CORRECT ORDER BASED ON UI SCREENSHOT:
+    // 1. Nro Viaje
+    // 2. Tipo Operación
+    // 3. Tipo Servicio
+    // 4. Cliente (Triggers cascade)
+    // 5. Unidad Negocio
+    // 6. Código Carga (Triggers route calculation)
+    // 7. Agregar Ruta
     // =================================================================
     await test.step('Phase 2: Fill Form', async () => {
       logger.info('PHASE 2: Fill Complete Viaje Form');
 
-      // 1. Basic info - Nro Viaje
+      // 1. Nro Viaje
       await viajesPlanificarPage.fillNroViaje(nroViaje);
 
-      // 2. Cliente FIRST - use FULL unique name from JSON (includes timestamp)
-      // CRITICAL: We must use the FULL name to avoid selecting duplicate clients like "Delta Spa"
-      // The timestamp suffix makes the name unique (e.g., "Delta Logistics SpA 123456")
-      logger.info(`Selecting Cliente: ${clienteNombre} (full unique name)`);
-      await viajesPlanificarPage.selectCliente(clienteNombre);
-
-      // 3. Código Carga - ALL contracts use code 715 (Pallet_Furgon_Frio_10ton)
-      logger.info('Selecting Codigo Carga: Pallet_Furgon_Frio_10ton (715)');
-      await viajesPlanificarPage.selectCodigoCarga('Pallet_Furgon_Frio_10ton');
-
-      // 4. Tipo Operación
+      // 2. Tipo Operación
       await viajesPlanificarPage.selectTipoOperacion('tclp2210');
 
-      // 5. Tipo Servicio
+      // 3. Tipo Servicio
       await viajesPlanificarPage.selectTipoServicio('tclp2210');
 
-      // 6. Tipo Viaje (optional, using default)
-      await viajesPlanificarPage.selectTipoViaje('1');
+      // 4. Cliente - Critical Cascade Trigger
+      logger.info(`Selecting Cliente: ${clienteNombre}`);
+      await viajesPlanificarPage.selectCliente(clienteNombre);
 
-      // 7. Unidad Negocio
-      await viajesPlanificarPage.selectUnidadNegocio('1');
+      // 5. Tipo Viaje (Default Normal) & Unidad Negocio
+      await viajesPlanificarPage.selectTipoViaje('Normal');
+      await viajesPlanificarPage.selectUnidadNegocio('Defecto');
 
-      // 8. Route modal - uses Route 715 linked to contracts
+      // 6. Código Carga - The "Magical" Trigger
+      // We look for '715' or the cargo name 'Pallet_Furgon_Frio_10ton'
+      logger.info('Selecting Codigo Carga (Pallet_Furgon_Frio_10ton)...');
+      await viajesPlanificarPage.selectCodigoCarga('Pallet_Furgon_Frio_10ton');
+
+      // 7. Route Modal
+      logger.info('Adding Route 05082025-1...');
       await viajesPlanificarPage.agregarRuta('05082025-1');
-
-      // Origen and Destino are auto-filled by Route selection (per user instruction)
-      // await viajesPlanificarPage.selectOrigen('1_agunsa_lampa_RM');
-      // await viajesPlanificarPage.selectDestino('225_Starken_Sn Bernardo');
 
       logger.info('Form filled completely');
     });
@@ -131,7 +119,7 @@ test.describe('Viajes - Planificar (Create)', () => {
     // PHASE 3: Save Viaje
     // =================================================================
     await test.step('Phase 3: Save', async () => {
-      logger.info('PHASE 4: Save Viaje');
+      logger.info('PHASE 3: Save Viaje');
       await viajesPlanificarPage.clickGuardar();
       logger.info('Save clicked');
     });
@@ -140,20 +128,22 @@ test.describe('Viajes - Planificar (Create)', () => {
     // PHASE 4: Verification
     // =================================================================
     await test.step('Phase 4: Verify', async () => {
-      logger.info('PHASE 5: Verification');
+      logger.info('PHASE 4: Verification');
 
+      // Check if we navigated away from /crear
       const isSaved = await viajesPlanificarPage.isFormSaved();
-      expect(isSaved).toBeTruthy();
+      expect(isSaved, 'Form should be saved and URL changed').toBeTruthy();
 
+      // Verify in Grid
       const foundInAsignar = await viajesPlanificarPage.verifyInAsignar(nroViaje);
 
       if (foundInAsignar) {
-        logger.info(`Viaje ${nroViaje} verified in /viajes/asignar`);
+        logger.info(`✅ Viaje ${nroViaje} verified in /viajes/asignar`);
       } else {
-        logger.warn(`Viaje ${nroViaje} not found in /viajes/asignar`);
+        logger.warn(`⚠️ Viaje ${nroViaje} not found in /viajes/asignar`);
       }
 
-      expect(foundInAsignar).toBe(true);
+      expect(foundInAsignar, `Viaje ${nroViaje} should be visible in Asignar grid`).toBe(true);
     });
 
     // =================================================================
@@ -187,8 +177,5 @@ test.describe('Viajes - Planificar (Create)', () => {
     logger.info(`   Ruta: 05082025-1`);
     logger.info(`   Status: PLANIFICADO`);
     logger.info('='.repeat(80));
-
-    // Store for potential next steps
-    process.env.CREATED_VIAJE_NRO = nroViaje;
   });
 });
