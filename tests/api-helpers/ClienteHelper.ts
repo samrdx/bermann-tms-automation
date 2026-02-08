@@ -32,8 +32,9 @@ export class ClienteHelper {
         const baseUrl = config.get().baseUrl;
         const clientePage = new ClienteFormPage(page);
 
-        // Data Generation - UNIQUE NAME with full Unix seconds to guarantee uniqueness
-        const unixTs = Math.floor(Date.now() / 1000);
+        // Data Generation - UNIQUE NAME with 6-digit Unix seconds to guarantee uniqueness
+        // Use % 1000000 to keep names short (TMS truncates long names in dropdowns)
+        const unixTs = Math.floor(Date.now() / 1000) % 1000000;
         const rawBaseName = generateShortCompanyName();
         const baseName = rawBaseName.split(' - ')[0].trim(); // Company name before timestamp suffix
 
