@@ -1,33 +1,40 @@
 {
-  "createdAt": "2026-02-07T18:42:29.524Z",
-  "workerIndex": 3,
+  "createdAt": "2026-02-08T02:58:50.639Z",
+  "workerIndex": 1,
   "projectName": "base-entities-chromium",
   "transportista": {
     "id": "",
-    "nombre": "Rutas del Maule - 489749",
-    "rut": "71115930-4",
-    "razonSocial": "Rutas del Maule - 489749",
-    "baseNombre": "Rutas del Maule"
+    "nombre": "LogiChile Connect 519530",
+    "rut": "59920296-K",
+    "razonSocial": "LogiChile Connect 519530",
+    "baseNombre": "LogiChile Connect"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "LogiChile Connect Logistics SpA",
-    "rut": "27278443-4",
-    "email": "logichileconnect@test.cl"
+    "nombre": "Austral Freight 519544",
+    "nombreFantasia": "Austral SpA 519544",
+    "rut": "73773565-6",
+    "email": "australfreight@test.cl"
   },
   "vehiculo": {
-    "patente": "LMNJ-96",
-    "muestra": "VEH-1770489789997",
-    "transportistaNombre": "Rutas del Maule - 489749",
+    "patente": "ZAFL-58",
+    "muestra": "VEH-1770519571521",
+    "transportistaNombre": "LogiChile Connect 519530",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Antonio",
-    "apellido": "Rojas",
-    "rut": "12.335.052-9",
-    "email": "antoniorojas@test.com",
-    "telefono": "+56936648840",
-    "transportistaNombre": "Rutas del Maule - 489749"
+    "nombre": "Rosa",
+    "apellido": "Fernández",
+    "rut": "64.634.369-0",
+    "email": "rosafernández@test.com",
+    "telefono": "+56964632210",
+    "transportistaNombre": "LogiChile Connect 519530"
   },
-  "executionTimeSeconds": 73.44
+  "executionTimeSeconds": 71.76,
+  "contratoCliente": {
+    "id": "891",
+    "nroContrato": "67110",
+    "tipo": "Venta",
+    "clienteNombre": "Austral SpA 519544"
+  }
 }
