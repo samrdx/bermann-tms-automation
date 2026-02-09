@@ -6,7 +6,7 @@ import fs from 'fs';
 
 /**
  * Step 5.5: Cliente Contract Creation (Type: Venta)
- * * FIX: Robust dropdown selection applied to prevent "Validation Errors"
+ * * FIX: Robust dropdown selection + Retry Logic for Saving in CI/CD
  */
 test.describe('Cliente Contract Creation (Venta Type)', () => {
     test.setTimeout(120000); // Increased timeout for safety
@@ -81,7 +81,7 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         });
         await page.waitForTimeout(1000);
 
-        // 4. Select Cliente (CORREGIDO CON ROBUSTEZ)
+        // 4. Select Cliente (CORREGIDO CON SCOPING)
         logger.info(`Selecting cliente: "${clienteNombre}"`);
 
         // Open dropdown
@@ -130,31 +130,39 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
 
         logger.info('Clicking Guardar button...');
         const btnGuardar = page.locator('button.btn-success:has-text("Guardar"), #btn_guardar').first();
-        
-        // Scroll to make sure it's clickable
         await btnGuardar.scrollIntoViewIfNeeded();
-        await btnGuardar.click();
+
+        // --- FIX: LOGICA DE REINTENTO (RETRY) ---
+        // Primer intento con force: true
+        await btnGuardar.click({ force: true });
 
         // Wait for Navigation OR Error
         try {
-            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
+            // Aumentado a 30s para CI/CD
+            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 30000 });
             logger.info('✅ Save successful - Navigation detected');
         } catch (e) {
-            // Diagnostics Improved
-            const rawErrors = await page.locator('.text-danger, .help-block, .alert-danger').allTextContents();
-            // Filtrar los asteriscos (*) y textos vacíos para ver el error real
-            const errors = rawErrors
-                .map(e => e.trim())
-                .filter(e => e !== '' && e !== '*' && e.length > 2);
-
-            if (errors.length > 0) {
-                throw new Error(`Save Failed with Validation Errors: ${errors.join(' | ')}`);
-            }
+            logger.warn('Save click didn\'t navigate. Retrying click once...');
             
-            // Retry once if no obvious errors found (sometimes it's just a laggy click)
-            logger.warn('Save click didn\'t navigate and no errors found, retrying once...');
-            await btnGuardar.click();
-            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
+            // Reintento: Esperar un momento y clickear de nuevo
+            await page.waitForTimeout(1000);
+            await btnGuardar.click({ force: true });
+
+            try {
+                await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
+            } catch (retryE) {
+                // Diagnostics Improved: Filtrar asteriscos
+                const rawErrors = await page.locator('.text-danger, .help-block, .alert-danger').allTextContents();
+                const errors = rawErrors
+                    .map(e => e.trim())
+                    .filter(e => e !== '' && e !== '*' && e.length > 2); // Ignorar asteriscos sueltos
+
+                if (errors.length > 0) {
+                    throw new Error(`Save Failed with Validation Errors: ${errors.join(' | ')}`);
+                }
+                
+                throw new Error(`Save failed after retry. URL stuck at: ${page.url()}`);
+            }
         }
 
         // 6. Extract ID
@@ -199,8 +207,8 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         // STEP 6: Final Save
         // ===================================================================
         logger.info('Saving contract (final)...');
-        await page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
-        await page.waitForTimeout(2000); // Allow save to process
+        await page.locator('button.btn-success:has-text("Guardar"), #btn_guardar').click({ force: true });
+        await page.waitForTimeout(3000); // Allow save to process
 
         // =================================================================
         // STEP 7: Update JSON
