@@ -8,8 +8,9 @@ const logger = createLogger('ContratosFormPage');
 export class ContratosFormPage extends BasePage {
   private readonly selectors = {
     nroContrato: '#contrato-nro_contrato',
-    // Usamos ID directo para evitar conflictos
+    // Botón Guardar ID Único
     btnGuardar: '#btn_guardar', 
+    // Selectores de error
     errorMessages: '.text-danger, .help-block, .alert-danger, .toast-message'
   };
 
@@ -39,7 +40,7 @@ export class ContratosFormPage extends BasePage {
       
       await this.forceCloseModal();
 
-      // Guardar
+      // Guardar con Diagnóstico
       await this.saveWithRetry();
 
       const currentUrl = this.page.url();
@@ -73,8 +74,7 @@ export class ContratosFormPage extends BasePage {
   }
 
   private async saveWithRetry(): Promise<void> {
-    logger.info('💾 Saving...');
-    // Selector ID estricto
+    logger.info('💾 Saving with Forensic Diagnostics...');
     const btnSelector = '#btn_guardar';
     await this.page.waitForSelector(btnSelector);
 
@@ -83,16 +83,36 @@ export class ContratosFormPage extends BasePage {
             await Promise.all([
                 this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 8000 }),
                 this.page.evaluate((sel) => {
-                    (document.querySelector(sel) as HTMLElement).click();
+                    const btn = document.querySelector(sel) as HTMLElement;
+                    if (btn) btn.click();
                 }, btnSelector)
             ]);
             return;
-        } catch {
-            logger.warn(`Save attempt ${attempt} failed. Retrying...`);
+        } catch (e) {
+            logger.warn(`Save attempt ${attempt} failed.`);
+            
+            // --- DIAGNÓSTICO DE ERRORES ---
+            const visibleErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
+            const cleanErrors = visibleErrors.map(t => t.trim()).filter(t => t.length > 2 && !t.includes('*'));
+            
+            if (cleanErrors.length > 0) {
+                logger.error(`🚨 BLOCKING ERRORS: ${cleanErrors.join(' | ')}`);
+            }
+
+            // Verificar campos inválidos (HTML5)
+            const invalidFields = await this.page.evaluate(() => {
+                return Array.from(document.querySelectorAll(':invalid'))
+                    .map(el => el.getAttribute('id') || el.getAttribute('name') || el.tagName);
+            });
+            if (invalidFields.length > 0) {
+                logger.error(`🚨 INVALID FIELDS: ${invalidFields.join(', ')}`);
+            }
+            // -----------------------------
+
             await this.page.waitForTimeout(2000);
         }
     }
-    throw new Error('Save failed after 3 attempts');
+    throw new Error('Save failed after 3 attempts. See logs for validation errors.');
   }
 
   public async forceCloseModal(): Promise<void> {
@@ -105,7 +125,7 @@ export class ContratosFormPage extends BasePage {
   }
   
   // Requerido por tests legacy
-  async addSpecificRouteAndCargo(c: string, v: string) { /* ... lógica anterior ... */ }
+  async addSpecificRouteAndCargo(c: string, v: string) { /* ... Lógica existente ... */ }
   async saveAndExtractId(): Promise<string> {
       await this.saveWithRetry();
       const match = this.page.url().match(/\/contrato\/(?:ver|editar)\/(\d+)/);
