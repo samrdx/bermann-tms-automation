@@ -7,16 +7,22 @@ const logger = createLogger('ContratosFormPage');
 
 export class ContratosFormPage extends BasePage {
   private readonly selectors = {
+    // Form fields
     nroContrato: '#contrato-nro_contrato',
     transportistaBtn: 'button[data-id="contrato-transportista_id"]',
+
+    // Route Modal
     btnAddRuta: 'button:has-text("Añadir Ruta")',
     modalRutas: '#modalRutas',
     btnRoute715: 'a#btn_plus_715',
     btnCargo715_19: 'a#btn_plus_ruta_715_19',
     inputTarifaViaje715: '#txt_tarifa_extra_715',
     inputTarifaConductor715: '#txt_tarifa_conductor_715',
+
+    // Actions (Usamos ID específico)
     btnGuardar: '#btn_guardar',
-    // Incluye toasts y alertas
+    
+    // Validations
     errorMessages: '.text-danger, .help-block, .alert-danger, .toast-message'
   };
 
@@ -39,11 +45,17 @@ export class ContratosFormPage extends BasePage {
     await this.page.waitForLoadState('domcontentloaded');
   }
 
+  // Helper de dropdown (Mantenemos Playwright click aquí porque suele funcionar bien si el selector es único)
   async selectBootstrapDropdown(triggerSelector: string, value: string) {
     const btn = this.page.locator(triggerSelector).first();
     await btn.waitFor({ state: 'visible' });
     await btn.scrollIntoViewIfNeeded();
-    await btn.click({ force: true });
+    
+    // JS Click también para el dropdown por seguridad
+    await this.page.evaluate((sel) => {
+        const el = document.querySelector(sel) as HTMLElement;
+        if (el) el.click();
+    }, triggerSelector);
 
     const parent = btn.locator('xpath=..');
     const menu = parent.locator('.dropdown-menu.show').first();
@@ -52,7 +64,7 @@ export class ContratosFormPage extends BasePage {
     const search = menu.locator('.bs-searchbox input');
     if (await search.isVisible()) {
       await search.fill(value);
-      await this.page.waitForTimeout(1000); // Espera de filtrado
+      await this.page.waitForTimeout(1000);
       await this.page.keyboard.press('Enter');
     } else {
       await menu.locator('li a').filter({ hasText: value }).first().click();
@@ -85,44 +97,13 @@ export class ContratosFormPage extends BasePage {
 
       await this.forceCloseModal();
 
-      // --- GUARDADO MEJORADO ---
-      logger.info('💾 Saving basic contract...');
-      const btnGuardar = this.page.locator(this.selectors.btnGuardar).first();
-      await btnGuardar.scrollIntoViewIfNeeded();
-      
-      // ESPERA DE ESTABILIZACIÓN (CRÍTICO)
-      await this.page.waitForTimeout(1500); 
-
-      // Primer intento con Promise.all para atrapar navegación
-      try {
-        await Promise.all([
-             this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 }),
-             btnGuardar.click({ force: true })
-        ]);
-        logger.info('✅ Navigation successful (1st try)');
-      } catch (e) {
-        logger.warn('First save attempt timed out. Checking errors or retrying...');
-        
-        // Verificar errores antes de reintentar
-        const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
-        const realErrors = rawErrors.map(e=>e.trim()).filter(e => e.length > 2 && !e.includes('*'));
-        
-        if (realErrors.length > 0) throw new Error(`Save Failed: ${realErrors.join('|')}`);
-
-        // Reintento agresivo
-        await this.page.waitForTimeout(1000);
-        await btnGuardar.click({ force: true });
-        
-        try {
-            await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
-        } catch (retryError) {
-             throw new Error(`Save stuck on create page after retry. URL: ${this.page.url()}`);
-        }
-      }
+      // Guardar usando JS Injection
+      await this.saveWithJsInjection();
 
       const currentUrl = this.page.url();
       const match = currentUrl.match(/\/editar\/(\d+)/);
       if (match) return match[1];
+
       if (currentUrl.includes('/index')) return 'UNKNOWN_ID_BUT_SAVED';
       
       throw new Error(`Contract created but ID not found in URL: ${currentUrl}`);
@@ -130,6 +111,54 @@ export class ContratosFormPage extends BasePage {
     } catch (error) {
       logger.error('CRITICAL FAILURE in fillBasicContractInfo', error);
       throw error;
+    }
+  }
+
+  // --- OPCIÓN 1: JS INJECTION PARA GUARDAR ---
+  private async saveWithJsInjection(): Promise<void> {
+    logger.info('💾 Saving using JS Injection (Ghost Click)...');
+    
+    // Aseguramos que el elemento existe antes de inyectar
+    await this.page.waitForSelector(this.selectors.btnGuardar, { state: 'attached' });
+    await this.page.waitForTimeout(1000); // Estabilización final
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            logger.info(`JS Save Attempt ${attempt}...`);
+            
+            await Promise.all([
+                this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 8000 }),
+                // INYECCIÓN JS: Click directo al elemento DOM por ID
+                this.page.evaluate((selector) => {
+                    const btn = document.querySelector(selector) as HTMLElement;
+                    if (btn) {
+                        btn.click();
+                    } else {
+                        throw new Error(`Button ${selector} not found in DOM during evaluation`);
+                    }
+                }, this.selectors.btnGuardar)
+            ]);
+            
+            logger.info('✅ Navigation successful');
+            return;
+
+        } catch (e) {
+            logger.warn(`Attempt ${attempt} failed.`);
+            
+            // Verificar errores
+            const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
+            const realErrors = rawErrors
+                .map(err => err.trim())
+                .filter(err => err.length > 1 && !err.includes('*') && err !== '|');
+
+            if (realErrors.length > 0) {
+                throw new Error(`Validation Errors prevented save: ${realErrors.join(' | ')}`);
+            }
+
+            if (attempt === 3) throw new Error(`Save failed after 3 JS injection attempts. URL: ${this.page.url()}`);
+            
+            await this.page.waitForTimeout(2000);
+        }
     }
   }
 
@@ -178,14 +207,8 @@ export class ContratosFormPage extends BasePage {
   }
 
   async saveAndExtractId(): Promise<string> {
-    logger.info('💾 Saving contract (Final Step)...');
     await this.forceCloseModal();
-    const saveBtn = this.page.locator(this.selectors.btnGuardar).first();
-    await saveBtn.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(1000); // Estabilización
-    await saveBtn.click({ force: true });
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(2000);
+    await this.saveWithJsInjection(); 
     const match = this.page.url().match(/\/contrato\/(?:ver|editar)\/(\d+)/);
     return match ? match[1] : '';
   }

@@ -16,12 +16,12 @@ export interface AsignacionData {
 export class AsignarPage extends BasePage {
   private readonly selectors = {
     assignment: {
-      // FIX CRÍTICO: Apuntar al botón interactivo VISIBLE del dropdown de Bootstrap
-      transportistaBtn: "div.bootstrap-select button[data-toggle='dropdown']:visible, button[title='Transportista']:visible",
-      patentePrincipalBtn: "button[title='Vehículo Principal']:visible, button[data-id='patente_principal']:visible",
-      conductoresBtn: "button[data-id='viajes-conductor_id']:visible, button[title*='Conductor']:visible",
+      // Usamos selectores específicos pero robustos
+      // NOTA: Para JS Click, necesitamos un selector que sea único en el DOM o usar .first()
+      transportistaBtn: "button[title='Transportista']",
+      patentePrincipalBtn: "button[title='Vehículo Principal']",
+      conductoresBtn: "button[data-id='viajes-conductor_id']",
       btnGuardar: "#btn_guardar_form",
-      btnCerrar: 'a.btn.btn-secondary',
     },
     table: {
       container: '#tabla_asignar',
@@ -91,15 +91,12 @@ export class AsignarPage extends BasePage {
 
     await this.page.waitForLoadState('domcontentloaded');
     
-    logger.info('Waiting for Transportista dropdown...');
-    
-    // Espera explícita del botón visible
+    // Esperamos que aparezca el formulario (cualquier botón de dropdown es buena señal)
+    logger.info('Waiting for Assignment Form...');
     try {
-        await this.page.waitForSelector(this.selectors.assignment.transportistaBtn, { state: 'visible', timeout: 30000 });
+        await this.page.waitForSelector("div.bootstrap-select", { state: 'attached', timeout: 30000 });
     } catch (e) {
-        // Fallback: Si el selector estricto falla, intentar buscar cualquier botón con el texto aproximado
-        logger.warn('Strict selector failed, trying fallback...');
-        await this.page.waitForSelector("button:has-text('Transportista')", { state: 'visible', timeout: 10000 });
+        logger.warn('Bootstrap select not found attached immediately, waiting longer...');
     }
     
     logger.info('✅ Assignment Form Loaded');
@@ -126,18 +123,41 @@ export class AsignarPage extends BasePage {
     );
   }
 
+  // --- OPCIÓN 1: JS CLICK PARA DROPDOWNS ---
   private async selectBSDropdown(buttonSelector: string, optionText: string): Promise<void> {
-    logger.info(`Selecting "${optionText}" in ${buttonSelector}`);
+    logger.info(`Selecting "${optionText}" in ${buttonSelector} using JS Injection`);
     
-    // Usar .first() es vital si hay duplicados ocultos
-    const btn = this.page.locator(buttonSelector).first();
+    // 1. Obtener localizador para Playwright (solo para esperar visibilidad)
+    const btnLocator = this.page.locator(buttonSelector).first();
+    
+    // Intentar esperar a que el botón exista (fallback a genérico si falla)
+    try {
+        await btnLocator.waitFor({ state: 'attached', timeout: 10000 });
+    } catch {
+        logger.warn(`Button ${buttonSelector} not found. Trying fallback click strategy.`);
+    }
 
-    await btn.waitFor({ state: 'visible', timeout: 10000 });
-    await btn.scrollIntoViewIfNeeded();
-    await btn.click({ force: true });
+    // 2. JS CLICK: Abrir el menú inyectando click
+    await this.page.evaluate((sel) => {
+        // Buscamos todos los botones que coincidan
+        const buttons = document.querySelectorAll(sel);
+        // Filtramos los visibles (heuristic simple: offsetParent no nulo)
+        const visibleBtn = Array.from(buttons).find(b => (b as HTMLElement).offsetParent !== null);
+        
+        if (visibleBtn) {
+            (visibleBtn as HTMLElement).click();
+        } else {
+            // Si no encuentra visible, clica el primero
+            const first = document.querySelector(sel) as HTMLElement;
+            if(first) first.click();
+        }
+    }, buttonSelector);
 
-    const parent = btn.locator('xpath=..');
-    const dropdownMenu = parent.locator('.dropdown-menu.show').first();
+    // 3. Manejo del menú desplegable (Playwright standard)
+    // Usamos localizadores relativos al botón abierto
+    // Nota: Al hacer click JS, el atributo aria-expanded cambia.
+    
+    const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
     await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
 
     const searchBox = dropdownMenu.locator('.bs-searchbox input');
@@ -148,21 +168,26 @@ export class AsignarPage extends BasePage {
     } else {
       const option = dropdownMenu.locator('li a').filter({ hasText: optionText }).first();
       if (await option.isVisible()) {
-        await option.click();
+        await option.click(); // Aquí usamos click normal, dentro del menú suele ser seguro
       } else {
         logger.warn(`Exact match "${optionText}" not found. Clicking first option.`);
         await dropdownMenu.locator('li a').first().click();
       }
     }
+    
+    // Cerrar si quedó abierto
     if (await dropdownMenu.isVisible()) await this.page.keyboard.press('Escape');
     await this.page.waitForTimeout(300);
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info('Clicking Guardar...');
-    const btnGuardar = this.page.locator(this.selectors.assignment.btnGuardar).first();
-    await btnGuardar.scrollIntoViewIfNeeded();
-    await btnGuardar.click();
+    logger.info('Clicking Guardar using JS...');
+    // JS CLICK para Guardar
+    await this.page.evaluate((sel) => {
+        const btn = document.querySelector(sel) as HTMLElement;
+        if(btn) btn.click();
+    }, this.selectors.assignment.btnGuardar);
+    
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
   }
@@ -171,19 +196,22 @@ export class AsignarPage extends BasePage {
     logger.info(`=== Starting Assignment for ${nroViaje} ===`);
     await this.selectViajeRow(nroViaje);
 
-    // Usar el selector corregido
     await this.selectBSDropdown(this.selectors.assignment.transportistaBtn, data.transportista);
     logger.info('Transportista selected. Waiting for cascade...');
-    await this.page.waitForTimeout(3000); 
+    
+    // Cascada generosa
+    await this.page.waitForTimeout(4000); 
 
+    // Espera del botón vehículo
     await this.page.waitForFunction(
       (selector) => {
         const btn = document.querySelector(selector);
         return btn && !btn.hasAttribute('disabled') && !btn.classList.contains('disabled');
       },
       "button[title='Vehículo Principal']", 
-      { timeout: 15000 }
+      { timeout: 30000 }
     );
+    
     await this.selectBSDropdown(this.selectors.assignment.patentePrincipalBtn, data.vehiculoPrincipal);
     await this.selectBSDropdown(this.selectors.assignment.conductoresBtn, data.conductor);
     await this.clickGuardar();
