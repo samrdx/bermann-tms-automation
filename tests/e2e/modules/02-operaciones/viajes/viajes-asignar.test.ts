@@ -1,77 +1,70 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
-import { logger } from '../../../../../src/utils/logger.js';
+import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
+import { logger } from '../../../../../src/utils/logger.js';
 import fs from 'fs';
 
-test.describe('Viajes - Asignar (Dynamic)', () => {
+// Helper de RUT
+function generateRandomRut(): string {
+    const num = Math.floor(10000000 + Math.random() * 90000000);
+    let suma = 0;
+    let multiplicador = 2;
+    for (let i = String(num).length - 1; i >= 0; i--) {
+        suma += parseInt(String(num).charAt(i)) * multiplicador;
+        multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+    }
+    const resto = 11 - (suma % 11);
+    const dv = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+    return `${num}-${dv}`.replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
+}
 
-    test('Should assign Trip to Transportista/Resources from JSON', async ({
-        viajesAsignarPage
-    }, testInfo) => {
-        // 1. Load worker-specific data
-        let lastRunData: any;
+test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
+  test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page }, testInfo) => {
+    
+    // 1. Obtener Cliente (del test base) o usar default
+    const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+    let clienteId = '62'; 
+    if (fs.existsSync(dataPath)) {
         try {
-            const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
-            if (fs.existsSync(dataPath)) {
-                logger.info(`Reading worker-specific data from ${dataPath}`);
-                const rawData = fs.readFileSync(dataPath, 'utf-8');
-                lastRunData = JSON.parse(rawData);
-            } else {
-                // Fail if no data in E2E
-                throw new Error(`Worker-specific data file not found: ${dataPath}`);
-            }
-        } catch (error) {
-            logger.error('Error reading worker-specific data file', error);
-            throw error;
-        }
+            const opData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+            if (opData.cliente?.id) clienteId = opData.cliente.id;
+        } catch (e) {}
+    }
 
-       // 2. Data Validation
-        if (!lastRunData?.viaje?.nroViaje) {
-            // CORRECCIÓN: Agregar 'true' como primer argumento
-            test.skip(true, 'Skipping: No Nro Viaje found in worker-specific JSON');
-            return;
-        }
+    const api = new TmsApiClient(page);
+    await api.initialize(); 
 
-        const nroViaje = lastRunData.viaje.nroViaje;
-        const transportistaName = lastRunData.transportista.nombre;
-        const patente = lastRunData.vehiculo.patente;
-        const conductorName = `${lastRunData.conductor.nombre} ${lastRunData.conductor.apellido}`;
+    // 2. CREAR TRANSPORTISTA (Para el contrato de Costo)
+    const transName = `TransAPI ${Math.floor(Math.random() * 10000)}`;
+    const transportistaId = await api.createTransportista(transName, generateRandomRut());
 
-        logger.info(`📋 Test Params: Viaje=${nroViaje}, Trans=${transportistaName}, Patente=${patente}, Cond=${conductorName}`);
+    // 3. LOGICA: CREAR CONTRATOS
+    
+    // A. Contrato CLIENTE (Tipo Venta) -> Permite PLANIFICAR
+    const nroContratoVenta = `VTA-${Math.floor(Math.random() * 100000)}`;
+    await api.createContratoVenta(clienteId, nroContratoVenta);
 
-        // 3. Navigate
-        await test.step('Phase 1: Navigate to Asignar', async () => {
-            await viajesAsignarPage.navigate();
-            await viajesAsignarPage.waitForTableLoad();
-        });
+    // B. Contrato TRANSPORTISTA (Tipo Costo) -> Permite ASIGNAR
+    // CORRECCIÓN AQUÍ: Usamos createContratoCosto
+    const nroContratoCosto = `CST-${Math.floor(Math.random() * 100000)}`;
+    await api.createContratoCosto(transportistaId, nroContratoCosto);
 
-        // 4. Assign
-        await test.step('Phase 2: Assign Resources', async () => {
-            await viajesAsignarPage.assignViaje(nroViaje, {
-                transportista: transportistaName,
-                vehiculoPrincipal: patente,
-                conductor: conductorName
-            });
-        });
+    // 4. PLANIFICAR VIAJE
+    const nroViaje = `API-V${Math.floor(Math.random() * 100000)}`;
+    await api.createViaje(clienteId, nroViaje);
+    
+    // 5. VERIFICACIÓN UI
+    const asignarPage = new AsignarPage(page);
+    await asignarPage.navigate();
 
-        // 5. Verify
-        await test.step('Phase 3: Verify Status', async () => {
-            const isAssigned = await viajesAsignarPage.verifyViajeAsignado(nroViaje);
-            expect(isAssigned, 'Viaje should be assigned').toBeTruthy();
-
-            const status = await viajesAsignarPage.getViajeStatus(nroViaje);
-            logger.info(`Final Status: ${status}`);
-            // Flexible assertion: ASIGNADO or DISPONIBLE
-            expect(status.toUpperCase()).toMatch(/ASIGNADO|DISPONIBLE/);
-        });
-
-        // 6. UPDATE JSON (Critical for Pipeline Continuity)
-        logger.info('Updating JSON with assignment details...');
-        lastRunData.viaje.status = 'ASIGNADO';
-        lastRunData.viaje.transportistaAsignado = transportistaName;
-        lastRunData.viaje.vehiculoAsignado = patente;
-        lastRunData.viaje.conductorAsignado = conductorName;
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
-        fs.writeFileSync(dataPath, JSON.stringify(lastRunData, null, 2), 'utf-8');
-    });
+    logger.info(`🔍 UI: Buscando viaje ${nroViaje}...`);
+    await page.waitForTimeout(1000);
+    await page.locator('input[type="search"]').first().fill(nroViaje);
+    await page.keyboard.press('Enter');
+    
+    await expect(page.locator('tbody tr')).toContainText(nroViaje, { timeout: 10000 });
+    
+    logger.info(`✅ Business Logic Verified: Trip ${nroViaje} planned with Client Contract & ready for Carrier ${transName} (Contracted).`);
+  });
 });

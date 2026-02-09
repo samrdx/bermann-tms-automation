@@ -1,49 +1,34 @@
 {
-  "createdAt": "2026-02-09T00:17:24.392Z",
+  "createdAt": "2026-02-09T18:00:29.822Z",
   "workerIndex": 1,
   "projectName": "base-entities-chromium",
   "transportista": {
     "id": "",
-    "nombre": "Fletes El Roble 596244",
-    "rut": "50319073-7",
-    "razonSocial": "Fletes El Roble 596244",
-    "baseNombre": "Fletes El Roble"
+    "nombre": "Austral Freight 660029",
+    "rut": "69999992-K",
+    "razonSocial": "Austral Freight 660029",
+    "baseNombre": "Austral Freight"
   },
   "cliente": {
-    "id": "N/A",
-    "nombre": "MegaLogística Central 596256",
-    "nombreFantasia": "MegaLogística SpA 596256",
-    "rut": "52901450-3",
-    "email": "megalogísticacentral@test.cl"
+    "id": "229",
+    "nombre": "TransSur Logística 660047",
+    "nombreFantasia": "TransSur SpA 660047",
+    "rut": "92424950-1",
+    "email": "transsurlogística@test.cl"
   },
   "vehiculo": {
-    "patente": "CCQV-98",
-    "muestra": "VEH-1770596283777",
-    "transportistaNombre": "Fletes El Roble 596244",
+    "patente": "PCBP-56",
+    "muestra": "VEH-1770660079642",
+    "transportistaNombre": "Austral Freight 660029",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Pedro",
-    "apellido": "Muñoz",
-    "rut": "73.043.322-0",
-    "email": "pedromuñoz@test.com",
-    "telefono": "+56948864468",
-    "transportistaNombre": "Fletes El Roble 596244"
+    "nombre": "Ana",
+    "apellido": "Torres",
+    "rut": "10.832.932-7",
+    "email": "anatorres@test.com",
+    "telefono": "+56978104556",
+    "transportistaNombre": "Austral Freight 660029"
   },
-  "executionTimeSeconds": 69.72,
-  "contratoCliente": {
-    "id": "926",
-    "nroContrato": "17897",
-    "tipo": "Venta",
-    "clienteNombre": "MegaLogística SpA 596256"
-  },
-  "viaje": {
-    "nroViaje": "82302",
-    "cliente": "MegaLogística SpA 596256",
-    "ruta": "05082025-1",
-    "status": "ASIGNADO",
-    "transportistaAsignado": "Fletes El Roble 596244",
-    "vehiculoAsignado": "CCQV-98",
-    "conductorAsignado": "Pedro Muñoz"
-  }
+  "executionTimeSeconds": 88.14
 }
