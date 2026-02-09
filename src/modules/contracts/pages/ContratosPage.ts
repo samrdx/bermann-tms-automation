@@ -9,7 +9,7 @@ export class ContratosFormPage extends BasePage {
   private readonly selectors = {
     // Form fields
     nroContrato: '#contrato-nro_contrato',
-    
+
     // Transportista (Botón disparador del dropdown)
     transportistaBtn: 'button[data-id="contrato-transportista_id"]',
 
@@ -23,7 +23,7 @@ export class ContratosFormPage extends BasePage {
 
     // Actions
     btnGuardar: '#btn_guardar',
-    
+
     // Validations
     errorMessages: '.text-danger, .help-block, .alert-danger'
   };
@@ -114,11 +114,11 @@ export class ContratosFormPage extends BasePage {
         await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 10000 });
         logger.info('✅ Navigation successful');
       } catch (e) {
-        // --- FIX CRÍTICO: Filtrar asteriscos (*) del reporte de errores ---
+        // Filtrar asteriscos (*) del reporte de errores
         const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
         const realErrors = rawErrors
-            .map(err => err.trim())
-            .filter(err => err.length > 1 && !err.includes('*') && err !== '|');
+          .map(err => err.trim())
+          .filter(err => err.length > 1 && !err.includes('*') && err !== '|');
 
         if (realErrors.length > 0) {
           throw new Error(`Save Failed with Validation Errors: ${realErrors.join(' | ')}`);
@@ -133,7 +133,7 @@ export class ContratosFormPage extends BasePage {
       if (match) return match[1];
 
       if (currentUrl.includes('/index')) return 'UNKNOWN_ID_BUT_SAVED';
-      
+
       throw new Error(`Contract created but ID not found in URL: ${currentUrl}`);
 
     } catch (error) {
@@ -165,7 +165,7 @@ export class ContratosFormPage extends BasePage {
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
     if (await closeBtn.isVisible()) await closeBtn.click();
 
-    await this.page.click('#btn_click_715'); 
+    await this.page.click('#btn_click_715');
     await this.page.waitForTimeout(1000);
 
     await this.page.click(this.selectors.btnCargo715_19);
@@ -188,5 +188,34 @@ export class ContratosFormPage extends BasePage {
       });
     });
     await this.page.waitForTimeout(1000);
+  }
+
+  /**
+   * MÉTODO RECUPERADO: Guarda el contrato y extrae el ID.
+   * Usado por contrato-crear.test.ts
+   */
+  async saveAndExtractId(): Promise<string> {
+    logger.info('💾 Saving contract (Final Step)...');
+
+    // 1. Limpieza de seguridad
+    await this.forceCloseModal();
+
+    // 2. Click en Guardar
+    const saveBtn = this.page.locator(this.selectors.btnGuardar).first();
+    await saveBtn.scrollIntoViewIfNeeded();
+    await saveBtn.click();
+
+    // 3. Esperar a que se procese
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(2000);
+
+    const currentUrl = this.page.url();
+    logger.info(`Final Save URL: ${currentUrl}`);
+
+    // 4. Intentar extraer ID
+    const match = currentUrl.match(/\/contrato\/(?:ver|editar)\/(\d+)/);
+    // Si la URL cambió a index pero se guardó, intentaríamos buscarlo, 
+    // pero para este método devolvemos vacío si no está en la URL, el test lo manejará.
+    return match ? match[1] : '';
   }
 }
