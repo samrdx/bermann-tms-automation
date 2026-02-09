@@ -29,47 +29,21 @@
 
 ### How You're Used in This Project
 
-1. **Stagehand AI Integration** (Primary use)
-   - Cost: ~$0.002-0.006 per action
-   - Used for: Complex UI exploration, dynamic elements
-   - API: Gemini 2.0 Flash via GEMINI_API_KEY
+1. **Code Generation** (Primary use)
+   - Generate Page Objects following tms-page-objects skill
+   - Create test files following tms-tests skill patterns
+   - Implement utility functions with TypeScript strict mode
+   - Refactor existing code for consistency
 
-2. **Code Generation** (Secondary use)
-   - When Claude Terminal unavailable
-   - Emergency fallback
-   - Manual prompts via terminal
+2. **Design Guidance** (Secondary use)
+   - Architecture review and suggestions
+   - Best practices consultation
+   - Pattern identification and recommendations
 
-### API Configuration
-
-```typescript
-// Stagehand uses Gemini automatically
-const stagehand = new Stagehand({
-  env: "LOCAL",
-  enableCaching: true,
-  // Gemini configured via GEMINI_API_KEY env var
-});
-```
-
-### Cost Optimization
-
-**Your role in the 80/20 strategy:**
-
-- 80% Playwright (free) ← Main automation
-- 20% You (Gemini via Stagehand) ← Complex cases only
-
-**When to use you:**
-
-- Dynamic dropdowns without stable selectors
-- Complex modal interactions
-- Visual element identification
-- Exploratory testing
-
-**When NOT to use you:**
-
-- Stable form fields (use Playwright)
-- Known selectors (use Page Objects)
-- Login/logout flows (use Playwright)
-- Simple CRUD operations
+3. **Integration Strategy**
+   - Work alongside Claude for strategic planning
+   - Provide implementation details
+   - Follow established patterns from skills system
 
 ### Skills to Follow
 
@@ -89,7 +63,7 @@ When generating code for this project:
    - TypeScript strict mode
    - Error handling with screenshots
 
-### Example Prompt for You
+### Example Prompts for Code Generation
 
 ```
 Using @tms-page-objects skill, create [ModuleName]Page.ts with:
@@ -98,13 +72,21 @@ Using @tms-page-objects skill, create [ModuleName]Page.ts with:
 - Follow ContratosFormPage.ts pattern
 ```
 
+```
+Using @tms-tests skill, create test file for [Module]:
+- 4-phase structure
+- Load JSON data
+- Winston logging
+- Error screenshots
+```
+
 ### Output Format
 
 When generating code, always:
 
 - Use TypeScript with strict types
 - Include Winston logging
-- Add error handling
+- Add error handling with screenshots
 - Follow skill templates exactly
 - Reference Confluence for selectors
 
@@ -113,7 +95,7 @@ When generating code, always:
 ```
 Claude Pro (claude.ai) → Strategic planning, architecture
     ↓
-Gemini (you) → Code execution, Stagehand automation
+Gemini (you) → Code generation, pattern guidance
     ↓
 Cursor AI → Inline completion, refactoring
     ↓
@@ -489,15 +471,14 @@ tests/e2e/
 - **Skills System:** Prowler-inspired pattern for AI guidance
 - **CI/CD:** GitHub Actions
 - **IDE:** Cursor with Claude integration
-- **Stagehand + Gemini 2.0 Flash** (you!)
+- **AI Assistance:** Gemini 2.0 Flash for code generation
 
 ## Project Metrics
 
 **Metrics:**
 - Tests: 12 (4 auth + 4 entities + 4 operations) - 100% passing
 - Skills: 5 TMS-specific (tms-selectors, tms-dropdowns, tms-page-objects, tms-tests, tms-data)
-- Cost per test: ~$0.001 average (Stagehand usage)
-- Your contribution: ~10-20% of automation (complex UI only)
+- Primary use: Code generation and pattern guidance
 - Modules: 5/5 complete (auth, transport, commercial, contracts, planning)
 
 ## Project Structure
@@ -558,8 +539,8 @@ qa-automation-framework/
 
 ---
 
-**Your Role:** Intelligent automation where Playwright can't reach
-**Cost-effective:** Only when necessary
+**Your Role:** Code generation and automation guidance
 **Quality:** Follow skills for consistency
+**Integration:** Work alongside Claude for strategic planning
 
 **Last Updated:** February 9, 2026
