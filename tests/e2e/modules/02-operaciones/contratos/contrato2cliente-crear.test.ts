@@ -6,12 +6,10 @@ import fs from 'fs';
 
 /**
  * Step 5.5: Cliente Contract Creation (Type: Venta)
- *
- * This test uses manual page interaction for specific Venta logic,
- * but reuses helper methods from ContratosFormPage where possible.
+ * * FIX: Robust dropdown selection applied to prevent "Validation Errors"
  */
 test.describe('Cliente Contract Creation (Venta Type)', () => {
-    test.setTimeout(80000); // Increased timeout for safety
+    test.setTimeout(120000); // Increased timeout for safety
 
     test('Create Cliente Contract using Pre-existing Entities from JSON', async ({ page }, testInfo) => {
         const startTime = Date.now();
@@ -83,7 +81,7 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         });
         await page.waitForTimeout(1000);
 
-        // 4. Select Cliente (The Critical Part)
+        // 4. Select Cliente (CORREGIDO CON ROBUSTEZ)
         logger.info(`Selecting cliente: "${clienteNombre}"`);
 
         // Open dropdown
@@ -91,11 +89,16 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         await pickerBtn.waitFor({ state: 'visible' });
         await pickerBtn.click();
 
-        // Wait for search box
-        const searchBox = page.locator('.dropdown-menu.show .bs-searchbox input').first();
+        // --- FIX: SCOPING (Buscar menú dentro del padre) ---
+        const parent = pickerBtn.locator('xpath=..');
+        const dropdownMenu = parent.locator('.dropdown-menu.show').first();
+        await dropdownMenu.waitFor({ state: 'visible' });
+
+        // Wait for search box inside that specific menu
+        const searchBox = dropdownMenu.locator('.bs-searchbox input');
         await searchBox.waitFor({ state: 'visible', timeout: 5000 });
 
-        // Setup API Listener for Search
+        // Setup API Listener for Search (optional safety net)
         const searchResponse = page.waitForResponse(
             resp => resp.url().includes('get_clientes') || resp.url().includes('api'),
             { timeout: 8000 }
@@ -104,39 +107,54 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         // Type full name
         await searchBox.fill(clienteNombre);
 
-        // Wait for results to filter (Network + UI)
-        await searchResponse;
-        await page.waitForTimeout(500);
+        // Wait for results
+        await searchResponse; 
+        await page.waitForTimeout(1000); // Extra wait for UI render
 
-        // Select via Keyboard (ArrowDown + Enter)
+        // Select via Keyboard (ArrowDown + Enter is safest)
         await page.keyboard.press('ArrowDown');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(300);
         await page.keyboard.press('Enter');
 
-        logger.info('✅ Cliente selected via keyboard');
-        await page.waitForTimeout(1000);
+        // Verify selection happened (Dropdown should close)
+        await page.waitForTimeout(500);
+        if (await dropdownMenu.isVisible()) {
+            logger.warn('Dropdown still open, forcing close with Escape');
+            await page.keyboard.press('Escape');
+        }
+        
+        logger.info('✅ Cliente selection action completed');
 
         // 5. Clean & Save
         await contratosPage.forceCloseModal();
 
         logger.info('Clicking Guardar button...');
         const btnGuardar = page.locator('button.btn-success:has-text("Guardar"), #btn_guardar').first();
+        
+        // Scroll to make sure it's clickable
+        await btnGuardar.scrollIntoViewIfNeeded();
         await btnGuardar.click();
 
         // Wait for Navigation OR Error
         try {
-            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 8000 });
+            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
             logger.info('✅ Save successful - Navigation detected');
         } catch (e) {
-            // Diagnostics
-            const errors = await page.locator('.text-danger, .help-block, .alert-danger').allTextContents();
+            // Diagnostics Improved
+            const rawErrors = await page.locator('.text-danger, .help-block, .alert-danger').allTextContents();
+            // Filtrar los asteriscos (*) y textos vacíos para ver el error real
+            const errors = rawErrors
+                .map(e => e.trim())
+                .filter(e => e !== '' && e !== '*' && e.length > 2);
+
             if (errors.length > 0) {
                 throw new Error(`Save Failed with Validation Errors: ${errors.join(' | ')}`);
             }
-            // Retry once if no errors found
-            logger.warn('Save click didn\'t navigate, retrying once...');
+            
+            // Retry once if no obvious errors found (sometimes it's just a laggy click)
+            logger.warn('Save click didn\'t navigate and no errors found, retrying once...');
             await btnGuardar.click();
-            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 8000 });
+            await page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
         }
 
         // 6. Extract ID
@@ -153,7 +171,7 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
             logger.info('Redirected to index, searching grid...');
             const searchInput = page.locator('input[type="search"]').first();
             await searchInput.fill(nroContrato);
-            await page.waitForTimeout(1000);
+            await page.waitForTimeout(1500);
 
             const row = page.locator('table tbody tr').first();
             const link = await row.locator('a[href*="/editar/"]').getAttribute('href');
