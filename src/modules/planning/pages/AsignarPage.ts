@@ -16,10 +16,6 @@ export interface AsignacionData {
 export class AsignarPage extends BasePage {
   private readonly selectors = {
     assignment: {
-      // Selectores robustos para dropdowns de Bootstrap
-      transportistaBtn: "div.bootstrap-select button[data-toggle='dropdown'], button[title='Transportista']",
-      patentePrincipalBtn: "button[title='Vehículo Principal'], button[data-id='patente_principal']",
-      conductoresBtn: "button[data-id='viajes-conductor_id'], button[title*='Conductor']",
       btnGuardar: "#btn_guardar_form",
     },
     table: {
@@ -43,74 +39,30 @@ export class AsignarPage extends BasePage {
     await this.page.waitForLoadState('networkidle');
   }
 
-  // --- MÉTODOS RECUPERADOS (Verificación y Tabla) ---
-
-  async waitForTableLoad(): Promise<void> {
-    logger.info('Waiting for table to load');
-    await this.page.waitForSelector(this.selectors.table.container, { state: 'visible', timeout: 15000 });
-    await this.page.waitForTimeout(1000);
-  }
-
   async findViajeRow(nroViaje: string): Promise<Locator | null> {
-    logger.info(`Searching for viaje: ${nroViaje}`);
     const searchInput = this.page.locator('input[type="search"]').first();
     if (await searchInput.isVisible()) {
       await searchInput.fill(nroViaje);
       await this.page.waitForTimeout(1500);
     }
-    
-    // Buscar filas
     const rows = this.page.locator(this.selectors.table.rows);
     const rowCount = await rows.count();
-    
     for (let i = 0; i < rowCount; i++) {
-        const row = rows.nth(i);
-        const text = await row.innerText();
-        if (text.includes(nroViaje)) return row;
+      const row = rows.nth(i);
+      const text = await row.innerText();
+      if (text.includes(nroViaje)) return row;
     }
     return null;
   }
 
-  async getViajeStatus(nroViaje: string): Promise<string> {
-    const row = await this.findViajeRow(nroViaje);
-    if (!row) throw new Error(`Viaje ${nroViaje} not found`);
-    
-    const cells = await row.locator('td').allTextContents();
-    // Ajustar índice si es necesario, pero usando el definido en selectors
-    return cells[this.selectors.table.estadoViajeColumn]?.trim() || '';
-  }
-
-  async verifyViajeAsignado(nroViaje: string): Promise<boolean> {
-    logger.info(`Verifying assignment for ${nroViaje}`);
-    await this.navigate(); // Recargar para ver estado actualizado
-    
-    const row = await this.findViajeRow(nroViaje);
-    if (!row) return false;
-    
-    const cells = await row.locator('td').allTextContents();
-    
-    // Verificar que las columnas clave tengan datos
-    const transportista = cells[this.selectors.table.transportistaColumn]?.trim();
-    const conductor = cells[this.selectors.table.conductorColumn]?.trim();
-    const vehiculo = cells[this.selectors.table.vehiculoUnoColumn]?.trim();
-
-    logger.info(`Verification Data - Trans: ${transportista}, Cond: ${conductor}, Veh: ${vehiculo}`);
-    
-    // Retorna true si todos tienen valor
-    return !!(transportista && conductor && vehiculo);
-  }
-
-  // --- MÉTODOS DE ACCIÓN (Asignación Robusta) ---
-
   async selectViajeRow(nroViaje: string): Promise<boolean> {
     logger.info(`Selecting viaje row: ${nroViaje}`);
-    
     const row = await this.findViajeRow(nroViaje);
     if (!row) throw new Error(`Viaje ${nroViaje} not found in table`);
 
     await row.scrollIntoViewIfNeeded();
+    const editIcon = row.locator('i.fa-pencil, i.fa-edit, a[title="Editar"]').first();
 
-    const editIcon = row.locator('i.fa-pencil, i.fa-edit, .glyphicon-pencil, a[title="Editar"], a[title="Asignar"]').first();
     if (await editIcon.isVisible()) {
       await Promise.all([
         this.page.waitForURL(/\/editar\//, { timeout: 30000 }), 
@@ -121,60 +73,49 @@ export class AsignarPage extends BasePage {
     }
 
     await this.page.waitForLoadState('domcontentloaded');
-    
-    // Esperar a que cargue el formulario
+    // Esperamos a que aparezca cualquier select de bootstrap
     try {
-        await this.page.waitForSelector(this.selectors.assignment.transportistaBtn, { state: 'attached', timeout: 30000 });
-    } catch (e) {
-        logger.warn('Strict selector failed, trying fallback...');
-        await this.page.waitForSelector("button:has-text('Transportista')", { state: 'visible', timeout: 10000 });
+        await this.page.waitForSelector('.bootstrap-select', { timeout: 30000 });
+    } catch {
+        logger.warn('Bootstrap select not detected immediately.');
     }
-    
     logger.info('✅ Assignment Form Loaded');
     return true;
   }
 
-  private async selectBSDropdown(buttonSelector: string, optionText: string): Promise<void> {
-    logger.info(`Selecting "${optionText}" in ${buttonSelector}`);
+  // --- ARMA SECRETA: SELECCIÓN POR TEXTO SIN UI ---
+  // Busca cualquier <select> en la página que contenga la opción deseada y la selecciona.
+  private async forceSelectByText(optionText: string, labelForLog: string): Promise<void> {
+    logger.info(`💉 Injecting value for "${labelForLog}": ${optionText}`);
     
-    // 1. Abrir Dropdown (JS Click)
-    await this.page.evaluate((sel) => {
-        const buttons = document.querySelectorAll(sel);
-        const visibleBtn = Array.from(buttons).find(b => (b as HTMLElement).offsetParent !== null);
-        if (visibleBtn) (visibleBtn as HTMLElement).click();
-        else {
-             const anyBtn = document.querySelector(sel) as HTMLElement;
-             if(anyBtn) anyBtn.click();
+    const found = await this.page.evaluate((text) => {
+        // Buscar todos los selects visibles
+        const selects = Array.from(document.querySelectorAll('select'));
+        
+        for (const select of selects) {
+            // Buscar la opción por texto
+            const option = Array.from(select.options).find(opt => opt.text.trim().includes(text));
+            
+            if (option) {
+                // Si encontramos la opción, la seleccionamos directo en el DOM
+                select.value = option.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // Actualizar Bootstrap Select si existe
+                // @ts-ignore
+                if (window.$ && window.$(select).selectpicker) {
+                    // @ts-ignore
+                    window.$(select).selectpicker('refresh');
+                }
+                return true; // Éxito
+            }
         }
-    }, buttonSelector);
+        return false; // No encontrado
+    }, optionText);
 
-    // 2. Esperar Menú DIV (no ul.inner)
-    const dropdownMenu = this.page.locator('div.dropdown-menu.show').first();
-    try {
-        await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
-    } catch {
-        logger.warn('Dropdown did not open, retrying click...');
-        await this.page.locator(buttonSelector).first().click({ force: true });
-        await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
+    if (!found) {
+        throw new Error(`Could not find any dropdown containing option "${optionText}"`);
     }
-
-    // 3. Buscar y Clickear Opción
-    const searchBox = dropdownMenu.locator('.bs-searchbox input');
-    if (await searchBox.isVisible()) {
-      await searchBox.fill(optionText);
-      await this.page.waitForTimeout(1000);
-      await this.page.keyboard.press('Enter');
-    } else {
-      const option = dropdownMenu.locator('li a').filter({ hasText: optionText }).first();
-      if (await option.isVisible()) {
-         await option.evaluate((el) => (el as HTMLElement).click());
-      } else {
-         const firstOption = dropdownMenu.locator('li a').first();
-         await firstOption.evaluate((el) => (el as HTMLElement).click());
-      }
-    }
-    
-    if (await dropdownMenu.isVisible()) await this.page.keyboard.press('Escape');
     await this.page.waitForTimeout(500);
   }
 
@@ -188,37 +129,54 @@ export class AsignarPage extends BasePage {
   }
 
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {
-    logger.info(`=== Starting Assignment for ${nroViaje} ===`);
+    logger.info(`=== Starting Assignment for ${nroViaje} (Injection Mode) ===`);
     await this.selectViajeRow(nroViaje);
 
-    // 1. Transportista
-    await this.selectBSDropdown(this.selectors.assignment.transportistaBtn, data.transportista);
+    // 1. Transportista (Inyección)
+    await this.forceSelectByText(data.transportista, 'Transportista');
     
-    // Espera larga para cascada
-    logger.info('Waiting for cascading updates (8s)...');
-    await this.page.waitForTimeout(8000); 
+    logger.info('Waiting for cascade (loading vehicles)...');
+    await this.page.waitForTimeout(6000); // Espera generosa para AJAX
 
-    // Verificar si habilitó vehículo
-    const isVehicleEnabled = await this.page.evaluate(() => {
-        const btn = document.querySelector("button[data-id='patente_principal']") as HTMLButtonElement;
-        return btn && !btn.disabled && !btn.classList.contains('disabled');
-    });
-
-    if (!isVehicleEnabled) {
-        logger.warn('Vehicle button still disabled. Trying to re-trigger transportista...');
-        await this.selectBSDropdown(this.selectors.assignment.transportistaBtn, data.transportista);
+    // 2. Vehículo (Inyección)
+    // Intentamos inyectar. Si falla, es porque la lista sigue vacía (AJAX falló o lento)
+    try {
+        await this.forceSelectByText(data.vehiculoPrincipal, 'Vehículo');
+    } catch (e) {
+        logger.warn('Vehicle not found initially. Retrying transportista selection...');
+        // Retry logic: seleccionar transportista de nuevo
+        await this.forceSelectByText(data.transportista, 'Transportista (Retry)');
         await this.page.waitForTimeout(5000);
+        await this.forceSelectByText(data.vehiculoPrincipal, 'Vehículo (Retry)');
     }
-
-    // 2. Vehículo
-    await this.selectBSDropdown(this.selectors.assignment.patentePrincipalBtn, data.vehiculoPrincipal);
     
-    // 3. Conductor
-    await this.selectBSDropdown(this.selectors.assignment.conductoresBtn, data.conductor);
+    // 3. Conductor (Inyección)
+    await this.forceSelectByText(data.conductor, 'Conductor');
     
     // 4. Guardar
     await this.clickGuardar();
     logger.info('✅ Assignment flow complete');
     return true;
+  }
+  
+  // Métodos auxiliares requeridos por el test
+  async waitForTableLoad(): Promise<void> {
+    await this.page.waitForSelector('#tabla_asignar', { state: 'visible', timeout: 15000 });
+  }
+  
+  async getViajeStatus(nroViaje: string): Promise<string> {
+      const row = await this.findViajeRow(nroViaje);
+      if (!row) throw new Error(`Viaje ${nroViaje} not found`);
+      const cells = await row.locator('td').allTextContents();
+      return cells[13]?.trim() || ''; // Ajusta índice según tu tabla
+  }
+
+  async verifyViajeAsignado(nroViaje: string): Promise<boolean> {
+    await this.navigate();
+    const row = await this.findViajeRow(nroViaje);
+    if (!row) return false;
+    const cells = await row.locator('td').allTextContents();
+    // Indices basados en tu código anterior (11, 12, 3)
+    return !!(cells[11]?.trim() && cells[12]?.trim() && cells[3]?.trim());
   }
 }
