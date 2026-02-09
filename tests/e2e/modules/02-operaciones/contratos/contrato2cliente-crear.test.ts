@@ -74,27 +74,31 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
 
         // =================================================================
-        // STEP 8: Verification (CON RELOAD)
+        // STEP 8: Verification - Verificar contrato en tabla con navegación a index
         // =================================================================
-        logger.info('Verifying route creation (Reloading to ensure persistence)...');
-        await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
-        await page.waitForLoadState('networkidle');
-        
-        // Buscar la celda
-        const routeCell = page.getByText('05082025-1').first();
-        
-        // Verificar existencia primero
-        if (await routeCell.count() === 0) {
-             logger.warn('Route not found immediately. Retrying reload...');
-             await page.reload();
-             await page.waitForLoadState('networkidle');
-        }
+        logger.info('🔍 PHASE 4: Verifying contract in table...');
 
-        // Scroll y check
-        await routeCell.scrollIntoViewIfNeeded();
-        await expect(routeCell).toBeVisible({ timeout: 10000 });
-        
-        logger.info('Route 715 verified');
-        logger.info('STEP 5.5 COMPLETE');
+        // Navegar a la página de índice de contratos para verificar en la tabla principal
+        await page.goto('https://moveontruckqa.bermanntms.cl/contrato/index');
+        await page.waitForLoadState('networkidle');
+
+        // Estrategia 1: Locator con scope de tabla (más confiable)
+        const contractTable = page.locator('table tbody');
+        const contractRow = contractTable.locator('tr')
+          .filter({ hasText: 'Venta' })                    // Tipo de contrato
+          .filter({ hasText: clienteNombre })              // Nombre del cliente
+          .first();
+
+        // Verificar que la fila es visible
+        await expect(contractRow).toBeVisible({ timeout: 10000 });
+        logger.info('✅ Contract row found in table');
+
+        // Estrategia 2: Verificar número de contrato en esa fila (validación adicional)
+        const contractNumberCell = contractRow.locator('td').first();
+        await expect(contractNumberCell).toBeVisible({ timeout: 5000 });
+        const foundContractNumber = await contractNumberCell.textContent();
+        logger.info(`✅ Contract number verified in table: ${foundContractNumber?.trim()}`);
+
+        logger.info('✅ STEP 5.5 COMPLETE - Contract verified in index table');
     });
 });

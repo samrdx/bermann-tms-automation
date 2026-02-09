@@ -5,6 +5,16 @@ export default defineConfig({
   testIgnore: ['**/examples/**'],  // Explicitly ignore examples directory
   fullyParallel: true,  // Enable parallel execution
   workers: 3,           // One worker per browser for controlled parallelism
+  reporter: [
+    ['html', {
+      outputFolder: 'playwright-report',
+      open: 'never'  // Never auto-open in CI (prevents hanging in headless)
+    }],
+    ['json', {
+      outputFile: 'playwright-report/results.json'
+    }],
+    ['list']  // Console output for CI logs
+  ],
   timeout: 60000,
   retries: 0,
   use: {

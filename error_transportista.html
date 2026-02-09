@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Transportistas</title>
+    <meta name="csrf-param" content="_csrf">
+<meta name="csrf-token" content="LAQuAaScdpJO_4fK2Z7ArvKNA6fNAaTJPpMc3QN17qJebl558_41zQLG0Z689YObkeFq4qkskrEPoyWkMROcmg==">
+
+<link href="/content/bootstrap-4.4.1/css/bootstrap.min.css" rel="stylesheet">
+<script src="/assets/8694f237/jquery.js"></script>
+<script src="/assets/4fd0fe3b/yii.js"></script>
+<script src="/content/bootstrap-4.4.1/js/bootstrap.bundle.min.js"></script>    <link href="/content/admin/plugins/switchery/switchery.min.css" rel="stylesheet" />
+    <link href="/content/admin/css/icons.css" rel="stylesheet" type="text/css">
+    <link href="/content/fontAwesome/fa/all.css" rel="stylesheet" type="text/css">
+    <link href="/content/bootstrap-select/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- bootrap notify -->
+    <link href="/content/admin/plugins/bootstrap-notify/bootstrap-notify.css?v=2.19.1" rel="stylesheet" type="text/css">
+
+    <!-- animated  css -->
+    <link href="/content/admin/plugins/animate/animate.css" rel="stylesheet" type="text/css">
+
+    <link href="/content/admin/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/content/admin/css/custom.css?v=2.19.1" rel="stylesheet" type="text/css">
+    <!-- Novedades -->
+    <link href="/content/novedades/novedades.css" rel="stylesheet" type="text/css">
+
+    <!-- Card -->
+    <link href="/content/card/card.css" rel="stylesheet" type="text/css">
+
+    <script src="/content/admin/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="/content/admin/js/bermann.js?v=2.19.1"></script>
+
+    <!-- custom fetch manager -->
+    <script type="text/javascript" src="/content/admin/js/fetch.js"></script>
+
+    <!-- permisson JS -->
+    <script type="text/javascript" src="/content/admin/js/permission.js?v=2.19.1" data-base-url=""></script>
+
+    <style>
+        #wrapper, .side-menu.left{
+            height: 1400px;
+        }
+        
+        .content-page > .content {
+            margin-bottom: 0 !important;
+        }
+
+        .footer{
+            position: fixed !important;
+        }
+
+        .requerido::after {
+            content: " * ";
+            color: red;
+            font-weight: 900;
+        }
+
+        body {
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+
+        /* topbar fijo sin afectar layout */
+        .topbar {
+            z-index: 9999;
+            position: fixed;
+            width: 100%;
+        }
+
+        .modal {
+            z-index: 10000; 
+        }
+
+
+    </style>
+
+    <!-- Estilo para el nuevo estado asignado parcial (Morado) -->
+    <style>
+        .border-purple {
+            border-color: #6f42c1 !important;
+        }
+
+        .text-purple {
+            color: #6f42c1 !important;
+        }
+    </style>
+
+
+</head>
+
+<body class="fixed-left-void widescreen">
+    
+
+    <!-- Begin page -->
+    <div id="wrapper" class="forced enlarged">
+
+        <!-- Top Bar Start -->
+        <div class="topbar">
+
+            <!-- LOGO -->
+            <div class="topbar-left">
+                <div class="ml-3">
+                    <a href="/site/index" style="text-decoration:none;" class="logo">
+                        <img src="/images/tms-icon.png" class="logo-min" width="30" alt="">
+                        <span><img src="/images/tms.png" width="150" alt=""></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Button mobile view to collapse sidebar menu -->
+            <nav class="navbar-custom">
+                <ul class="list-inline float-right mb-0">
+
+                    <!--notificaciones de contador-->
+                    <li class="list-inline-item dropdown notification-list float-left mr-3" onclick="actualizarConteoReportes()">
+                        <a class="nav-link  nav-user dropdown-toggle" id="main_notification" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger noti-icon-badges" style="display:none" id="contador_reporetes_usaurio"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-arrow dropdown-menu-lg" aria-labelledby="Preview" style="width: 400px; max-width: 400px; min-width: 400px;">
+                            <div class="dropdown-item noti-title">
+                                <h5 class="font-16"><span class="badge badge-danger float-right"></span>Descarga de reportes</h5>
+                            </div>
+
+                            <div id="contenedor_reportes_usuario">
+                            </div>
+
+                            <div class="dropdown-item notify-item p-0">
+                                <a class="text-success" class="card-link" href="/reportes/reportesusuario"> 
+                                    <div class="d-flex justify-content-between align-items-center p-2">
+                                        <span style="margin: 0 auto;" class="manito">
+                                            <b>Ver mas</b>
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="list-inline-item dropdown notification-list" style="background: rgba(0, 0, 0, 0.2) !important;">
+                                                <a class="nav-link dropdown-toggle  nav-user " data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                            <img src="/images/icon_user.svg" alt="user" class="rounded-circle p-1">
+                            <strong style="font-weight: bolder; color:white; font-size:.8em"> Angie</strong>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right profile-dropdown " aria-labelledby="Preview">
+                            <a href="https://ayuda.bermanntms.cl/inicio" target="blank_" class="dropdown-item notify-item">
+                                <i class="fas fa-arrow-circle-right"></i><span>Ayuda</span> <i class="fas fa-external-link-alt" style="font-size:10px; color:#98a6ad; margin-left:50px"></i>
+                            </a>
+                            <a href="https://apimoveontruckqa.bermanntms.cl" target="blank_" class="dropdown-item notify-item">
+                                <i class="fas fa-code"></i><span>Api</span> <i class="fas fa-external-link-alt" style="font-size:10px; color:#98a6ad; margin-left:50px"></i>
+                            </a>
+                            <a href="/login/cerrarsesion" class="dropdown-item notify-item">
+                                <i class="mdi mdi-logout"></i> <span>Cerrar Sesion</span>
+                            </a>
+                        </div>
+                    </li>
+
+                    <!--consulta para mostrar el componente-->
+                    <!-- <php $direcciones = ClienteDirecciones::find()->where(['fecha_borrado' => null])->all(); ?> -->
+                </ul>
+
+                <ul class="list-inline menu-left mb-0">
+                    <li class="float-left">
+                        <button class="button-menu-mobile open-left waves-light waves-effect">
+                            <i class="mdi mdi-menu"></i>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <!-- Top Bar End -->
+
+        <!-- ========== Left Sidebar Start ========== -->
+
+        <div class="left side-menu">
+            <div class="sidebar-inner slimscrollleft">
+                <!--- Divider -->
+                <div id="sidebar-menu" class="pt-0">
+                    <ul>
+                        <!-- inicio -->
+                                                    
+
+                            <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-home"></i><span>Inicio</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul id="ul-inicio">
+                                    <!-- dashboard de viajes -->
+                                                                            <li>
+                                            <a href="/site/index" class="waves-primary ">
+                                                <span> Inicio </span>
+                                            </a>
+                                        </li>
+                                                                        
+                                    <!-- dashboarde de viajes -->
+                                    <!-- <php  if (buscarNombreVista("DashboardViajes") ==  1 && $_SESSION['usaurioSkyview'] == "schuftan01") { ?> -->
+                                                                        
+                                    <!-- dashboarde de viajes -->
+                                    <!-- <php if( $_SESSION['usaurioSkyview'] == "cbplogistica" ){ ?> -->
+                                                                            
+                                    <!-- dashboarde de viajes -->
+                                    <!-- <php if( enap ConfigurationDashboardBI::findActiveDashbordBI(3) ){ ?> -->
+                                    
+                                    <!-- dashboarde de viajes -->
+                                    <!-- <php if( $_SESSION['usaurioSkyview'] == "llico" ){ ?> -->
+                                    
+                                                                            <li>
+                                            <a href="/site/disponibilidad" class="waves-primary ">
+                                                <span> Disponibilidad </span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                
+                        <!-- fin inicio -->
+
+                        <!-- validacion de Cliente para dashboard ejecutivo -->
+                        
+                                        
+                        
+                        
+                        <!-- Administracion -->
+
+                            <!-- if ( ($idTipoUsuario == 1 ) || ($idTipoUsuario == 2 ) ) {  -->
+                                                            <li class="has_sub">
+                                    <a href="javascript:void(0);" class="waves-effect ">
+                                        <i class="fal fa-cogs"></i><span> Administración</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    
+                                    <!-- estados -->
+                                    <ul id="ul-administracion">
+                                                                                    <li class="">
+                                                <a href="/estatusviaje/index" class="">
+                                                    <span>Estados</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- campos opcionales -->
+                                                                                    <li class="">
+                                                <a href="/camposopcionales/index" class="">
+                                                    <span>Campos Opcionales</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo usuario -->
+                                                                                    <li class="">
+                                                <a href="/tipousuarios/index" class="">
+                                                    <span>Tipo Usuario</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- usuario -->
+                                                                                    <li class="">
+                                                <a href="/usuarios/index" class="">
+                                                    <span>Usuarios</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo operacion -->
+                                                                                    <li class="">
+                                                <a href="/tipooperacion/index" class="">
+                                                    <span>Tipo Operación</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo servicio -->
+                                                                                    <li class="">
+                                                <a href="/tiposervicio/index" class="">
+                                                    <span>Tipo Servicio</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo viaje -->
+                                        <!--  -->
+                                        <!-- tipo contenedor -->
+                                                                                <!-- macrozona -->
+                                                                                <!-- zona de macrozona -->
+                                                                                <!-- area -->
+                                                                                <!-- Tipo Documento Conductor -->
+                                                                                    <li class="">
+                                                <a href="/tipodocumentoconductor/index" class="">
+                                                    <span>Tipo Doc. Conductor</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- subestatus viaje -->
+                                                                                    <li class="">
+                                                <a href="/subestatusviaje/index" class="">
+                                                    <span>Subestados</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- motivo subestado -->
+                                                                                    <li class="">
+                                                <a href="/subestatusviajemotivos/index" class="">
+                                                    <span>Motivos Subestados</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- unidad negocio -->
+                                                                                    <li class="">
+                                                <a href="/unidadnegocio/index" class="">
+                                                    <span>Unidad Negocio</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- cuenta contable -->
+                                                                                    <li class="">
+                                                <a href="/cuentacontable/index" class="">
+                                                    <span>Cuenta Contable</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo cobro -->
+                                                                                    <li class="">
+                                                <a href="/tipocobro/index" class="">
+                                                    <span>Tipo Cobro</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo cobro -->
+                                                                                    <li class="">
+                                                <a href="/tipocarga/index" class="">
+                                                    <span>Tipo Carga</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- tipo tarifa -->
+                                        <!--  -->
+                                            <!-- tipo poliza -->
+                                                                                            <li class="">
+                                                    <a href="/tipopolizas/index" class="">
+                                                        <span>Tipo Polizas</span>
+                                                    </a>
+                                                </li>
+                                                                                                <!-- poliza -->
+                                                                                                    <li class="">
+                                                        <a href="/polizas/index" class="">
+                                                            <span>Polizas</span>
+                                                        </a>
+                                                    </li>
+                                                                                                                                                    <li class="">
+                                                        <a href="/reportes/logvisitas" class="">
+                                                            <span>Log Visitas </span>
+                                                        </a>
+                                                    </li>
+                                                                                                                                                    <li class="">
+                                                        <a href="/reportes/logsesion" class="">
+                                                            <span>Log Inicio Sesión</span>
+                                                        </a>
+                                                    </li>
+                                                
+                                        <!-- tipo documento POD -->
+                                                                                    <li class="">
+                                                <a href="/tipodocumentopod/index" class="">
+                                                    <span>Tipo Documento POD</span>
+                                                </a>
+                                            </li>
+                                                                                
+                                        <!-- ciclo pago -->
+                                                                                    <li class="">
+                                                <a href="/ciclopagos/index" class="">
+                                                    <span>Ciclo Pagos</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- adicionales -->
+                                                                                <!-- sobretiempo -->
+                                                                                    <li class="">
+                                                <a href="/sobretiempo/index" class="">
+                                                    <span>Sobretiempo</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- motivo alerta -->
+                                                                                    <li class="">
+                                                <a href="/motivosalerta/index" class="">
+                                                    <span>Motivos Alertas</span>
+                                                </a>
+                                            </li>
+                                        
+                                        <!-- configuracion global -->
+                                                                                    <li class="">
+                                                <a href="/configuracionglobal/index" class="">
+                                                    <span>Configuración Global</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- Reporte Auditoria -->
+                                                                                    <li class="">
+                                                <a href="/reportes/auditoria" style='cursor:pointer' class="">
+                                                    <span>Auditoria</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- log listado -->
+                                                                                    <li class="">
+                                                <a href="/log/index" style='cursor:pointer' class="">
+                                                    <span>Logs</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- rendicion autorizacion -->
+                                                                                <!-- cuenta corriente  -->
+                                                                                <!-- Reporte por usuario -->
+                                        <li class="">
+                                            <a href="/reportes/reportesusuario" class="">
+                                                <span>Reportes de usuario</span>
+                                            </a>
+                                        </li>
+                                        <!-- Localidad -->
+                                                                                    <li class="">
+                                                <a href="/localidad/index" class="">
+                                                    <span>Localidades</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- Distribuidor -->
+                                                                                    <li class="">
+                                                <a href="/distribuidor/index" class="">
+                                                    <span>Distribuidores</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- Empresa PSR -->
+                                                                                    <li class="">
+                                                <a href="/empresapsr/index" class="">
+                                                    <span>Empresa PSR</span>
+                                                </a>
+                                            </li>
+                                        
+                                        <!-- Condicion de Venta -->
+                                                                                    <li class="">
+                                                <a href="/condicionventas/index" class="">
+                                                    <span>Condición de Venta</span>
+                                                </a>
+                                            </li>
+                                                                                
+                                    </ul>
+                                </li>
+                                                    <!-- Fin Administracion -->
+
+                        <!-- estatus de viaje -->
+                        <!-- if ( ($idTipoUsuario == 1 ) ) {  -->
+                        <li class="has_sub d-none">
+                            <a href="/estatusviaje/index" class="waves-effect ">
+                                <i class="fal fa-toggle-on"></i><span> Estatus de viaje</span>
+                            </a>
+                        </li>
+                        <!-- fin estatus de viaje -->
+
+                        <!-- Transportista -->
+                        <!-- ( ($idTipoUsuario == 1 ) || ($idTipoUsuario == 2 )|| ($idTipoUsuario == 4 ) ) -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect active">
+                                    <i class="fal fa-steering-wheel"></i><span> Transportista</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <!-- transportista -->
+                                                                            <li class="active">
+                                            <a href="/transportistas/index" class="active">
+                                                <span>Listado</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- contacto trasportista -->
+                                                                            <li class="">
+                                            <a href="/transportistascontactos/index" class="">
+                                                <span>Contactos</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- tipo transportista -->
+                                                                            <li class="">
+                                            <a href="/tipotransportista/index" class="">
+                                                <span>Tipo Transportista</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- conductores -->
+                                                                            <li class="">
+                                            <a href="/conductores/index" class="">
+                                                <span>Conductores</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- tipo vehiculos -->
+                                                                            <li class="">
+                                            <a href="/tipovehiculos/index" class="">
+                                                <span>Tipo Vehículos</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- tipo rampla  -->
+                                                                            <li class="">
+                                            <a href="/tiporampla/index" class="">
+                                                <span>Tipo Rampla</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- vehiculos -->
+                                                                            <li class="">
+                                            <a href="/vehiculos/index" class="">
+                                                <span>Vehículos</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- uso chasis -->
+                                                                            <li class="">
+                                            <a href="/chassisuse/index" class="">
+                                                <span>Uso Chassis</span>
+                                            </a>
+                                        </li>
+                                    
+                                    <!-- Unidades de medidas -->
+                                                                            <li class="">
+                                            <a href="/capacities/index" class="">
+                                                <span>Capacidades</span>
+                                            </a>
+                                        </li>
+                                                                    
+                                    <!-- lo comente por si en algun momento se llega a utilizar -->
+                                    <!--                                 <li class=""> 
+                                    <a href="/sobretiempotransportistas/index" class="">
+                                        <span>Sobretiempo</span>
+                                    </a>
+                                </li>
+                             -->
+                                </ul>
+                            </li>
+                                                <!-- Fin Transportista -->
+
+                        <!-- Clientes -->
+                        <!-- ( ($idTipoUsuario == 1 ) || ($idTipoUsuario == 2 )|| ($idTipoUsuario == 3 ) )  -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-user-circle"></i><span> Clientes</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <!-- clientes -->
+                                                                            <li class="">
+                                            <a href="/clientes/index" class="">
+                                                <span>Listado</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- cliente facturador -->
+                                                                        <!-- cliente facturador contacto -->
+                                                                        <!-- contacto clientes -->
+                                                                            <li class="">
+                                            <a href="/clientescontactos/index" class="">
+                                                <span>Contactos</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- tipo clientes -->
+                                                                            <li class="">
+                                            <a href="/tipocliente/index" class="">
+                                                <span>Tipo Cliente</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- fin Clientes -->
+
+                        <!-- geozonas -->
+                        <!-- ( ($idTipoUsuario == 1 ) || ($idTipoUsuario == 4 ) )  -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-globe-americas"></i><span>GeoZonas</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <!-- poligonos -->
+                                                                            <li class="">
+                                            <a href="/poligonos/index" class="waves-effect" class="">
+                                                <span>Poligonos</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- waypoint -->
+                                                                            <li class="">
+                                            <a href="/waypoint/index" class="waves-effect" class="">
+                                                <span>Waypoint</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- Macro Zonas -->
+                                                                            <li class="">
+                                            <a href="/macrozones/index" class="waves-effect" class="">
+                                                <span>Macro zonas</span>
+                                            </a>
+                                        </li>
+                                    
+                                    <!-- Rutas Macro Zonas -->
+                                                                            <li class="">
+                                            <a href="/routemacrozone/index" class="waves-effect" class="">
+                                                <span>Rutas Macro zonas</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- fin geozonas -->
+                        <!-- planificacion Recurso -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="far fa-stream"></i><span>Planificación Recurso</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <!--propiedad Recurso  -->
+                                                                            <li class="">
+                                            <a href="/propiedad/index" class="">
+                                                <span>Propiedades</span>
+                                            </a>
+                                        </li>
+                                    
+                                     <!--propiedad Calendario  -->
+                                                                             <li class="">
+                                            <a href="/propiedad/calendario" class="">
+                                                <span>Calendario</span>
+                                            </a>
+                                        </li>
+                                                                        <!--propiedad -->
+                                                                            <li class="">
+                                            <a href="/propiedad/listadowarning" class="">
+                                                <span>Listado warning</span>
+                                            </a>
+                                        </li>
+                                    
+                                    <!--perfil de recurso  -->
+                                                                        
+                                    <!--perfil de recurso  -->
+                                                                        <!--perfil de recurso  -->
+                                                                            <li class="">
+                                            <a href="/propiedad/recursocorreo" class="">
+                                                <span>Recurso Correo</span>
+                                            </a>
+                                        </li>
+                                                                        <!--Tipo Documento Recurso  -->
+                                                                            <li class="">
+                                            <a href="/resourcedocument/index" class="">
+                                                <span>Recurso Documento</span>
+                                            </a>
+                                        </li>
+                                    
+                                    <!--Condición de Propiedades  -->
+                                                                            <li class="">
+                                            <a href="/propiedadcondicion/index" class="">
+                                                <span>Condición de Propiedad</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- planificacion Recurso -->
+
+
+                        
+                                                    <!-- Carga -->
+                                                            <li class="has_sub">
+                                    <a href="javascript:void(0);" class="waves-effect ">
+                                        <i class="fal fa-box"></i><span>Categoría Carga</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <!-- crear carga -->
+                                                                                    <li class="">
+                                                <a href="/carga/index" class="waves-effect" class="">
+                                                    <span>Listado</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- unidad Medida -->
+                                                                                    <li class="">
+                                                <a href="/unidadmedida/index" class="waves-effect" class="">
+                                                    <span>Unidad Medida</span>
+                                                </a>
+                                            </li>
+                                        
+                                        <!-- Categoria Carga -->
+                                                                                    <li class="">
+                                                <a href="/categoriacarga/index" class="waves-effect" class="">
+                                                    <span>Categoría</span>
+                                                </a>
+                                            </li>
+                                                                                <!-- Configuracion Carga -->
+                                                                                    <li class="">
+                                                <a href="/configuracioncarga/index" class="waves-effect" class="">
+                                                    <span>Configuración </span>
+                                                </a>
+                                            </li>
+                                        
+                                        <!-- Contenido Carga -->
+                                                                                    <li class="">
+                                                <a href="/contenidocarga/index" class="waves-effect" class="">
+                                                    <span>Contenido</span>
+                                                </a>
+                                            </li>
+                                        
+                                        <!-- Temperatura Carga -->
+                                                                                    <li class="">
+                                                <a href="/temperaturacarga/index" class="waves-effect" class="">
+                                                    <span>Temperatura</span>
+                                                </a>
+                                            </li>
+                                        
+                                        <!-- Comercio -->
+                                                                                    <li class="">
+                                                <a href="/comercio/index" class="waves-effect" class="">
+                                                    <span>Comercio</span>
+                                                </a>
+                                            </li>
+                                                                            </ul>
+                                </li>
+                                                                            <!-- fin carga -->
+
+
+                        <!-- Hoja de Ruta -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-book-open"></i><span> Hoja de Ruta</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                                                            <li class="">
+                                            <a href="/hojaruta/index" class="">
+                                                <span>Listado</span>
+                                            </a>
+                                        </li>
+                                                                                                                <li class="">
+                                            <a href="/hojaruta/cierreadministrativo" class="">
+                                                <span>Cierre HR</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- Hoja de Ruta -->
+
+                        <!-- viajes -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-truck"></i><span> Viajes</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <!--planificar viaje masivo -->
+                                                                            <li class="">
+                                            <a href="/viajes/cargamasiva" class="">
+                                                <span>Planificación Masiva</span>
+                                            </a>
+                                        </li>
+                                                                        <!--planificar viaje  -->
+                                                                            <li class="">
+                                            <a href="/viajes/crear" class="">
+                                                <span>Planificar</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- asignar viaje -->
+                                                                            <li class="">
+                                            <a href="/viajes/asignar" class="">
+                                                <span>Asignar</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- listado viaje -->
+
+                                    
+                                                                                    <li class="">
+                                                <a href="/viajes/listado" class="">
+                                                    <span>Listado</span>
+                                                </a>
+                                            </li>
+                                        
+                                                                        <!-- monitorero viaje -->
+                                                                            <li class="">
+                                            <a href="/viajes/monitoreo" class="">
+                                                <span>Monitorear</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- calendario viaje -->
+                                                                            <li class="">
+                                            <a href="/viajes/calendario" class="">
+                                                <span>Calendario</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- mapa viaje -->
+                                                                            <li class="">
+                                            <a href="/viajes/mapaviajes" class="">
+                                                <span>Mapa Viaje</span>
+                                            </a>
+                                        </li>
+                                    
+                                    <!-- gestion POD -->
+                                                                            <li class="">
+                                            <a href="/viajes/gestionpod" class="">
+                                                <span>Gestión POD</span>
+                                            </a>
+                                        </li>
+                                    
+                                        
+                                            
+                                    <!-- TODO: mover a reportes -->
+                                    <!-- reporte viaje -->
+                                                                            <li class="">
+                                            <a href="/viajes/reporteviajes" class="">
+                                                <span>Reporte Viajes</span>
+                                            </a>
+                                        </li>
+                                                                        
+     
+                                    <!-- timeline de viajes -->
+                                                                            <li class="">
+                                            <a href="/viajes/timeline" class="">
+                                                <span>Timeline 
+                                                    <!-- <span class="badge badge-primary float-right"> BETA </span>  -->
+                                                </span>
+                                            </a>
+                                        </li>
+                                    
+                                </ul>
+                            </li>
+                                                <!-- fin viajes -->
+
+                        <!-- Ultima Milla -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-route"></i><span> Ultima Milla</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                                                            <li class="">
+                                            <a href="/lastmille/index" class="">
+                                                <span>Listado Pedido</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                            <li class="">
+                                            <a href="/lastmille/asignar" class="">
+                                                <span>Asignar Pedido</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                            <li class="">
+                                            <a href="/timewindow/index" class="">
+                                                <span>Ventanas Horarias</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- fin Ultima Milla -->
+
+                        <!-- ruta segura -->
+                                                <!-- fin ruta segura -->
+
+                        <!-- tarificador -->
+
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-calculator"></i><span>Tarificador</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                                                            <li class="">
+                                            <a href="/ruta/index" class="">
+                                                <span>Listado Rutas</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                                                                        <li class="">
+                                                <a href="/contrato/index" class="">
+                                                    <span>Contratos</span>
+                                                </a>
+                                            </li>
+                                        
+                                                                                    <li class="">
+                                                <a href="/tarificador/index" class="">
+                                                    <span>Viajes</span>
+                                                </a>
+                                            </li>
+                                        
+                                                                                    <li class="">
+                                                <a href="/prefactura/index" class="">
+                                                    <span>Pre-facturas</span>
+                                                </a>
+                                            </li>
+                                        
+                                                                                    <li class="">
+                                                <a href="/proforma/index" class="">
+                                                    <span>Proformas</span>
+                                                </a>
+                                            </li>
+                                                                                
+                                                                                    <li class="">
+                                                <a href="/extracostos/index" class="">
+                                                    <span>Extra Costos</span>
+                                                </a>
+                                            </li>
+                                        
+                                                                                    <li class="">
+                                                <a href="/exchangerate/index" class="">
+                                                    <span>Tipo de Cambio</span>
+                                                </a>
+                                            </li>
+                                                                            
+                                </ul>
+                            </li>
+                                                <!-- fin tarificador -->
+
+                        <!-- viatico -->
+                                                <!-- fin viatico -->
+
+                        <!-- Caja -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-cash-register"></i><span>Caja</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                                                            <li class="">
+                                            <a href="/cash/index" class="">
+                                                <span>Listado</span>
+                                            </a>
+                                        </li>
+                                                                                                                <li class="">
+                                            <a href="/cash/vale" class="">
+                                                <span>Autorizar Vales</span>
+                                            </a>
+                                        </li>
+                                                                                                                <li class="">
+                                            <a href="/cash/gestionfondos" class="">
+                                                <span>Gestion de Fondos</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- end caja -->
+
+                        <!-- liquidacion -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-hand-holding-usd"></i><span>Liquidación</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                                                            <li class="">
+                                            <a href="/liquidacion/index" class="">
+                                                <span>Listado</span>
+                                            </a>
+                                        </li>
+                                                                                                                <li class="">
+                                            <a href="/liquidacion/viajes" class="">
+                                                <span>Viajes Comisionados</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!-- end liquidacion -->
+
+                        <!-- rendiciones -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-coins"></i><span>Rendición</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <!-- rendicion listado -->
+                                                                            <li class="">
+                                            <a href="/rendicion/index" class="">
+                                                <span>Listado</span>
+                                            </a>
+                                        </li>
+                                                                        
+                                    <!--rendicion categoria  -->
+                                                                            <li class="">
+                                            <a href="/rendicioncategoria/index" class="">
+                                                <span>Rendición Categoria</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- rendicion motivo -->
+                                                                            <li class="">
+                                            <a href="/rendicionmotivo/index" class="">
+                                                <span>Rendición Motivo</span>
+                                            </a>
+                                        </li>
+                                                                        <!-- rendicion movimiento -->
+                                                                        <!-- tipo ingreso (rendicion)  -->
+                                    <!-- <php if (buscarNombreVista("TipoIngreso") == 1) { ?>
+                                        <li class="<= ($pagina == "tipoingreso-index") ? "active" : "" ?>">
+                                            <a href="<= Yii::getAlias('@web'); ?>/tipoingreso/index" class="<= ($pagina == "tipoingreso-index") ? "active" : "" ?>">
+                                                <span>Tipo Ingreso</span>
+                                            </a>
+                                        </li>
+                                    <php } ?> -->
+                                </ul>
+                            </li>
+                                                <!-- fin rendiciones -->
+
+                        <!-- libreta conduccion -->
+                                                <!-- fin viatico -->
+
+                        <!-- temperatura -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-temperature-low"></i><span>Temperatura</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                                                            <li class="">
+                                            <a href="/perfiltemperatura/index" class="">
+                                                <span>Perfil</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                            <li class="">
+                                            <a href="/temperatura/index" class="">
+                                                <span>Mapa</span>
+                                            </a>
+                                        </li>
+                                                                                                                <li class="">
+                                            <a href="/temperatura/alertas" class="">
+                                                <span>Alertas</span>
+                                            </a>
+                                        </li>
+                                    
+                                </ul>
+                            </li>
+                                                <!-- fin temperatura -->
+
+                        <!-- reportes generales -->
+                                                    <li class="has_sub">
+                                <a href="javascript:void(0);" class="waves-effect ">
+                                    <i class="fal fa-file-signature"></i><span> Reportes</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul id="ul-reportes">
+
+                                    <!--                                        <li class="">
+                                            <a href="/reportes/permanencia" style='cursor:pointer' class="">
+                                                <span>Permanencia</span>
+                                            </a>
+                                        </li>
+                                    -->
+
+                                                                            <li class="">
+                                            <a href="/reportes/permanenciaporvehiculos" style='cursor:pointer' class="">
+                                                <span>Permanencia Vehículos</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                            <li class="">
+                                            <a href="/reportes/permanenciaporzonas" style='cursor:pointer' class="">
+                                                <span>Permanencia Zonas</span>
+                                            </a>
+                                        </li>
+                                    
+                                    <!--                                        <li class="">
+                                            <a href="/reportes/cumplimiento" style='cursor:pointer' class="">
+                                                <span>Cumplimiento</span>
+                                            </a>
+                                        </li>
+                                    -->
+
+                                                                            <li class="">
+                                            <a href="/reportes/cumplimientounidadnegocio" style='cursor:pointer' class="">
+                                                <span>Cumplimiento Unidad Negocio</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                            <li class="">
+                                            <a href="/reportes/cumplimientotransportistas" style='cursor:pointer' class="">
+                                                <span>Cumplimiento Transportistas</span>
+                                            </a>
+                                        </li>
+                                    
+                                                                            <li class="">
+                                            <a href="/reportes/provisioningandrenditionreport" style='cursor:pointer' class="">
+                                                <span>Cta. Cte Conductores</span>
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </li>
+                                                <!--fin Reportes Generales -->
+
+                    </ul>
+                    <div class="clearfix"></div>
+
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+
+        </div>
+
+
+        <!-- Left Sidebar End -->
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="content-page">
+            <!-- Start content -->
+            <div class="content">
+                <div class="container-fluid">
+                    <!-- Page-Title -->
+                                            <div class="row">
+                            <div class="col-sm-12">
+                                <div class="page-title-box">
+                                    <h4 class="page-title">Transportistas</h4>
+                                    <span class="ml-3">
+                                        <div class="spinner-border text-dark" id="spinner-cargando" style="display:none" role="status">
+                                            <span class="sr-only"></span>
+                                        </div>
+                                    </span>
+                                    <ol class="breadcrumb float-right">
+                                        <li class="breadcrumb-item">Sub Transportistas</li>
+                                                                                    <li class="breadcrumb-item">Listado</li>
+                                                                                                                    </ol>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                                        
+<div class="row">
+    <div class="col-md-12 my-2">
+        <a href="/transportistas/crear" class="btn btn-success">Crear Transportista</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="portlet">
+            <div class="portlet-heading bg-success">
+                <h3 class="portlet-title">
+                    Filtros
+                </h3>
+                <div class="portlet-widgets">
+                    <a data-toggle="collapse" href="#bg-primary"><i class="ion-minus-round"></i></a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <div id="bg-primary" class="panel-collapse collapse show">
+                <div class="portlet-body">
+                    <div class="row">     
+                        <div class="col-md-2 col-sm-12">
+                            <label for="">Buscar</label>
+                            <input type="text" class="form-control" value="" id="search">
+                        </div> 
+                        <div class="col-md-2 col-6">
+                            <label for="">Estado</label>
+                            <select name="estado" id="estado" class="form-control selectpicker" data-live-search="true" data-actions-box="true">
+                                <option value="">Todos</option>
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
+                        </div>                        
+                        <div class="col-md-3 col-6">
+                            <br>
+                            <button id="btn_quitar_filtros" onclick="quitarFiltros()" class="btn btn-danger mt-2">Quitar Filtros</button>
+                            <a href="#" id="buscar" onclick="buscarTransportistas()" class="btn btn-success mt-2">Buscar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card-box" style="overflow:scroll; display:none !important" id="tabla">
+            <div class="mb-2">
+                <button class="btn btn-secondary" onclick="exportarExcel()">Excel</button>
+            </div>
+            <table id="tabla_transportistas" class="table table-hover table-bordered">
+                <thead>
+                    <tr id="header_table_transportistas">
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="card-box text-center" id="div_no_data">Sin datos para mostrar</div>
+    </div>
+</div>
+<br>
+
+<!-- dataTable -->
+<link href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap4.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap4.js"></script>
+<!-- dataTable -->
+
+<script>
+    var url_base = '';
+
+    var datatable = null;
+    let cantRows = 0;
+
+    $(document).ready(function() {
+
+        cargarFiltrosTransportistas();
+        buscarTransportistas();
+
+        if(localStorage.getItem('filtrosTransportistas') != null){
+            localStorage.removeItem('filtrosTransportistas');
+        }
+        
+    });
+    
+    function buscarTransportistas() {
+        if(datatable != null){
+            datatable.destroy();
+        }
+
+        if ($.fn.DataTable.isDataTable('#tabla_transportistas')) {
+            $('#tabla_transportistas').DataTable().clear().destroy();
+        }
+
+        datatable = new DataTable('#tabla_transportistas', {
+            dom: '<"d-flex justify-content-between mb-3"lB><t><"d-flex justify-content-between mt-3"ip>',
+            autoWidth: false,
+            language: {
+                "url": "/content/admin/plugins/datatables/spanish.json"
+            },
+            pagingType: 'simple_numbers',
+            ajax: {
+                url: "/transportistas/buscartransportistas",
+                type: 'POST',
+                data: {
+                    search: $('#search').val(),
+                    estado: $('#estado').val(),
+                },
+                beforeSend: function() {
+                    $("#modalCargando").modal("show");
+                },
+                complete: function(response) {
+
+                    if(response.responseJSON.code == 0){
+                        showNotify('danger', 'top right', response.responseJSON.message);
+                        cerrarModalCargando(500);
+                        return false;
+                    }
+
+                    if(response.responseJSON.data.length > 0){
+                        $("#tabla").fadeIn();
+                        $("#div_no_data").fadeOut();
+                    } else {
+                        $("#tabla").hide();
+                        $("#div_no_data").fadeIn();
+                    }
+                    guardarFiltrosTransportistas();
+                    cerrarModalCargando(500);
+                    cantRows = response.responseJSON.recordsTotal;
+
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error en la carga de datos: ", error);
+                    alert("Hubo un problema al cargar los datos. Inténtalo de nuevo.");
+                    cerrarModalCargando(500);
+                }
+            },
+            order: [[0, 'asc']],  // Orden inicial por la columna de nombre (si es necesario)
+            //scrollY: '500px',
+            columns: [
+                { data: 'Nombre', title: 'Nombre', orderSequence: ['desc', 'asc'], searchable: true },
+                { data: 'RUT', title: 'RUT', orderSequence: ['desc', 'asc'], searchable: true },
+                { data: 'Dirección', title: 'Dirección', orderSequence: ['desc', 'asc'], searchable: true },
+                { data: 'Región', title: 'Región', orderSequence: ['desc', 'asc'], searchable: true },
+                { data: 'Comuna', title: 'Comuna', orderSequence: ['desc', 'asc'], searchable: true },
+                { data: 'Tipo Transportista', title: 'Tipo Transportista', orderSequence: ['desc', 'asc'], searchable: true },
+                {
+                    data: '',
+                    title: 'Estado',
+                    className: 'text-center',
+                    render: function (data, type, row) {
+                        const estado = row.estado || 'Inactivo';
+                        const estadoClass = estado === 'Activo' ? 'badge-success' : 'badge-danger';
+                        return `<span class="manito badge ${estadoClass}" onclick="cambiarEstado(${row.id}, ${estado === 'Activo' ? 1 : 0})">${estado}</span>`;
+                    },
+                    orderData: [6], // Ordena por el valor de la columna oculta de estado
+                },
+                {
+                    data: 'estado', // Columna oculta con valores numéricos (1 o 0)
+                    visible: false,
+                },
+                {
+                    data: '', 
+                    title: 'Acciones', 
+                    orderSequence: ['asc', 'desc'], 
+                    className: 'text-center',
+                    render: (data, type, row) => {
+                        var buttons = '';
+
+                        buttons = `<a data-toggle="tooltip" data-placement="top" title="Editar" href="${url_base}/transportistas/editar/${row.id}"><i class="fal fa-pencil-alt text-warning"></i></a>`;
+
+                        return buttons;
+                    }
+                }
+            ],
+            processing: true,
+            serverSide: true,
+            initComplete: function() {
+
+                if (datatable && datatable.columns) {
+                    //setTimeout(() => { datatable.columns.adjust().draw(); }, 500);
+                    setTimeout(() => { datatable.columns.adjust(); }, 500);
+                }
+                
+            }
+        });
+
+    }
+
+    function exportarExcel(){
+
+        $("#modalCargando").modal("show");
+
+        $.ajax({
+            type: "POST",
+            url: "/transportistas/excellistado",
+            data: {
+                search: $('#search').val(),
+                estado: $('#estado').val(),
+                cant_rows: cantRows
+            },
+            success: function(response) {
+                
+                data = JSON.parse(response);
+                
+                if(data.code == 0){
+                    showNotify('danger', 'top right', 'Ocurrio un error al procesar la descarga del archivo');
+                    return false;
+                }
+
+                if(data.code == 1){
+                    showNotify('success', 'top right', 'El archivo se agrego a la lista de descargas');
+
+                    setTimeout(() => {
+                        showNotify('info', 'top right', 'Se notificara cuando este listo para su visualización');
+                    }, 1000);
+                }
+
+                if(data.code == 2){
+                    window.location.href = data.url;
+                }
+                
+                cerrarModalCargando(500);
+            },
+            error: function(error) {
+                console.log(error);
+                $('#registros').html(error.responseText);
+            }
+        });
+
+    }
+
+    async function cambiarEstado(transportista_id, inactivo){
+
+        const valid = await validatePermission(28);
+
+        if (!valid) { return false; }
+
+        mensaje = inactivo == 1 ? `¿Está seguro de inactivar el transportista?` : `¿Está seguro de activar el transportista?`;
+
+        await confirmacion(mensaje).then((result) => {
+
+            if(result == 0){
+                showNotify('warning', 'top right', 'Acción cancelada por el usuario');
+                return false;
+            }
+
+            $("#modalCargando").modal("show")
+            $.ajax({
+                url: "/transportistas/cambiarestado",
+                type: 'POST',
+                data: {
+                    transportista_id
+                },
+                dataType: "json",
+                success: function(res) {
+                    if(res.code == 0){
+                        showNotify('danger', 'top right', res.message);
+                        cerrarModalCargando(500);
+                        return false;
+                    }
+
+                    const accion = inactivo == 1 ? "inactivado" : "activado";
+                    showNotify('success', 'top right', `transportista ${accion} con éxito`);
+                    datatable.ajax.reload(null, false);
+
+                    cerrarModalCargando(500);
+                }
+            })
+
+        }).catch(error => {
+            console.error(error);
+            cerrarModalCargando(500)
+        }); 
+
+        event.preventDefault()
+
+    }
+    
+    function guardarFiltrosTransportistas(){
+
+        let filtros = {
+            "search": $('#search').val(),
+            "estado": $('#estado').val()
+        }
+
+        const filtrosTransportistas = JSON.stringify(filtros);
+
+        localStorage.setItem('filtrosTransportistas', filtrosTransportistas);
+    }
+
+    function cargarFiltrosTransportistas(){
+        if(localStorage.getItem('filtrosTransportistas') != null){
+
+            filtros = JSON.parse(localStorage.getItem('filtrosTransportistas'));
+
+            $('#search').val(filtros.search);
+            $('#estado').val(filtros.estado);
+            $("#estado").selectpicker("refresh");
+
+        }
+    }
+
+    function quitarFiltros(){
+        $('#search').val("");
+        $('#estado').val("");
+        $("#estado").selectpicker("refresh");
+
+        $('input[type="search"]').val("");
+        localStorage.setItem('filtrosTransportistasn', "");
+  
+        // se inicializan las variables de la paginacion
+        page = 1;
+        total_rows = 0;
+
+        buscarTransportistas();
+    }
+
+</script>                </div>
+                <!-- end container -->
+            </div>
+            <!-- end content -->
+
+            <footer class="footer">
+                <a href="https://ayuda.bermanntms.cl/inicio" target="blank_" style="color: #98a6ad;">2026 <span class="hide-phone">- Sistema de Gestión de Viajes - 2.19.1 - .91</span></a>
+            </footer>
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Right content here -->
+        <!-- ============================================================== -->
+
+
+
+        <div class="modal fade" id="modalCargando" tabindex="-1" role="dialog" style="z-index: 99999;" aria-labelledby="exampleModalLabel" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog  modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" style="display:none">×</button>
+                        <h5 class="modal-title" id="exampleModalLabel">Cargando</h5>
+                    </div>
+                    <div class="modal-body text-center ">
+                        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="sr-only">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END wrapper -->
+
+        <!-- modal mostrar detalle PODe -->
+            <div id="modalConfirmacion" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="CenterModalLabel" data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog modal-md modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 id="titulo_asignar" class="modal-title">Confirmación</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p id="label_mensaje_confirmacion"> </p>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#" class="btn btn-secondary waves-effect" id="btn_cancelar">Cancelar</a>
+                            <a href="#" class="btn btn-primary waves-effect" id="btn_ok">Aceptar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- modal asignar viaje -->
+
+        <!-- Modal confirmacion propiedades documentos -->
+
+        <div id="modalConfirmationPropertiesDocuments" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="CenterModalLabel" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 id="titulo_asignar" class="modal-title">Confirmación</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p id="label_message_confirmation"> </p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-secondary waves-effect" id="btn_confirm_cancelar">Cancelar</a>
+                        <a href="#" class="btn btn-primary waves-effect" id="btn_confirm_ok">Aceptar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fin Modal confirmacion propiedades documentos -->
+        <script>
+            var resizefunc = [];
+        </script>
+
+        <!-- Plugins  -->
+
+        <script src="/content/admin/js/detect.js"></script>
+        <script src="/content/admin/js/fastclick.js"></script>
+        <script src="/content/admin/js/jquery.slimscroll.js"></script>
+        <script src="/content/admin/js/jquery.blockUI.js"></script>
+        <script src="/content/admin/js/waves.js"></script>
+        <script src="/content/admin/js/wow.min.js"></script>
+        <script src="/content/admin/js/jquery.nicescroll.js"></script>
+        <script src="/content/admin/js/jquery.scrollTo.min.js"></script>
+        <script src="/content/admin/plugins/switchery/switchery.min.js"></script>
+        <!-- Notification js -->
+        <script src="/content/admin/plugins/bootstrap-notify/bootstrap-notify.js?v=2.19.1"></script>
+        <script src="/content/admin/plugins/bootstrap-notify/show-notify.js?v=2.19.1"></script>
+        <!-- Custom main Js -->
+        <script src="/content/admin/js/jquery.core.js"></script>
+        <script src="/content/admin/js/jquery.app.js"></script>
+        <script type="text/javascript" src="/content/bootstrap-select/js/bootstrap-select.js"></script>
+        <script type="text/javascript" src="/content/bootstrap-select/js/i18n/defaults-es_CL.min.js"></script>
+        <!-- Session Timeout Detection -->
+        <script type="text/javascript">
+            // ============================================================================
+            // CONFIGURACIÓN DE TIMEOUT DE SESIÓN
+            // ============================================================================
+            // El timeout se obtiene de la configuración de Yii2 (config/web.php)
+            // Para pruebas: usar valores menores (ej: 60000 = 1 minuto)
+            // Para producción: usar valores mayores (ej: 7200000 = 2 horas)
+            // ============================================================================
+            
+            // Timeout de sesión (en milisegundos)
+            // MODO PRUEBA: 1 minuto (60000 ms)
+            // window.SESSION_TIMEOUT_MS = 1800000;
+            // MODO PRODUCCIÓN: Descomentar la siguiente línea y comentar la anterior
+            // window.SESSION_TIMEOUT_MS = 7200000; // 2 horas por defecto
+            
+            // Configuración adicional (opcional)
+            // Si se define, sobrescribe los valores por defecto en session-timeout.js
+            // window.SESSION_CONFIG = {
+            //     CHECK_INTERVAL: 60000,    // Intervalo de verificación (1 minuto)
+            //     WARNING_TIME: 10000       // Tiempo antes de mostrar advertencia (10 segundos)
+            // };
+            
+            // URL base para cerrar sesión (misma forma que línea 207)
+            // window.LOGOUT_URL = '/login/cerrarsesion';
+        </script>
+        <!-- <script type="text/javascript" src="/content/admin/js/session-timeout.js?v=2.19.1"></script> -->
+        <!-- <script type="text/javascript">
+            // Verificar que el módulo de timeout se cargó correctamente
+            if (typeof window.SessionTimeout !== 'undefined') {
+                console.log('Session Timeout configurado:', {
+                    timeout: window.SessionTimeout.getTimeout() + 'ms (' + (window.SessionTimeout.getTimeout() / 1000 / 60) + ' minutos)',
+                    checkInterval: window.SessionTimeout.getCheckInterval() + 'ms',
+                    lastActivity: new Date(window.SessionTimeout.getLastActivityTime()).toLocaleString()
+                });
+            }
+        </script> -->
+
+        <script>
+            
+            // TODO: conversar si nos movemos a esta opcion de configuracoin para el JS
+            const CONFIG_TMS = {
+                PLANIFICACION_RECURSOS: 1,
+                TARIFICADOR: 0,
+                DASHBOARD_VIAJES: 1,
+                FACTOR_MULTIPLICADOR: 2,
+                NOTIFICACION_EMAIL_VIAJES: 0,
+                AUTOASIGNACION: 1,
+                TIMELINE: 1,
+                CONFIGURACION_CONTRATO: 0,
+                TARIFA_CONDUCTOR: 1,
+            };
+
+            // TODO: si nos vamos por la opciones de arriba, inicializar esto en el objeto de arriba
+            const CONFIG_CONTRACT = 0;
+            const ACTIVE_RATER = 1;
+            const CONTRACT_MULTICURRENCY = 1;
+            const OUTSOURCE_TRIP = 1;
+            const CONTRACT_MODALITY = 2;
+            const DRIVER_RATE = 1;
+            const AUTOMATIC_PROVISIONING = 1;
+            const LAST_MILLE = 1;
+            
+            // const BASE_URL = "<= Yii::getAlias('@web'); ?>";  dejar centralizada aqui y eliminar las demas
+
+            $(document).ready(function() {
+
+                // cuando el modal se queda visible al cambiar de vistas
+                // api visibilidad JS
+                document.addEventListener('visibilitychange', function(event) {
+                    if (document.visibilityState == "visible") {
+                        setTimeout(function() {
+                            $("#modalCargando").modal("hide")
+                        }, 1000);
+                    }
+                });
+
+                localStorage.setItem("domain", window.location.origin);
+
+                setTimeout(() => {
+                                                                                                        // showNotify('danger', 'top right', '<= Yii::$app->session->getFlash('error'); ?>', "se cerrara en 5 segundos");
+                        showNotify("danger", "top right", "Error al crear el transportistas");
+                                    }, 500);
+
+                $('#main_notification').click(function() {
+                    obtenerReportesUsuario();
+                });
+            });
+
+            function obtenerReportesUsuario(){
+                $.ajax({
+                    url: '/site/getusuarioreportes',
+                    type: 'GET',
+                    success: function(response) {
+                        res = JSON.parse(response);
+                        if(!res.data.length === 0) return false;
+
+                        let htmlReportes = "";
+
+                        $("#contenedor_reportes_usuario").html();
+
+                        res.data.forEach(function(item){
+
+                            let icono = (item.fecha_edicion === null)
+                                ? '<i class="text-warning fa fa-spinner fa-spin"></i>'
+                                : `<a class="text-success" href="${item.url}"><i class="fa fa-download"></i></a>`;
+
+                            htmlReportes += `
+                                <div class="dropdown-item notify-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <b>Tipo</b>: ${item.nombre}<br>
+                                            <b>Fecha</b>: ${item.fecha_edicion ?? "En Proceso"}
+                                        </div>
+                                        ${icono}
+                                    </div>
+                                </div>
+                            `;
+
+                        });
+
+                        $("#contenedor_reportes_usuario").html(htmlReportes);
+                        
+                        if(res.sinVer === 0){
+                            $("#contador_reporetes_usaurio").fadeOut(1)
+                            $("#contador_reporetes_usaurio").html(0)
+                        }else{
+                            $("#contador_reporetes_usaurio").fadeIn(1)
+                            $("#contador_reporetes_usaurio").html(res.sinVer)
+                        }
+                    }
+                });
+                
+                
+            }
+            
+            function actualizarConteoReportes(){
+                $.ajax({
+                    type: "GET",
+                    url: "/site/cambiarestadoreportesusuario",
+                    success: function(response) {
+                        $("#contador_reporetes_usaurio").fadeOut(1)
+                    }
+                });
+            }
+        </script>
+
+        </body>
+
+</html>
