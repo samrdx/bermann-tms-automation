@@ -16,10 +16,10 @@ export interface AsignacionData {
 export class AsignarPage extends BasePage {
   private readonly selectors = {
     assignment: {
-      // CORRECCIÓN: Selector más permisivo para CI
-      transportistaBtn: "button[title*='Transportista'], button[data-id='transportista'], button[data-id='viaje_transportista_id']",
-      patentePrincipalBtn: "button[title*='Vehículo Principal'], button[data-id='patente_principal']",
-      conductoresBtn: "button[data-id='viajes-conductor_id'], button[title*='Conductor']",
+      // FIX CRÍTICO: Agregamos :visible para ignorar botones ocultos o duplicados
+      transportistaBtn: "button[title='Transportista']:visible, button[data-id='transportista']:visible",
+      patentePrincipalBtn: "button[title='Vehículo Principal']:visible, button[data-id='patente_principal']:visible",
+      conductoresBtn: "button[data-id='viajes-conductor_id']:visible, button[title*='Conductor']:visible",
       btnGuardar: "#btn_guardar_form",
       btnCerrar: 'a.btn.btn-secondary',
     },
@@ -89,11 +89,10 @@ export class AsignarPage extends BasePage {
       await row.click();
     }
 
-    // Esperar a que el DOM se asiente
     await this.page.waitForLoadState('domcontentloaded');
     
     logger.info('Waiting for Transportista dropdown...');
-    // Selector blindado
+    // Usamos el selector corregido con :visible
     await this.page.waitForSelector(this.selectors.assignment.transportistaBtn, { state: 'visible', timeout: 30000 });
     logger.info('✅ Assignment Form Loaded');
 
@@ -172,7 +171,7 @@ export class AsignarPage extends BasePage {
         const btn = document.querySelector(selector);
         return btn && !btn.hasAttribute('disabled') && !btn.classList.contains('disabled');
       },
-      this.selectors.assignment.patentePrincipalBtn.split(',')[0], // Usamos el primer selector para la función JS
+      "button[title='Vehículo Principal']", // Selector simple para JS
       { timeout: 15000 }
     );
     await this.selectBSDropdown(this.selectors.assignment.patentePrincipalBtn, data.vehiculoPrincipal);

@@ -16,8 +16,8 @@ export class ContratosFormPage extends BasePage {
     inputTarifaViaje715: '#txt_tarifa_extra_715',
     inputTarifaConductor715: '#txt_tarifa_conductor_715',
     btnGuardar: '#btn_guardar',
-    // Agregamos selectores de Toasts (mensajes flotantes)
-    errorMessages: '.text-danger, .help-block, .alert-danger, .toast-message, .toast-error'
+    // Incluye toasts y alertas
+    errorMessages: '.text-danger, .help-block, .alert-danger, .toast-message'
   };
 
   constructor(page: Page) {
@@ -43,7 +43,7 @@ export class ContratosFormPage extends BasePage {
     const btn = this.page.locator(triggerSelector).first();
     await btn.waitFor({ state: 'visible' });
     await btn.scrollIntoViewIfNeeded();
-    await btn.click({ force: true }); // Force click para asegurar apertura
+    await btn.click({ force: true });
 
     const parent = btn.locator('xpath=..');
     const menu = parent.locator('.dropdown-menu.show').first();
@@ -52,7 +52,7 @@ export class ContratosFormPage extends BasePage {
     const search = menu.locator('.bs-searchbox input');
     if (await search.isVisible()) {
       await search.fill(value);
-      await this.page.waitForTimeout(1000); // Aumentado para CI
+      await this.page.waitForTimeout(1000); // Espera de filtrado
       await this.page.keyboard.press('Enter');
     } else {
       await menu.locator('li a').filter({ hasText: value }).first().click();
@@ -85,43 +85,44 @@ export class ContratosFormPage extends BasePage {
 
       await this.forceCloseModal();
 
-      // --- GUARDADO ROBUSTO ---
+      // --- GUARDADO MEJORADO ---
       logger.info('💾 Saving basic contract...');
       const btnGuardar = this.page.locator(this.selectors.btnGuardar).first();
       await btnGuardar.scrollIntoViewIfNeeded();
       
-      // Intentamos click normal primero
-      await btnGuardar.click({ force: true });
+      // ESPERA DE ESTABILIZACIÓN (CRÍTICO)
+      await this.page.waitForTimeout(1500); 
 
+      // Primer intento con Promise.all para atrapar navegación
       try {
-        // Aumentamos timeout a 30s para CI
-        await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 30000 });
-        logger.info('✅ Navigation successful');
+        await Promise.all([
+             this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 }),
+             btnGuardar.click({ force: true })
+        ]);
+        logger.info('✅ Navigation successful (1st try)');
       } catch (e) {
-        // Retry logic: Si falló, intentar clickear de nuevo una vez más
-        logger.warn('Save timed out. Retrying click once...');
+        logger.warn('First save attempt timed out. Checking errors or retrying...');
+        
+        // Verificar errores antes de reintentar
+        const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
+        const realErrors = rawErrors.map(e=>e.trim()).filter(e => e.length > 2 && !e.includes('*'));
+        
+        if (realErrors.length > 0) throw new Error(`Save Failed: ${realErrors.join('|')}`);
+
+        // Reintento agresivo
+        await this.page.waitForTimeout(1000);
         await btnGuardar.click({ force: true });
         
         try {
             await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
         } catch (retryError) {
-             // Ahora sí capturamos errores
-            const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
-            const realErrors = rawErrors
-                .map(err => err.trim())
-                .filter(err => err.length > 1 && !err.includes('*') && err !== '|');
-
-            if (realErrors.length > 0) {
-              throw new Error(`Save Failed with Errors: ${realErrors.join(' | ')}`);
-            }
-            throw new Error(`Save clicked, retried, but stuck on create page. URL: ${this.page.url()}`);
+             throw new Error(`Save stuck on create page after retry. URL: ${this.page.url()}`);
         }
       }
 
       const currentUrl = this.page.url();
       const match = currentUrl.match(/\/editar\/(\d+)/);
       if (match) return match[1];
-
       if (currentUrl.includes('/index')) return 'UNKNOWN_ID_BUT_SAVED';
       
       throw new Error(`Contract created but ID not found in URL: ${currentUrl}`);
@@ -181,6 +182,7 @@ export class ContratosFormPage extends BasePage {
     await this.forceCloseModal();
     const saveBtn = this.page.locator(this.selectors.btnGuardar).first();
     await saveBtn.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(1000); // Estabilización
     await saveBtn.click({ force: true });
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
