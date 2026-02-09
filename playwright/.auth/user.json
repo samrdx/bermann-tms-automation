@@ -2,17 +2,17 @@
   "cookies": [
     {
       "name": "PHPSESSID",
-      "value": "iprsn3m91au5omaaq9lh02cof9",
+      "value": "6kuio4bnm3fi1ju6plg0l69snj",
       "domain": "moveontruckqa.bermanntms.cl",
       "path": "/",
-      "expires": 1770530507.878977,
+      "expires": 1770603874.88047,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "_csrf",
-      "value": "de69d9f6905e7b392a63a19e228e6ac4a9416a56dd62b5e7eeaf272db62f9d87a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22KDxuAk-Im6RF0DdpGyOkm9ElxpncAGoI%22%3B%7D",
+      "value": "1dd139eb171acde954c6308144eb2a5279c63fee42cb33443152f142cdcf518aa%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22_Z0YjGL5eUMcZiSvuwCdGWkhAUH14tBg%22%3B%7D",
       "domain": "moveontruckqa.bermanntms.cl",
       "path": "/",
       "expires": -1,
@@ -22,7 +22,7 @@
     },
     {
       "name": "_cfuvid",
-      "value": "QUwL5gRufNPTTV59Q.5qeVQI5r7ruxY0vqHFHT6Sq40-1770523308616-0.0.1.1-604800000",
+      "value": "6_aIHr3P3EXt9SPlZRYRTTBRmxj.tx0hkWkkKyDbTcI-1770596675119-0.0.1.1-604800000",
       "domain": ".highcharts.com",
       "path": "/",
       "expires": -1,
@@ -38,10 +38,6 @@
         {
           "name": "domain",
           "value": "https://moveontruckqa.bermanntms.cl"
-        },
-        {
-          "name": "filtrosDashboard",
-          "value": "{\"desde\":\"08/02/2026\",\"hasta\":\"15/02/2026\",\"unidad_negocio\":[],\"entidad\":\"1\",\"clientes\":[],\"tipo_operacion\":[]}"
         }
       ]
     }
