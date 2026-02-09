@@ -18,22 +18,24 @@
 - **tms-tests** - Test structure and phases
 - **tms-data** - Data generation strategies (RUT, timestamps, factories)
 
+**Note:** 5 TMS-specific skills provide comprehensive automation guidance.
+
 **Always check AGENTS.md before creating Page Objects, tests, or working with dropdowns.**
 
 ---
 
-## 📊 Project Status Dashboard (Updated: 2026-02-06)
+## 📊 Project Status Dashboard (Updated: 2026-02-09)
 
 | Categoría | Estado / Valor | Última Actualización |
 |-----------|----------------|----------------------|
-| Branch Activo | main | 2026-02-06 |
-| Tests Automatizados | 13 | 2026-02-06 |
-| Módulos Completos | 5 (auth, transport, commercial, contracts, planning) | 2026-02-06 |
-| Tasa de Éxito | 100% | 2026-02-06 |
-| Skills Operacionales | 5/5 | 2026-02-06 |
-| Archivos Core | 8/8 OK | 2026-02-06 |
-| Cobertura E2E | Entities → Contracts → Trips (completo) | 2026-02-06 |
-| Compilación TypeScript | ✅ Sin errores | 2026-02-06 |
+| Branch Activo | main | 2026-02-09 |
+| Tests Automatizados | 12 | 2026-02-09 |
+| Módulos Completos | 5 (auth, transport, commercial, contracts, planning) | 2026-02-09 |
+| Tasa de Éxito | 100% | 2026-02-09 |
+| Skills Operacionales | 5 TMS-specific | 2026-02-09 |
+| Archivos Core | 8/8 OK | 2026-02-09 |
+| Cobertura E2E | Entities → Contracts → Trips (completo) | 2026-02-09 |
+| Compilación TypeScript | ✅ Sin errores | 2026-02-09 |
 
 ---
 
@@ -473,10 +475,9 @@ tests/e2e/
 │   │   ├── clientes/cliente-crear.test.ts
 │   │   ├── vehiculos/vehiculo-crear.test.ts
 │   │   └── conductor/conductor-crear.test.ts
-│   └── 02-operaciones/         # Operation tests (5 tests)
+│   └── 02-operaciones/         # Operation tests (4 tests)
 │       ├── contratos/contrato-crear.test.ts
 │       ├── contratos/contrato2cliente-crear.test.ts
-│       ├── contratos/allflow-to-contract.test.ts
 │       ├── viajes/viajes-planificar.test.ts
 │       └── viajes/viajes-asignar.test.ts
 ├── suites/
@@ -688,19 +689,19 @@ cat logs/app.log              # View logs
 
 **Track these metrics:**
 
-- ✅ Total automated tests: **13**
+- ✅ Total automated tests: **12**
 - ✅ Pass rate: **100%**
 - ✅ Modules complete: **5/5**
 - ✅ Coverage: **Entities → Contracts → Trips (complete)**
 - ✅ Parallel execution: **3 workers**
-- ✅ Skills operational: **5/5**
+- ✅ Skills operational: **5 TMS-specific**
 - ✅ TypeScript compilation: **✅ No errors**
 
 ## Success Criteria
 
 ✅ **Technical:**
 
-- 13+ automated tests
+- 12 automated tests
 - 100% pass rate maintained
 - Parallel execution (3 workers)
 - Worker-specific data isolation
@@ -776,7 +777,7 @@ cat logs/app.log              # View logs
 
 ---
 
-**Last Updated:** February 6, 2026
+**Last Updated:** February 9, 2026
 **Status:** Production-ready with parallel execution
-**Framework Level:** Enterprise-grade with 13 automated tests
+**Framework Level:** Enterprise-grade with 12 automated tests
 **Compilation:** ✅ TypeScript clean (0 errors)
