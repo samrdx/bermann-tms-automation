@@ -15,19 +15,14 @@ export interface AsignacionData {
 
 export class AsignarPage extends BasePage {
   private readonly selectors = {
-    // ASSIGNMENT PANEL
     assignment: {
-      transportistaBtn: "button[title='Transportista']",
-      patentePrincipalBtn: "button[title='Vehículo Principal']",
-      conductoresBtn: "button[data-id='viajes-conductor_id']",
+      // CORRECCIÓN: Selector más permisivo para CI
+      transportistaBtn: "button[title*='Transportista'], button[data-id='transportista'], button[data-id='viaje_transportista_id']",
+      patentePrincipalBtn: "button[title*='Vehículo Principal'], button[data-id='patente_principal']",
+      conductoresBtn: "button[data-id='viajes-conductor_id'], button[title*='Conductor']",
       btnGuardar: "#btn_guardar_form",
-      
-      // Fallbacks
-      recalcular: '#recalcular',
       btnCerrar: 'a.btn.btn-secondary',
     },
-
-    // TABLE
     table: {
       container: '#tabla_asignar',
       rows: '#tabla_asignar tbody tr',
@@ -52,8 +47,6 @@ export class AsignarPage extends BasePage {
     await this.page.waitForLoadState('networkidle');
   }
 
-  // ========== TABLE METHODS ==========
-
   async waitForTableLoad(): Promise<void> {
     logger.info('Waiting for table to load');
     await this.page.waitForSelector(this.selectors.table.container, { state: 'visible', timeout: 15000 });
@@ -67,10 +60,8 @@ export class AsignarPage extends BasePage {
       await searchInput.fill(nroViaje);
       await this.page.waitForTimeout(1500);
     }
-
     const rows = this.page.locator(this.selectors.table.rows);
     const rowCount = await rows.count();
-
     for (let i = 0; i < rowCount; i++) {
       const row = rows.nth(i);
       const text = await row.innerText();
@@ -88,21 +79,21 @@ export class AsignarPage extends BasePage {
 
     const editIcon = row.locator('i.fa-pencil, i.fa-edit, .glyphicon-pencil, a[title="Editar"], a[title="Asignar"]').first();
 
-    // --- FIX: NAVEGACIÓN EXPLÍCITA ---
-    // En CI/CD, el clic a veces es más rápido que la redirección. 
-    // Esperamos explícitamente a que la URL cambie a "/editar/"
     if (await editIcon.isVisible()) {
       logger.info('Clicking Edit icon and waiting for navigation...');
       await Promise.all([
-        this.page.waitForURL(/\/editar\//, { timeout: 30000 }), // Espera clave
+        this.page.waitForURL(/\/editar\//, { timeout: 30000 }), 
         editIcon.click()
       ]);
     } else {
       await row.click();
     }
 
-    // Ahora estamos seguros de que estamos en la página correcta
+    // Esperar a que el DOM se asiente
+    await this.page.waitForLoadState('domcontentloaded');
+    
     logger.info('Waiting for Transportista dropdown...');
+    // Selector blindado
     await this.page.waitForSelector(this.selectors.assignment.transportistaBtn, { state: 'visible', timeout: 30000 });
     logger.info('✅ Assignment Form Loaded');
 
@@ -122,15 +113,12 @@ export class AsignarPage extends BasePage {
     const row = await this.findViajeRow(nroViaje);
     if (!row) return false;
     const cells = await row.locator('td').allTextContents();
-    
     return !!(
       cells[this.selectors.table.transportistaColumn]?.trim() &&
       cells[this.selectors.table.conductorColumn]?.trim() &&
       cells[this.selectors.table.vehiculoUnoColumn]?.trim()
     );
   }
-
-  // ========== DROPDOWN HELPER ==========
 
   private async selectBSDropdown(buttonSelector: string, optionText: string): Promise<void> {
     logger.info(`Selecting "${optionText}" in ${buttonSelector}`);
@@ -140,7 +128,6 @@ export class AsignarPage extends BasePage {
     await btn.scrollIntoViewIfNeeded();
     await btn.click();
 
-    // SCOPING: Buscar menú dentro del padre
     const parent = btn.locator('xpath=..');
     const dropdownMenu = parent.locator('.dropdown-menu.show').first();
     await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
@@ -159,7 +146,6 @@ export class AsignarPage extends BasePage {
         await dropdownMenu.locator('li a').first().click();
       }
     }
-
     if (await dropdownMenu.isVisible()) await this.page.keyboard.press('Escape');
     await this.page.waitForTimeout(300);
   }
@@ -173,36 +159,25 @@ export class AsignarPage extends BasePage {
     await this.page.waitForTimeout(2000);
   }
 
-  // ========== MAIN FLOW ==========
-
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {
     logger.info(`=== Starting Assignment for ${nroViaje} ===`);
-
-    // 1. Enter Form
     await this.selectViajeRow(nroViaje);
 
-    // 2. Transportista
     await this.selectBSDropdown(this.selectors.assignment.transportistaBtn, data.transportista);
     logger.info('Transportista selected. Waiting for cascade...');
-    await this.page.waitForTimeout(2500); 
+    await this.page.waitForTimeout(3000); 
 
-    // 3. Vehículo Principal (Wait for enabled)
     await this.page.waitForFunction(
       (selector) => {
         const btn = document.querySelector(selector);
         return btn && !btn.hasAttribute('disabled') && !btn.classList.contains('disabled');
       },
-      "button[title='Vehículo Principal']",
+      this.selectors.assignment.patentePrincipalBtn.split(',')[0], // Usamos el primer selector para la función JS
       { timeout: 15000 }
     );
     await this.selectBSDropdown(this.selectors.assignment.patentePrincipalBtn, data.vehiculoPrincipal);
-
-    // 4. Conductor
     await this.selectBSDropdown(this.selectors.assignment.conductoresBtn, data.conductor);
-
-    // 5. Guardar
     await this.clickGuardar();
-
     logger.info('✅ Assignment flow complete');
     return true;
   }

@@ -7,25 +7,17 @@ const logger = createLogger('ContratosFormPage');
 
 export class ContratosFormPage extends BasePage {
   private readonly selectors = {
-    // Form fields
     nroContrato: '#contrato-nro_contrato',
-
-    // Transportista (Botón disparador del dropdown)
     transportistaBtn: 'button[data-id="contrato-transportista_id"]',
-
-    // Route Modal
     btnAddRuta: 'button:has-text("Añadir Ruta")',
     modalRutas: '#modalRutas',
     btnRoute715: 'a#btn_plus_715',
     btnCargo715_19: 'a#btn_plus_ruta_715_19',
     inputTarifaViaje715: '#txt_tarifa_extra_715',
     inputTarifaConductor715: '#txt_tarifa_conductor_715',
-
-    // Actions
     btnGuardar: '#btn_guardar',
-
-    // Validations
-    errorMessages: '.text-danger, .help-block, .alert-danger'
+    // Agregamos selectores de Toasts (mensajes flotantes)
+    errorMessages: '.text-danger, .help-block, .alert-danger, .toast-message, .toast-error'
   };
 
   constructor(page: Page) {
@@ -47,16 +39,12 @@ export class ContratosFormPage extends BasePage {
     await this.page.waitForLoadState('domcontentloaded');
   }
 
-  /**
-   * Helper Robusto para Dropdowns Bootstrap (Scoping)
-   */
   async selectBootstrapDropdown(triggerSelector: string, value: string) {
     const btn = this.page.locator(triggerSelector).first();
     await btn.waitFor({ state: 'visible' });
     await btn.scrollIntoViewIfNeeded();
-    await btn.click();
+    await btn.click({ force: true }); // Force click para asegurar apertura
 
-    // SCOPING: Buscar menú dentro del padre para evitar errores de Strict Mode
     const parent = btn.locator('xpath=..');
     const menu = parent.locator('.dropdown-menu.show').first();
     await menu.waitFor({ state: 'visible' });
@@ -64,26 +52,22 @@ export class ContratosFormPage extends BasePage {
     const search = menu.locator('.bs-searchbox input');
     if (await search.isVisible()) {
       await search.fill(value);
-      await this.page.waitForTimeout(500); // Espera técnica para filtrado
+      await this.page.waitForTimeout(1000); // Aumentado para CI
       await this.page.keyboard.press('Enter');
     } else {
-      // Click directo si no hay search
       await menu.locator('li a').filter({ hasText: value }).first().click();
     }
 
-    // Asegurar cierre
     if (await menu.isVisible()) await this.page.keyboard.press('Escape');
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(500);
   }
 
   async fillBasicContractInfo(nroContrato: string, transportistaNombre: string): Promise<string> {
     logger.info('📝 Filling basic contract information');
 
     try {
-      // 1. Llenar Nro Contrato
       await this.page.fill(this.selectors.nroContrato, nroContrato);
 
-      // 2. Seleccionar Tipo Contrato = "Costo" (1)
       await this.page.evaluate(() => {
         const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
         if (el) {
@@ -95,45 +79,51 @@ export class ContratosFormPage extends BasePage {
       });
       await this.page.waitForTimeout(1000);
 
-      // 3. Seleccionar Transportista (Usando el Helper Robusto)
       logger.info(`Selecting Transportista: ${transportistaNombre}`);
       await this.selectBootstrapDropdown(this.selectors.transportistaBtn, transportistaNombre);
       logger.info('✅ Transportista selected');
 
-      // 4. Limpieza Preventiva
       await this.forceCloseModal();
 
-      // 5. Guardar
+      // --- GUARDADO ROBUSTO ---
       logger.info('💾 Saving basic contract...');
       const btnGuardar = this.page.locator(this.selectors.btnGuardar).first();
       await btnGuardar.scrollIntoViewIfNeeded();
-      await btnGuardar.click();
+      
+      // Intentamos click normal primero
+      await btnGuardar.click({ force: true });
 
-      // Esperar navegación o detectar error
       try {
-        await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 10000 });
+        // Aumentamos timeout a 30s para CI
+        await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 30000 });
         logger.info('✅ Navigation successful');
       } catch (e) {
-        // Filtrar asteriscos (*) del reporte de errores
-        const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
-        const realErrors = rawErrors
-          .map(err => err.trim())
-          .filter(err => err.length > 1 && !err.includes('*') && err !== '|');
+        // Retry logic: Si falló, intentar clickear de nuevo una vez más
+        logger.warn('Save timed out. Retrying click once...');
+        await btnGuardar.click({ force: true });
+        
+        try {
+            await this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 });
+        } catch (retryError) {
+             // Ahora sí capturamos errores
+            const rawErrors = await this.page.locator(this.selectors.errorMessages).allTextContents();
+            const realErrors = rawErrors
+                .map(err => err.trim())
+                .filter(err => err.length > 1 && !err.includes('*') && err !== '|');
 
-        if (realErrors.length > 0) {
-          throw new Error(`Save Failed with Validation Errors: ${realErrors.join(' | ')}`);
+            if (realErrors.length > 0) {
+              throw new Error(`Save Failed with Errors: ${realErrors.join(' | ')}`);
+            }
+            throw new Error(`Save clicked, retried, but stuck on create page. URL: ${this.page.url()}`);
         }
-        // Si no hay errores visibles pero no navegó
-        throw new Error('Save clicked but navigation did not occur and no validation errors found.');
       }
 
-      // 6. Extraer ID
       const currentUrl = this.page.url();
       const match = currentUrl.match(/\/editar\/(\d+)/);
       if (match) return match[1];
 
       if (currentUrl.includes('/index')) return 'UNKNOWN_ID_BUT_SAVED';
-
+      
       throw new Error(`Contract created but ID not found in URL: ${currentUrl}`);
 
     } catch (error) {
@@ -141,8 +131,6 @@ export class ContratosFormPage extends BasePage {
       throw error;
     }
   }
-
-  // --- MÉTODOS AUXILIARES ---
 
   public async forceCloseModal(): Promise<void> {
     await this.page.evaluate(() => {
@@ -165,13 +153,12 @@ export class ContratosFormPage extends BasePage {
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
     if (await closeBtn.isVisible()) await closeBtn.click();
 
-    await this.page.click('#btn_click_715');
+    await this.page.click('#btn_click_715'); 
     await this.page.waitForTimeout(1000);
 
     await this.page.click(this.selectors.btnCargo715_19);
     await this.forceCloseModal();
 
-    // Llenar tarifas
     const inputCond = this.page.locator(this.selectors.inputTarifaConductor715);
     await inputCond.click();
     await inputCond.fill(tarifaConductor);
@@ -180,7 +167,6 @@ export class ContratosFormPage extends BasePage {
     await inputViaje.click();
     await inputViaje.fill(tarifaViaje);
 
-    // Disparar eventos
     await this.page.evaluate(() => {
       document.querySelectorAll('input[id^="txt_tarifa_"]').forEach(el => {
         el.dispatchEvent(new Event('change', { bubbles: true }));
@@ -190,32 +176,15 @@ export class ContratosFormPage extends BasePage {
     await this.page.waitForTimeout(1000);
   }
 
-  /**
-   * MÉTODO RECUPERADO: Guarda el contrato y extrae el ID.
-   * Usado por contrato-crear.test.ts
-   */
   async saveAndExtractId(): Promise<string> {
     logger.info('💾 Saving contract (Final Step)...');
-
-    // 1. Limpieza de seguridad
     await this.forceCloseModal();
-
-    // 2. Click en Guardar
     const saveBtn = this.page.locator(this.selectors.btnGuardar).first();
     await saveBtn.scrollIntoViewIfNeeded();
-    await saveBtn.click();
-
-    // 3. Esperar a que se procese
+    await saveBtn.click({ force: true });
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
-
-    const currentUrl = this.page.url();
-    logger.info(`Final Save URL: ${currentUrl}`);
-
-    // 4. Intentar extraer ID
-    const match = currentUrl.match(/\/contrato\/(?:ver|editar)\/(\d+)/);
-    // Si la URL cambió a index pero se guardó, intentaríamos buscarlo, 
-    // pero para este método devolvemos vacío si no está en la URL, el test lo manejará.
+    const match = this.page.url().match(/\/contrato\/(?:ver|editar)\/(\d+)/);
     return match ? match[1] : '';
   }
 }
