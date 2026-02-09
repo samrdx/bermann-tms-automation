@@ -16,8 +16,8 @@ export interface AsignacionData {
 export class AsignarPage extends BasePage {
   private readonly selectors = {
     assignment: {
-      // FIX CRÍTICO: Agregamos :visible para ignorar botones ocultos o duplicados
-      transportistaBtn: "button[title='Transportista']:visible, button[data-id='transportista']:visible",
+      // FIX CRÍTICO: Apuntar al botón interactivo VISIBLE del dropdown de Bootstrap
+      transportistaBtn: "div.bootstrap-select button[data-toggle='dropdown']:visible, button[title='Transportista']:visible",
       patentePrincipalBtn: "button[title='Vehículo Principal']:visible, button[data-id='patente_principal']:visible",
       conductoresBtn: "button[data-id='viajes-conductor_id']:visible, button[title*='Conductor']:visible",
       btnGuardar: "#btn_guardar_form",
@@ -92,10 +92,17 @@ export class AsignarPage extends BasePage {
     await this.page.waitForLoadState('domcontentloaded');
     
     logger.info('Waiting for Transportista dropdown...');
-    // Usamos el selector corregido con :visible
-    await this.page.waitForSelector(this.selectors.assignment.transportistaBtn, { state: 'visible', timeout: 30000 });
+    
+    // Espera explícita del botón visible
+    try {
+        await this.page.waitForSelector(this.selectors.assignment.transportistaBtn, { state: 'visible', timeout: 30000 });
+    } catch (e) {
+        // Fallback: Si el selector estricto falla, intentar buscar cualquier botón con el texto aproximado
+        logger.warn('Strict selector failed, trying fallback...');
+        await this.page.waitForSelector("button:has-text('Transportista')", { state: 'visible', timeout: 10000 });
+    }
+    
     logger.info('✅ Assignment Form Loaded');
-
     return true;
   }
 
@@ -121,11 +128,13 @@ export class AsignarPage extends BasePage {
 
   private async selectBSDropdown(buttonSelector: string, optionText: string): Promise<void> {
     logger.info(`Selecting "${optionText}" in ${buttonSelector}`);
+    
+    // Usar .first() es vital si hay duplicados ocultos
     const btn = this.page.locator(buttonSelector).first();
 
     await btn.waitFor({ state: 'visible', timeout: 10000 });
     await btn.scrollIntoViewIfNeeded();
-    await btn.click();
+    await btn.click({ force: true });
 
     const parent = btn.locator('xpath=..');
     const dropdownMenu = parent.locator('.dropdown-menu.show').first();
@@ -162,6 +171,7 @@ export class AsignarPage extends BasePage {
     logger.info(`=== Starting Assignment for ${nroViaje} ===`);
     await this.selectViajeRow(nroViaje);
 
+    // Usar el selector corregido
     await this.selectBSDropdown(this.selectors.assignment.transportistaBtn, data.transportista);
     logger.info('Transportista selected. Waiting for cascade...');
     await this.page.waitForTimeout(3000); 
@@ -171,7 +181,7 @@ export class AsignarPage extends BasePage {
         const btn = document.querySelector(selector);
         return btn && !btn.hasAttribute('disabled') && !btn.classList.contains('disabled');
       },
-      "button[title='Vehículo Principal']", // Selector simple para JS
+      "button[title='Vehículo Principal']", 
       { timeout: 15000 }
     );
     await this.selectBSDropdown(this.selectors.assignment.patentePrincipalBtn, data.vehiculoPrincipal);
