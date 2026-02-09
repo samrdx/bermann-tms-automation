@@ -40,13 +40,9 @@ jobs:
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-
-          # 1. SETUP: Usar SOLO el flag de proyecto (Igual que Smoke CI)
+          # 1. SETUP: Usar el proyecto CORRECTO para setup (Igual que Smoke CI)
           echo "🚀 STAGE 1: Base Entities Setup"
           npx playwright test --project=base-entities-chromium --reporter=line
-
-          # 2. CONTRATOS
-          # ...
 
           # 2. CONTRATOS: Crear Contratos (1 worker para evitar colisiones)
           echo "🚀 STAGE 2: Contracts"
