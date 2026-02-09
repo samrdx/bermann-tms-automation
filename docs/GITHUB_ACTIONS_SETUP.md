@@ -40,7 +40,7 @@ You **MUST** add the following secrets to your GitHub repository:
 | ---------------- | ---------------------------------------------- | ------------- |
 | `USERNAME_DEV`   | QA environment username (maps to regular user) | `arivas`      |
 | `PASSWORD_DEV`   | QA environment password (maps to regular user) | `arivas`      |
-| `GEMINI_API_KEY` | Gemini API key (optional, for Stagehand tests) | `AIza...`     |
+| `GEMINI_API_KEY` | Gemini API key (optional, not currently used) | `AIza...`     |
 
 **Note:** The codebase automatically maps `USERNAME_DEV`/`PASSWORD_DEV` (CI/CD style) to `TEST_REGULAR_USER`/`TEST_REGULAR_PASS` (local dev style) via [`credentials.ts`](file:///c:/projects/bermann-tms-automation/src/config/credentials.ts).
 

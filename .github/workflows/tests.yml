@@ -10,7 +10,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 45 # Aumentado para ejecución secuencial
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
@@ -28,7 +28,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E Tests (Staged Execution)
+      - name: Run E2E Tests (Secuencial y Robusto)
         env:
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           ENVIRONMENT: dev
@@ -40,25 +40,25 @@ jobs:
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          # 1. SETUP: Crear Entidades Base (Conductor, Camión, Cliente)
-          echo "🚀 STAGE 1: Base Entities"
-          npx playwright test tests/e2e/modules/01-entidades --project=chromium --workers=1 --reporter=line
+          # 1. SETUP: Crear Entidades Base CORRECTAS (Igual que Smoke)
+          echo "🚀 STAGE 1: Base Entities Setup"
+          npx playwright test tests/e2e/suites/base-entities.setup.ts --project=chromium --reporter=line
 
-          # 2. CONTRATOS: Crear Contratos usando las entidades de Stage 1
+          # 2. CONTRATOS: Crear Contratos (1 worker para evitar colisiones)
           echo "🚀 STAGE 2: Contracts"
           npx playwright test tests/e2e/modules/02-operaciones/contratos --project=chromium --workers=1 --reporter=line
 
-          # 3. OPERACIONES: Planificar y Asignar usando contratos de Stage 2
+          # 3. OPERACIONES: Viajes (1 worker para orden Planificar -> Asignar)
           echo "🚀 STAGE 3: Viajes Operations"
           npx playwright test tests/e2e/modules/02-operaciones/viajes --project=chromium --workers=1 --reporter=html,line
 
-      - name: Upload Playwright HTML Report
+      - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-qa
           path: playwright-report/
-          retention-days: 30
+          retention-days: 15
 
       - name: Upload Data Artifacts
         if: always()

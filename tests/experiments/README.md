@@ -1,19 +1,19 @@
 # Experiments
 
-Pruebas experimentales con Stagehand AI y nuevas técnicas.
+Pruebas experimentales y nuevas técnicas.
 
 ## Contenido
 
-- `stagehand-simple.test.ts` - Demo básico de Stagehand
-- `stagehand-login-ai.test.ts` - Login con AI
-- `login-experiments.test.ts` - Variaciones de login
+- `debug-transportista.ts` - Debug utilities for transportista module
+- `login-experiments.ts` - Login variations and experiments
 
 ## Propósito
 
 - Probar nuevas herramientas
 - Demos para presentaciones
 - Exploración de técnicas avanzadas
+- Debug utilities para desarrollo
 
 ## NO son parte del suite de CI/CD
 
-Estos tests son para exploración, no producción.
+Estos tests son para exploración y debug, no producción.

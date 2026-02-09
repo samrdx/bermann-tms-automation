@@ -1,6 +1,6 @@
 # 🚀 Bermann TMS - QA Automation Framework
 
-Framework de automatización para testing del sistema TMS de Bermann utilizando Playwright, Stagehand y IA.
+Framework de automatización para testing del sistema TMS de Bermann utilizando Playwright y TypeScript.
 
 ## 📋 Descripción
 
@@ -13,10 +13,9 @@ Este proyecto automatiza los flujos críticos del sistema TMS (Transport Managem
 ## 🛠️ Tecnologías
 
 - **Playwright** - Automatización de navegadores
-- **Stagehand AI** - Automatización inteligente con IA
 - **TypeScript** - Tipado estático
 - **Winston** - Sistema de logging profesional
-- **Gemini API** - Inteligencia artificial
+- **Page Object Model** - Arquitectura de testing
 
 ## 📁 Estructura del Proyecto
 
@@ -144,7 +143,6 @@ LOG_LEVEL=info
 - [x] Browser Manager
 - [x] Sistema de logging
 - [x] Page Object Model para Login
-- [x] Integración con Stagehand
 - [x] Automatización de flujos críticos TMS (Login, Contratos, Planificar, Asignar)
 - [x] Sistema de reportes ejecutivos (HTML Reports)
 - [x] CI/CD con GitHub Actions
