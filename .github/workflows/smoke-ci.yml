@@ -50,10 +50,11 @@ jobs:
 
           echo "🔹 Step 3: Viajes Tests (Sequential - CRITICAL)"
           # FIX: --workers=1 garantiza que Planificar termine antes de Asignar
+          # FIX: --reporter=line,html asegura que se genere el reporte incluso si falla
           npx playwright test \
             tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts \
             tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-            --project=chromium --workers=1 --reporter=html,line
+            --project=chromium --workers=1 --reporter=line,html
 
       - name: List Generated Files (Debug)
         if: always()
