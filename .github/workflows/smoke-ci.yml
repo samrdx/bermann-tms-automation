@@ -1,15 +1,16 @@
-name: Smoke CI (Recovery Mode)
+name: QA Tests CI
 
 on:
   push:
-    branches: [main, develop, fix/*, debug/*]
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  smoke-setup:
-    name: Smoke Setup (Chromium)
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
@@ -24,10 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Full Operational Suite (Sequential)
+      - name: Run E2E Tests (Secuencial y Robusto)
         env:
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           ENVIRONMENT: dev
@@ -39,41 +40,29 @@ jobs:
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          echo "🔹 Step 1: Base Entities Setup"
+          # 1. SETUP: Usar el proyecto CORRECTO para setup (igual que Smoke)
+          echo "🚀 STAGE 1: Base Entities Setup"
           npx playwright test --project=base-entities-chromium --reporter=line
 
-          echo "🔹 Step 2: Contract Tests (Sequential)"
-          npx playwright test \
-            tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
-            tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
-            --project=chromium --workers=1 --reporter=line
+          # 2. CONTRATOS
+          echo "🚀 STAGE 2: Contracts"
+          npx playwright test tests/e2e/modules/02-operaciones/contratos --project=chromium --workers=1 --reporter=line
 
-          echo "🔹 Step 3: Viajes Tests (Sequential - CRITICAL)"
-          # FIX: --workers=1 garantiza que Planificar termine antes de Asignar
-          npx playwright test \
-            tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts \
-            tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-            --project=chromium --workers=1 --reporter=html,line
-
-      - name: List Generated Files (Debug)
-        if: always()
-        run: |
-          echo "📂 Checking Data Files:"
-          ls -la *.json 2>/dev/null || echo "No JSON files found in root"
-
-      - name: Upload Setup Data
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: last-run-data-chromium
-          path: last-run-data-chromium.json
-          if-no-files-found: warn
-          retention-days: 5
+          # 3. OPERACIONES
+          echo "🚀 STAGE 3: Viajes Operations"
+          npx playwright test tests/e2e/modules/02-operaciones/viajes --project=chromium --workers=1 --reporter=html,line
 
       - name: Upload Playwright Report
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-smoke
+          name: playwright-report-qa
           path: playwright-report/
-          retention-days: 5
+          retention-days: 15
+
+      - name: Upload Data Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-data
+          path: last-run-data-*.json

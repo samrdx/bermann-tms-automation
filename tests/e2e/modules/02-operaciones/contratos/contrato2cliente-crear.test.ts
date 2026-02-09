@@ -5,25 +5,28 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 
 test.describe('Cliente Contract Creation (Venta Type)', () => {
-    test.setTimeout(180000); // Timeout máximo
+    test.setTimeout(120000);
 
     test('Create Cliente Contract using Pre-existing Entities from JSON', async ({ page }, testInfo) => {
         const startTime = Date.now();
         logger.info('Starting STEP 5.5: Cliente Contract (Venta)');
         
+        // 1. Cargar Datos
         const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
         if (!fs.existsSync(dataPath)) throw new Error(`Data file not found at ${dataPath}`);
         
         const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
         const clienteNombre = operationalData.cliente.nombreFantasia || operationalData.cliente.nombre;
 
+        // 2. Navegar
         const contratosPage = new ContratosFormPage(page);
         await contratosPage.navigateToCreate();
 
+        // 3. Llenar Formulario
         const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
         await page.fill('#contrato-nro_contrato', nroContrato);
 
-        // Tipo Contrato
+        // Inyección Tipo Contrato
         await page.evaluate(() => {
             const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
             if (el) {
@@ -35,8 +38,9 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         });
         await page.waitForTimeout(500);
 
-        // Tipo Venta
-        await page.waitForSelector('select#tipo', { state: 'attached' });
+        // Inyección Tipo Venta
+        const tipoVentaSelector = 'select#tipo';
+        await page.waitForSelector(tipoVentaSelector, { state: 'attached' });
         await page.evaluate(() => {
             const el = document.querySelector('select#tipo') as HTMLSelectElement;
             if (el) {
@@ -48,58 +52,86 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         });
         await page.waitForTimeout(500);
 
-        // Seleccionar Cliente
+        // Selección Cliente
         logger.info(`Selecting cliente: "${clienteNombre}"`);
         
+        // Abrir dropdown con JS
         await page.evaluate(() => {
             const btn = document.querySelector('button[data-id="contrato-cliente_id"]') as HTMLElement;
             if(btn) btn.click();
         });
 
-        // FIX: Selector específico DIV para evitar ul.inner oculto
+        // Esperar menú
         const dropdownMenu = page.locator('div.dropdown-menu.show').first();
         await dropdownMenu.waitFor({ state: 'visible', timeout: 10000 });
         
+        // Buscar y seleccionar
         const searchBox = dropdownMenu.locator('.bs-searchbox input');
         await searchBox.waitFor({ state: 'visible', timeout: 5000 });
         await searchBox.fill(clienteNombre);
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(1000);
         await page.keyboard.press('ArrowDown');
         await page.waitForTimeout(300);
         await page.keyboard.press('Enter');
         
         if (await dropdownMenu.isVisible()) await page.keyboard.press('Escape');
-        
         await contratosPage.forceCloseModal();
 
-        // GUARDADO ROBUSTO
+        // =================================================================
+        // STEP 5: GUARDADO ROBUSTO CON DIAGNÓSTICO
+        // =================================================================
         logger.info('Clicking Guardar button...');
         const saveBtnID = '#btn_guardar'; 
         await page.waitForSelector(saveBtnID, { state: 'attached' });
         await page.waitForTimeout(1000);
 
         let isSaved = false;
+        
         for (let i = 1; i <= 3; i++) {
             try {
                 logger.info(`Save Attempt ${i}...`);
+                
                 await Promise.all([
-                    page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 }),
+                    page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 10000 }),
+                    // JS CLICK DIRECTO
                     page.evaluate((sel) => {
                         const btn = document.querySelector(sel) as HTMLElement;
                         if (btn) btn.click();
                     }, saveBtnID)
                 ]);
+                
                 isSaved = true;
+                logger.info('✅ Navigation successful');
                 break;
+
             } catch (e) {
                 logger.warn(`Save attempt ${i} failed.`);
+                
+                // --- FORENSIC DIAGNOSTICS ---
+                const rawErrors = await page.locator('.text-danger, .alert-danger').allTextContents();
+                const visibleErrors = rawErrors.map(e => e.trim()).filter(e => e.length > 2 && !e.includes('*'));
+                
+                if (visibleErrors.length > 0) {
+                    logger.error(`🚨 BLOCKING ERRORS DETECTED: ${visibleErrors.join(' | ')}`);
+                }
+
+                // Check HTML5 invalid fields
+                const invalidFields = await page.evaluate(() => {
+                    return Array.from(document.querySelectorAll(':invalid')).map(el => el.getAttribute('id') || el.getAttribute('name') || el.tagName);
+                });
+                
+                if (invalidFields.length > 0) {
+                    logger.error(`🚨 INVALID FIELDS DETECTED: ${invalidFields.join(', ')}`);
+                }
+                // -----------------------------
+                
                 await page.waitForTimeout(2000);
             }
         }
 
-        if (!isSaved) throw new Error(`Save failed after 3 attempts. URL stuck at: ${page.url()}`);
+        if (!isSaved) throw new Error(`Save failed after 3 attempts. Check above for validation errors.`);
 
-        // Extract ID
+        // 6. Extract ID
         const currentUrl = page.url();
         let contractId: string | undefined;
         const editMatch = currentUrl.match(/\/editar\/(\d+)/);
@@ -119,15 +151,18 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         if (!contractId) throw new Error('Failed to extract Contract ID');
         logger.info(`✅ Contract created! ID: ${contractId}`);
 
+        // Phase 2: Add Route
         await contratosPage.addSpecificRouteAndCargo('20000', '50000');
 
         // Final Save
+        logger.info('Saving final changes...');
         await page.evaluate(() => {
              const btn = document.querySelector('#btn_guardar') as HTMLElement;
              if(btn) btn.click();
         });
         await page.waitForTimeout(3000);
 
+        // Update JSON
         operationalData.contratoCliente = {
             id: contractId,
             nroContrato: nroContrato,
@@ -137,10 +172,19 @@ test.describe('Cliente Contract Creation (Venta Type)', () => {
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
         logger.info(`Saved contratoCliente.id: ${contractId}`);
 
+        // =================================================================
+        // STEP 8: Verification (CORREGIDO CON SCROLL)
+        // =================================================================
         await page.goto(`https://moveontruckqa.bermanntms.cl/contrato/editar/${contractId}`);
         await page.waitForLoadState('networkidle');
-        await expect(page.getByText('05082025-1').first()).toBeVisible({ timeout: 10000 });
         
+        const routeCell = page.getByText('05082025-1').first();
+        
+        // Scroll explícito para evitar error "received: hidden"
+        await routeCell.scrollIntoViewIfNeeded();
+        await expect(routeCell).toBeVisible();
+        
+        logger.info('Route 715 verified');
         logger.info('STEP 5.5 COMPLETE');
     });
 });
