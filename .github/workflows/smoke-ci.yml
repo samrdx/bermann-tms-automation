@@ -9,8 +9,8 @@ jobs:
   smoke-setup:
     name: Smoke Setup (Chromium)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    
+    timeout-minutes: 20
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,45 +27,39 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Full Operational Suite
+      - name: Run Full Operational Suite (Sequential)
         env:
-          # Environment
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           ENVIRONMENT: dev
           HEADLESS: true
           TIMEOUT: 60000
           LOG_LEVEL: info
-          
-          # Credentials
           TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          echo "Step 1: Running Base Entities Setup..."
+          echo "🔹 Step 1: Base Entities Setup"
           npx playwright test --project=base-entities-chromium --reporter=line
-          
-          echo "Step 2: Running Contract Tests (sequential to avoid interference)..."
+
+          echo "🔹 Step 2: Contract Tests (Sequential)"
           npx playwright test \
             tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
             tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
             --project=chromium --workers=1 --reporter=line
-          
-          echo "Step 3: Running Viajes Tests..."
+
+          echo "🔹 Step 3: Viajes Tests (Sequential - CRITICAL)"
+          # FIX: --workers=1 garantiza que Planificar termine antes de Asignar
           npx playwright test \
             tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts \
             tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-            --project=chromium --reporter=html,line
-
-
+            --project=chromium --workers=1 --reporter=html,line
 
       - name: List Generated Files (Debug)
         if: always()
         run: |
-          echo "Listing root directory files:"
-          ls -la
-          echo "Searching for last-run-data files:"
-          find . -name "last-run-data-*.json"
+          echo "📂 Checking Data Files:"
+          ls -la *.json 2>/dev/null || echo "No JSON files found in root"
 
       - name: Upload Setup Data
         if: always()
