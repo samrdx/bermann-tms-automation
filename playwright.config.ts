@@ -53,7 +53,13 @@ export default defineConfig({
     /* Headless: True en CI, o lo que diga la variable en local */
     headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),
 
-    viewport: { width: 1280, height: 720 },
+    /* Viewport reducido para mejor visualización en headed mode */
+    viewport: { width: 1024, height: 768 },
+
+    /* Tamaño de ventana para headed mode (se ve centrado en pantalla) */
+    launchOptions: {
+      args: process.env.HEADLESS === 'false' ? ['--window-size=1100,850'] : []
+    },
 
     actionTimeout: process.env.CI ? 15 * 1000 : 10 * 1000,
     navigationTimeout: process.env.CI ? 30 * 1000 : 15 * 1000,
