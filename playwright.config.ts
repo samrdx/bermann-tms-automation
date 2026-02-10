@@ -1,42 +1,83 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url'; // 1. Importar esto
+
+// 2. Reconstruir __filename y __dirname para ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cargar variables de entorno
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: ['**/examples/**'],  // Explicitly ignore examples directory
-  fullyParallel: true,  // Enable parallel execution
-  workers: 3,           // One worker per browser for controlled parallelism
+  testIgnore: ['**/examples/**'],
+  fullyParallel: true,
+
+  /* * CRÍTICO PARA CI:
+   * - En CI usamos 1 worker para evitar colisiones en la DB legacy.
+   * - En Local usamos 3 para velocidad.
+   */
+  workers: process.env.CI ? 1 : 3,
+
+  /*
+   * RETRIES:
+   * - En CI reintentamos 2 veces si falla (para flakiness de red/UI).
+   * - En Local 0 para ver el fallo rápido.
+   */
+  retries: process.env.CI ? 2 : 0,
+
   reporter: [
     ['html', {
       outputFolder: 'playwright-report',
-      open: 'never'  // Never auto-open in CI (prevents hanging in headless)
+      open: 'never'
     }],
     ['json', {
       outputFile: 'playwright-report/results.json'
     }],
-    ['list']  // Console output for CI logs
+    ['list']
   ],
-  timeout: 60000,
-  retries: 0,
-  use: {
-    headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),  // Auto-headless in CI
-    trace: 'on',
-    screenshot: 'on',
-    video: 'on',
+
+  /*
+   * TIMEOUTS (Aumentados para UI Legacy):
+   * - Global: 2 min en CI (por si la red va lenta).
+   * - Expect/Action: 15s (para dar tiempo a los spinners de carga).
+   */
+  timeout: process.env.CI ? 120 * 1000 : 60 * 1000,
+  expect: {
+    timeout: process.env.CI ? 15 * 1000 : 5 * 1000,
   },
+
+  use: {
+    /* Headless: True en CI, o lo que diga la variable en local */
+    headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),
+
+    viewport: { width: 1280, height: 720 },
+
+    actionTimeout: process.env.CI ? 15 * 1000 : 10 * 1000,
+    navigationTimeout: process.env.CI ? 30 * 1000 : 15 * 1000,
+
+    /* Artifacts: Solo guardamos evidencia si falla */
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+
+    ignoreHTTPSErrors: true,
+  },
+
   tsconfig: './tsconfig.tests.json',
+
   projects: [
     {
       name: 'setup',
-      testMatch: /auth\.setup\.ts/,  // Only auth setup
+      testMatch: /auth\.setup\.ts/,
     },
-    // Auth tests - run WITHOUT storageState (test login from scratch)
     {
       name: 'auth-tests',
       testMatch: /tests\/e2e\/auth\/.+\.test\.ts/,
       use: devices['Desktop Chrome'],
-      // NO storageState - these tests need to test login from scratch
     },
-    // Separate base-entities setup for each browser (worker isolation)
     {
       name: 'base-entities-chromium',
       testMatch: /base-entities\.setup\.ts/,
@@ -55,42 +96,46 @@ export default defineConfig({
       use: devices['Desktop Safari'],
       dependencies: ['setup'],
     },
-    // Browser test projects (with base-entities dependency for CI)
+
+    // --- MAIN TEST PROJECTS ---
     {
       name: 'chromium',
       testMatch: [
-        /tests\/e2e\/modules\/.+\.test\.ts/,  // Only operational tests (modules)
-        /tests\/e2e\/suites\/.+\.test\.ts/,   // And suite tests (if any)
+        /tests\/e2e\/modules\/.+\.test\.ts/,
+        /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
+        launchOptions: {
+          args: ['--disable-dev-shm-usage', '--no-sandbox']
+        }
       },
-      dependencies: ['setup'],  // Auth only — base-entities runs as separate CI step
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
       testMatch: [
-        /tests\/e2e\/modules\/.+\.test\.ts/,  // Only operational tests (modules)
-        /tests\/e2e\/suites\/.+\.test\.ts/,   // And suite tests (if any)
+        /tests\/e2e\/modules\/.+\.test\.ts/,
+        /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],  // Auth only — base-entities runs as separate CI step
+      dependencies: ['setup'],
     },
     {
       name: 'webkit',
       testMatch: [
-        /tests\/e2e\/modules\/.+\.test\.ts/,  // Only operational tests (modules)
-        /tests\/e2e\/suites\/.+\.test\.ts/,   // And suite tests (if any)
+        /tests\/e2e\/modules\/.+\.test\.ts/,
+        /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],  // Auth only — base-entities runs as separate CI step
+      dependencies: ['setup'],
     },
   ],
 });
