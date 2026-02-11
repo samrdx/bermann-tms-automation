@@ -299,14 +299,50 @@ export class ContratosFormPage extends BasePage {
       document.body.classList.remove('modal-open');
     });
   }
+
+  /**
+   * Fills a field slowly using pressSequentially to avoid character loss
+   * Critical for Bootstrap inputs with masking/validation
+   */
+  private async fillSlowly(selector: string, value: string, delay: number = 80): Promise<void> {
+    const locator = this.page.locator(selector);
+    await locator.click();
+    await locator.clear();
+    await this.page.waitForTimeout(200);
+    await locator.pressSequentially(value, { delay });
+    await this.page.waitForTimeout(300);
+    // Trigger events to ensure form recognizes the value
+    await this.page.evaluate((sel) => {
+      const el = document.querySelector(sel) as HTMLInputElement;
+      if (el) {
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('blur', { bubbles: true }));
+      }
+    }, selector);
+  }
   
   // Métodos legacy necesarios
   async addSpecificRouteAndCargo(tarifaConductor: string, tarifaViaje: string): Promise<void> {
     logger.info('🛣️ Adding specific Route 715 and Cargo 715_19');
     await this.forceCloseModal();
+    await this.page.waitForTimeout(500); // Esperar después de cerrar modales
 
-    await this.page.click('button:has-text("Añadir Ruta")');
-    await this.page.waitForSelector('#modalRutas', { state: 'visible' });
+    // Intentar abrir el modal de rutas con retry
+    const btnAnadirRuta = this.page.locator('button:has-text("Añadir Ruta")').first();
+    await btnAnadirRuta.waitFor({ state: 'visible', timeout: 10000 });
+    await btnAnadirRuta.scrollIntoViewIfNeeded();
+    await btnAnadirRuta.click();
+
+    // Esperar modal con timeout extendido
+    try {
+      await this.page.waitForSelector('#modalRutas', { state: 'visible', timeout: 15000 });
+    } catch (e) {
+      logger.warn('⚠️ Modal did not open on first click, retrying...');
+      await this.page.waitForTimeout(500);
+      await btnAnadirRuta.click();
+      await this.page.waitForSelector('#modalRutas', { state: 'visible', timeout: 10000 });
+    }
 
     await this.page.click('a#btn_plus_715'); // Ruta 715
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
