@@ -155,7 +155,9 @@ test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
     logger.info('🔍 Verifying assignment...');
     await page.waitForTimeout(2000);
     const currentUrl = page.url();
-    expect(currentUrl).toContain('/viajes/asignar');
+    // El sistema puede redirigir a /viajes/editar/{id} (éxito) o quedarse en /viajes/asignar
+    const isSuccess = currentUrl.includes('/viajes/asignar') || currentUrl.includes('/viajes/editar/');
+    expect(isSuccess, `Expected /viajes/asignar or /viajes/editar/, got: ${currentUrl}`).toBe(true);
     logger.info(`✅ SUCCESS: Trip ${nroViaje} assigned to:`);
     logger.info(`   Transportista: ${transName}`);
     logger.info(`   Vehículo: ${vehiculoPatente}`);
