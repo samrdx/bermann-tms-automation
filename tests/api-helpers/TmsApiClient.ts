@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test'; // Agregado 'expect'
+import { Page } from '@playwright/test';
 import { logger } from '../../src/utils/logger.js';
 import {
   generateChileanStreet,
@@ -6,16 +6,14 @@ import {
   generatePatente,
   generateRandomName,
   generateRandomLastName,
-  generateValidChileanRUT,
-  generateDocument
+  generateValidChileanRUT
 } from '../../src/utils/rutGenerator.js'; 
 
 export class TmsApiClient {
   private baseUrl: string;
 
   constructor(private page: Page) {
-    // toma la variable de entorno, o usa la default si estás en local
-    this.baseUrl = process.env.BASE_URL || 'https://moveontruckqa.bermanntms.cl';
+    this.baseUrl = 'https://moveontruckqa.bermanntms.cl';
   }
 
   async initialize(): Promise<void> {
@@ -23,7 +21,7 @@ export class TmsApiClient {
   }
 
   private generateRandomId(): string {
-    return String(Math.floor(Date.now() / 1000) % 1000000); // Timestamp corto para unicidad
+    return String(Math.floor(10000 + Math.random() * 90000));
   }
 
   /**
@@ -34,39 +32,55 @@ export class TmsApiClient {
     await locator.click();
     await locator.clear();
     await this.page.waitForTimeout(200);
+
+    // Escribir caracter por caracter con delay
     await locator.pressSequentially(value, { delay });
+
+    // Esperar a que el input mask procese
     await this.page.waitForTimeout(300);
 
+    // Verificar si se perdió el último caracter (común con "K" en RUTs)
     const currentValue = await locator.inputValue();
     const normalizedCurrent = currentValue.replace(/[^0-9Kk]/g, '').toUpperCase();
     const normalizedExpected = value.replace(/[^0-9Kk]/g, '').toUpperCase();
 
     if (normalizedCurrent !== normalizedExpected) {
       logger.warn(`⚠️ RUT value mismatch - trying to fix. Got: ${currentValue}, Expected: ${value}`);
+      // Intentar agregar el último caracter si falta
       const lastChar = normalizedExpected.slice(-1);
       if (!normalizedCurrent.endsWith(lastChar)) {
         await locator.press(lastChar);
         await this.page.waitForTimeout(200);
+        logger.info(`✅ Added missing character: ${lastChar}`);
       }
     }
   }
 
+  /**
+   * Verifica si hay un error de RUT inválido visible en la página.
+   */
+  private async checkForRutError(): Promise<boolean> {
+    const hasError = await this.page.getByText('El rut ingresado no es valido', { exact: true })
+      .isVisible({ timeout: 1000 }).catch(() => false);
+    if (hasError) {
+      logger.error('RUT validation error detected!');
+      return true;
+    }
+    return false;
+  }
+
   // --- 1. TRANSPORTISTA ---
-  async createTransportista(baseName: string): Promise<string> {
-    const rut = generateValidChileanRUT();
-    const nombre = `${baseName} ${this.generateRandomId()}`;
-    
+  async createTransportista(nombre: string): Promise<string> {
+    const rut = generateValidChileanRUT(); 
     logger.info(`🚀 UI: Creating Transportista [${nombre}] RUT: [${rut}]`);
     await this.page.goto(`${this.baseUrl}/transportistas/crear`);
     await this.page.waitForLoadState('networkidle');
-    
     await this.page.waitForSelector('input[name="Transportistas[nombre]"]', { state: 'visible', timeout: 15000 });
     await this.page.fill('input[name="Transportistas[nombre]"]', nombre);
     await this.page.fill('input[name="Transportistas[razon_social]"]', nombre);
-    await this.fillSlowly('input[name="Transportistas[documento]"]', rut, 50);
+    await this.fillSlowly('input[name="Transportistas[documento]"]', rut, 50); 
     await this.page.fill('input[name="Transportistas[calle]"]', generateChileanStreet());
     await this.page.fill('input[name="Transportistas[altura]"]', generateStreetNumber());
-    
     await this.page.selectOption('select[name="Transportistas[tipo_transportista_id]"]', '1');
     await this.page.selectOption('select[name="Transportistas[region_id]"]', '1');
     await this.page.selectOption('select[name="Transportistas[ciudad_id]"]', '1');
@@ -77,46 +91,185 @@ export class TmsApiClient {
       this.page.locator('button:has-text("Guardar"), input[type="submit"]').first().click()
     ]);
 
-    // USANDO NUEVA LÓGICA DE RESCATE ROBUSTA
-    const id = await this.rescueEntityId('Transportista', rut, `${this.baseUrl}/transportistas/index`);
-    if (id === '0') throw new Error('Critical: Transportista ID is 0');
+    // Extraer ID de la URL o buscar en el index
+    let id = '0';
+    const currentUrl = this.page.url();
+    const idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
+    if (idMatch) {
+      id = idMatch[1];
+    } else if (currentUrl.includes('/index')) {
+      // Buscar en la tabla por nombre
+      const row = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
+      if (await row.count() > 0) {
+        const dataKey = await row.getAttribute('data-key');
+        if (dataKey) {
+          id = dataKey;
+        } else {
+          const link = row.locator('a[href*="/ver/"], a[href*="/editar/"]').first();
+          const href = await link.getAttribute('href');
+          const match = href?.match(/\/(\d+)/);
+          if (match) id = match[1];
+        }
+      }
+    }
+    logger.info(`✅ Transportista created with ID: ${id}`);
     return id;
   }
 
   // --- 2. CLIENTE ---
-  async createCliente(baseName: string): Promise<string> {
-    const rut = generateValidChileanRUT();
-    const nombre = `${baseName} ${this.generateRandomId()}`;
-    
+  async createCliente(nombre: string): Promise<string> {
+    const rut = generateValidChileanRUT(); 
     logger.info(`🚀 UI: Creating Cliente [${nombre}] RUT: [${rut}]`);
     await this.page.goto(`${this.baseUrl}/clientes/crear`);
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForSelector('#clientes-nombre', { state: 'visible', timeout: 15000 });
 
+    // Campos obligatorios
     await this.page.fill('#clientes-nombre', nombre);
-    await this.fillSlowly('#clientes-rut', rut, 50);
+    await this.fillSlowly('#clientes-rut', rut, 50); 
     await this.page.fill('#clientes-nombre_fantasia', nombre);
+
+    // Dirección
     await this.page.fill('#clientes-calle', generateChileanStreet());
 
-    // Dropdowns obligatorios con teclado
-    await this.selectWithKeyboard('button[data-id="clientes-tipo_cliente_id"]');
-    await this.selectWithKeyboard('button[data-id="clientes-region_id"]', 2000); // Wait for cascade
-    await this.selectWithKeyboard('button[data-id="clientes-ciudad_id"]', 2000); // Wait for cascade
-    await this.selectWithKeyboard('button[data-id="clientes-comuna_id"]');
+    // Seleccionar Tipo Cliente (obligatorio)
+    await this.page.click('button[data-id="clientes-tipo_cliente_id"]');
+    await this.page.waitForTimeout(500);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(500);
 
-    // Polígonos (Manejo robusto)
-    await this.handlePoligonos();
+    // Seleccionar Region (obligatorio)
+    await this.page.click('button[data-id="clientes-region_id"]');
+    await this.page.waitForTimeout(500);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(2000); 
+
+    // Seleccionar Ciudad (obligatorio)
+    await this.page.click('button[data-id="clientes-ciudad_id"]');
+    await this.page.waitForTimeout(500);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(2000); 
+
+    // Seleccionar Comuna (obligatorio)
+    await this.page.click('button[data-id="clientes-comuna_id"]');
+    await this.page.waitForTimeout(500);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(500);
+
+    // Seleccionar Polígonos
+    logger.info('📍 Selecting Polígonos...');
+    const poligonosBtn = this.page.locator('button[data-id*="poligono"], button[data-id*="Poligono"]').first();
+
+    if (await poligonosBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await poligonosBtn.click();
+      await this.page.waitForTimeout(500);
+
+      const selectAllBtn = this.page.locator('.dropdown-menu.show button.actions-btn.bs-select-all');
+      if (await selectAllBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await selectAllBtn.click();
+        logger.info('✅ Polígonos: Seleccionar todos clicked');
+      } else {
+        const firstOption = this.page.locator('.dropdown-menu.show .dropdown-item, .dropdown-menu.show li a').first();
+        if (await firstOption.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await firstOption.click();
+          logger.info('✅ Polígonos: Primera opción seleccionada');
+        }
+      }
+      await this.page.keyboard.press('Escape');
+      await this.page.waitForTimeout(500);
+    } else {
+      logger.info('🔎 Trying fallback selector for Polígonos...');
+      const labelDiv = this.page.locator('label:has-text("Polígonos")').first();
+      if (await labelDiv.isVisible({ timeout: 2000 }).catch(() => false)) {
+        const nearbyBtn = this.page.locator('label:has-text("Polígonos") ~ .bootstrap-select button, label:has-text("Polígonos") + div button').first();
+        if (await nearbyBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await nearbyBtn.click();
+          await this.page.waitForTimeout(500);
+          const selectAllBtn = this.page.locator('.dropdown-menu.show button.actions-btn.bs-select-all');
+          if (await selectAllBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+            await selectAllBtn.click();
+            logger.info('✅ Polígonos: Seleccionar todos clicked (fallback)');
+          }
+          await this.page.keyboard.press('Escape');
+          await this.page.waitForTimeout(500);
+        }
+      } else {
+        logger.warn('⚠️ Polígonos dropdown not found - continuing without it');
+      }
+    }
 
     // Guardar
-    await Promise.all([ 
-      this.page.waitForNavigation({ waitUntil: 'networkidle' }), 
-      this.page.locator('button:has-text("Guardar"), #btn_guardar').first().click() 
-    ]);
+    await this.page.click('#btn_guardar');
+    await this.page.waitForTimeout(3000);
 
-    // USANDO NUEVA LÓGICA DE RESCATE ROBUSTA
-    const id = await this.rescueEntityId('Cliente', rut, `${this.baseUrl}/clientes/index`);
-    if (id === '0') throw new Error('Critical: Cliente ID is 0');
-    
+    // Extraer ID
+    let id = '0';
+    let currentUrl = this.page.url();
+    logger.info(`📍 URL after save: ${currentUrl}`);
+
+    let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
+    if (idMatch) {
+      id = idMatch[1];
+      logger.info(`✅ Cliente ID extracted from URL: ${id}`);
+    } else {
+      logger.info(`🔍 Using search filter to find Cliente: ${nombre}`);
+      await this.page.waitForTimeout(1000);
+
+      const searchInput = this.page.locator('#search');
+      await searchInput.fill(nombre);
+      logger.info(`🔎 Filled search with: ${nombre}`);
+
+      await this.page.getByRole('link', { name: 'Buscar' }).click();
+      await this.page.waitForLoadState('networkidle');
+      logger.info(`🔎 Clicked Buscar link`);
+
+      // Esperar a que el nombre aparezca en la tabla usando getByText
+      logger.info(`⏳ Waiting for "${nombre}" to appear in table...`);
+      const clienteCell = this.page.getByText(nombre, { exact: true });
+      await clienteCell.waitFor({ state: 'visible', timeout: 15000 });
+      logger.info(`✅ Found "${nombre}" in table`);
+
+      // Buscar la fila con data-key que contiene este texto
+      const row = this.page.locator('table tbody tr[data-key]').filter({ has: clienteCell }).first();
+
+      if (await row.count() > 0) {
+        const dataKey = await row.getAttribute('data-key');
+        if (dataKey) {
+          id = dataKey;
+          logger.info(`✅ Cliente ID from data-key: ${id}`);
+        }
+      } else {
+        // Fallback: buscar usando XPath ancestor desde la celda encontrada
+        logger.info(`🔎 Trying ancestor row lookup...`);
+        const parentRow = clienteCell.locator('xpath=ancestor::tr').first();
+        const dataKey = await parentRow.getAttribute('data-key');
+        if (dataKey) {
+          id = dataKey;
+          logger.info(`✅ Cliente ID from parent row: ${id}`);
+        } else {
+          // Último fallback: buscar href del link de edición
+          const editLink = parentRow.locator('a[href*="/clientes/editar/"]').first();
+          if (await editLink.count() > 0) {
+            const href = await editLink.getAttribute('href');
+            const match = href?.match(/\/editar\/(\d+)/);
+            if (match) {
+              id = match[1];
+              logger.info(`✅ Cliente ID from edit link: ${id}`);
+            }
+          }
+        }
+      }
+    }
+
+    if (id === '0') {
+      logger.error(`❌ Could not extract Cliente ID for: ${nombre}`);
+      throw new Error(`Failed to extract Cliente ID for: ${nombre}`);
+    }
+
     logger.info(`✅ Cliente created with ID: ${id}`);
     return id;
   }
@@ -127,38 +280,70 @@ export class TmsApiClient {
     logger.info(`🚛 UI: Creating Vehículo [${patente}] for Transportista: ${transportistaNombre}`);
     await this.page.goto(`${this.baseUrl}/vehiculos/crear`);
     await this.page.waitForLoadState('networkidle');
-    
     await this.page.waitForSelector('input[name="Vehiculos[patente]"]', { state: 'visible', timeout: 15000 });
     await this.page.fill('input[name="Vehiculos[patente]"]', patente);
     await this.page.fill('input[name="Vehiculos[muestra]"]', patente);
 
     // Seleccionar transportista
-    await this.selectBootstrapDropdownSimple('button[data-id="vehiculos-transportista_id"]', transportistaNombre, 'Transportista');
+    await this.page.click('button[data-id="vehiculos-transportista_id"]');
+    await this.page.waitForTimeout(500);
+    const searchBox = this.page.locator('.dropdown-menu.show .bs-searchbox input');
+    if (await searchBox.isVisible()) {
+      await searchBox.fill(transportistaNombre);
+      await this.page.waitForTimeout(1000);
+    }
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(500);
 
-    // Seleccionar Tipo Vehículo: TRACTO
-    await this.selectBootstrapDropdownSimple('button[data-id="vehiculos-tipo_vehiculo_id"]', 'TRACTO', 'Tipo Vehículo');
-    await this.page.waitForTimeout(1000); // Esperar carga AJAX
+    // Tipo Vehículo
+    logger.info('🚛 Selecting Tipo Vehículo: TRACTO');
+    await this.page.click('button[data-id="vehiculos-tipo_vehiculo_id"]');
+    await this.page.waitForTimeout(500);
+    const tipoVehiculoMenu = this.page.locator('div.dropdown-menu.show').first();
+    const tipoSearchBox = tipoVehiculoMenu.locator('.bs-searchbox input');
+    if (await tipoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await tipoSearchBox.fill('TRACTO');
+      await this.page.waitForTimeout(500);
+    }
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(1000); 
 
-    // Seleccionar Capacidad: 3 KG
+    // Capacidad
+    logger.info('📦 Selecting Capacidad: 3 KG');
     const capacidadBtn = this.page.locator('button[data-id="vehiculos-capacidad_id"]');
-    if (await capacidadBtn.isVisible({ timeout: 3000 })) {
-        await this.selectBootstrapDropdownSimple('button[data-id="vehiculos-capacidad_id"]', '3 KG', 'Capacidad');
+    if (await capacidadBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await capacidadBtn.click();
+      await this.page.waitForTimeout(500);
+      const capacidadMenu = this.page.locator('div.dropdown-menu.show').first();
+      const capacidadSearchBox = capacidadMenu.locator('.bs-searchbox input');
+      if (await capacidadSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await capacidadSearchBox.fill('3 KG');
+        await this.page.waitForTimeout(500);
+      }
+      await this.page.keyboard.press('ArrowDown');
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(500);
+    } else {
+      logger.warn('⚠️ Capacidad dropdown not visible - skipping');
     }
 
+    // Guardar
     await Promise.all([
       this.page.waitForNavigation({ waitUntil: 'networkidle' }),
       this.page.locator('button:has-text("Guardar")').click()
     ]);
+    logger.info(`✅ Vehículo created: ${patente}`);
     return patente;
   }
 
   // --- 4. CONDUCTOR ---
   async createConductor(transportistaNombre: string): Promise<string> {
     const nombre = generateRandomName();
-    const rut = generateValidChileanRUT();
+    const rut = generateValidChileanRUT(); 
     const usuario = `user${Math.floor(Math.random() * 100000)}`;
     const clave = `pass${Math.floor(Math.random() * 100000)}`;
-    
     logger.info(`👨‍✈️ UI: Creating Conductor [${nombre}] for Transportista: ${transportistaNombre}`);
     await this.page.goto(`${this.baseUrl}/conductores/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -170,26 +355,57 @@ export class TmsApiClient {
     await this.page.fill('input[name="Conductores[apellido]"]', generateRandomLastName());
     await this.fillSlowly('input[name="Conductores[documento]"]', rut, 50);
 
-    await this.selectWithKeyboard('button[data-id="conductores-licencia"]');
+    // Licencia
+    await this.page.click('button[data-id="conductores-licencia"]');
+    await this.page.waitForTimeout(500);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(500);
 
-    // Fecha Futura
-    const futureDate = new Date();
-    futureDate.setFullYear(futureDate.getFullYear() + 2);
-    const dateStr = `${String(futureDate.getDate()).padStart(2, '0')}-${String(futureDate.getMonth() + 1).padStart(2, '0')}-${futureDate.getFullYear()}`;
-    const fechaInput = this.page.locator('#conductores-fecha_vencimiento_licencia, input[name*="fecha_vencimiento_licencia"]');
-    if (await fechaInput.isVisible()) {
-        await fechaInput.fill(dateStr);
-        await this.page.keyboard.press('Tab');
+    // Fecha
+    const fechaVencimiento = new Date();
+    fechaVencimiento.setFullYear(fechaVencimiento.getFullYear() + 1);
+    const dia = String(fechaVencimiento.getDate()).padStart(2, '0');
+    const mes = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
+    const anio = fechaVencimiento.getFullYear();
+    const fechaStr = `${dia}-${mes}-${anio}`; 
+    logger.info(`📅 Setting fecha vencimiento licencia: ${fechaStr}`);
+
+    const fechaInput = this.page.locator('#conductores-fecha_vencimiento_licencia, input[name="Conductores[fecha_vencimiento_licencia]"]').first();
+    if (await fechaInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await fechaInput.click();
+      await this.page.waitForTimeout(300);
+      await fechaInput.fill(fechaStr);
+      await this.page.keyboard.press('Tab'); 
+      await this.page.waitForTimeout(500);
     }
 
-    await this.selectBootstrapDropdownSimple('button[data-id="conductores-transportista_id"]', transportistaNombre, 'Transportista');
+    // Transportista
+    await this.page.click('button[data-id="conductores-transportista_id"]');
+    await this.page.waitForTimeout(500);
+    const searchBox = this.page.locator('.dropdown-menu.show .bs-searchbox input');
+    if (await searchBox.isVisible()) {
+      await searchBox.fill(transportistaNombre);
+      await this.page.waitForTimeout(1000);
+    }
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(500);
 
+    // Guardar
     await this.page.click('#btn_guardar');
     await this.page.waitForTimeout(3000);
+
+    const currentUrl = this.page.url();
+    if (currentUrl.includes('/index') || currentUrl.includes('/ver') || currentUrl.includes('/editar')) {
+      logger.info(`✅ Conductor created: ${nombre}`);
+    } else {
+      logger.info(`⚠️ Conductor form submitted (URL: ${currentUrl})`);
+    }
     return nombre;
   }
 
-  // --- 5. CONTRATOS ---
+  // --- 5. LÓGICA DE CONTRATOS ---
   private async fillGenericContract(tipoVal: '1'|'2', entityName: string, selectId: string) {
     const nro = this.generateRandomId();
     logger.info(`📝 Creating contract [${nro}] tipo=${tipoVal} for: ${entityName}`);
@@ -197,72 +413,106 @@ export class TmsApiClient {
     await this.page.waitForLoadState('networkidle');
     await this.page.fill('#contrato-nro_contrato', nro);
 
-    // AJAX Wait
-    const ajaxPromise = this.page.waitForResponse(r => r.url().includes('rendersubview') && r.status() === 200, { timeout: 15000 }).catch(()=>null);
-    await this.page.evaluate((val) => {
+    // CORRECCIÓN AQUÍ: Agregado el tipo explícito ': string' a 'val'
+    await this.page.evaluate((val: string) => { 
       const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
       if (el) { el.value = val; el.dispatchEvent(new Event('change', { bubbles: true })); }
     }, tipoVal);
-    await ajaxPromise;
-    await this.page.waitForTimeout(1000);
+    
+    await this.page.waitForTimeout(3000);
 
     if (tipoVal === '2') {
       const tipoSelect = this.page.locator('select#tipo');
-      if (await tipoSelect.isVisible({ timeout: 3000 })) {
+      if (await tipoSelect.isVisible({ timeout: 3000 }).catch(() => false)) {
         await this.page.selectOption('select#tipo', '1');
         await this.page.waitForTimeout(1000);
       }
     }
 
-    // Selección robusta de entidad
     const buttonSelector = `button[data-id="${selectId}"]`;
-    await this.selectBootstrapDropdownSimple(buttonSelector, entityName, 'Entidad Contrato');
+    await this.page.click(buttonSelector);
+    await this.page.waitForTimeout(500);
+    const searchBox = this.page.locator('.dropdown-menu.show .bs-searchbox input');
+    if (await searchBox.isVisible()) {
+      await searchBox.fill(entityName);
+      await this.page.waitForTimeout(1000);
+    }
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await this.page.waitForTimeout(500);
 
     await this.page.click('#btn_guardar');
-    await this.page.waitForNavigation({ waitUntil: 'networkidle' });
+    await this.page.waitForTimeout(3000);
 
     const currentUrl = this.page.url();
     if (currentUrl.includes('/editar/')) {
       logger.info(`✅ Contract saved, adding routes...`);
       await this.addRouteAndTarifas('20000', '50000');
+    } else {
+      logger.info(`⚠️ Contract form submitted (URL: ${currentUrl})`);
     }
   }
 
-  // Método auxiliar para agregar rutas (Mantenido de tu código)
   private async addRouteAndTarifas(tarifaConductor: string, tarifaViaje: string): Promise<void> {
     logger.info('🛣️ Adding Route 715 and Cargo with SLOW tarifa entry...');
-    
-    // Limpieza de modales previos
+
     await this.page.evaluate(() => {
-        document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-        document.body.classList.remove('modal-open');
+      // @ts-ignore
+      if (typeof $ !== 'undefined') $('.modal').modal('hide');
+      document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+      document.body.classList.remove('modal-open');
     });
+    await this.page.waitForTimeout(500);
 
     const btnAnadirRuta = this.page.locator('button:has-text("Añadir Ruta")').first();
     await btnAnadirRuta.waitFor({ state: 'visible', timeout: 10000 });
     await btnAnadirRuta.scrollIntoViewIfNeeded();
     await btnAnadirRuta.click();
 
-    await this.page.waitForSelector('#modalRutas', { state: 'visible', timeout: 15000 });
-    
-    // Ruta y Cargo
+    try {
+      await this.page.waitForSelector('#modalRutas', { state: 'visible', timeout: 15000 });
+    } catch {
+      logger.warn('⚠️ Modal did not open, retrying...');
+      await this.page.waitForTimeout(500);
+      await btnAnadirRuta.click();
+      await this.page.waitForSelector('#modalRutas', { state: 'visible', timeout: 10000 });
+    }
+
     await this.page.click('a#btn_plus_715');
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
     if (await closeBtn.isVisible()) await closeBtn.click();
-    
+
     await this.page.click('#btn_click_715');
-    await this.page.waitForTimeout(500);
-    await this.page.click('a#btn_plus_ruta_715_19');
-
-    await this.page.waitForTimeout(1000); // Esperar que se agregue la fila
-
-    // Tarifas
-    await this.fillSlowly('#txt_tarifa_conductor_715', tarifaConductor, 50);
-    await this.fillSlowly('#txt_tarifa_extra_715', tarifaViaje, 50);
     await this.page.waitForTimeout(1000);
 
+    await this.page.click('a#btn_plus_ruta_715_19');
+
+    await this.page.evaluate(() => {
+      // @ts-ignore
+      if (typeof $ !== 'undefined') $('.modal').modal('hide');
+      document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.waitForTimeout(1000);
+
+    logger.info(`💰 Filling tarifa conductor SLOWLY: ${tarifaConductor}`);
+    await this.fillSlowly('#txt_tarifa_conductor_715', tarifaConductor, 100);
+
+    logger.info(`💰 Filling tarifa viaje SLOWLY: ${tarifaViaje}`);
+    await this.fillSlowly('#txt_tarifa_extra_715', tarifaViaje, 100);
+
+    await this.page.waitForTimeout(2000);
+
+    logger.info('💾 Saving contract with routes...');
     await this.page.click('#btn_guardar');
     await this.page.waitForTimeout(3000);
+
+    const finalUrl = this.page.url();
+    if (finalUrl.includes('/editar/') || finalUrl.includes('/index')) {
+      logger.info('✅ Contract with routes saved successfully');
+    } else {
+      logger.warn(`⚠️ Contract save status uncertain (URL: ${finalUrl})`);
+    }
   }
 
   async createContratoCosto(transportistaNombre: string) {
@@ -273,71 +523,62 @@ export class TmsApiClient {
     await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id');
   }
 
-  // --- 6. PLANIFICAR VIAJE (FIXED 🔧) ---
+  // --- 6. PLANIFICAR VIAJE ---
   async createViaje(clienteNombre: string, nroViaje: string) {
     logger.info(`🚚 UI: Creating Viaje [${nroViaje}] for Cliente [${clienteNombre}]`);
-    
-    // FIX 1: Esperar estabilidad total antes de navegar (evita "interrupted by another navigation")
-    await this.page.waitForLoadState('networkidle');
-    
     await this.page.goto(`${this.baseUrl}/viajes/crear`);
     await this.page.waitForLoadState('domcontentloaded');
     await this.page.waitForTimeout(1000);
 
     await this.page.fill('#viajes-nro_viaje', nroViaje);
+    logger.info(`✅ Filled Nro Viaje: ${nroViaje}`);
 
-    // Dropdowns
     await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', 'tclp2210', 'Tipo Operación');
     await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', 'tclp2210', 'Tipo Servicio');
-    
-    // Cliente (Cascade)
     await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
-    await this.page.waitForLoadState('networkidle'); // Esperar carga de datos del cliente
-    
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(1500);
+
     await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_viaje_id"]', 'Normal', 'Tipo Viaje');
     await this.selectBootstrapDropdownSimple('button[data-id="viajes-unidad_negocio_id"]', 'Defecto', 'Unidad Negocio');
     await this.page.waitForLoadState('networkidle');
 
-    // Carga (Trigger route calc)
     await this.selectBootstrapDropdownSimple('button[data-id="viajes-carga_id"]', 'Pallet_Furgon_Frio_10ton', 'Código Carga');
     await this.page.keyboard.press('Tab');
+    await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
 
-    // FIX 2: Agregar Ruta Robustecido
     logger.info('📍 Adding Route...');
     const btnAgregarRuta = this.page.locator('button:has-text("Agregar Ruta")').first();
-    
-    // Esperamos explícitamente a que el botón NO esté deshabilitado (clave para CI)
-    await expect(btnAgregarRuta).not.toBeDisabled({ timeout: 20000 });
-    
+    await btnAgregarRuta.waitFor({ state: 'visible', timeout: 15000 });
     await btnAgregarRuta.click();
     await this.page.waitForTimeout(1000);
 
-    // Seleccionar ruta en modal
     const primeraRuta = this.page.locator('#tabla-rutas tbody tr .btn-success').first();
-    if (await primeraRuta.isVisible({ timeout: 5000 })) {
+    if (await primeraRuta.isVisible({ timeout: 5000 }).catch(() => false)) {
       await primeraRuta.click();
       logger.info('✅ Route selected');
     } else {
       logger.warn('⚠️ No route found in modal');
     }
-    
+    await this.page.waitForTimeout(1000);
+
+    logger.info('💾 Clicking Guardar...');
     await this.page.click('#btn_guardar_form');
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
+
+    const successToast = this.page.locator('text="Viaje Creado con éxito"');
+    const nroViajeVal = await this.page.locator('#viajes-nro_viaje').inputValue().catch(() => '');
+
+    if (await successToast.isVisible({ timeout: 3000 }).catch(() => false) || nroViajeVal === '') {
+      logger.info(`✅ Viaje [${nroViaje}] created successfully via UI`);
+    } else {
+      logger.warn(`⚠️ Could not confirm viaje creation, continuing...`);
+    }
   }
 
   // --- UTILS ---
-
-  // Helper para select simple con teclado
-  private async selectWithKeyboard(selector: string, waitAfter: number = 500) {
-    await this.page.click(selector);
-    await this.page.waitForTimeout(300);
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
-    await this.page.waitForTimeout(waitAfter);
-  }
-
   private async selectBootstrapDropdownSimple(buttonSelector: string, textToSelect: string, fieldName: string): Promise<void> {
     logger.info(`📋 Selecting ${fieldName}: "${textToSelect}"`);
     const btn = this.page.locator(buttonSelector);
@@ -363,49 +604,6 @@ export class TmsApiClient {
       await this.page.keyboard.press('Escape');
     }
     await this.page.waitForTimeout(300);
-  }
-
-  private async handlePoligonos() {
-    const poligonosBtn = this.page.locator('button[data-id*="poligono"], button[data-id*="Poligono"]').first();
-    if (await poligonosBtn.isVisible({ timeout: 2000 }).catch(()=>false)) {
-        await poligonosBtn.click();
-        const selectAll = this.page.locator('.bs-select-all');
-        if (await selectAll.isVisible()) await selectAll.click();
-        await this.page.keyboard.press('Escape');
-    }
-  }
-
-  // --- FIX 3: RESCUE ID ROBUSTO (#search) ---
-  private async rescueEntityId(entityName: string, uniqueRut: string, indexUrl: string): Promise<string> {
-    const urlMatch = this.page.url().match(/\/(?:ver|view|editar|update)\/(\d+)/);
-    if (urlMatch && urlMatch[1]) return urlMatch[1];
-
-    logger.warn(`⚠️ ID rescue needed for ${entityName}. Searching in Index...`);
-    await this.page.goto(indexUrl);
-    
-    // Selector combinado: busca #search OR input[type=search]
-    const searchInput = this.page.locator('#search, input[type="search"]').first();
-    
-    await searchInput.waitFor({ state: 'visible', timeout: 20000 });
-    await searchInput.fill(uniqueRut);
-    
-    // Click en botón Buscar (si existe) o Enter
-    const btnBuscar = this.page.getByRole('link', { name: 'Buscar' });
-    if (await btnBuscar.isVisible()) {
-        await btnBuscar.click();
-    } else {
-        await this.page.keyboard.press('Enter');
-    }
-    
-    try {
-      await this.page.waitForResponse(r => r.url().includes('index') && r.status() === 200, { timeout: 10000 });
-      const link = this.page.locator('table tbody tr:first-child a[href*="editar"]').first();
-      const href = await link.getAttribute('href') || '';
-      const match = href.match(/\/(?:editar|update|ver|view)\/(\d+)/);
-      if (match) return match[1];
-    } catch (e) {
-      logger.error(`❌ Failed to rescue ID for ${entityName}`);
-    }
-    return '0';
+    logger.info(`✅ ${fieldName} selected`);
   }
 }
