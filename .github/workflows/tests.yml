@@ -7,15 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  # Definimos URL base global
-  BASE_URL: https://moveontruckqa.bermanntms.cl
-  CI: true
-
 jobs:
   # ------------------------------------------------------------------
   # JOB 1: TESTS ATÓMICOS (NUEVA GENERACIÓN)
-  # Son independientes, crean sus propios datos y pueden correr en paralelo.
   # ------------------------------------------------------------------
   atomic-suite:
     name: 🛡️ Atomic E2E Flows
@@ -40,12 +34,25 @@ jobs:
 
       - name: 🚀 Run Atomic Workflows
         env:
-          # Inyectamos secretos por si el TmsApiClient evoluciona
+          # --- VARIABLES REQUERIDAS POR TU CONFIGMANAGER ---
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          ENVIRONMENT: dev
+          HEADLESS: true
+          LOG_LEVEL: info
+          TIMEOUT: 60000
+
+          # --- CREDENCIALES (Doble mapeo por seguridad) ---
+          # Para TmsApiClient
           TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          # Para fixtures base (si las usan)
+          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
+          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
+
         run: |
           echo "Running Independent Business Flows..."
-          # Ejecutamos específicamente tu nuevo test
           npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
             --project=chromium \
             --reporter=html,line
@@ -59,14 +66,13 @@ jobs:
           retention-days: 15
 
   # ------------------------------------------------------------------
-  # JOB 2: TESTS LEGACY (DEPENDIENTES DE SETUP)
-  # Requieren orden secuencial y compartir el archivo JSON.
+  # JOB 2: TESTS LEGACY (Se mantiene igual, funcionaba bien)
   # ------------------------------------------------------------------
   legacy-suite:
     name: 📦 Legacy Dependent Flows
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [] # No depende de atomic-suite, corren a la vez
+    needs: []
 
     steps:
       - name: Checkout code
@@ -86,19 +92,22 @@ jobs:
 
       - name: ⛓️ Run Sequential Legacy Suite
         env:
-          BASE_URL_DEV: ${{ env.BASE_URL }}
+          # Variables Legacy necesarias
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          ENVIRONMENT: dev
+          HEADLESS: true
+          TIMEOUT: 60000
           TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
+          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          # 1. SETUP BASE (Genera el JSON)
           echo "🔹 Stage 1: Base Setup"
           npx playwright test --project=base-entities-chromium --reporter=line
 
-          # 2. CONTRATOS (Usa el JSON)
           echo "🔹 Stage 2: Legacy Contracts"
           npx playwright test tests/e2e/modules/02-operaciones/contratos --project=chromium --workers=1 --reporter=line
 
-          # 3. VIAJES PLANIFICAR (Usa el JSON - Solo Planificar, Asignar ya está en Atomic)
           echo "🔹 Stage 3: Legacy Planning"
           npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts --project=chromium --workers=1 --reporter=line
 
