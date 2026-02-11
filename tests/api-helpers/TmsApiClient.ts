@@ -227,11 +227,11 @@ export class TmsApiClient {
       await this.page.waitForLoadState('networkidle');
       logger.info(`🔎 Clicked Buscar link`);
 
-      // Esperar a que el nombre aparezca en la tabla usando getByText
+      // Esperar a que el nombre aparezca en la tabla (case-insensitive porque TMS normaliza a Title Case)
       logger.info(`⏳ Waiting for "${nombre}" to appear in table...`);
-      const clienteCell = this.page.getByText(nombre, { exact: true });
+      const clienteCell = this.page.locator('table tbody tr td').filter({ hasText: new RegExp(nombre, 'i') }).first();
       await clienteCell.waitFor({ state: 'visible', timeout: 15000 });
-      logger.info(`✅ Found "${nombre}" in table`);
+      logger.info(`✅ Found "${nombre}" in table (case-insensitive)`);
 
       // Buscar la fila con data-key que contiene este texto
       const row = this.page.locator('table tbody tr[data-key]').filter({ has: clienteCell }).first();
