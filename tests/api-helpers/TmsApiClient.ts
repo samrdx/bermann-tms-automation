@@ -233,33 +233,23 @@ export class TmsApiClient {
       await clienteCell.waitFor({ state: 'visible', timeout: 15000 });
       logger.info(`✅ Found "${nombre}" in table (case-insensitive)`);
 
-      // Buscar la fila con data-key que contiene este texto
-      const row = this.page.locator('table tbody tr[data-key]').filter({ has: clienteCell }).first();
+      // Buscar la fila padre usando XPath ancestor (más confiable)
+      const parentRow = clienteCell.locator('xpath=ancestor::tr').first();
+      const dataKey = await parentRow.getAttribute('data-key');
 
-      if (await row.count() > 0) {
-        const dataKey = await row.getAttribute('data-key');
-        if (dataKey) {
-          id = dataKey;
-          logger.info(`✅ Cliente ID from data-key: ${id}`);
-        }
+      if (dataKey) {
+        id = dataKey;
+        logger.info(`✅ Cliente ID from data-key: ${id}`);
       } else {
-        // Fallback: buscar usando XPath ancestor desde la celda encontrada
-        logger.info(`🔎 Trying ancestor row lookup...`);
-        const parentRow = clienteCell.locator('xpath=ancestor::tr').first();
-        const dataKey = await parentRow.getAttribute('data-key');
-        if (dataKey) {
-          id = dataKey;
-          logger.info(`✅ Cliente ID from parent row: ${id}`);
-        } else {
-          // Último fallback: buscar href del link de edición
-          const editLink = parentRow.locator('a[href*="/clientes/editar/"]').first();
-          if (await editLink.count() > 0) {
-            const href = await editLink.getAttribute('href');
-            const match = href?.match(/\/editar\/(\d+)/);
-            if (match) {
-              id = match[1];
-              logger.info(`✅ Cliente ID from edit link: ${id}`);
-            }
+        // Fallback: buscar href del link de edición en la fila
+        logger.info(`🔎 Trying edit link lookup...`);
+        const editLink = parentRow.locator('a[href*="/clientes/editar/"]').first();
+        if (await editLink.count() > 0) {
+          const href = await editLink.getAttribute('href');
+          const match = href?.match(/\/editar\/(\d+)/);
+          if (match) {
+            id = match[1];
+            logger.info(`✅ Cliente ID from edit link: ${id}`);
           }
         }
       }
