@@ -1,4 +1,4 @@
-name: QA Tests CI
+name: TMS QA Suite (Hybrid)
 
 on:
   push:
@@ -8,9 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  # ------------------------------------------------------------------
+  # JOB 1: TESTS ATÓMICOS (NUEVA GENERACIÓN)
+  # ------------------------------------------------------------------
+  atomic-suite:
+    name: 🛡️ Atomic E2E Flows
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
 
     steps:
       - name: Checkout code
@@ -28,41 +32,89 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E Tests (Secuencial y Robusto)
+      - name: 🚀 Run Atomic Workflows
         env:
+          # --- VARIABLES REQUERIDAS POR TU CONFIGMANAGER ---
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          ENVIRONMENT: dev
+          HEADLESS: true
+          LOG_LEVEL: info
+          TIMEOUT: 60000
+
+          # --- CREDENCIALES (Doble mapeo por seguridad) ---
+          # Para TmsApiClient
+          TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          # Para fixtures base (si las usan)
+          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
+          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
+          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
+          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
+
+        run: |
+          echo "Running Independent Business Flows..."
+          npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
+            --project=chromium \
+            --reporter=html,line
+
+      - name: Upload Atomic Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-atomic
+          path: playwright-report/
+          retention-days: 15
+
+  # ------------------------------------------------------------------
+  # JOB 2: TESTS LEGACY (Se mantiene igual, funcionaba bien)
+  # ------------------------------------------------------------------
+  legacy-suite:
+    name: 📦 Legacy Dependent Flows
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: []
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: ⛓️ Run Sequential Legacy Suite
+        env:
+          # Variables Legacy necesarias
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           ENVIRONMENT: dev
           HEADLESS: true
           TIMEOUT: 60000
-          LOG_LEVEL: info
           TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
           PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
         run: |
-          # 1. SETUP: Usar el proyecto CORRECTO para setup (Igual que Smoke CI)
-          echo "🚀 STAGE 1: Base Entities Setup"
+          echo "🔹 Stage 1: Base Setup"
           npx playwright test --project=base-entities-chromium --reporter=line
 
-          # 2. CONTRATOS: Crear Contratos (1 worker para evitar colisiones)
-          echo "🚀 STAGE 2: Contracts"
+          echo "🔹 Stage 2: Legacy Contracts"
           npx playwright test tests/e2e/modules/02-operaciones/contratos --project=chromium --workers=1 --reporter=line
 
-          # 3. OPERACIONES: Viajes (1 worker para orden Planificar -> Asignar)
-          echo "🚀 STAGE 3: Viajes Operations"
-          npx playwright test tests/e2e/modules/02-operaciones/viajes --project=chromium --workers=1 --reporter=html,line
+          echo "🔹 Stage 3: Legacy Planning"
+          npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts --project=chromium --workers=1 --reporter=line
 
-      - name: Upload Playwright Report
+      - name: Upload Legacy Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-qa
+          name: report-legacy
           path: playwright-report/
           retention-days: 15
-
-      - name: Upload Data Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: run-data
-          path: last-run-data-*.json

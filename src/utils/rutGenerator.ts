@@ -270,11 +270,17 @@ export function generateLicenseType(): string {
 
 /**
  * Generates a document number based on type
+ * For RUT: Returns formatted as XX.XXX.XXX-V (with dots and verification digit)
  */
 export function generateDocument(type: 'RUT' | 'EXTRANJERO'): string {
     if (type === 'RUT') {
-        const rawRut = generateValidChileanRUT();
-        return rawRut.replace(/^(\d{1,2})(\d{3})(\d{3})(-[\dkK])$/, '$1.$2.$3$4');
+        const rawRut = generateValidChileanRUT(); // Format: "12345678-9" or "12345678-K"
+        const [numberPart, dv] = rawRut.split('-');
+
+        // Format number with dots (from right to left, every 3 digits)
+        const formatted = numberPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+        return `${formatted}-${dv}`;
     } else {
         // Extranjero: 90M+ range usually
         const num = Math.floor(Math.random() * 5000000) + 90000000;
