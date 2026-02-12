@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: TMS AUTOMATION E2E TEST
 
 on:
   push:
@@ -23,19 +23,29 @@ jobs:
       run: npm ci
 
     - name: Run Specific Test (Viajes Asignar)
+      # 1. Aquí definimos las variables de entorno para ESTE paso
       env:
-        # Mapeamos TUS secretos de GitHub a las variables que usa el código
+        # Mapeamos los Secretos de GitHub a las variables que usa tu código
+        BASE_URL: ${{ secrets.BASE_URL }}
         TMS_USER: ${{ secrets.USERNAME_DEV }}
         TMS_PASS: ${{ secrets.PASSWORD_DEV }}
         
-        # Si tienes una URL base en secretos, úsala así (o quítala si está hardcodeada)
-        BASE_URL: ${{ secrets.BASE_URL }} 
-        
-        # Fuerza el modo headless en playwright.config.ts
-        CI: 1 
+        # Activamos modo CI (Headless)
+        CI: 1
       
-      # Ejecuta solo el test blindado
-      run: npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --project=chromium
+      # 2. Aquí ejecutamos los comandos (Debug + Test)
+      run: |
+        echo "🔍 Verificando inyección de variables..."
+        
+        if [ -z "$BASE_URL" ]; then 
+          echo "❌ ERROR CRÍTICO: La variable BASE_URL está vacía. Revisa los 'Repository Secrets' en GitHub."
+          exit 1
+        else 
+          echo "✅ BASE_URL detectada correctamente."
+        fi
+        
+        echo "🚀 Iniciando ejecución de Playwright..."
+        npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --project=chromium
 
     - name: Upload Playwright Report
       if: always()

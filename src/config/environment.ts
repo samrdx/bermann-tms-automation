@@ -4,7 +4,6 @@ import path from 'path';
 dotenv.config();
 
 export interface EnvironmentConfig {
-  geminiApiKey?: string;  // Optional - Gemini/Stagehand removed from project
   baseUrl: string;
   environment: 'dev' | 'staging' | 'prod';
   headless: boolean;
@@ -22,9 +21,8 @@ class ConfigManager {
 
   private loadConfig(): EnvironmentConfig {
     const env = (process.env.ENVIRONMENT || 'dev') as 'dev' | 'staging' | 'prod';
-    
+
     return {
-      geminiApiKey: process.env.GEMINI_API_KEY || '',
       baseUrl: this.getBaseUrl(env),
       environment: env,
       headless: process.env.HEADLESS === 'true',
@@ -34,6 +32,12 @@ class ConfigManager {
   }
 
   private getBaseUrl(env: string): string {
+    // 1. Prioridad CI/CD: Si existe BASE_URL (inyectada por GitHub Actions), úsala.
+    if (process.env.BASE_URL) {
+      return process.env.BASE_URL;
+    }
+
+    // 2. Fallback Local: Busca variables específicas por entorno (legacy)
     const urls: Record<string, string> = {
       dev: process.env.BASE_URL_DEV || '',
       staging: process.env.BASE_URL_STAGING || '',
@@ -43,7 +47,6 @@ class ConfigManager {
   }
 
   private validateConfig(): void {
-    // GEMINI_API_KEY validation removed - Stagehand/Gemini no longer used in project
     if (!this.config.baseUrl) {
       throw new Error('BASE_URL is not configured for environment: ' + this.config.environment);
     }
