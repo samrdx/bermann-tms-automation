@@ -42,9 +42,9 @@
 ## Project Overview
 
 **Project:** QA Automation Framework for Bermann Transport Management System (TMS)
-**Client:** Bermann (https://www.bermann.cl/soluciones)
+**Client:** Bermann (<https://www.bermann.cl/soluciones>)
 **Critical Product:** TMS - largest customer base
-**QA Environment:** https://moveontruckqa.bermanntms.cl/login
+**QA Environment:** <https://moveontruckqa.bermanntms.cl/login>
 **Goal:** Deliver project in March 2025 for salary increase request
 **Timeline:** 8 weeks (Jan 27 - Mar 21, 2025)
 
@@ -727,19 +727,19 @@ cat logs/app.log              # View logs
 
 **Documentation:**
 
-- Playwright: https://playwright.dev
-- TypeScript: https://www.typescriptlang.org/docs
-- Winston: https://github.com/winstonjs/winston
+- Playwright: <https://playwright.dev>
+- TypeScript: <https://www.typescriptlang.org/docs>
+- Winston: <https://github.com/winstonjs/winston>
 
 **Internal:**
 
-- TMS QA: https://moveontruckqa.bermanntms.cl
+- TMS QA: <https://moveontruckqa.bermanntms.cl>
 - Skills: [AGENTS.md](AGENTS.md) + [skills/](skills/)
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## Notes for Claude
 
-### When generating code:
+### When generating code
 
 1. **ALWAYS check AGENTS.md first** for relevant skills
 2. **Read skill documentation** before writing code
@@ -753,7 +753,7 @@ cat logs/app.log              # View logs
 10. Update package.json if adding new scripts
 11. Use worker-specific JSON with DataPathHelper
 
-### When suggesting improvements:
+### When suggesting improvements
 
 1. Maintain consistency with existing patterns
 2. Think about scalability to 50+ tests
@@ -762,7 +762,7 @@ cat logs/app.log              # View logs
 5. Reference skills system when applicable
 6. Consider parallel execution implications
 
-### Critical Rules:
+### Critical Rules
 
 - ❌ Never hardcode selectors (use Confluence)
 - ❌ Never skip skill documentation
@@ -777,7 +777,7 @@ cat logs/app.log              # View logs
 
 ---
 
-**Last Updated:** February 9, 2026
+**Last Updated:** February 11, 2026
 **Status:** Production-ready with parallel execution
 **Framework Level:** Enterprise-grade with 12 automated tests
 **Compilation:** ✅ TypeScript clean (0 errors)
