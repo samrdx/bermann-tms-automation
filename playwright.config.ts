@@ -40,23 +40,33 @@ export default defineConfig({
   ],
 
   /*
-   * TIMEOUTS (Aumentados para UI Legacy):
-   * - Global: 2 min en CI (por si la red va lenta).
-   * - Expect/Action: 15s (para dar tiempo a los spinners de carga).
+   * TIMEOUTS (Optimizados para CI lento):
+   * - Global: 3 min en CI (entidades + contratos + viaje).
+   * - Expect/Action: 20s en CI (spinners de carga y cascades AJAX).
    */
-  timeout: process.env.CI ? 120 * 1000 : 60 * 1000,
+  timeout: process.env.CI ? 180 * 1000 : 60 * 1000,
   expect: {
-    timeout: process.env.CI ? 15 * 1000 : 5 * 1000,
+    timeout: process.env.CI ? 20 * 1000 : 10 * 1000,
+    toPass: {
+      timeout: process.env.CI ? 30 * 1000 : 15 * 1000,
+      intervals: [500, 1000, 2000, 5000],
+    },
   },
 
   use: {
     /* Headless: True en CI, o lo que diga la variable en local */
     headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),
 
-    viewport: { width: 1280, height: 720 },
+    /* Viewport reducido para mejor visualización en headed mode */
+    viewport: { width: 1024, height: 768 },
 
-    actionTimeout: process.env.CI ? 15 * 1000 : 10 * 1000,
-    navigationTimeout: process.env.CI ? 30 * 1000 : 15 * 1000,
+    /* Tamaño de ventana para headed mode (se ve centrado en pantalla) */
+    launchOptions: {
+      args: process.env.HEADLESS === 'false' ? ['--window-size=1100,850'] : []
+    },
+
+    actionTimeout: process.env.CI ? 20 * 1000 : 10 * 1000,
+    navigationTimeout: process.env.CI ? 45 * 1000 : 20 * 1000,
 
     /* Artifacts: Solo guardamos evidencia si falla */
     trace: 'retain-on-failure',
