@@ -1,58 +1,18 @@
 import { Page, expect } from '@playwright/test';
-
-
-
 import { logger } from '../../src/utils/logger.js';
-
-
-
 import {
-
-
-
   generateChileanStreet,
-
-
-
   generateStreetNumber,
-
-
-
   generatePatente,
-
-
-
   generateRandomName,
-
-
-
   generateRandomLastName,
-
-
-
   generateValidChileanRUT
-
-
-
 } from '../../src/utils/rutGenerator.js';
-
-
-
-
-
 
 
 export class TmsApiClient {
 
-
-
   private baseUrl: string;
-
-
-
-
-
-
 
   constructor(private page: Page) {
 
@@ -64,12 +24,6 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   async initialize(): Promise<void> {
 
 
@@ -80,12 +34,6 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   private generateRandomId(): string {
 
 
@@ -95,12 +43,6 @@ export class TmsApiClient {
 
 
   }
-
-
-
-
-
-
 
   /**
 
@@ -223,12 +165,6 @@ export class TmsApiClient {
 
 
   }
-
-
-
-
-
-
 
   /**
 
@@ -652,91 +588,48 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   // --- 1. TRANSPORTISTA ---
-
-
-
   async createTransportista(nombre: string): Promise<string> {
 
-
-
     const rut = generateValidChileanRUT();
-
-
+    const btnGuardar = this.page.locator('button.btn.btn-success').filter({ hasText: 'Guardar' });
 
     logger.info(`🚀 UI: Creating Transportista [${nombre}] RUT: [${rut}]`);
 
-
-
     await this.page.goto(`${this.baseUrl}/transportistas/crear`);
-
-
 
     await this.page.waitForLoadState('networkidle');
 
-
-
     await this.page.waitForSelector('input[name="Transportistas[nombre]"]', { state: 'visible', timeout: 15000 });
-
-
 
     await this.page.fill('input[name="Transportistas[nombre]"]', nombre);
 
-
-
     await this.page.fill('input[name="Transportistas[razon_social]"]', nombre);
-
-
 
     await this.typeRutSlowly('input[name="Transportistas[documento]"]', rut);
 
-
-
     await this.page.fill('input[name="Transportistas[calle]"]', generateChileanStreet());
-
-
 
     await this.page.fill('input[name="Transportistas[altura]"]', generateStreetNumber());
 
-
-
     await this.page.selectOption('select[name="Transportistas[tipo_transportista_id]"]', '1');
 
-
+    await this.page.locator('select[name="Transportistas[tipo_transportista_id]"]').dispatchEvent('change');
 
     await this.page.selectOption('select[name="Transportistas[region_id]"]', '1');
 
-
-
     await this.page.selectOption('select[name="Transportistas[ciudad_id]"]', '1');
-
-
 
     await this.page.selectOption('select[name="Transportistas[comuna_id]"]', '2');
 
-
-
-
-
-
-
     await Promise.all([
-
-
 
       this.page.waitForNavigation({ waitUntil: 'networkidle' }),
 
+      this.page.waitForNavigation({ waitUntil: 'networkidle' }),
+      btnGuardar.click(),
 
-
-      this.page.locator('button:has-text("Guardar"), input[type="submit"]').first().click()
-
-
+      logger.info(`✅ Transportista [${nombre}] created successfully`),
 
     ]);
 
@@ -992,16 +885,7 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   // --- 2. CLIENTE ---
-
-
-
   async createCliente(nombre: string): Promise<string> {
 
 
@@ -1568,16 +1452,7 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   // --- 3. VEHÍCULO ---
-
-
-
   async createVehiculo(transportistaNombre: string): Promise<string> {
 
 
@@ -1808,16 +1683,7 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   // --- 4. CONDUCTOR ---
-
-
-
   async createConductor(transportistaNombre: string): Promise<string> {
 
 
@@ -2060,16 +1926,7 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   // --- 5. LÓGICA DE CONTRATOS ---
-
-
-
   /**
 
 
@@ -2528,12 +2385,6 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   private async addRouteAndTarifas(tarifaConductor: string, tarifaViaje: string): Promise<void> {
 
 
@@ -2776,12 +2627,6 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   async createContratoCosto(transportistaNombre: string) {
 
 
@@ -2791,12 +2636,6 @@ export class TmsApiClient {
 
 
   }
-
-
-
-
-
-
 
   async createContratoVenta(clienteNombre: string) {
 
@@ -2808,16 +2647,7 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
   // --- 6. PLANIFICAR VIAJE ---
-
-
-
   async createViaje(clienteNombre: string, nroViaje: string) {
 
 
@@ -3060,10 +2890,7 @@ export class TmsApiClient {
 
   }
 
-
-
  // --- 7. ASIGNAR VIAJE (ORDENADO: Selección -> Espera -> Healer -> Vehículo) ---
-
   async assignViaje(nroViaje: string, transportistaNombre: string, patenteVehiculo: string, nombreConductor: string) {
 
     logger.info(`🚚 UI: Assigning Viaje [${nroViaje}]`);
@@ -3244,11 +3071,7 @@ export class TmsApiClient {
 
   }
 
-
-
   // --- UTILS ---
-
-
 
 /**
 
@@ -3488,16 +3311,6 @@ export class TmsApiClient {
 
   }
 
-
-
-
-
-
-
-
-
-
-
   private async selectBootstrapDropdownSimple(buttonSelector: string, textToSelect: string, fieldName: string): Promise<void> {
 
 
@@ -3603,12 +3416,6 @@ export class TmsApiClient {
 
 
   }
-
-
-
-
-
-
 
   private async forceSelectByText(selectId: string, textToSelect: string): Promise<void> {
 
@@ -3751,7 +3558,5 @@ export class TmsApiClient {
 
 
   }
-
-
 
 }

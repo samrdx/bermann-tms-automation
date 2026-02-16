@@ -189,7 +189,7 @@ last-run-data-{chromium,firefox,webkit}.json
      |
 contrato-crear -> contrato2cliente-crear
      |
-viajes-planificar -> viajes-asignar
+viajes-planificar -> viajes-asignar -> viajes-finalizar
 ```
 
 For full architectural documentation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

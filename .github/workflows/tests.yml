@@ -9,7 +9,7 @@ on:
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: TESTS ATÓMICOS (NUEVA GENERACIÓN)
+  # JOB 1: TESTS ATÓMICOS (NUEVA GENERACIÓN - STANDARD)
   # ------------------------------------------------------------------
   atomic-suite:
     name: 🛡️ Atomic E2E Flows
@@ -34,27 +34,29 @@ jobs:
 
       - name: 🚀 Run Atomic Workflows
         env:
-          # --- VARIABLES REQUERIDAS POR TU CONFIGMANAGER ---
-          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
-          ENVIRONMENT: dev
+          # --- NUEVO ESTÁNDAR (Sincronizado con credentials.ts) ---
+          TMS_URL: ${{ secrets.BASE_URL_DEV || 'https://moveontruckqa.bermanntms.cl' }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+
+          # Variables de Configuración Playwright
+          CI: true
           HEADLESS: true
           LOG_LEVEL: info
           TIMEOUT: 60000
 
-          # --- CREDENCIALES (Doble mapeo por seguridad) ---
-          # Para TmsApiClient
+          # (Opcional) Mantener variables viejas si algún helper compartido aún las usa
+          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
-          # Para fixtures base (si las usan)
-          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
-          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
-          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
-          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
 
+        # CORRECCIÓN IMPORTANTE: Ejecutar múltiples archivos en UN solo comando
+        # Esto genera un único reporte HTML combinado y permite paralelismo real.
         run: |
           echo "Running Independent Business Flows..."
-          npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-          npx playwright test tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
+          npx playwright test \
+            tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
+            tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
             --project=chromium \
             --reporter=html,line
 
@@ -67,7 +69,7 @@ jobs:
           retention-days: 3
 
   # ------------------------------------------------------------------
-  # JOB 2: TESTS LEGACY (Se mantiene igual, funcionaba bien)
+  # JOB 2: TESTS LEGACY (Sin cambios, para no romper compatibilidad)
   # ------------------------------------------------------------------
   legacy-suite:
     name: 📦 Legacy Dependent Flows
@@ -93,7 +95,7 @@ jobs:
 
       - name: ⛓️ Run Sequential Legacy Suite
         env:
-          # Variables Legacy necesarias
+          # Variables Legacy (Mantener hasta refactorizar estos tests)
           BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
           ENVIRONMENT: dev
           HEADLESS: true
