@@ -1,9 +1,6 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
-
 import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
-
 import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
-
 import { logger } from '../../../../../src/utils/logger.js';
 
 
@@ -16,291 +13,291 @@ test.describe.configure({ mode: 'serial', retries: 1 });
 
 test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
 
-  test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page }) => {
+    test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page }) => {
 
-    test.setTimeout(300000);
-
-
-
-    const api = new TmsApiClient(page);
-
-    await api.initialize();
+        test.setTimeout(300000);
 
 
 
-    // 1. Definir nombres únicos
+        const api = new TmsApiClient(page);
 
-    const transName = `TransAPI ${Math.floor(Math.random() * 9000)}`;
-
-    const cliName = `CliAPI ${Math.floor(Math.random() * 9000)}`;
+        await api.initialize();
 
 
 
-    // 2. Crear Entidades
+        // 1. Definir nombres únicos
 
-    await api.createTransportista(transName);
+        const transName = `TransAPI ${Math.floor(Math.random() * 9000)}`;
 
-    await api.createCliente(cliName);
-
-
-
-    // 3. Crear Vehículo y Conductor (Capturamos datos)
-
-    const patenteVehiculo = await api.createVehiculo(transName);
-
-    const nombreConductor = await api.createConductor(transName);
-
-   
-
-    logger.info(`📝 Datos -> Trans: ${transName}, Veh: ${patenteVehiculo}, Cond: ${nombreConductor}`);
+        const cliName = `CliAPI ${Math.floor(Math.random() * 9000)}`;
 
 
 
-    // 4. Crear Contratos
+        // 2. Crear Entidades
 
-    await api.createContratoVenta(cliName);
+        await api.createTransportista(transName);
 
-    await api.createContratoCosto(transName);
-
-
-
-    // 5. Planificar Viaje
-
-    const nroViaje = `API-V${Math.floor(Math.random() * 100000)}`;
-
-    await api.createViaje(cliName, nroViaje);
-
-   
-
-    // 6. Verificación en UI de Asignación
-
-    const asignarPage = new AsignarPage(page);
-
-    await asignarPage.navigate();
-
-   
-
-    logger.info(`🔍 UI: Buscando viaje ${nroViaje}...`);
-
-    await asignarPage.selectViajeRow(nroViaje);
+        await api.createCliente(cliName);
 
 
 
-    // 7. SELECCIONAR TRANSPORTISTA (Lógica Blindada Anti-Cambios)
+        // 3. Crear Vehículo y Conductor (Capturamos datos)
 
-    // Usamos una función específica que escribe lento, espera el filtro y VERIFICA el resultado
+        const patenteVehiculo = await api.createVehiculo(transName);
 
-    await selectTransportistaRobust(page, transName);
+        const nombreConductor = await api.createConductor(transName);
 
 
 
-    // 8. Esperar Cascada (AJAX) - usar networkidle en lugar de timeout fijo
+        logger.info(`📝 Datos -> Trans: ${transName}, Veh: ${patenteVehiculo}, Cond: ${nombreConductor}`);
 
-    logger.info('⏳ Waiting for cascade (vehicle/conductor loading)...');
 
-    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
 
-      logger.warn('⚠️ networkidle timeout, continuing...');
+        // 4. Crear Contratos
+
+        await api.createContratoVenta(cliName);
+
+        await api.createContratoCosto(transName);
+
+
+
+        // 5. Planificar Viaje
+
+        const nroViaje = `API-V${Math.floor(Math.random() * 100000)}`;
+
+        await api.createViaje(cliName, nroViaje);
+
+
+
+        // 6. Verificación en UI de Asignación
+
+        const asignarPage = new AsignarPage(page);
+
+        await asignarPage.navigate();
+
+
+
+        logger.info(`🔍 UI: Buscando viaje ${nroViaje}...`);
+
+        await asignarPage.selectViajeRow(nroViaje);
+
+
+
+        // 7. SELECCIONAR TRANSPORTISTA (Lógica Blindada Anti-Cambios)
+
+        // Usamos una función específica que escribe lento, espera el filtro y VERIFICA el resultado
+
+        await selectTransportistaRobust(page, transName);
+
+
+
+        // 8. Esperar Cascada (AJAX) - usar networkidle en lugar de timeout fijo
+
+        logger.info('⏳ Waiting for cascade (vehicle/conductor loading)...');
+
+        await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+
+            logger.warn('⚠️ networkidle timeout, continuing...');
+
+        });
+
+        await page.waitForTimeout(500); // Brief DOM stabilization
+
+
+
+        // 9. SELECCIONAR VEHÍCULO (Bootstrap Select - con búsqueda)
+
+        logger.info(`🚛 Selecting Vehículo: ${patenteVehiculo}`);
+
+        await selectBootstrapDropdownByDataId(page, 'viajes-vehiculo_uno_id', patenteVehiculo);
+
+
+
+        // 10. SELECCIONAR CONDUCTOR (Bootstrap Select - usando data-id específico para evitar "Conductor Dos")
+
+        logger.info(`👨‍✈️ Selecting Conductor: ${nombreConductor}`);
+
+        await selectBootstrapDropdownByDataId(page, 'viajes-conductor_id', nombreConductor);
+
+
+
+        // 11. VERIFICACIÓN FINAL DEL TRANSPORTISTA (CRÍTICO - evita falso positivo)
+
+        logger.info('🔒 FINAL VERIFICATION: Checking Transportista before save...');
+
+        const finalCheck = await page.evaluate((expectedName: string) => {
+
+            const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
+
+            if (!select) return { correct: false, current: 'SELECT NOT FOUND' };
+
+
+
+            const selectedOption = select.options[select.selectedIndex];
+
+            const currentText = selectedOption?.text || '';
+
+            const isCorrect = currentText.toUpperCase().includes(expectedName.toUpperCase());
+
+
+
+            return { correct: isCorrect, current: currentText, value: select.value };
+
+        }, transName);
+
+
+
+        if (!finalCheck.correct) {
+
+            logger.warn(`⚠️ TRANSPORTISTA RESET DETECTED! Current: "${finalCheck.current}", Expected: "${transName}"`);
+
+            logger.info('🔧 Applying SILENT fix (no events to avoid cascade)...');
+
+
+
+            // Fix silencioso - solo cambiar valor sin disparar eventos
+
+            await page.evaluate((targetName: string) => {
+
+                const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
+
+                if (!select) return;
+
+
+
+                const options = Array.from(select.options);
+
+                const match = options.find(opt => opt.text.toUpperCase().includes(targetName.toUpperCase()));
+
+
+
+                if (match) {
+
+                    // Solo cambiar el valor, NO disparar eventos
+
+                    select.value = match.value;
+
+
+
+                    // Actualizar Bootstrap Select visualmente sin trigger change
+
+                    // @ts-ignore
+
+                    if (window.jQuery) {
+
+                        // @ts-ignore
+
+                        const $sel = window.jQuery(select);
+
+                        // @ts-ignore
+
+                        if ($sel.selectpicker) {
+
+                            // @ts-ignore
+
+                            $sel.selectpicker('val', match.value);
+
+                        }
+
+                        // @ts-ignore
+
+                        if ($sel.data('select2')) {
+
+                            // @ts-ignore
+
+                            $sel.select2('val', match.value, false); // false = no trigger
+
+                        }
+
+                    }
+
+                }
+
+            }, transName);
+
+
+
+            const recheck = await page.evaluate(() => {
+
+                const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
+
+                return select?.options[select.selectedIndex]?.text || 'UNKNOWN';
+
+            });
+
+            logger.info(`✅ Transportista fixed to: "${recheck}"`);
+
+        } else {
+
+            logger.info(`✅ Transportista confirmed: "${finalCheck.current}"`);
+
+        }
+
+
+
+        await page.waitForTimeout(300);
+
+
+
+        // 12. GUARDAR (Y MANEJAR MODALES)
+
+        logger.info('💾 Clicking Guardar...');
+
+        await page.click('#btn_guardar_form');
+
+
+
+        // --> FIX: Detectar y aceptar Modal de Confirmación "Estado Finalizado" <--
+
+        try {
+
+            // Buscamos botones comunes de confirmación (bootbox, sweetalert o nativos)
+
+            const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")').first();
+
+            if (await btnConfirmar.isVisible({ timeout: 5000 })) {
+
+                logger.info('⚠️ Modal confirmación detectado. Aceptando...');
+
+                await btnConfirmar.click();
+
+            }
+
+        } catch (e) {
+
+            logger.info('ℹ️ No confirmation modal appeared.');
+
+        }
+
+
+
+        // Validar que NO aparezca el error de "Sin Contrato" (Falso Positivo por mala selección)
+
+        const errorContrato = page.locator('text="Transportista sin contrato"');
+
+        if (await errorContrato.isVisible({ timeout: 2000 })) {
+
+            throw new Error(`❌ ERROR: El sistema indica 'Transportista sin contrato'. Verifica que el paso 7 seleccionó a ${transName}.`);
+
+        }
+
+
+
+        await page.waitForLoadState('networkidle');
+
+
+
+        // 12. Verificar Éxito
+
+        logger.info('🔍 Verifying assignment success...');
+
+        await expect(page.locator('body')).toContainText('éxito', { timeout: 20000 });
+
+
+
+        logger.info(`✅ SUCCESS: Trip ${nroViaje} assigned to ${transName}`);
 
     });
-
-    await page.waitForTimeout(500); // Brief DOM stabilization
-
-
-
-    // 9. SELECCIONAR VEHÍCULO (Bootstrap Select - con búsqueda)
-
-    logger.info(`🚛 Selecting Vehículo: ${patenteVehiculo}`);
-
-    await selectBootstrapDropdownByDataId(page, 'viajes-vehiculo_uno_id', patenteVehiculo);
-
-
-
-    // 10. SELECCIONAR CONDUCTOR (Bootstrap Select - usando data-id específico para evitar "Conductor Dos")
-
-    logger.info(`👨‍✈️ Selecting Conductor: ${nombreConductor}`);
-
-    await selectBootstrapDropdownByDataId(page, 'viajes-conductor_id', nombreConductor);
-
-
-
-    // 11. VERIFICACIÓN FINAL DEL TRANSPORTISTA (CRÍTICO - evita falso positivo)
-
-    logger.info('🔒 FINAL VERIFICATION: Checking Transportista before save...');
-
-    const finalCheck = await page.evaluate((expectedName: string) => {
-
-      const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
-
-      if (!select) return { correct: false, current: 'SELECT NOT FOUND' };
-
-
-
-      const selectedOption = select.options[select.selectedIndex];
-
-      const currentText = selectedOption?.text || '';
-
-      const isCorrect = currentText.toUpperCase().includes(expectedName.toUpperCase());
-
-
-
-      return { correct: isCorrect, current: currentText, value: select.value };
-
-    }, transName);
-
-
-
-    if (!finalCheck.correct) {
-
-      logger.warn(`⚠️ TRANSPORTISTA RESET DETECTED! Current: "${finalCheck.current}", Expected: "${transName}"`);
-
-      logger.info('🔧 Applying SILENT fix (no events to avoid cascade)...');
-
-
-
-      // Fix silencioso - solo cambiar valor sin disparar eventos
-
-      await page.evaluate((targetName: string) => {
-
-        const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
-
-        if (!select) return;
-
-
-
-        const options = Array.from(select.options);
-
-        const match = options.find(opt => opt.text.toUpperCase().includes(targetName.toUpperCase()));
-
-
-
-        if (match) {
-
-          // Solo cambiar el valor, NO disparar eventos
-
-          select.value = match.value;
-
-
-
-          // Actualizar Bootstrap Select visualmente sin trigger change
-
-          // @ts-ignore
-
-          if (window.jQuery) {
-
-            // @ts-ignore
-
-            const $sel = window.jQuery(select);
-
-            // @ts-ignore
-
-            if ($sel.selectpicker) {
-
-              // @ts-ignore
-
-              $sel.selectpicker('val', match.value);
-
-            }
-
-            // @ts-ignore
-
-            if ($sel.data('select2')) {
-
-              // @ts-ignore
-
-              $sel.select2('val', match.value, false); // false = no trigger
-
-            }
-
-          }
-
-        }
-
-      }, transName);
-
-
-
-      const recheck = await page.evaluate(() => {
-
-        const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
-
-        return select?.options[select.selectedIndex]?.text || 'UNKNOWN';
-
-      });
-
-      logger.info(`✅ Transportista fixed to: "${recheck}"`);
-
-    } else {
-
-      logger.info(`✅ Transportista confirmed: "${finalCheck.current}"`);
-
-    }
-
-
-
-    await page.waitForTimeout(300);
-
-
-
-    // 12. GUARDAR (Y MANEJAR MODALES)
-
-    logger.info('💾 Clicking Guardar...');
-
-    await page.click('#btn_guardar_form');
-
-   
-
-    // --> FIX: Detectar y aceptar Modal de Confirmación "Estado Finalizado" <--
-
-    try {
-
-        // Buscamos botones comunes de confirmación (bootbox, sweetalert o nativos)
-
-        const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")').first();
-
-        if (await btnConfirmar.isVisible({ timeout: 5000 })) {
-
-            logger.info('⚠️ Modal confirmación detectado. Aceptando...');
-
-            await btnConfirmar.click();
-
-        }
-
-    } catch (e) {
-
-        logger.info('ℹ️ No confirmation modal appeared.');
-
-    }
-
-
-
-    // Validar que NO aparezca el error de "Sin Contrato" (Falso Positivo por mala selección)
-
-    const errorContrato = page.locator('text="Transportista sin contrato"');
-
-    if (await errorContrato.isVisible({ timeout: 2000 })) {
-
-        throw new Error(`❌ ERROR: El sistema indica 'Transportista sin contrato'. Verifica que el paso 7 seleccionó a ${transName}.`);
-
-    }
-
-
-
-    await page.waitForLoadState('networkidle');
-
-
-
-    // 12. Verificar Éxito
-
-    logger.info('🔍 Verifying assignment success...');
-
-    await expect(page.locator('body')).toContainText('éxito', { timeout: 20000 });
-
-   
-
-    logger.info(`✅ SUCCESS: Trip ${nroViaje} assigned to ${transName}`);
-
-  });
 
 });
 
@@ -320,13 +317,13 @@ async function selectTransportistaRobust(page: any, nombre: string) {
 
     logger.info(`🛡️ Robust Selection: Transportista "${nombre}"`);
 
-   
+
 
     const btnDropdown = page.locator('button[data-id="viajes-transportista_id"]');
 
     await btnDropdown.click();
 
-   
+
 
     // Escribir lento para dar tiempo al filtro JS del framework
 
@@ -336,7 +333,7 @@ async function selectTransportistaRobust(page: any, nombre: string) {
 
     await searchBox.pressSequentially(nombre, { delay: 100 });
 
-   
+
 
     // Esperar explícitamente a que aparezca la opción filtrada en la lista
 
@@ -344,13 +341,13 @@ async function selectTransportistaRobust(page: any, nombre: string) {
 
     await opcionFiltrada.waitFor({ state: 'visible', timeout: 5000 });
 
-   
+
 
     await page.waitForTimeout(500); // Estabilizar animación
 
     await opcionFiltrada.click();
 
-   
+
 
     // VERIFICACIÓN: ¿Qué dice el botón ahora?
 
@@ -358,7 +355,7 @@ async function selectTransportistaRobust(page: any, nombre: string) {
 
     const textoBoton = await btnDropdown.textContent();
 
-   
+
 
     if (!textoBoton?.includes(nombre)) {
 
