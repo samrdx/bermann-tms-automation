@@ -54,6 +54,7 @@ jobs:
         run: |
           echo "Running Independent Business Flows..."
           npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
+          npx playwright test tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
             --project=chromium \
             --reporter=html,line
 
@@ -63,7 +64,7 @@ jobs:
         with:
           name: report-atomic
           path: playwright-report/
-          retention-days: 15
+          retention-days: 3
 
   # ------------------------------------------------------------------
   # JOB 2: TESTS LEGACY (Se mantiene igual, funcionaba bien)
@@ -117,4 +118,4 @@ jobs:
         with:
           name: report-legacy
           path: playwright-report/
-          retention-days: 15
+          retention-days: 3
