@@ -26,135 +26,63 @@ export class TmsApiClient {
 
   async initialize(): Promise<void> {
 
-
-
     logger.info(`✅ TmsApiClient initialized`);
-
-
 
   }
 
   private generateRandomId(): string {
 
-
-
     return String(Math.floor(10000 + Math.random() * 100000));
-
 
 
   }
 
   /**
-
-
-
    * Helper para escribir texto lentamente simulando escritura humana.
-
-
-
    */
-
-
 
   private async fillSlowly(selector: string, value: string, delay: number = 80): Promise<void> {
 
-
-
     const locator = this.page.locator(selector);
-
-
 
     await locator.click();
 
-
-
     await locator.clear();
 
-
-
     await this.page.waitForTimeout(200);
-
-
-
-
-
 
 
     // Escribir caracter por caracter con delay
 
-
-
     await locator.pressSequentially(value, { delay });
-
-
-
-
-
-
 
     // Esperar a que el input mask procese
 
-
-
     await this.page.waitForTimeout(300);
-
-
-
-
-
-
 
     // Verificar si se perdió el último caracter (común con "K" en RUTs)
 
-
-
     const currentValue = await locator.inputValue();
-
-
 
     const normalizedCurrent = currentValue.replace(/[^0-9Kk]/g, '').toUpperCase();
 
-
-
     const normalizedExpected = value.replace(/[^0-9Kk]/g, '').toUpperCase();
-
-
-
-
-
-
 
     if (normalizedCurrent !== normalizedExpected) {
 
-
-
       logger.warn(`⚠️ RUT value mismatch - trying to fix. Got: ${currentValue}, Expected: ${value}`);
-
-
 
       // Intentar agregar el último caracter si falta
 
-
-
       const lastChar = normalizedExpected.slice(-1);
-
-
 
       if (!normalizedCurrent.endsWith(lastChar)) {
 
-
-
         await locator.press(lastChar);
-
-
 
         await this.page.waitForTimeout(200);
 
-
-
         logger.info(`✅ Added missing character: ${lastChar}`);
-
-
 
       }
 
@@ -165,1292 +93,393 @@ export class TmsApiClient {
 
 
   }
-
   /**
-
-
-
-   * Helper especializado para escribir RUT en campos con Input Mask.
-
-
-
-   */
-
-
-
+    * Helper especializado para escribir RUT en campos con Input Mask.
+    * FIX FIREFOX: Usa .fill('') en lugar de triple clic para limpiar.
+    */
   private async typeRutSlowly(selector: string, rutValue: string): Promise<void> {
-
-
-
     logger.info(`🔑 typeRutSlowly: Writing RUT [${rutValue}] on ${selector}`);
-
-
-
     const locator = this.page.locator(selector);
 
-
-
-
-
-
-
     const normalize = (val: string) => val.toUpperCase().replace(/[^0-9K]/g, '');
-
-
-
     const normalizedExpected = normalize(rutValue);
-
-
-
     const verificationDigit = normalizedExpected.slice(-1);
-
-
-
     const rutBody = normalizedExpected.slice(0, -1);
-
-
-
     const rawWithHyphen = `${rutBody}-${verificationDigit}`;
 
-
-
-
-
-
-
     const formatTmsRut = (body: string, dv: string): string => {
-
-
-
       const parts: string[] = [];
-
-
-
       let remaining = body;
-
-
-
       while (remaining.length > 3) {
-
-
-
         parts.unshift(remaining.slice(-3));
-
-
-
         remaining = remaining.slice(0, -3);
-
-
-
       }
-
-
-
       if (remaining) parts.unshift(remaining);
-
-
-
       return parts.join('.') + '-' + dv;
-
-
-
     };
 
-
-
-
-
-
-
-    // --- Intento 1: pressSequentially con delay 100ms ---
-
-
-
-    await locator.click({ clickCount: 3 });
-
-
-
-    await this.page.keyboard.press('Backspace');
-
-
-
-    await this.page.waitForTimeout(200);
-
-
-
-
-
-
+    // --- Intento 1: Escritura limpia y rápida ---
+    // FIX: Usamos fill('') que es atómico y no falla en Firefox por latencia
+    await locator.fill('');
+    await this.page.waitForTimeout(100);
 
     await locator.pressSequentially(rawWithHyphen, { delay: 100 });
-
-
-
     await this.page.waitForTimeout(500);
-
-
-
-
-
-
 
     let currentValue = await locator.inputValue();
-
-
-
     let normalizedCurrent = normalize(currentValue);
 
-
-
-
-
-
-
     if (normalizedCurrent === normalizedExpected) {
-
-
-
       logger.info(`✅ RUT verified (attempt 1): ${currentValue}`);
-
-
-
       return;
-
-
-
     }
 
+    // --- Intento 2: Retry más lento ---
+    logger.warn(`⚠️ RUT mismatch (attempt 1). Got: [${currentValue}], Expected: [${normalizedExpected}]. Retrying slower...`);
 
-
-
-
-
-
-    // --- Intento 2: Retry más lento (delay 150ms) ---
-
-
-
-    logger.warn(`⚠️ RUT mismatch (attempt 1). Got: [${currentValue}] (${normalizedCurrent}), Expected: (${normalizedExpected}). Retrying slower...`);
-
-
-
-
-
-
-
-    await locator.click({ clickCount: 3 });
-
-
-
-    await this.page.keyboard.press('Backspace');
-
-
-
-    await this.page.waitForTimeout(300);
-
-
-
-
-
-
+    await locator.fill(''); // FIX: Limpieza segura nuevamente
+    await this.page.waitForTimeout(200);
 
     const retryRut = verificationDigit === 'K' ? `${rutBody}-k` : rawWithHyphen;
-
-
-
-
-
-
-
     await locator.pressSequentially(retryRut, { delay: 150 });
-
-
-
     await this.page.waitForTimeout(500);
 
-
-
-
-
-
-
     currentValue = await locator.inputValue();
-
-
-
     normalizedCurrent = normalize(currentValue);
 
-
-
-
-
-
-
     if (normalizedCurrent === normalizedExpected) {
-
-
-
       logger.info(`✅ RUT verified (attempt 2): ${currentValue}`);
-
-
-
       return;
-
-
-
     }
 
-
-
-
-
-
-
-    // --- Intento 3: Fallback JavaScript ---
-
-
-
-    logger.warn(`⚠️ RUT mismatch (attempt 2). Got: [${currentValue}] (${normalizedCurrent}). Using JS fallback...`);
-
-
-
+    // --- Intento 3: Fallback JavaScript (Inyección Directa) ---
+    logger.warn(`⚠️ RUT mismatch (attempt 2). Using JS fallback...`);
     const tmsFormatted = formatTmsRut(rutBody, verificationDigit);
 
-
-
-
-
-
-
     await this.page.evaluate(
-
-
-
       ({ sel, formattedValue }) => {
-
-
-
         const input = document.querySelector(sel) as HTMLInputElement;
-
-
-
         if (input) {
-
-
-
+          // Desactivamos listeners temporalmente para evitar interferencia del input mask
           const savedOnInput = input.oninput;
-
-
-
           const savedOnChange = input.onchange;
-
-
-
-          const savedOnKeydown = input.onkeydown;
-
-
-
-
-
-
-
-          input.oninput = null;
-
-
-
-          input.onchange = null;
-
-
-
-          input.onkeydown = null;
-
-
-
-
-
-
 
           input.value = formattedValue;
 
-
-
-
-
-
-
-          input.oninput = savedOnInput;
-
-
-
-          input.onchange = savedOnChange;
-
-
-
-          input.onkeydown = savedOnKeydown;
-
-
-
-
-
-
-
+          // Disparamos eventos manualmente
           input.dispatchEvent(new Event('input', { bubbles: true }));
-
-
-
           input.dispatchEvent(new Event('change', { bubbles: true }));
-
-
-
           input.dispatchEvent(new Event('blur', { bubbles: true }));
-
-
-
         }
-
-
-
       },
-
-
-
       { sel: selector, formattedValue: tmsFormatted }
-
-
-
     );
 
-
-
-
-
-
-
     await this.page.waitForTimeout(300);
-
-
-
     currentValue = await locator.inputValue();
-
-
-
     normalizedCurrent = normalize(currentValue);
 
-
-
-
-
-
-
     if (normalizedCurrent === normalizedExpected) {
-
-
-
       logger.info(`✅ RUT verified (JS fallback): ${currentValue}`);
-
-
-
       return;
-
-
-
     }
 
-
-
-
-
-
-
-    if (normalizedCurrent.slice(0, -1) === rutBody || normalizedCurrent === rutBody) {
-
-
-
-      logger.warn(`⚠️ RUT body matches but DV may differ. Got: [${currentValue}], Expected: [${rutValue}]. Continuing...`);
-
-
-
-      return;
-
-
-
-    }
-
-
-
-
-
-
-
-    logger.error(`❌ RUT validation FAILED after all attempts. Final: [${currentValue}] (${normalizedCurrent}), Expected: [${rutValue}] (${normalizedExpected})`);
-
-
-
+    logger.error(`❌ RUT validation FAILED. Final: [${currentValue}], Expected: [${rutValue}]`);
   }
 
   // --- 1. TRANSPORTISTA ---
   async createTransportista(nombre: string): Promise<string> {
-
     const rut = generateValidChileanRUT();
-    const btnGuardar = this.page.locator('button.btn.btn-success').filter({ hasText: 'Guardar' });
 
     logger.info(`🚀 UI: Creating Transportista [${nombre}] RUT: [${rut}]`);
 
     await this.page.goto(`${this.baseUrl}/transportistas/crear`);
-
     await this.page.waitForLoadState('networkidle');
 
+    // Llenado de formulario
     await this.page.waitForSelector('input[name="Transportistas[nombre]"]', { state: 'visible', timeout: 15000 });
-
     await this.page.fill('input[name="Transportistas[nombre]"]', nombre);
-
     await this.page.fill('input[name="Transportistas[razon_social]"]', nombre);
-
     await this.typeRutSlowly('input[name="Transportistas[documento]"]', rut);
-
     await this.page.fill('input[name="Transportistas[calle]"]', generateChileanStreet());
-
     await this.page.fill('input[name="Transportistas[altura]"]', generateStreetNumber());
 
+    // Selección de Dropdowns + Evento Change (Para validaciones de frontend)
     await this.page.selectOption('select[name="Transportistas[tipo_transportista_id]"]', '1');
-
     await this.page.locator('select[name="Transportistas[tipo_transportista_id]"]').dispatchEvent('change');
 
     await this.page.selectOption('select[name="Transportistas[region_id]"]', '1');
-
     await this.page.selectOption('select[name="Transportistas[ciudad_id]"]', '1');
-
     await this.page.selectOption('select[name="Transportistas[comuna_id]"]', '2');
 
+    // Pausa técnica para estabilidad en Firefox
+    await this.page.waitForTimeout(500);
+
+    // --- GUARDADO ROBUSTO (JS INJECTION) ---
+    logger.info('💾 Saving Transportista via JS Injection...');
+
     await Promise.all([
-
       this.page.waitForNavigation({ waitUntil: 'networkidle' }),
 
-      this.page.waitForNavigation({ waitUntil: 'networkidle' }),
-      btnGuardar.click(),
+      // FIX: Usamos evaluate() para hacer click directo en el DOM.
+      // Esto evita que Firefox falle esperando que el botón sea "estable" o visible si hay overlays.
+      this.page.evaluate(() => {
+        const buttons = Array.from(document.querySelectorAll('button.btn-success, input[type="submit"].btn-success'));
+        const btnGuardar = buttons.find(b => b.textContent?.includes('Guardar') || (b as HTMLInputElement).value?.includes('Guardar'));
 
-      logger.info(`✅ Transportista [${nombre}] created successfully`),
-
+        if (btnGuardar) {
+          (btnGuardar as HTMLElement).click();
+        } else {
+          throw new Error('JS Injection: Botón Guardar no encontrado en el DOM');
+        }
+      })
     ]);
 
+    logger.info(`✅ Transportista [${nombre}] created successfully`);
 
-
-
-
-
-
+    // --- EXTRACCIÓN DE ID ---
     let id = '0';
-
-
-
     let currentUrl = this.page.url();
-
-
-
     logger.info(`📍 URL after save: ${currentUrl}`);
-
-
-
-
-
-
 
     let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
 
-
-
     if (idMatch) {
-
-
-
       id = idMatch[1];
-
-
-
       logger.info(`✅ Transportista ID extracted from URL: ${id}`);
-
-
-
     } else {
-
-
-
       logger.info(`🔍 Using search filter to find Transportista: ${nombre}`);
 
-
-
       await this.page.waitForTimeout(1000);
-
-
-
-
-
-
-
       const searchInput = this.page.locator('#search');
 
-
-
       await searchInput.fill(nombre);
-
-
-
       logger.info(`🔎 Filled search with: ${nombre}`);
 
-
-
-
-
-
-
       await this.page.getByRole('link', { name: 'Buscar' }).click();
-
-
-
       await this.page.waitForLoadState('networkidle');
-
-
-
       logger.info(`🔎 Clicked Buscar link`);
-
-
 
       await this.page.waitForTimeout(2000);
 
-
-
-
-
-
-
+      // Estrategia de búsqueda en tabla
       const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
 
-
-
-
-
-
-
       if (await row.count() > 0) {
-
-
-
         const dataKey = await row.getAttribute('data-key');
-
-
-
         if (dataKey) {
-
-
-
           id = dataKey;
-
-
-
           logger.info(`✅ Transportista ID from data-key: ${id}`);
-
-
-
         }
-
-
-
       } else {
-
-
-
         logger.info(`🔎 Trying alternative search in table...`);
-
-
-
         const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
 
-
-
         if (await anyRow.count() > 0) {
-
-
-
           const dataKey = await anyRow.getAttribute('data-key');
-
-
-
           if (dataKey) {
-
-
-
             id = dataKey;
-
-
-
             logger.info(`✅ Transportista ID from fallback data-key: ${id}`);
-
-
-
           } else {
-
-
-
             const link = anyRow.locator('a[href*="/transportistas/"]').first();
-
-
-
             if (await link.count() > 0) {
-
-
-
               const href = await link.getAttribute('href');
-
-
-
               const match = href?.match(/\/(\d+)/);
-
-
-
               if (match) {
-
-
-
                 id = match[1];
-
-
-
                 logger.info(`✅ Transportista ID from link: ${id}`);
-
-
-
               }
-
-
-
             }
-
-
-
           }
-
-
-
         } else {
-
-
-
           logger.warn(`⚠️ No row found for Transportista: ${nombre}`);
-
-
-
         }
-
-
-
       }
-
-
-
     }
-
-
-
-
-
-
 
     if (id === '0') {
-
-
-
       logger.error(`❌ Could not extract Transportista ID for: ${nombre}`);
-
-
-
       throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
-
-
-
     }
 
-
-
-
-
-
-
     logger.info(`✅ Transportista created with ID: ${id}`);
-
-
-
     return id;
-
-
-
   }
+
 
   // --- 2. CLIENTE ---
   async createCliente(nombre: string): Promise<string> {
-
-
-
     const rut = generateValidChileanRUT();
-
-
-
     logger.info(`🚀 UI: Creating Cliente [${nombre}] RUT: [${rut}]`);
 
-
-
     await this.page.goto(`${this.baseUrl}/clientes/crear`);
-
-
-
     await this.page.waitForLoadState('networkidle');
-
-
-
     await this.page.waitForSelector('#clientes-nombre', { state: 'visible', timeout: 15000 });
 
-
-
-
-
-
-
     await this.page.fill('#clientes-nombre', nombre);
-
-
-
     await this.typeRutSlowly('#clientes-rut', rut);
-
-
-
     await this.page.fill('#clientes-nombre_fantasia', nombre);
-
-
-
     await this.page.fill('#clientes-calle', generateChileanStreet());
 
+    // --- FIX FIREFOX: Clics vía JS para evitar Timeouts de estabilidad ---
 
-
-
-
-
-
-    await this.page.click('button[data-id="clientes-tipo_cliente_id"]');
-
-
-
+    // 1. Tipo Cliente
+    await this.clickViaJS('button[data-id="clientes-tipo_cliente_id"]');
     await this.page.waitForTimeout(500);
-
-
-
     await this.page.keyboard.press('ArrowDown');
-
-
-
     await this.page.keyboard.press('Enter');
 
-
-
-    await this.page.waitForTimeout(500);
-
-
-
-
-
-
-
-    await this.page.click('button[data-id="clientes-region_id"]');
-
-
-
-    await this.page.waitForTimeout(500);
-
-
-
+    // 2. Región
+    await this.clickViaJS('button[data-id="clientes-region_id"]');
+    await this.page.waitForTimeout(800); // Un poco más de tiempo para carga de cascada
     await this.page.keyboard.press('ArrowDown');
-
-
-
     await this.page.keyboard.press('Enter');
 
-
-
-    await this.page.waitForTimeout(2000);
-
-
-
-
-
-
-
-    await this.page.click('button[data-id="clientes-ciudad_id"]');
-
-
-
+    // 3. Ciudad
+    await this.page.waitForTimeout(1000); // Esperar carga AJAX
+    await this.clickViaJS('button[data-id="clientes-ciudad_id"]');
     await this.page.waitForTimeout(500);
-
-
-
     await this.page.keyboard.press('ArrowDown');
-
-
-
     await this.page.keyboard.press('Enter');
 
-
-
-    await this.page.waitForTimeout(2000);
-
-
-
-
-
-
-
-    await this.page.click('button[data-id="clientes-comuna_id"]');
-
-
-
+    // 4. Comuna
+    await this.page.waitForTimeout(1000);
+    await this.clickViaJS('button[data-id="clientes-comuna_id"]');
     await this.page.waitForTimeout(500);
-
-
-
     await this.page.keyboard.press('ArrowDown');
-
-
-
     await this.page.keyboard.press('Enter');
 
-
-
-    await this.page.waitForTimeout(500);
-
-
-
-
-
-
-
+    // --- Gestión de Polígonos ---
     logger.info('📍 Selecting Polígonos...');
-
-
-
     const poligonosBtn = this.page.locator('button[data-id*="poligono"], button[data-id*="Poligono"]').first();
 
-
-
-
-
-
-
     if (await poligonosBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-
-
-
-      await poligonosBtn.click();
-
-
-
+      await this.clickViaJS('button[data-id*="poligono"], button[data-id*="Poligono"]');
       await this.page.waitForTimeout(500);
-
-
-
-
-
-
 
       const selectAllBtn = this.page.locator('.dropdown-menu.show button.actions-btn.bs-select-all');
-
-
-
       if (await selectAllBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-
-
-
         await selectAllBtn.click();
-
-
-
         logger.info('✅ Polígonos: Seleccionar todos clicked');
-
-
-
-      } else {
-
-
-
-        const firstOption = this.page.locator('.dropdown-menu.show .dropdown-item, .dropdown-menu.show li a').first();
-
-
-
-        if (await firstOption.isVisible({ timeout: 1000 }).catch(() => false)) {
-
-
-
-          await firstOption.click();
-
-
-
-          logger.info('✅ Polígonos: Primera opción seleccionada');
-
-
-
-        }
-
-
-
       }
-
-
-
       await this.page.keyboard.press('Escape');
-
-
-
-      await this.page.waitForTimeout(500);
-
-
-
-    } else {
-
-
-
-      logger.info('🔎 Trying fallback selector for Polígonos...');
-
-
-
-      const labelDiv = this.page.locator('label:has-text("Polígonos")').first();
-
-
-
-      if (await labelDiv.isVisible({ timeout: 2000 }).catch(() => false)) {
-
-
-
-        const nearbyBtn = this.page.locator('label:has-text("Polígonos") ~ .bootstrap-select button, label:has-text("Polígonos") + div button').first();
-
-
-
-        if (await nearbyBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-
-
-
-          await nearbyBtn.click();
-
-
-
-          await this.page.waitForTimeout(500);
-
-
-
-          const selectAllBtn = this.page.locator('.dropdown-menu.show button.actions-btn.bs-select-all');
-
-
-
-          if (await selectAllBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-
-
-
-            await selectAllBtn.click();
-
-
-
-            logger.info('✅ Polígonos: Seleccionar todos clicked (fallback)');
-
-
-
-          }
-
-
-
-          await this.page.keyboard.press('Escape');
-
-
-
-          await this.page.waitForTimeout(500);
-
-
-
-        }
-
-
-
-      } else {
-
-
-
-        logger.warn('⚠️ Polígonos dropdown not found - continuing without it');
-
-
-
-      }
-
-
-
     }
 
+    // --- GUARDADO ---
+    await Promise.all([
+      this.page.waitForNavigation({ waitUntil: 'networkidle' }),
+      this.clickViaJS('#btn_guardar')
+    ]);
 
+    // ... (El resto de la lógica de extracción de ID se mantiene igual)
+    return this.extractIdAfterSave(nombre, 'Cliente');
+  }
 
-
-
-
-
-    await this.page.click('#btn_guardar');
-
-
-
-    await this.page.waitForTimeout(3000);
-
-
-
-
-
-
-
+  /**
+   * HELPER: Extrae el ID de la entidad creada (Transportista, Cliente, etc.)
+   * Intenta primero por URL (si redirige a /ver/123) y luego usa el buscador de la grilla.
+   */
+  private async extractIdAfterSave(nombre: string, entityLabel: string): Promise<string> {
     let id = '0';
-
-
-
     let currentUrl = this.page.url();
+    logger.info(`📍 URL after save (${entityLabel}): ${currentUrl}`);
 
-
-
-    logger.info(`📍 URL after save: ${currentUrl}`);
-
-
-
-
-
-
-
+    // 1. Intentar extraer de la URL directa (ej: /view/123)
     let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
-
-
-
     if (idMatch) {
-
-
-
       id = idMatch[1];
-
-
-
-      logger.info(`✅ Cliente ID extracted from URL: ${id}`);
-
-
-
-    } else {
-
-
-
-      logger.info(`🔍 Using search filter to find Cliente: ${nombre}`);
-
-
-
-      await this.page.waitForTimeout(1000);
-
-
-
-
-
-
-
-      const searchInput = this.page.locator('#search');
-
-
-
-      await searchInput.fill(nombre);
-
-
-
-      logger.info(`🔎 Filled search with: ${nombre}`);
-
-
-
-
-
-
-
-      await this.page.getByRole('link', { name: 'Buscar' }).click();
-
-
-
-      await this.page.waitForLoadState('networkidle');
-
-
-
-      logger.info(`🔎 Clicked Buscar link`);
-
-
-
-      await this.page.waitForTimeout(2000);
-
-
-
-
-
-
-
-      const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
-
-
-
-
-
-
-
-      if (await row.count() > 0) {
-
-
-
-        const dataKey = await row.getAttribute('data-key');
-
-
-
-        if (dataKey) {
-
-
-
-          id = dataKey;
-
-
-
-          logger.info(`✅ Cliente ID from data-key: ${id}`);
-
-
-
-        }
-
-
-
-      } else {
-
-
-
-        logger.info(`🔎 Trying alternative search in table...`);
-
-
-
-        const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
-
-
-
-        if (await anyRow.count() > 0) {
-
-
-
-          const dataKey = await anyRow.getAttribute('data-key');
-
-
-
-          if (dataKey) {
-
-
-
-            id = dataKey;
-
-
-
-            logger.info(`✅ Cliente ID from fallback data-key: ${id}`);
-
-
-
-          } else {
-
-
-
-            const link = anyRow.locator('a[href*="/clientes/"]').first();
-
-
-
-            if (await link.count() > 0) {
-
-
-
-              const href = await link.getAttribute('href');
-
-
-
-              const match = href?.match(/\/(\d+)/);
-
-
-
-              if (match) {
-
-
-
-                id = match[1];
-
-
-
-                logger.info(`✅ Cliente ID from link: ${id}`);
-
-
-
-              }
-
-
-
-            }
-
-
-
-          }
-
-
-
-        } else {
-
-
-
-          logger.warn(`⚠️ No row found for Cliente: ${nombre}`);
-
-
-
-        }
-
-
-
-      }
-
-
-
+      logger.info(`✅ ${entityLabel} ID extracted from URL: ${id}`);
+      return id;
     }
 
+    // 2. Si no redirigió, usar el buscador de la grilla
+    logger.info(`🔍 Using search filter to find ${entityLabel}: ${nombre}`);
+    await this.page.waitForTimeout(1000);
 
+    const searchInput = this.page.locator('#search');
+    await searchInput.fill(nombre);
+    logger.info(`🔎 Filled search with: ${nombre}`);
 
+    // CORRECCIÓN FIREFOX: Clic vía JS directo al ID 'buscar'
+    // Reemplaza: await this.page.getByRole('link', { name: 'Buscar' }).click();
+    await this.page.evaluate(() => {
+      const btn = document.getElementById('buscar');
+      if (btn) btn.click();
+      else console.error('Botón Buscar no encontrado');
+    });
 
+    await this.page.waitForLoadState('networkidle');
+    logger.info(`🔎 Clicked Buscar link (JS)`)
+    await this.page.waitForTimeout(2000);
 
+    // 3. Buscar en la tabla por data-key
+    const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
 
+    if (await row.count() > 0) {
+      const dataKey = await row.getAttribute('data-key');
+      if (dataKey) {
+        id = dataKey;
+        logger.info(`✅ ${entityLabel} ID from data-key: ${id}`);
+        return id;
+      }
+    }
+
+    // 4. Fallback: Buscar cualquier fila que tenga el texto
+    logger.info(`🔎 Trying alternative search in table...`);
+    const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
+
+    if (await anyRow.count() > 0) {
+      const dataKey = await anyRow.getAttribute('data-key');
+      if (dataKey) {
+        id = dataKey;
+        logger.info(`✅ ${entityLabel} ID from fallback data-key: ${id}`);
+        return id;
+      }
+
+      // Intentar sacar ID de algún link de editar/ver dentro de la fila
+      const link = anyRow.locator('a[href*="/ver/"], a[href*="/editar/"]').first();
+      if (await link.count() > 0) {
+        const href = await link.getAttribute('href');
+        const match = href?.match(/\/(\d+)/);
+        if (match) {
+          id = match[1];
+          logger.info(`✅ ${entityLabel} ID from link: ${id}`);
+          return id;
+        }
+      }
+    }
 
     if (id === '0') {
-
-
-
-      logger.error(`❌ Could not extract Cliente ID for: ${nombre}`);
-
-
-
-      throw new Error(`Failed to extract Cliente ID for: ${nombre}`);
-
-
-
+      logger.error(`❌ Could not extract ${entityLabel} ID for: ${nombre}`);
+      throw new Error(`Failed to extract ${entityLabel} ID for: ${nombre}`);
     }
 
-
-
-
-
-
-
-    logger.info(`✅ Cliente created with ID: ${id}`);
-
-
-
     return id;
-
-
-
   }
+
+  /**
+     * HELPER: Realiza un clic directo en el DOM usando la referencia del elemento de Playwright.
+     * Ventaja: Soporta selectores complejos (:has-text, xpath) y evita Timeouts de estabilidad.
+     */
+  private async clickViaJS(selector: string): Promise<void> {
+    logger.info(`⚡ JS Click: ${selector}`);
+
+    // 1. Resolvemos el elemento con Playwright (así entiende :has-text, xpath, etc.)
+    const locator = this.page.locator(selector).first();
+
+    // 2. Esperamos a que exista en el DOM (attached)
+    await locator.waitFor({ state: 'attached', timeout: 15000 });
+
+    // 3. Ejecutamos el click nativo sobre el elemento ya resuelto
+    await locator.evaluate((el) => {
+      if (el instanceof HTMLElement) {
+        el.click();
+      } else {
+        console.error('Element is not clickable via JS:', el);
+      }
+    });
+  }
+
 
   // --- 3. VEHÍCULO ---
   async createVehiculo(transportistaNombre: string): Promise<string> {
@@ -2183,7 +1212,7 @@ export class TmsApiClient {
 
 
 
-      const matchingOption = $sel.find('option').filter(function(this: any) {
+      const matchingOption = $sel.find('option').filter(function (this: any) {
 
 
 
@@ -2647,255 +1676,124 @@ export class TmsApiClient {
 
   }
 
-  // --- 6. PLANIFICAR VIAJE ---
+  // --- 6. PLANIFICAR VIAJE (FIX CARGA & AUTO-HEALING) ---
   async createViaje(clienteNombre: string, nroViaje: string) {
-
-
-
     logger.info(`🚚 UI: Creating Viaje [${nroViaje}] for Cliente [${clienteNombre}]`);
 
-
-
-
-
-
-
     await this.page.goto(`${this.baseUrl}/viajes/crear`);
-
-
-
-    await this.page.waitForLoadState('domcontentloaded');
-
-
-
-    await this.page.waitForTimeout(1000);
-
-
-
-
-
-
-
-    await this.page.fill('#viajes-nro_viaje', nroViaje);
-
-
-
-    logger.info(`✅ Filled Nro Viaje: ${nroViaje}`);
-
-
-
-
-
-
-
-    await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', 'tclp2210', 'Tipo Operación');
-
-
-
-    await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', 'tclp2210', 'Tipo Servicio');
-
-
-
-    await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
-
-
-
     await this.page.waitForLoadState('networkidle');
 
+    // --- FUNCIÓN HELPER: Llenar Formulario (Reutilizable para Auto-Healing) ---
+    const fillForm = async (isRetry = false) => {
+      logger.info(`📝 Filling Form (Retry: ${isRetry})...`);
 
+      // 1. Campos de Texto
+      await this.page.fill('#viajes-nro_viaje', nroViaje);
 
-    await this.page.waitForTimeout(1500);
+      // 2. Dropdowns Simples (Operación, Servicio, Cliente)
+      // Usamos JS directo si es retry para mayor velocidad y seguridad
+      if (isRetry) {
+        await this.forceSelectByText('tipo_operacion_form', 'tclp2210'); // Asumiendo ID del select oculto
+        await this.forceSelectByText('viajes-tipo_servicio_id', 'tclp2210');
+        await this.forceSelectByText('viajes-cliente_id', clienteNombre);
+      } else {
+        await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', 'tclp2210', 'Tipo Operación');
+        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', 'tclp2210', 'Tipo Servicio');
+        await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
+      }
 
+      if (!isRetry) await this.page.waitForTimeout(1000); // Esperar carga de datos del cliente
 
+      // 3. Tipos de Viaje
+      if (isRetry) {
+        await this.forceSelectByText('viajes-tipo_viaje_id', 'Normal');
+        await this.forceSelectByText('viajes-unidad_negocio_id', 'Defecto');
+      } else {
+        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_viaje_id"]', 'Normal', 'Tipo Viaje');
+        await this.selectBootstrapDropdownSimple('button[data-id="viajes-unidad_negocio_id"]', 'Defecto', 'Unidad Negocio');
+      }
 
+      // 4. SELECCIÓN DE CARGA (CRÍTICO - FIX ANTERIOR)
+      // Usamos inyección JS directa para evitar problemas de "click fuera del modal" o dropdown cerrado
+      logger.info('📦 Seleccionando Carga (Force JS)...');
+      await this.forceSelectByText('viajes-carga_id', 'Pallet_Furgon_Frio_10ton');
+      await this.page.waitForTimeout(500);
+    };
 
+    // 1. LLENADO INICIAL
+    await fillForm(false);
 
-
-
-    await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_viaje_id"]', 'Normal', 'Tipo Viaje');
-
-
-
-    await this.selectBootstrapDropdownSimple('button[data-id="viajes-unidad_negocio_id"]', 'Defecto', 'Unidad Negocio');
-
-
-
-    await this.page.waitForLoadState('networkidle');
-
-
-
-
-
-
-
-    await this.selectBootstrapDropdownSimple('button[data-id="viajes-carga_id"]', 'Pallet_Furgon_Frio_10ton', 'Código Carga');
-
-
-
-    await this.page.keyboard.press('Tab');
-
-
-
-    await this.page.waitForLoadState('networkidle');
-
-
-
-    await this.page.waitForTimeout(2000);
-
-
-
-
-
-
-
+    // 2. AGREGAR RUTA
     logger.info('📍 Adding Route...');
-
-
-
     const btnAgregarRuta = this.page.locator('button:has-text("Agregar Ruta")').first();
 
-
-
-    await btnAgregarRuta.waitFor({ state: 'visible', timeout: 15000 });
-
-
-
-    await expect(btnAgregarRuta).toBeEnabled({ timeout: 20000 });
-
-
-
-    await btnAgregarRuta.click();
-
-
-
-    await this.page.waitForTimeout(1000);
-
-
-
-
-
-
-
-    const ruta715Selector = this.page.locator(`//tr[td[contains(., '715')]]//i`).first();
-
-
-
-    const rutaGenericaSelector = this.page.locator('#tabla-rutas tbody tr .btn-success').first();
-
-
-
-
-
-
-
-    if (await ruta715Selector.isVisible({ timeout: 5000 }).catch(() => false)) {
-
-
-
-      await ruta715Selector.click();
-
-
-
-      logger.info('✅ Route 715 selected (Specific XPath)');
-
-
-
-    } else if (await rutaGenericaSelector.isVisible({ timeout: 2000 }).catch(() => false)) {
-
-
-
-      await rutaGenericaSelector.click();
-
-
-
-      logger.warn('⚠️ Route 715 not found, selected first available route instead.');
-
-
-
-    } else {
-
-
-
-      logger.warn('⚠️ No route found in modal to select.');
-
-
-
+    // Click seguro en Agregar Ruta
+    if (await btnAgregarRuta.isVisible()) {
+      await btnAgregarRuta.evaluate(el => (el as HTMLElement).click());
     }
 
+    // Selección de Ruta 715 (Modal)
+    const rutaSelector = this.page.locator(`//tr[td[contains(., '715')]]//i`).first();
+    try {
+      await rutaSelector.waitFor({ state: 'visible', timeout: 5000 });
+      await rutaSelector.evaluate(el => (el as HTMLElement).click());
+      logger.info('✅ Ruta seleccionada en modal.');
+    } catch (e) {
+      logger.warn('⚠️ Ruta 715 no encontrada, intentando genérica...');
+      const rutaGen = this.page.locator('#tabla-rutas tbody tr .btn-success').first();
+      if (await rutaGen.isVisible()) await rutaGen.click();
+    }
 
-
-
-
-
-
-    await this.page.waitForTimeout(1000);
-
-
-
-
-
-
-
-    logger.info('💾 Clicking Guardar...');
-
-
-
-    await this.page.click('#btn_guardar_form');
-
-
-
-    await this.page.waitForLoadState('networkidle');
-
-
-
+    // 3. AUTO-HEALING (Recuperación tras posible recarga)
+    logger.info('⏳ Verificando estado del formulario tras agregar ruta...');
     await this.page.waitForTimeout(2000);
 
+    // Verificamos si se borró el Nro Viaje O si se borró la Carga
+    const valNroViaje = await this.page.inputValue('#viajes-nro_viaje');
+    const valCarga = await this.page.locator('#viajes-carga_id').inputValue(); // Valor del select oculto
 
-
-
-
-
-
-    const successToast = this.page.locator('text="Viaje Creado con éxito"');
-
-
-
-    const nroViajeVal = await this.page.locator('#viajes-nro_viaje').inputValue().catch(() => '');
-
-
-
-
-
-
-
-    if (await successToast.isVisible({ timeout: 3000 }).catch(() => false) || nroViajeVal === '') {
-
-
-
-      logger.info(`✅ Viaje [${nroViaje}] created successfully via UI`);
-
-
-
-    } else {
-
-
-
-      logger.warn(`⚠️ Could not confirm viaje creation, continuing...`);
-
-
-
+    if (!valNroViaje || valNroViaje !== nroViaje || valCarga === '') {
+      logger.warn('⚠️ Formulario reiniciado detectado. Re-aplicando datos...');
+      await fillForm(true); // Re-llenamos todo
     }
 
+    // 4. GUARDAR
+    logger.info('💾 Clicking Guardar...');
+    await this.page.evaluate(() => {
+      const btn = document.getElementById('btn_guardar_form');
+      if (btn) btn.click();
+    });
 
+    try {
+      await this.page.waitForLoadState('networkidle', { timeout: 8000 });
+    } catch { }
 
+    // 5. VALIDACIÓN FINAL
+    const currentUrl = this.page.url();
+    if (currentUrl.includes('/crear')) {
+      const errors = await this.page.locator('.alert-danger, .has-error').allTextContents();
+      if (errors.length > 0) throw new Error(`❌ Error al guardar: ${errors.join(' | ')}`);
+
+      // Si no hay errores, verificamos si realmente se guardó (Toast o cambio de ID)
+      const toast = this.page.locator('text="Viaje Creado con éxito"');
+      if (!await toast.isVisible()) {
+        // Última verificación: ¿El input sigue lleno?
+        const finalVal = await this.page.inputValue('#viajes-nro_viaje');
+        if (finalVal === nroViaje) throw new Error('❌ Estancado en /crear. Posible causa: Carga no seleccionada o validación JS silenciosa.');
+      }
+    }
+    logger.info(`✅ Viaje [${nroViaje}] created successfully.`);
   }
 
- // --- 7. ASIGNAR VIAJE (ORDENADO: Selección -> Espera -> Healer -> Vehículo) ---
+  // --- ASEGÚRATE DE TENER ESTE HELPER (Lo usamos para la Carga) ---
+
+
+  // --- 7. ASIGNAR VIAJE (ORDENADO: Selección -> Espera -> Healer -> Vehículo) ---
   async assignViaje(nroViaje: string, transportistaNombre: string, patenteVehiculo: string, nombreConductor: string) {
 
     logger.info(`🚚 UI: Assigning Viaje [${nroViaje}]`);
 
-   
+
 
     // 1. Navegar y Buscar
 
@@ -2909,13 +1807,13 @@ export class TmsApiClient {
 
     await this.page.waitForTimeout(2000);
 
-   
+
 
     await this.page.locator('a[href*="asignar"], a[href*="update"]').first().click();
 
     await this.page.waitForLoadState('domcontentloaded');
 
-   
+
 
     // ---------------------------------------------------------
 
@@ -2923,13 +1821,13 @@ export class TmsApiClient {
 
     // ---------------------------------------------------------
 
-   
+
 
     // A.1 Selección Inicial
 
     await this.selectTransportistaRobust(transportistaNombre);
 
-   
+
 
     // A.2 Espera de Estabilización (Cascada AJAX)
 
@@ -2949,29 +1847,29 @@ export class TmsApiClient {
 
     const currentTrans = await this.page.locator('#s2id_Viajes_transportista_id .select2-chosen').textContent();
 
-   
+
 
     if (!currentTrans?.toUpperCase().includes(transportistaNombre.toUpperCase())) {
 
-        logger.warn(`⚠️ Transportista reset detected! Re-applying value...`);
+      logger.warn(`⚠️ Transportista reset detected! Re-applying value...`);
 
-       
 
-        // Re-seleccionamos
 
-        await this.selectTransportistaRobust(transportistaNombre);
+      // Re-seleccionamos
 
-        await this.page.locator('body').click();
+      await this.selectTransportistaRobust(transportistaNombre);
 
-       
+      await this.page.locator('body').click();
 
-        // Esperamos un poco más para asegurar que esta segunda selección pegue
 
-        await this.page.waitForTimeout(3000);
+
+      // Esperamos un poco más para asegurar que esta segunda selección pegue
+
+      await this.page.waitForTimeout(3000);
 
     } else {
 
-        logger.info('✅ Transportista is stable.');
+      logger.info('✅ Transportista is stable.');
 
     }
 
@@ -2983,7 +1881,7 @@ export class TmsApiClient {
 
     // ---------------------------------------------------------
 
-   
+
 
     // B.1 Esperar a que los datos existan (usando el ID correcto)
 
@@ -2991,21 +1889,21 @@ export class TmsApiClient {
 
     try {
 
-        await this.page.waitForFunction(() => {
+      await this.page.waitForFunction(() => {
 
-            const select = document.querySelector('#viajes-vehiculo_uno_id') as HTMLSelectElement;
+        const select = document.querySelector('#viajes-vehiculo_uno_id') as HTMLSelectElement;
 
-            // Opción 0 es "Seleccione...", esperamos que haya más
+        // Opción 0 es "Seleccione...", esperamos que haya más
 
-            return select && select.options.length > 1;
+        return select && select.options.length > 1;
 
-        }, null, { timeout: 15000 });
+      }, null, { timeout: 15000 });
 
-        logger.info('✅ Vehicle data loaded!');
+      logger.info('✅ Vehicle data loaded!');
 
     } catch (e) {
 
-        logger.warn('⚠️ Timeout waiting for vehicle data. Attempting selection anyway...');
+      logger.warn('⚠️ Timeout waiting for vehicle data. Attempting selection anyway...');
 
     }
 
@@ -3017,7 +1915,7 @@ export class TmsApiClient {
 
     await this.forceSelectByText('viajes-vehiculo_uno_id', patenteVehiculo);
 
-   
+
 
     await this.page.waitForTimeout(1000); // Esperar eventos onchange del vehículo
 
@@ -3053,11 +1951,11 @@ export class TmsApiClient {
 
     const modal = this.page.locator('text=Confirmación');
 
-    if (await modal.isVisible({ timeout: 3000 }).catch(()=>false)) {
+    if (await modal.isVisible({ timeout: 3000 }).catch(() => false)) {
 
-        logger.info('⚠️ Accepting confirmation modal...');
+      logger.info('⚠️ Accepting confirmation modal...');
 
-        await this.page.locator('button:has-text("Aceptar")').click();
+      await this.page.locator('button:has-text("Aceptar")').click();
 
     }
 
@@ -3073,15 +1971,15 @@ export class TmsApiClient {
 
   // --- UTILS ---
 
-/**
-
-
-
-   * Selector ULTRA ROBUSTO para Transportistas (Actualizado)
-
-
-
-   */
+  /**
+  
+  
+  
+     * Selector ULTRA ROBUSTO para Transportistas (Actualizado)
+  
+  
+  
+     */
 
 
 
@@ -3093,7 +1991,7 @@ export class TmsApiClient {
 
 
 
-   
+
 
 
 
@@ -3105,7 +2003,7 @@ export class TmsApiClient {
 
 
 
-   
+
 
 
 
@@ -3129,7 +2027,7 @@ export class TmsApiClient {
 
 
 
-       
+
 
 
 
@@ -3177,7 +2075,7 @@ export class TmsApiClient {
 
 
 
-   
+
 
 
 
@@ -3189,7 +2087,7 @@ export class TmsApiClient {
 
 
 
-     
+
 
 
 
@@ -3225,7 +2123,7 @@ export class TmsApiClient {
 
 
 
-         
+
 
 
 
@@ -3241,7 +2139,7 @@ export class TmsApiClient {
 
 
 
-         
+
 
 
 
@@ -3257,31 +2155,31 @@ export class TmsApiClient {
 
 
 
-             // @ts-ignore
+            // @ts-ignore
 
 
 
-             window.jQuery(selectElement).trigger('change');
+            window.jQuery(selectElement).trigger('change');
 
 
 
-             // @ts-ignore
+            // @ts-ignore
 
 
 
-             if (window.jQuery(selectElement).select2) {
+            if (window.jQuery(selectElement).select2) {
 
 
 
-                // @ts-ignore
+              // @ts-ignore
 
 
 
-                window.jQuery(selectElement).select2('data', { id: matchingOption.value, text: matchingOption.text });
+              window.jQuery(selectElement).select2('data', { id: matchingOption.value, text: matchingOption.text });
 
 
 
-             }
+            }
 
 
 
@@ -3418,145 +2316,24 @@ export class TmsApiClient {
   }
 
   private async forceSelectByText(selectId: string, textToSelect: string): Promise<void> {
-
-
-
-    logger.info(`💉 JS Injection: Forcing selection in #${selectId} -> "${textToSelect}"`);
-
-
-
-
-
-
-
-    const result = await this.page.evaluate(({ id, text }) => {
-
-
-
+    await this.page.evaluate(({ id, text }) => {
       const select = document.getElementById(id) as HTMLSelectElement;
+      if (!select) return;
 
+      const option = Array.from(select.options).find(opt => opt.text.toUpperCase().includes(text.toUpperCase()));
+      if (option) {
+        select.value = option.value;
+        // Disparar eventos para que el framework (Yii/Bootstrap) detecte el cambio
+        select.dispatchEvent(new Event('change', { bubbles: true }));
 
-
-      if (!select) return { success: false, msg: 'Select element not found' };
-
-
-
-
-
-
-
-      const option = Array.from(select.options).find(opt =>
-
-
-
-        opt.text.toUpperCase().includes(text.toUpperCase())
-
-
-
-      );
-
-
-
-
-
-
-
-      if (!option) return { success: false, msg: `Option containing "${text}" not found in #${id}` };
-
-
-
-
-
-
-
-      select.value = option.value;
-
-
-
-
-
-
-
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-
-
-
-      select.dispatchEvent(new Event('input', { bubbles: true }));
-
-
-
-
-
-
-
-      // @ts-ignore
-
-
-
-      if (window.jQuery && window.jQuery(select).selectpicker) {
-
-
-
+        // Actualizar visualmente Bootstrap Select si existe
         // @ts-ignore
-
-
-
-        window.jQuery(select).selectpicker('refresh');
-
-
-
-        // @ts-ignore
-
-
-
-        window.jQuery(select).selectpicker('render');
-
-
-
+        if (window.jQuery && window.jQuery(select).selectpicker) {
+          // @ts-ignore
+          window.jQuery(select).selectpicker('refresh');
+        }
       }
-
-
-
-
-
-
-
-      return { success: true, value: option.value, text: option.text };
-
-
-
-
-
-
-
     }, { id: selectId, text: textToSelect });
-
-
-
-
-
-
-
-    if (!result.success) {
-
-
-
-      logger.error(`❌ JS Injection Failed: ${result.msg}`);
-
-
-
-    } else {
-
-
-
-      logger.info(`✅ JS Injection Success: Selected value [${result.value}] for text "${result.text}"`);
-
-
-
-    }
-
-
-
   }
 
 }
