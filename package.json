@@ -22,8 +22,8 @@
     "test:atomic:all:headed": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts --headed",
 
     "// === LEGACY (A Auditar) ===": "",
-    "test:legacy:setup": "playwright test tests/e2e/suites/base-entities.setup.ts --project=base-entities",
-    "test:legacy:setup:headed": "playwright test tests/e2e/suites/base-entities.setup.ts --project=base-entities --headed",
+    "test:legacy:setup": "playwright test tests/e2e/suites/base-entities.setup.ts",
+    "test:legacy:setup:headed": "playwright test tests/e2e/suites/base-entities.setup.ts --headed",
     "test:legacy:entidades": "playwright test tests/e2e/modules/01-entidades/",
     "test:legacy:entidades:headed": "playwright test tests/e2e/modules/01-entidades/ --headed",
     "test:legacy:contratos": "playwright test tests/e2e/modules/02-operaciones/contratos/",
