@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url'; // 1. Importar esto
+import { fileURLToPath } from 'url';
 
-// 2. Reconstruir __filename y __dirname para ES Modules
+// Reconstruir __filename y __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -41,7 +41,7 @@ export default defineConfig({
 
   /*
    * TIMEOUTS (Optimizados para CI lento):
-   * - Global: 3 min en CI (entidades + contratos + viaje).
+   * - Global: 3 min en CI.
    * - Expect/Action: 20s en CI (spinners de carga y cascades AJAX).
    */
   timeout: process.env.CI ? 180 * 1000 : 60 * 1000,
@@ -57,13 +57,11 @@ export default defineConfig({
     /* Headless: True en CI, o lo que diga la variable en local */
     headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),
 
-    /* Viewport reducido para mejor visualización en headed mode */
-    viewport: { width: 1024, height: 768 },
-
-    /* Tamaño de ventana para headed mode (se ve centrado en pantalla) */
-    launchOptions: {
-      args: process.env.HEADLESS === 'false' ? ['--window-size=1100,850'] : []
-    },
+    /* * CORRECCIÓN DE PANTALLA:
+     * Usamos 1920x1080 para evitar que footers o menús responsivos tapen botones.
+     * Esto reemplaza el hack de --window-size que rompía Firefox.
+     */
+    viewport: { width: 1920, height: 1080 },
 
     actionTimeout: process.env.CI ? 20 * 1000 : 10 * 1000,
     navigationTimeout: process.env.CI ? 45 * 1000 : 20 * 1000,
@@ -79,15 +77,20 @@ export default defineConfig({
   tsconfig: './tsconfig.tests.json',
 
   projects: [
+    // --- SETUP PROJECTS ---
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
     },
+
+    // --- AUTH UTILS ---
     {
       name: 'auth-tests',
       testMatch: /tests\/e2e\/auth\/.+\.test\.ts/,
       use: devices['Desktop Chrome'],
     },
+
+    // --- BASE ENTITIES SETUP ---
     {
       name: 'base-entities-chromium',
       testMatch: /base-entities\.setup\.ts/,
@@ -100,12 +103,14 @@ export default defineConfig({
       use: devices['Desktop Firefox'],
       dependencies: ['setup'],
     },
+    /* 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD
     {
       name: 'base-entities-webkit',
       testMatch: /base-entities\.setup\.ts/,
       use: devices['Desktop Safari'],
       dependencies: ['setup'],
     },
+    */
 
     // --- MAIN TEST PROJECTS ---
     {
@@ -117,6 +122,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
+        // Chrome acepta estos args, pero Firefox no. Aquí sí están bien.
         launchOptions: {
           args: ['--disable-dev-shm-usage', '--no-sandbox']
         }
@@ -132,9 +138,13 @@ export default defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
+        // IMPORTANTE: Sin launchOptions.args que rompan Firefox
       },
       dependencies: ['setup'],
     },
+
+    /* 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY
+     * Se mantiene comentado para referencia futura o debugging local puntual.
     {
       name: 'webkit',
       testMatch: [
@@ -147,5 +157,6 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
+    */
   ],
 });
