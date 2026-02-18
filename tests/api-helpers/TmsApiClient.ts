@@ -1723,41 +1723,201 @@ export class TmsApiClient {
     // 1. LLENADO INICIAL
     await fillForm(false);
 
-    // 2. AGREGAR RUTA
-    logger.info('📍 Adding Route...');
-    const btnAgregarRuta = this.page.locator('button:has-text("Agregar Ruta")').first();
-
-    // Click seguro en Agregar Ruta
-    if (await btnAgregarRuta.isVisible()) {
-      await btnAgregarRuta.evaluate(el => (el as HTMLElement).click());
-    }
-
-    // Selección de Ruta 715 (Modal)
-    const rutaSelector = this.page.locator(`//tr[td[contains(., '715')]]//i`).first();
+    // 2. TAB KEY — dispara cálculo de rutas y habilita botón "Agregar Ruta"
+    logger.info('⌨️ Pressing Tab to trigger route calculation...');
+    await this.page.keyboard.press('Tab');
     try {
-      await rutaSelector.waitFor({ state: 'visible', timeout: 5000 });
-      await rutaSelector.evaluate(el => (el as HTMLElement).click());
-      logger.info('✅ Ruta seleccionada en modal.');
-    } catch (e) {
-      logger.warn('⚠️ Ruta 715 no encontrada, intentando genérica...');
-      const rutaGen = this.page.locator('#tabla-rutas tbody tr .btn-success').first();
-      if (await rutaGen.isVisible()) await rutaGen.click();
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
+    } catch {
+      logger.warn('⚠️ networkidle timeout after Tab, continuing...');
     }
+    await this.page.waitForTimeout(1000);
 
-    // 3. AUTO-HEALING (Recuperación tras posible recarga)
-    logger.info('⏳ Verificando estado del formulario tras agregar ruta...');
+    // 3. CLICK "AGREGAR RUTA" (id=btn_rutas_sugeridas) — esperar que esté habilitado
+    logger.info('📍 Clicking "Agregar Ruta"...');
+    const btnAgregarRuta = this.page.locator('#btn_rutas_sugeridas');
+    try {
+      await btnAgregarRuta.waitFor({ state: 'visible', timeout: 10000 });
+      // Esperar que no esté disabled (poll cada 500ms)
+      for (let i = 0; i < 20; i++) {
+        const isDisabled = await btnAgregarRuta.evaluate(el => (el as HTMLButtonElement).disabled);
+        if (!isDisabled) break;
+        await this.page.waitForTimeout(500);
+      }
+    } catch {
+      logger.warn('⚠️ "Agregar Ruta" button not found/visible');
+    }
+    await btnAgregarRuta.evaluate(el => (el as HTMLElement).click());
+
+    // 4. ESPERAR MODAL #modalRutasSugeridas + TABLA #tabla-rutas
+    logger.info('⏳ Waiting for route modal...');
+    await this.page.waitForSelector('#modalRutasSugeridas.show, #modalRutasSugeridas[style*="display: block"]', { timeout: 10000 }).catch(() => {
+      logger.warn('⚠️ Modal #modalRutasSugeridas not detected');
+    });
+    await this.page.waitForSelector('#tabla-rutas tbody tr', { timeout: 10000 }).catch(() => {
+      logger.warn('⚠️ #tabla-rutas rows not found');
+    });
+
+    // 5. CLICK BOTÓN VERDE ✓ — buscarDetalleRuta(715)
+    logger.info('📍 Clicking route 715 button...');
+    const routeClicked = await this.page.evaluate(() => {
+      // Buscar botón con onclick buscarDetalleRuta(715)
+      const btn = document.querySelector('button[onclick*="buscarDetalleRuta(715)"]') as HTMLElement;
+      if (btn) { btn.click(); return 'onclick-selector'; }
+      // Fallback: primer .btn-success en la tabla
+      const btnSuccess = document.querySelector('#tabla-rutas tbody tr .btn-success') as HTMLElement;
+      if (btnSuccess) { btnSuccess.click(); return 'btn-success-fallback'; }
+      // Último recurso: llamar función directamente
+      // @ts-ignore
+      if (typeof buscarDetalleRuta === 'function') { buscarDetalleRuta(715); return 'js-direct'; }
+      return 'NOT_FOUND';
+    });
+    logger.info(`✅ Route clicked via: ${routeClicked}`);
+
+    // 6. ESPERAR que buscarDetalleRuta AJAX complete
+    logger.info('⏳ Waiting for route AJAX to complete...');
     await this.page.waitForTimeout(2000);
-
-    // Verificamos si se borró el Nro Viaje O si se borró la Carga
-    const valNroViaje = await this.page.inputValue('#viajes-nro_viaje');
-    const valCarga = await this.page.locator('#viajes-carga_id').inputValue(); // Valor del select oculto
-
-    if (!valNroViaje || valNroViaje !== nroViaje || valCarga === '') {
-      logger.warn('⚠️ Formulario reiniciado detectado. Re-aplicando datos...');
-      await fillForm(true); // Re-llenamos todo
+    try {
+      await this.page.waitForLoadState('networkidle', { timeout: 15000 });
+    } catch {
+      logger.warn('⚠️ networkidle timeout after route selection');
     }
 
-    // 4. GUARDAR
+    // 7. CERRAR MODAL si sigue abierto (buscarDetalleRuta puede no cerrarlo)
+    logger.info('🔒 Force-closing route modal...');
+    await this.page.evaluate(() => {
+      // @ts-ignore — jQuery modal hide
+      if (window.jQuery) {
+        // @ts-ignore
+        window.jQuery('#modalRutasSugeridas').modal('hide');
+      }
+      // Remover backdrop manualmente por si quedó
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('padding-right');
+    });
+    await this.page.waitForTimeout(500);
+
+    // 8. RE-FILL COMPLETO — buscarDetalleRuta(715) resetea TODOS los dropdowns
+    // La ruta ya está asociada server-side, así que re-llenar no la pierde
+    logger.info('🔄 Re-filling ENTIRE form after route AJAX reset...');
+
+    // 8.1 Texto
+    await this.page.fill('#viajes-nro_viaje', nroViaje);
+
+    // 8.2 Dropdowns — usar forceSelectByText con change events para cascading
+    await this.forceSelectByText('tipo_operacion_form', 'tclp2210');
+    await this.page.waitForTimeout(300);
+
+    await this.forceSelectByText('viajes-tipo_servicio_id', 'tclp2210');
+    await this.page.waitForTimeout(300);
+
+    // 8.3 Cliente — CRITICAL: change event triggers cascading AJAX that loads Carga options
+    logger.info('🔄 Re-selecting Cliente (triggers cascade for Carga)...');
+    await this.forceSelectByText('viajes-cliente_id', clienteNombre);
+    // Esperar cascading AJAX del cliente (carga opciones de Carga, etc.)
+    try {
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
+    } catch {
+      logger.warn('⚠️ networkidle timeout after Cliente re-select');
+    }
+    await this.page.waitForTimeout(1500); // Espera extra para que Carga options se carguen
+
+    // 8.4 Tipo Viaje y Unidad Negocio
+    await this.forceSelectByText('viajes-tipo_viaje_id', 'Normal');
+    await this.page.waitForTimeout(300);
+    await this.forceSelectByText('viajes-unidad_negocio_id', 'Defecto');
+    await this.page.waitForTimeout(300);
+
+    // 8.5 Carga — ahora las opciones deben estar cargadas por el cascade del Cliente
+    logger.info('📦 Re-selecting Carga...');
+    await this.forceSelectByText('viajes-carga_id', 'Pallet_Furgon_Frio_10ton');
+    await this.page.waitForTimeout(500);
+
+    // 8.6 NO presionar Tab — la ruta ya está asociada server-side por buscarDetalleRuta(715)
+    logger.info('⏭️ Skipping Tab (route already loaded server-side)');
+
+    // 9. RE-TRIGGER buscarDetalleRuta(715) — el cascade del Cliente (step 8.3) limpia
+    //    Origen/Destino. Necesitamos re-cargar la ruta para poblar Origen/Destino.
+    logger.info('🔄 Re-calling buscarDetalleRuta(715) to reload Origen/Destino...');
+    await this.page.evaluate(() => {
+      // @ts-ignore — función global del TMS
+      if (typeof buscarDetalleRuta === 'function') buscarDetalleRuta(715);
+    });
+    await this.page.waitForTimeout(2000);
+    try {
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
+    } catch {
+      logger.warn('⚠️ networkidle timeout after buscarDetalleRuta re-call');
+    }
+    await this.page.waitForTimeout(1000);
+
+    // 10. CERRAR MODAL si buscarDetalleRuta lo abrió de nuevo
+    await this.page.evaluate(() => {
+      // @ts-ignore
+      if (window.jQuery) {
+        // @ts-ignore
+        window.jQuery('#modalRutasSugeridas').modal('hide');
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('padding-right');
+    });
+    await this.page.waitForTimeout(500);
+
+    // 11. RE-VERIFICAR nroViaje (buscarDetalleRuta puede haberlo limpiado de nuevo)
+    const valNroViaje2 = await this.page.inputValue('#viajes-nro_viaje');
+    if (!valNroViaje2 || valNroViaje2 !== nroViaje) {
+      logger.warn(`⚠️ nroViaje reset again ("${valNroViaje2}"). Re-filling...`);
+      await this.page.fill('#viajes-nro_viaje', nroViaje);
+    }
+
+    // 12. RE-VERIFICAR dropdowns — buscarDetalleRuta puede resetear selectores
+    //     Usar SILENT fill (sin change events) para no disparar cascade de nuevo
+    logger.info('🔄 Silent re-verify of all dropdowns...');
+    await this.page.evaluate(({ cli }: { cli: string }) => {
+      const setSilent = (id: string, text: string) => {
+        const sel = document.getElementById(id) as HTMLSelectElement;
+        if (!sel || sel.options.length <= 1) return; // Skip if no options loaded
+        const currentText = sel.options[sel.selectedIndex]?.text || '';
+        if (currentText.toUpperCase().includes(text.toUpperCase())) return; // Already set correctly
+        const opt = Array.from(sel.options).find(o => o.text.toUpperCase().includes(text.toUpperCase()));
+        if (opt) {
+          sel.value = opt.value;
+          // Visual refresh only — NO change event!
+          // @ts-ignore
+          if (window.jQuery && window.jQuery(sel).selectpicker) {
+            // @ts-ignore
+            window.jQuery(sel).selectpicker('refresh');
+          }
+        }
+      };
+      setSilent('tipo_operacion_form', 'tclp2210');
+      setSilent('viajes-tipo_servicio_id', 'tclp2210');
+      setSilent('viajes-cliente_id', cli);
+      setSilent('viajes-tipo_viaje_id', 'Normal');
+      setSilent('viajes-unidad_negocio_id', 'Defecto');
+      setSilent('viajes-carga_id', 'Pallet_Furgon_Frio_10ton');
+    }, { cli: clienteNombre });
+
+    // 13. DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
+    const formDiag = await this.page.evaluate(() => {
+      const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
+                   'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-unidad_negocio_id',
+                   'viajes-carga_id', '_origendestinoform-origen', '_origendestinoform-destino'];
+      return ids.map(id => {
+        const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
+        if (!el) return `${id}=NOT_FOUND`;
+        if (el.tagName === 'SELECT') {
+          const sel = el as HTMLSelectElement;
+          return `${id}="${sel.options[sel.selectedIndex]?.text || 'EMPTY'}" (opts:${sel.options.length})`;
+        }
+        return `${id}="${el.value}"`;
+      }).join(' | ');
+    });
+    logger.info(`📋 Form state before save: ${formDiag}`);
+
+    // 14. GUARDAR
     logger.info('💾 Clicking Guardar...');
     await this.page.evaluate(() => {
       const btn = document.getElementById('btn_guardar_form');
@@ -1765,22 +1925,40 @@ export class TmsApiClient {
     });
 
     try {
-      await this.page.waitForLoadState('networkidle', { timeout: 8000 });
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
     } catch { }
+    await this.page.waitForTimeout(1000);
 
-    // 5. VALIDACIÓN FINAL
+    // 15. VALIDACIÓN FINAL
     const currentUrl = this.page.url();
     if (currentUrl.includes('/crear')) {
-      const errors = await this.page.locator('.alert-danger, .has-error').allTextContents();
+      // Check for visible errors
+      const errors = await this.page.locator('.alert-danger, .has-error, .help-block-error').allTextContents();
       if (errors.length > 0) throw new Error(`❌ Error al guardar: ${errors.join(' | ')}`);
 
-      // Si no hay errores, verificamos si realmente se guardó (Toast o cambio de ID)
+      // Check for success toast
       const toast = this.page.locator('text="Viaje Creado con éxito"');
-      if (!await toast.isVisible()) {
-        // Última verificación: ¿El input sigue lleno?
-        const finalVal = await this.page.inputValue('#viajes-nro_viaje');
-        if (finalVal === nroViaje) throw new Error('❌ Estancado en /crear. Posible causa: Carga no seleccionada o validación JS silenciosa.');
+      if (await toast.isVisible({ timeout: 3000 }).catch(() => false)) {
+        logger.info(`✅ Viaje [${nroViaje}] created (toast detected)`);
+        return;
       }
+
+      // Re-read form state for error reporting (includes Origen/Destino)
+      const finalFormState = await this.page.evaluate(() => {
+        const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
+                     'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-carga_id',
+                     '_origendestinoform-origen', '_origendestinoform-destino'];
+        return ids.map(id => {
+          const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
+          if (!el) return `${id}=NOT_FOUND`;
+          if (el.tagName === 'SELECT') {
+            const sel = el as HTMLSelectElement;
+            return `${id}="${sel.options[sel.selectedIndex]?.text || 'EMPTY'}" (opts:${sel.options.length})`;
+          }
+          return `${id}="${el?.value || 'NOT_FOUND'}"`;
+        }).join(', ');
+      });
+      throw new Error(`❌ Estancado en /crear. Form: ${finalFormState}`);
     }
     logger.info(`✅ Viaje [${nroViaje}] created successfully.`);
   }
