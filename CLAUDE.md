@@ -769,7 +769,7 @@ cat logs/app.log              # View logs
 - ❌ Never use .fill() on readonly inputs
 - ❌ Never assume dropdown state
 - ❌ Never modify last-run-data-*.json directly in tests (use helper)
-- ✅ Always wait for cascading dropdowns (1.5s)
+- ✅ Always wait for cascading dropdowns (2s)
 - ✅ Always use Winston logging
 - ✅ Always take screenshots on error
 - ✅ Always follow phase structure in tests
