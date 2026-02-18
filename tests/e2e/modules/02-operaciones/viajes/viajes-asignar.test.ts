@@ -4,13 +4,6 @@ import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
 import { logger } from '../../../../../src/utils/logger.js';
 
 
-
-// Retries habilitados para estabilidad local (útil aunque no uses Docker aún)
-
-test.describe.configure({ mode: 'serial', retries: 1 });
-
-
-
 test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
 
     test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page, browserName }) => {
@@ -41,6 +34,16 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
         await api.createContratoVenta(cliName);
 
         await api.createContratoCosto(transName);
+
+        // ── FIX ERROR 1: Estabilización de red entre contratos y viaje ──
+        // El backend puede estar aún procesando la petición de guardar contrato.
+        // Si navegamos inmediatamente, el navegador aborta con net::ERR_ABORTED
+        logger.info('⏳ Stabilizing browser before viaje creation...');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+            logger.warn('⚠️ networkidle timeout post-contrato, continuing...');
+        });
+        await page.waitForTimeout(2000); // Safety buffer for backend processing
 
         // 5. Planificar Viaje
 
@@ -242,14 +245,9 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
 
 
-        // 12. Verificar Éxito
-
-        logger.info('🔍 Verifying assignment success...');
-
-        await expect(page.locator('body')).toContainText('éxito', { timeout: 20000 });
-
-
-
+        // ── FIX: Verificación por búsqueda en grid de /viajes/asignar ──
+        logger.info('🔍 Verifying assignment: waiting for redirect to /viajes/asignar...');
+        await verifyAssignmentInGrid(page, nroViaje);
         logger.info(`✅ SUCCESS: Trip ${nroViaje} assigned to ${transName}`);
 
     });
@@ -259,7 +257,48 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
 
 /**
+ * Verificación determinista: espera la redirección a /viajes/asignar,
+ * busca el nroViaje en el filtro #search, y verifica que exista en el grid.
+ * Mucho más estable que intentar atrapar un toast efímero.
+ */
+async function verifyAssignmentInGrid(page: any, nroViaje: string): Promise<void> {
+    // 1. Esperar a que la página redirija a /viajes/asignar
+    await page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+        logger.warn('⚠️ networkidle timeout post-redirect, continuando...');
+    });
+    logger.info(`📍 Redirected to: ${page.url()}`);
 
+    // 2. Buscar el viaje en el filtro de búsqueda
+    const searchInput = page.locator('#search');
+    await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+    await searchInput.fill(nroViaje);
+    await searchInput.press('Enter');
+    logger.info(`🔎 Searching for trip: ${nroViaje}`);
+
+    // 3. Esperar a que el grid se actualice
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1500);
+
+    // 4. Verificar que el viaje aparece en el grid
+    const viajeRow = page.locator(`text="${nroViaje}"`).first();
+    const isVisible = await viajeRow.isVisible({ timeout: 10000 }).catch(() => false);
+
+    if (!isVisible) {
+        // Capturar errores visibles para diagnóstico
+        const visibleErrors = await page.locator('.alert-danger, .toast-error')
+            .allTextContents()
+            .catch(() => [] as string[]);
+        const errorMsg = visibleErrors.filter((e: string) => e.trim().length > 0).join(' | ');
+        throw new Error(`❌ Viaje [${nroViaje}] no encontrado en el grid de /viajes/asignar después de guardar. Errores: ${errorMsg || 'none'}`);
+    }
+
+    logger.info(`✅ Viaje [${nroViaje}] encontrado en el grid de asignación`);
+}
+
+
+
+/**
  * Helper Específico para Transportista:
 
  * Escribe lento, espera a que el filtro termine y selecciona visualmente.

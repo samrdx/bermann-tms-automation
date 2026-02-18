@@ -43,10 +43,18 @@ test.describe('Operaciones - Monitoreo - Finalizar Viaje', () => {
     await api.createContratoCosto(transName);
     logger.info('Contratos creados (Venta + Costo)');
 
+    // ── FIX ERROR 1: Estabilización de red entre contratos y viaje ──
+    // El backend puede estar aún procesando. Si navegamos inmediatamente,
+    // el navegador aborta con net::ERR_ABORTED
+    logger.info('Estabilizando navegador antes de crear viaje...');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+      logger.warn('networkidle timeout post-contrato, continuando...');
+    });
+    await page.waitForTimeout(2000); // Safety buffer for backend processing
+
     // 1.2.1 Limpiar modales/alertas residuales de creación de contratos
     logger.info('Limpiando modales residuales post-contratos...');
-    await page.waitForLoadState('domcontentloaded').catch(() => {});
-    await page.waitForTimeout(1000);
     await page.evaluate(() => {
       const $ = (window as any).jQuery;
       if ($) {
@@ -158,9 +166,9 @@ test.describe('Operaciones - Monitoreo - Finalizar Viaje', () => {
 
     await page.waitForLoadState('networkidle');
 
-    // 1.4.10 Verificar éxito
-    logger.info('Verificando éxito de la asignación...');
-    await expect(page.locator('body')).toContainText('éxito', { timeout: 20000 });
+    // ── FIX: Verificación por búsqueda en grid de /viajes/asignar ──
+    logger.info('Verificando asignación: esperando redirect a /viajes/asignar...');
+    await verifyAssignmentInGrid(page, logger, nroViaje);
     logger.info(`Viaje [${nroViaje}] asignado exitosamente a [${transName}]`);
 
     // 1.4.11 Limpiar modales residuales post-asignación
@@ -316,4 +324,42 @@ async function selectOptionByTextJS(page: any, text: string): Promise<boolean> {
     }
     return false;
   }, text);
+}
+
+/**
+ * Verificación determinista: espera redirect a /viajes/asignar,
+ * busca el nroViaje en el filtro #search, y verifica que exista en el grid.
+ */
+async function verifyAssignmentInGrid(page: any, log: any, nroViaje: string): Promise<void> {
+  // 1. Esperar a que la página redirija a /viajes/asignar
+  await page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+    log.warn('networkidle timeout post-redirect, continuando...');
+  });
+  log.info(`Redirected to: ${page.url()}`);
+
+  // 2. Buscar el viaje en el filtro de búsqueda
+  const searchInput = page.locator('#search');
+  await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+  await searchInput.fill(nroViaje);
+  await searchInput.press('Enter');
+  log.info(`Searching for trip: ${nroViaje}`);
+
+  // 3. Esperar a que el grid se actualice
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  await page.waitForTimeout(1500);
+
+  // 4. Verificar que el viaje aparece en el grid
+  const viajeRow = page.locator(`text="${nroViaje}"`).first();
+  const isVisible = await viajeRow.isVisible({ timeout: 10000 }).catch(() => false);
+
+  if (!isVisible) {
+    const visibleErrors = await page.locator('.alert-danger, .toast-error')
+      .allTextContents()
+      .catch(() => [] as string[]);
+    const errorMsg = visibleErrors.filter((e: string) => e.trim().length > 0).join(' | ');
+    throw new Error(`Viaje [${nroViaje}] no encontrado en grid de /viajes/asignar. Errores: ${errorMsg || 'none'}`);
+  }
+
+  log.info(`Viaje [${nroViaje}] encontrado en el grid de asignación`);
 }

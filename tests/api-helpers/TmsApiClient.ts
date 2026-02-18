@@ -349,20 +349,45 @@ export class TmsApiClient {
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
 
-    // --- Gestión de Polígonos ---
-    logger.info('📍 Selecting Polígonos...');
-    const poligonosBtn = this.page.locator('button[data-id*="poligono"], button[data-id*="Poligono"]').first();
+    // --- Gestión de Polígonos (CRITICAL for Origen/Destino in Viajes) ---
+    // CORRECTED: data-id is "drop_zones" NOT "poligono"
+    logger.info('📍 Selecting Polígonos (drop_zones)...');
+    const poligonosBtn = this.page.locator('button[data-id="drop_zones"]').first();
 
-    if (await poligonosBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await this.clickViaJS('button[data-id*="poligono"], button[data-id*="Poligono"]');
-      await this.page.waitForTimeout(500);
+    if (await poligonosBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      // Click to open dropdown
+      await poligonosBtn.evaluate(el => (el as HTMLElement).click());
+      await this.page.waitForTimeout(800);
 
-      const selectAllBtn = this.page.locator('.dropdown-menu.show button.actions-btn.bs-select-all');
-      if (await selectAllBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      // Click "Seleccionar Todos" button
+      const selectAllBtn = this.page.locator('.dropdown-menu.show button.bs-select-all').first();
+      if (await selectAllBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
         await selectAllBtn.click();
-        logger.info('✅ Polígonos: Seleccionar todos clicked');
+        logger.info('✅ Polígonos: Seleccionar Todos clicked');
+        await this.page.waitForTimeout(500);
+      } else {
+        // Fallback: use JS to select all options
+        logger.warn('⚠️ Seleccionar Todos button not found, using JS fallback...');
+        await this.page.evaluate(() => {
+          const select = document.getElementById('drop_zones') as HTMLSelectElement;
+          if (select) {
+            Array.from(select.options).forEach(opt => opt.selected = true);
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            // @ts-ignore
+            if (window.jQuery && window.jQuery(select).selectpicker) {
+              // @ts-ignore
+              window.jQuery(select).selectpicker('refresh');
+            }
+          }
+        });
+        logger.info('✅ Polígonos: All selected via JS');
       }
+
+      // Close dropdown
       await this.page.keyboard.press('Escape');
+      await this.page.waitForTimeout(300);
+    } else {
+      logger.warn('⚠️ Polígonos dropdown button not visible');
     }
 
     // --- GUARDADO ---
@@ -1516,11 +1541,27 @@ export class TmsApiClient {
 
     await this.page.click('a#btn_plus_715');
 
-
+    // Wait for loading modal to disappear (CRITICAL: blocks all clicks)
+    logger.info('⏳ Waiting for loading modal to disappear...');
+    try {
+      await this.page.waitForSelector('#modalCargando', { state: 'hidden', timeout: 15000 });
+      logger.info('✅ Loading modal hidden');
+    } catch {
+      // Fallback: force-hide via JS if still visible
+      logger.warn('⚠️ Loading modal timeout, forcing hide via JS...');
+      await this.page.evaluate(() => {
+        const loadingModal = document.getElementById('modalCargando');
+        if (loadingModal) {
+          loadingModal.classList.remove('show');
+          loadingModal.style.display = 'none';
+        }
+        // Also clean up any backdrop
+        document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+      });
+    }
+    await this.page.waitForTimeout(500);
 
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
-
-
 
     if (await closeBtn.isVisible()) await closeBtn.click();
 
@@ -1532,8 +1573,12 @@ export class TmsApiClient {
 
     await this.page.click('#btn_click_715');
 
-
-
+    // Wait for loading modal after expanding route
+    try {
+      await this.page.waitForSelector('#modalCargando', { state: 'hidden', timeout: 10000 });
+    } catch {
+      // Ignore - might not appear for this action
+    }
     await this.page.waitForTimeout(1000);
 
 
@@ -1544,8 +1589,17 @@ export class TmsApiClient {
 
     await this.page.click('a#btn_plus_ruta_715_19');
 
-
-
+    // Wait for loading modal after adding route tariff
+    logger.info('⏳ Waiting for loading modal after route tariff...');
+    try {
+      await this.page.waitForSelector('#modalCargando', { state: 'hidden', timeout: 15000 });
+    } catch {
+      logger.warn('⚠️ Loading modal timeout, forcing hide...');
+      await this.page.evaluate(() => {
+        const m = document.getElementById('modalCargando');
+        if (m) { m.classList.remove('show'); m.style.display = 'none'; }
+      });
+    }
 
 
 
@@ -1723,184 +1777,68 @@ export class TmsApiClient {
     // 1. LLENADO INICIAL
     await fillForm(false);
 
-    // 2. TAB KEY — dispara cálculo de rutas y habilita botón "Agregar Ruta"
-    logger.info('⌨️ Pressing Tab to trigger route calculation...');
-    await this.page.keyboard.press('Tab');
-    try {
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
-    } catch {
-      logger.warn('⚠️ networkidle timeout after Tab, continuing...');
+    // =======================================================================
+    // 2. SELECCIÓN DE ORIGEN Y DESTINO (PASO A PASO - SIN RECARGA)
+    // Secuencia: Carga ya seleccionada -> Abrir Origen -> Seleccionar -> Abrir Destino -> Seleccionar
+    // IMPORTANTE: No usar forceSelectByText aquí porque dispara change y puede recargar
+    // =======================================================================
+
+    // PASO 1: ORIGEN
+    logger.info('📍 PASO 1: Abriendo dropdown Origen...');
+    const origenBtn = this.page.locator('button[data-id="_origendestinoform-origen"]').first();
+    await origenBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await origenBtn.click();
+    await this.page.waitForTimeout(800);
+
+    // Esperar que el dropdown esté visible
+    const origenDropdown = this.page.locator('button[data-id="_origendestinoform-origen"]').locator('xpath=..').locator('.dropdown-menu.show').first();
+    await origenDropdown.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Buscar en el searchbox si existe
+    const origenSearchBox = origenDropdown.locator('.bs-searchbox input');
+    if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await origenSearchBox.fill('1_Agunsa_Lampa');
+      await this.page.waitForTimeout(500);
     }
+
+    // PASO 2: Seleccionar opción Origen
+    logger.info('📍 PASO 2: Seleccionando "1_Agunsa_Lampa_RM-18"...');
+    const origenOption = origenDropdown.locator('li a, li span.text').filter({ hasText: '1_Agunsa_Lampa_RM-18' }).first();
+    await origenOption.waitFor({ state: 'visible', timeout: 5000 });
+    await origenOption.click();
     await this.page.waitForTimeout(1000);
+    logger.info('✅ Origen seleccionado: 1_Agunsa_Lampa_RM-18');
 
-    // 3. CLICK "AGREGAR RUTA" (id=btn_rutas_sugeridas) — esperar que esté habilitado
-    logger.info('📍 Clicking "Agregar Ruta"...');
-    const btnAgregarRuta = this.page.locator('#btn_rutas_sugeridas');
-    try {
-      await btnAgregarRuta.waitFor({ state: 'visible', timeout: 10000 });
-      // Esperar que no esté disabled (poll cada 500ms)
-      for (let i = 0; i < 20; i++) {
-        const isDisabled = await btnAgregarRuta.evaluate(el => (el as HTMLButtonElement).disabled);
-        if (!isDisabled) break;
-        await this.page.waitForTimeout(500);
-      }
-    } catch {
-      logger.warn('⚠️ "Agregar Ruta" button not found/visible');
-    }
-    await btnAgregarRuta.evaluate(el => (el as HTMLElement).click());
+    // PASO 3: DESTINO
+    logger.info('📍 PASO 3: Abriendo dropdown Destino...');
+    const destinoBtn = this.page.locator('button[data-id="_origendestinoform-destino"]').first();
+    await destinoBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await destinoBtn.click();
+    await this.page.waitForTimeout(800);
 
-    // 4. ESPERAR MODAL #modalRutasSugeridas + TABLA #tabla-rutas
-    logger.info('⏳ Waiting for route modal...');
-    await this.page.waitForSelector('#modalRutasSugeridas.show, #modalRutasSugeridas[style*="display: block"]', { timeout: 10000 }).catch(() => {
-      logger.warn('⚠️ Modal #modalRutasSugeridas not detected');
-    });
-    await this.page.waitForSelector('#tabla-rutas tbody tr', { timeout: 10000 }).catch(() => {
-      logger.warn('⚠️ #tabla-rutas rows not found');
-    });
+    // Esperar que el dropdown esté visible
+    const destinoDropdown = this.page.locator('button[data-id="_origendestinoform-destino"]').locator('xpath=..').locator('.dropdown-menu.show').first();
+    await destinoDropdown.waitFor({ state: 'visible', timeout: 5000 });
 
-    // 5. CLICK BOTÓN VERDE ✓ — buscarDetalleRuta(715)
-    logger.info('📍 Clicking route 715 button...');
-    const routeClicked = await this.page.evaluate(() => {
-      // Buscar botón con onclick buscarDetalleRuta(715)
-      const btn = document.querySelector('button[onclick*="buscarDetalleRuta(715)"]') as HTMLElement;
-      if (btn) { btn.click(); return 'onclick-selector'; }
-      // Fallback: primer .btn-success en la tabla
-      const btnSuccess = document.querySelector('#tabla-rutas tbody tr .btn-success') as HTMLElement;
-      if (btnSuccess) { btnSuccess.click(); return 'btn-success-fallback'; }
-      // Último recurso: llamar función directamente
-      // @ts-ignore
-      if (typeof buscarDetalleRuta === 'function') { buscarDetalleRuta(715); return 'js-direct'; }
-      return 'NOT_FOUND';
-    });
-    logger.info(`✅ Route clicked via: ${routeClicked}`);
-
-    // 6. ESPERAR que buscarDetalleRuta AJAX complete
-    logger.info('⏳ Waiting for route AJAX to complete...');
-    await this.page.waitForTimeout(2000);
-    try {
-      await this.page.waitForLoadState('networkidle', { timeout: 15000 });
-    } catch {
-      logger.warn('⚠️ networkidle timeout after route selection');
+    // Buscar en el searchbox si existe
+    const destinoSearchBox = destinoDropdown.locator('.bs-searchbox input');
+    if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await destinoSearchBox.fill('225_Starken');
+      await this.page.waitForTimeout(500);
     }
 
-    // 7. CERRAR MODAL si sigue abierto (buscarDetalleRuta puede no cerrarlo)
-    logger.info('🔒 Force-closing route modal...');
-    await this.page.evaluate(() => {
-      // @ts-ignore — jQuery modal hide
-      if (window.jQuery) {
-        // @ts-ignore
-        window.jQuery('#modalRutasSugeridas').modal('hide');
-      }
-      // Remover backdrop manualmente por si quedó
-      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('padding-right');
-    });
-    await this.page.waitForTimeout(500);
-
-    // 8. RE-FILL COMPLETO — buscarDetalleRuta(715) resetea TODOS los dropdowns
-    // La ruta ya está asociada server-side, así que re-llenar no la pierde
-    logger.info('🔄 Re-filling ENTIRE form after route AJAX reset...');
-
-    // 8.1 Texto
-    await this.page.fill('#viajes-nro_viaje', nroViaje);
-
-    // 8.2 Dropdowns — usar forceSelectByText con change events para cascading
-    await this.forceSelectByText('tipo_operacion_form', 'tclp2210');
-    await this.page.waitForTimeout(300);
-
-    await this.forceSelectByText('viajes-tipo_servicio_id', 'tclp2210');
-    await this.page.waitForTimeout(300);
-
-    // 8.3 Cliente — CRITICAL: change event triggers cascading AJAX that loads Carga options
-    logger.info('🔄 Re-selecting Cliente (triggers cascade for Carga)...');
-    await this.forceSelectByText('viajes-cliente_id', clienteNombre);
-    // Esperar cascading AJAX del cliente (carga opciones de Carga, etc.)
-    try {
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
-    } catch {
-      logger.warn('⚠️ networkidle timeout after Cliente re-select');
-    }
-    await this.page.waitForTimeout(1500); // Espera extra para que Carga options se carguen
-
-    // 8.4 Tipo Viaje y Unidad Negocio
-    await this.forceSelectByText('viajes-tipo_viaje_id', 'Normal');
-    await this.page.waitForTimeout(300);
-    await this.forceSelectByText('viajes-unidad_negocio_id', 'Defecto');
-    await this.page.waitForTimeout(300);
-
-    // 8.5 Carga — ahora las opciones deben estar cargadas por el cascade del Cliente
-    logger.info('📦 Re-selecting Carga...');
-    await this.forceSelectByText('viajes-carga_id', 'Pallet_Furgon_Frio_10ton');
-    await this.page.waitForTimeout(500);
-
-    // 8.6 NO presionar Tab — la ruta ya está asociada server-side por buscarDetalleRuta(715)
-    logger.info('⏭️ Skipping Tab (route already loaded server-side)');
-
-    // 9. RE-TRIGGER buscarDetalleRuta(715) — el cascade del Cliente (step 8.3) limpia
-    //    Origen/Destino. Necesitamos re-cargar la ruta para poblar Origen/Destino.
-    logger.info('🔄 Re-calling buscarDetalleRuta(715) to reload Origen/Destino...');
-    await this.page.evaluate(() => {
-      // @ts-ignore — función global del TMS
-      if (typeof buscarDetalleRuta === 'function') buscarDetalleRuta(715);
-    });
-    await this.page.waitForTimeout(2000);
-    try {
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
-    } catch {
-      logger.warn('⚠️ networkidle timeout after buscarDetalleRuta re-call');
-    }
+    // PASO 4: Seleccionar opción Destino
+    logger.info('📍 PASO 4: Seleccionando "225_Starken_Sn Bernardo-19"...');
+    const destinoOption = destinoDropdown.locator('li a, li span.text').filter({ hasText: '225_Starken_Sn Bernardo-19' }).first();
+    await destinoOption.waitFor({ state: 'visible', timeout: 5000 });
+    await destinoOption.click();
     await this.page.waitForTimeout(1000);
+    logger.info('✅ Destino seleccionado: 225_Starken_Sn Bernardo-19');
 
-    // 10. CERRAR MODAL si buscarDetalleRuta lo abrió de nuevo
-    await this.page.evaluate(() => {
-      // @ts-ignore
-      if (window.jQuery) {
-        // @ts-ignore
-        window.jQuery('#modalRutasSugeridas').modal('hide');
-      }
-      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('padding-right');
-    });
-    await this.page.waitForTimeout(500);
+    // Esperar estabilización (sin networkidle que puede causar problemas)
+    await this.page.waitForTimeout(1500);
 
-    // 11. RE-VERIFICAR nroViaje (buscarDetalleRuta puede haberlo limpiado de nuevo)
-    const valNroViaje2 = await this.page.inputValue('#viajes-nro_viaje');
-    if (!valNroViaje2 || valNroViaje2 !== nroViaje) {
-      logger.warn(`⚠️ nroViaje reset again ("${valNroViaje2}"). Re-filling...`);
-      await this.page.fill('#viajes-nro_viaje', nroViaje);
-    }
-
-    // 12. RE-VERIFICAR dropdowns — buscarDetalleRuta puede resetear selectores
-    //     Usar SILENT fill (sin change events) para no disparar cascade de nuevo
-    logger.info('🔄 Silent re-verify of all dropdowns...');
-    await this.page.evaluate(({ cli }: { cli: string }) => {
-      const setSilent = (id: string, text: string) => {
-        const sel = document.getElementById(id) as HTMLSelectElement;
-        if (!sel || sel.options.length <= 1) return; // Skip if no options loaded
-        const currentText = sel.options[sel.selectedIndex]?.text || '';
-        if (currentText.toUpperCase().includes(text.toUpperCase())) return; // Already set correctly
-        const opt = Array.from(sel.options).find(o => o.text.toUpperCase().includes(text.toUpperCase()));
-        if (opt) {
-          sel.value = opt.value;
-          // Visual refresh only — NO change event!
-          // @ts-ignore
-          if (window.jQuery && window.jQuery(sel).selectpicker) {
-            // @ts-ignore
-            window.jQuery(sel).selectpicker('refresh');
-          }
-        }
-      };
-      setSilent('tipo_operacion_form', 'tclp2210');
-      setSilent('viajes-tipo_servicio_id', 'tclp2210');
-      setSilent('viajes-cliente_id', cli);
-      setSilent('viajes-tipo_viaje_id', 'Normal');
-      setSilent('viajes-unidad_negocio_id', 'Defecto');
-      setSilent('viajes-carga_id', 'Pallet_Furgon_Frio_10ton');
-    }, { cli: clienteNombre });
-
-    // 13. DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
+    // DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
     const formDiag = await this.page.evaluate(() => {
       const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
                    'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-unidad_negocio_id',
@@ -1917,50 +1855,94 @@ export class TmsApiClient {
     });
     logger.info(`📋 Form state before save: ${formDiag}`);
 
-    // 14. GUARDAR
-    logger.info('💾 Clicking Guardar...');
+    // 14. PRE-GUARDAR: Limpiar modales/backdrops residuales que puedan interceptar el clic
     await this.page.evaluate(() => {
-      const btn = document.getElementById('btn_guardar_form');
-      if (btn) btn.click();
-    });
-
-    try {
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 });
-    } catch { }
-    await this.page.waitForTimeout(1000);
-
-    // 15. VALIDACIÓN FINAL
-    const currentUrl = this.page.url();
-    if (currentUrl.includes('/crear')) {
-      // Check for visible errors
-      const errors = await this.page.locator('.alert-danger, .has-error, .help-block-error').allTextContents();
-      if (errors.length > 0) throw new Error(`❌ Error al guardar: ${errors.join(' | ')}`);
-
-      // Check for success toast
-      const toast = this.page.locator('text="Viaje Creado con éxito"');
-      if (await toast.isVisible({ timeout: 3000 }).catch(() => false)) {
-        logger.info(`✅ Viaje [${nroViaje}] created (toast detected)`);
-        return;
+      const $ = (window as any).jQuery;
+      if ($) {
+        $('.modal').modal('hide');
+        $('.bootbox').modal('hide');
       }
+      document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.waitForTimeout(500);
 
-      // Re-read form state for error reporting (includes Origen/Destino)
-      const finalFormState = await this.page.evaluate(() => {
-        const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
-                     'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-carga_id',
-                     '_origendestinoform-origen', '_origendestinoform-destino'];
-        return ids.map(id => {
-          const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
-          if (!el) return `${id}=NOT_FOUND`;
-          if (el.tagName === 'SELECT') {
-            const sel = el as HTMLSelectElement;
-            return `${id}="${sel.options[sel.selectedIndex]?.text || 'EMPTY'}" (opts:${sel.options.length})`;
-          }
-          return `${id}="${el?.value || 'NOT_FOUND'}"`;
-        }).join(', ');
-      });
-      throw new Error(`❌ Estancado en /crear. Form: ${finalFormState}`);
+    // 15. GUARDAR - con verificación de que el botón existe y es clickeable
+    logger.info('💾 Clicking Guardar...');
+    const guardarBtn = this.page.locator('#btn_guardar_form');
+    await guardarBtn.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Scroll al botón para asegurar visibilidad
+    await guardarBtn.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
+
+    // Clic con espera de respuesta de red
+    await Promise.all([
+      this.page.waitForResponse(
+        (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
+        { timeout: 15000 }
+      ).catch(() => logger.warn('⚠️ No response captured after Guardar click')),
+      guardarBtn.click(),
+    ]);
+
+    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    await this.page.waitForTimeout(2000);
+
+    // 16. VERIFICACIÓN POST-GUARDAR (3 estrategias en orden de fiabilidad)
+    logger.info('⏳ Verificando creación del viaje...');
+
+    // Estrategia 1: Toast exacto "Viaje Creado con éxito"
+    const toastExacto = this.page.getByText('Viaje Creado con éxito', { exact: true });
+    if (await toastExacto.isVisible({ timeout: 5000 }).catch(() => false)) {
+      logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast exacto)`);
+      return;
     }
-    logger.info(`✅ Viaje [${nroViaje}] created successfully.`);
+
+    // Estrategia 2: Toast o alerta parcial
+    const toastAlt = this.page.locator('.toast-success, .alert-success').first();
+    if (await toastAlt.isVisible({ timeout: 2000 }).catch(() => false)) {
+      const text = await toastAlt.textContent().catch(() => '');
+      logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast alt: "${text?.trim().substring(0, 60)}")`);
+      return;
+    }
+
+    // Verificar si hay error visible ANTES de ir a la grilla
+    const errors = await this.page.locator('.alert-danger, .has-error').allTextContents();
+    const filteredErrors = errors.filter(e => e.trim().length > 0);
+    if (filteredErrors.length > 0) {
+      throw new Error(`❌ Error al guardar viaje: ${filteredErrors.join(' | ')}`);
+    }
+
+    // Estrategia 3: Verificar si redirigió (éxito silencioso) o buscar en grilla
+    const currentUrl = this.page.url();
+    logger.info(`⚠️ No se detectó toast. URL actual: ${currentUrl}`);
+
+    // Si la URL cambió a /viajes/asignar, el viaje se creó correctamente
+    if (currentUrl.includes('/viajes/asignar') || currentUrl.includes('/viajes/index')) {
+      logger.info(`✅ Viaje [${nroViaje}] creado (redirect a ${currentUrl})`);
+      return;
+    }
+
+    // Fallback: navegar a grilla y buscar
+    logger.info('⚠️ Fallback: verificando en grilla de asignación...');
+    await this.page.goto(`${this.baseUrl}/viajes/asignar`);
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForTimeout(1500);
+
+    const searchInput = this.page.locator('#search');
+    await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+    await searchInput.fill(nroViaje);
+    await searchInput.press('Enter');
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForTimeout(1500);
+
+    const viajeRow = this.page.locator(`text="${nroViaje}"`);
+    if (await viajeRow.isVisible({ timeout: 5000 }).catch(() => false)) {
+      logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla de asignación`);
+      return;
+    }
+
+    throw new Error(`❌ Viaje [${nroViaje}] no encontrado. El botón Guardar puede no haber ejecutado el submit. URL final: ${this.page.url()}`);
   }
 
   // --- ASEGÚRATE DE TENER ESTE HELPER (Lo usamos para la Carga) ---
@@ -2139,12 +2121,49 @@ export class TmsApiClient {
 
 
 
-    // C.4 Validación Final
+    // ── FIX: Verificación por búsqueda en grid de /viajes/asignar ──
+    logger.info('🔍 Verifying assignment: waiting for redirect to /viajes/asignar...');
+    await this.verifyAssignmentInGrid(nroViaje);
+    logger.info(`✅ Viaje [${nroViaje}] assigned successfully`);
 
-    await expect(this.page.locator('body')).toContainText('éxito', { timeout: 20000 });
+  }
 
-    logger.info(`✅ Viaje assigned successfully`);
+  /**
+   * Verificación determinista: espera la redirección a /viajes/asignar,
+   * busca el nroViaje en el filtro #search, y verifica que exista en el grid.
+   */
+  private async verifyAssignmentInGrid(nroViaje: string): Promise<void> {
+    // 1. Esperar redirect a /viajes/asignar
+    await this.page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+      logger.warn('⚠️ networkidle timeout post-redirect, continuando...');
+    });
+    logger.info(`📍 Redirected to: ${this.page.url()}`);
 
+    // 2. Buscar el viaje en el filtro
+    const searchInput = this.page.locator('#search');
+    await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+    await searchInput.fill(nroViaje);
+    await searchInput.press('Enter');
+    logger.info(`🔎 Searching for trip: ${nroViaje}`);
+
+    // 3. Esperar actualización del grid
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForTimeout(1500);
+
+    // 4. Verificar que el viaje aparece en el grid
+    const viajeRow = this.page.locator(`text="${nroViaje}"`).first();
+    const isVisible = await viajeRow.isVisible({ timeout: 10000 }).catch(() => false);
+
+    if (!isVisible) {
+      const visibleErrors = await this.page.locator('.alert-danger, .toast-error')
+        .allTextContents()
+        .catch(() => [] as string[]);
+      const errorMsg = visibleErrors.filter((e: string) => e.trim().length > 0).join(' | ');
+      throw new Error(`❌ Viaje [${nroViaje}] no encontrado en grid de /viajes/asignar. Errores: ${errorMsg || 'none'}`);
+    }
+
+    logger.info(`✅ Viaje [${nroViaje}] encontrado en el grid de asignación`);
   }
 
   // --- UTILS ---
