@@ -1841,8 +1841,8 @@ export class TmsApiClient {
     // DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
     const formDiag = await this.page.evaluate(() => {
       const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
-                   'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-unidad_negocio_id',
-                   'viajes-carga_id', '_origendestinoform-origen', '_origendestinoform-destino'];
+        'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-unidad_negocio_id',
+        'viajes-carga_id', '_origendestinoform-origen', '_origendestinoform-destino'];
       return ids.map(id => {
         const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
         if (!el) return `${id}=NOT_FOUND`;
@@ -1885,7 +1885,7 @@ export class TmsApiClient {
       guardarBtn.click(),
     ]);
 
-    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    await this.page.waitForLoadState('domcontentloaded').catch(() => { });
     await this.page.waitForTimeout(2000);
 
     // 16. VERIFICACIÓN POST-GUARDAR (3 estrategias en orden de fiabilidad)
@@ -1926,14 +1926,14 @@ export class TmsApiClient {
     // Fallback: navegar a grilla y buscar
     logger.info('⚠️ Fallback: verificando en grilla de asignación...');
     await this.page.goto(`${this.baseUrl}/viajes/asignar`);
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1500);
 
     const searchInput = this.page.locator('#search');
     await searchInput.waitFor({ state: 'visible', timeout: 10000 });
     await searchInput.fill(nroViaje);
     await searchInput.press('Enter');
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1500);
 
     const viajeRow = this.page.locator(`text="${nroViaje}"`);
@@ -2148,7 +2148,7 @@ export class TmsApiClient {
     logger.info(`🔎 Searching for trip: ${nroViaje}`);
 
     // 3. Esperar actualización del grid
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1500);
 
     // 4. Verificar que el viaje aparece en el grid
@@ -2534,3 +2534,5 @@ export class TmsApiClient {
   }
 
 }
+
+// prueba de gemini cli // github actions
