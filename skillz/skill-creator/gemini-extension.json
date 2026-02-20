@@ -1,0 +1,11 @@
+{
+  "name": "skill-creator",
+  "version": "1.0.0",
+  "description": "Creates new AI agent skills following the Agent Skills spec. Trigger: When user asks to create a new skill, add agent instructions, or document patterns for AI.",
+  "author": "QA Team",
+  "license": "Apache-2.0",
+  "excludeTools": [],
+  "contexts": [
+    "GEMINI.md"
+  ]
+}

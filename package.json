@@ -15,7 +15,7 @@
     "test:auth:logout": "playwright test tests/e2e/auth/logout.test.ts",
     "// === ATOMIC (Estables) ===": "",
     "test:atomic:asignar": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --headed",
-    "test:atomic:finalizar": "playwright test tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts project=chromium --headed",
+    "test:atomic:finalizar": "playwright test tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts --project=chromium --headed",
     "test:atomic:all": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts",
     "test:atomic:all:headed": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts --headed",
     "// === LEGACY (A Auditar) ===": "",

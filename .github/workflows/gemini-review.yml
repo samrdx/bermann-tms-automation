@@ -1,0 +1,36 @@
+name: Gemini Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  gemini-review:
+    runs-on: ubuntu-latest
+    
+    # Permisos necesarios para que el bot pueda comentar en el PR
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para analizar el historial de commits y los diffs
+
+      - name: Ejecutar Gemini CLI Code Review
+        uses: google-github-actions/run-gemini-cli@v0.1.20
+        with:
+          # Instrucciones específicas para que entienda tu framework
+          prompt: >
+            You are a Senior QA Automation Engineer specialized in Playwright and TypeScript.
+            Please review the code changes in this Pull Request.
+            Look specifically for:
+            1. Potential flaky tests (e.g., missing waits, bad locators).
+            2. Missing assertions or edge cases.
+            3. Clean code practices in Page Object Models or API clients.
+            Provide a concise and constructive review.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
