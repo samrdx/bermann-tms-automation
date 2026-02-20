@@ -115,9 +115,21 @@ export class MonitoreoPage extends BasePage {
 
             // 4. Scroll al texto del viaje
             logger.info('📜 UI: Scrolling to trip text...');
-            await textoViaje.scrollIntoViewIfNeeded();
-            await this.page.waitForTimeout(300);
-            logger.info(`✅ UI: Viaje [${nroViaje}] confirmed & visible in #registros`);
+            // Re-localizamos justo antes de interactuar para evitar errores de "detached"
+            // y agregamos un pequeño delay para estabilidad del grid
+            await this.page.waitForTimeout(1000);
+            
+            try {
+                const finalLocator = this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first();
+                await finalLocator.scrollIntoViewIfNeeded({ timeout: 5000 });
+                await this.page.waitForTimeout(300);
+                logger.info(`✅ UI: Viaje [${nroViaje}] confirmed & visible in #registros`);
+            } catch (e: any) {
+                logger.warn(`⚠️ UI: Scroll failed (${e.message}), re-trying one last time...`);
+                await this.page.waitForTimeout(1000);
+                await this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first().scrollIntoViewIfNeeded();
+                logger.info(`✅ UI: Viaje [${nroViaje}] found after retry`);
+            }
 
         } catch (error) {
             logger.error(`❌ UI: Error searching for Viaje [${nroViaje}]`, error);
