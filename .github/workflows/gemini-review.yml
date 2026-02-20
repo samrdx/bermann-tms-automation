@@ -22,7 +22,10 @@ jobs:
       - name: Ejecutar Gemini CLI Code Review
         uses: google-github-actions/run-gemini-cli@v0.1.20
         with:
-          # Instrucciones específicas para que entienda tu framework
+          # La API Key de Gemini sí va como input
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          
+          # Instrucciones de revisión
           prompt: >
             You are a Senior QA Automation Engineer specialized in Playwright and TypeScript.
             Please review the code changes in this Pull Request.
@@ -31,6 +34,7 @@ jobs:
             2. Missing assertions or edge cases.
             3. Clean code practices in Page Object Models or API clients.
             Provide a concise and constructive review.
+            
+        # El Token de GitHub va como variable de entorno
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
