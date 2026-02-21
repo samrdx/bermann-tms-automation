@@ -35,8 +35,8 @@ Timeout: 60 minutes
 | Variable | Source |
 | --- | --- |
 | `BASE_URL` | `secrets.BASE_URL` |
-| `TMS_USER` | `secrets.USERNAME_DEV` |
-| `TMS_PASS` | `secrets.PASSWORD_DEV` |
+| `TMS_USER` | `secrets.TMS_USER` |
+| `TMS_PASS` | `secrets.TMS_PASS` |
 
 **Key detail:** This workflow validates `BASE_URL` before running and fails fast if it's empty.
 
@@ -71,8 +71,9 @@ Both jobs run in parallel, reducing total wall-clock time.
 The `tests.yml` workflow maps a single pair of secrets to multiple environment variable names for compatibility with different parts of the codebase:
 
 ```text
-secrets.TMS_USER  ->  TMS_USER, TEST_REGULAR_USER, USERNAME_DEV
-secrets.TMS_PASS  ->  TMS_PASS, TEST_REGULAR_PASS, PASSWORD_DEV
+secrets.BASE_URL  ->  BASE_URL, BASE_URL_DEV
+secrets.TMS_USER  ->  TMS_USERNAME, TMS_USER, TEST_REGULAR_USER, USERNAME_DEV
+secrets.TMS_PASS  ->  TMS_PASSWORD, TMS_PASS, TEST_REGULAR_PASS, PASSWORD_DEV
 ```
 
 Fallback values (`|| 'arivas'`) allow CI to run even without secrets configured (useful for forked repos or initial setup).
@@ -83,11 +84,9 @@ Fallback values (`|| 'arivas'`) allow CI to run even without secrets configured 
 
 | Secret | Used By | Purpose |
 | --- | --- | --- |
-| `USERNAME_DEV` | `playwright.yml` | TMS login username |
-| `PASSWORD_DEV` | `playwright.yml` | TMS login password |
-| `BASE_URL` | `playwright.yml` | TMS base URL |
-| `TMS_USER` | `tests.yml` | TMS login username (mapped to multiple vars) |
-| `TMS_PASS` | `tests.yml` | TMS login password (mapped to multiple vars) |
+| `TMS_USER` | All Workflows | TMS login username |
+| `TMS_PASS` | All Workflows | TMS login password |
+| `BASE_URL` | All Workflows | TMS base URL |
 
 ### How to Configure
 
@@ -103,21 +102,22 @@ See [docs/GITHUB_ACTIONS_SETUP.md](docs/GITHUB_ACTIONS_SETUP.md) for step-by-ste
 
 | Workflow | Artifact Name | Contents | Retention |
 | --- | --- | --- | --- |
-| `playwright.yml` | `playwright-report` | HTML report | 30 days |
-| `tests.yml` | `report-atomic` | HTML report (atomic suite) | 15 days |
-| `tests.yml` | `report-legacy` | HTML report (legacy suite) | 15 days |
+| `playwright.yml` | `playwright-report` | HTML report | 7 days |
+| `tests.yml` | `report-atomic` | HTML report (atomic suite) | 7 days |
+| `tests.yml` | `report-legacy` | HTML report (legacy suite) | 7 days |
 
 ### Storage Considerations
 
 - **Free tier limit:** 500 MB artifact storage (shared across all workflows)
 - **Report size:** Each HTML report is approximately 2-5 MB
+- **Standardized Retention:** All reports are kept for 7 days to conserve space while allowing debugging.
 - **Traces/videos:** Currently NOT uploaded (only generated on failure locally). If enabling `trace: retain-on-failure` uploads, monitor storage carefully as traces can be 10-50 MB each.
 - **Cleanup:** GitHub automatically deletes artifacts after the retention period expires
 
 ### Reducing Storage Usage
 
 If approaching the 500 MB limit:
-1. Reduce retention days (currently 15-30)
+1. Reduce retention days (currently 7)
 2. Only upload artifacts on failure (`if: failure()` instead of `if: always()`)
 3. Compress reports before upload
 4. Delete old artifacts manually via GitHub API or UI

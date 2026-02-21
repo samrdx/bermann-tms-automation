@@ -573,8 +573,8 @@ Two parallel jobs that run on push to main/develop:
 - Timeout: 20 minutes
 - Tests: `viajes-asignar.test.ts`, `viajes-finalizar.test.ts`
 - Browser: Chromium only
-- Credentials: `TMS_USERNAME` / `TMS_PASSWORD` standard
-- Artifact: `report-atomic` (3 days retention)
+- Credentials: `TMS_USER` / `TMS_PASS` mapped to `TMS_USERNAME` / `TMS_PASSWORD`
+- Artifact: `report-atomic` (7 days retention)
 
 **Job 2: Legacy Suite** (Sequential dependent tests)
 
@@ -583,15 +583,16 @@ Two parallel jobs that run on push to main/develop:
 - Stage 2: Contratos tests
 - Stage 3: `viajes-planificar.test.ts`
 - Workers: 1 (sequential execution)
-- Credentials: Legacy variables (TEST_REGULAR_USER, USERNAME_DEV)
-- Artifact: `report-legacy` (3 days retention)
+- Credentials: `TMS_USER` / `TMS_PASS` mapped to all legacy variables
+- Artifact: `report-legacy` (7 days retention)
 
 ### Legacy Workflow (playwright.yml)
 
 - Single test runner for `viajes-asignar.test.ts`
 - Uses Docker container: `mcr.microsoft.com/playwright:v1.58.0-jammy`
 - 60-minute timeout
-- Artifact: `playwright-report` (30 days retention)
+- Secrets: `BASE_URL`, `TMS_USER`, `TMS_PASS`
+- Artifact: `playwright-report` (7 days retention)
 
 ## Playwright Configuration
 
