@@ -34,8 +34,8 @@ jobs:
 
       - name: 🚀 Run Atomic Workflows
         env:
-          # --- NUEVO ESTÁNDAR (Sincronizado con credentials.ts) ---
-          TMS_URL: ${{ secrets.BASE_URL_DEV || 'https://moveontruckqa.bermanntms.cl' }}
+          # --- ESTÁNDAR CONSOLIDADO ---
+          BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
 
@@ -45,8 +45,8 @@ jobs:
           LOG_LEVEL: info
           TIMEOUT: 60000
 
-          # (Opcional) Mantener variables viejas si algún helper compartido aún las usa
-          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          # Compatibilidad Legacy
+          BASE_URL_DEV: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
           TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
 
@@ -66,7 +66,7 @@ jobs:
         with:
           name: report-atomic
           path: playwright-report/
-          retention-days: 3
+          retention-days: 7
 
   # ------------------------------------------------------------------
   # JOB 2: TESTS LEGACY (Sin cambios, para no romper compatibilidad)
@@ -96,10 +96,13 @@ jobs:
       - name: ⛓️ Run Sequential Legacy Suite
         env:
           # Variables Legacy (Mantener hasta refactorizar estos tests)
-          BASE_URL_DEV: https://moveontruckqa.bermanntms.cl
+          BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
+          BASE_URL_DEV: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
           ENVIRONMENT: dev
           HEADLESS: true
           TIMEOUT: 60000
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
           TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
           USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
@@ -120,4 +123,4 @@ jobs:
         with:
           name: report-legacy
           path: playwright-report/
-          retention-days: 3
+          retention-days: 7

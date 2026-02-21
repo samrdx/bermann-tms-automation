@@ -27,8 +27,12 @@ jobs:
       env:
         # Mapeamos los Secretos de GitHub a las variables que usa tu código
         BASE_URL: ${{ secrets.BASE_URL }}
-        TMS_USER: ${{ secrets.USERNAME_DEV }}
-        TMS_PASS: ${{ secrets.PASSWORD_DEV }}
+        TMS_USERNAME: ${{ secrets.TMS_USER }}
+        TMS_PASSWORD: ${{ secrets.TMS_PASS }}
+        
+        # Compatibilidad Legacy
+        TMS_USER: ${{ secrets.TMS_USER }}
+        TMS_PASS: ${{ secrets.TMS_PASS }}
         
         # Activamos modo CI (Headless)
         CI: 1
@@ -53,4 +57,4 @@ jobs:
       with:
         name: playwright-report
         path: playwright-report/
-        retention-days: 30
+        retention-days: 7
