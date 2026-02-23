@@ -1,3 +1,15 @@
+---
+name: tms-data
+description: >
+  Test data generation and management for Bermann TMS.
+  Includes Chilean RUT generation, unique timestamp strategies, and entity factories.
+  Trigger: Generating test data (contracts, users, dates), creating unique identifiers, or using factories.
+license: MIT
+metadata:
+  author: QA Team
+  version: "1.0.0"
+---
+
 # TMS Data Generation Skill
 
 ## Purpose

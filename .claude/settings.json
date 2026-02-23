@@ -1,8 +1,0 @@
-{
-  "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true,
-    "github@claude-plugins-official": false,
-    "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true
-  }
-}
