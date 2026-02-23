@@ -2,32 +2,13 @@
 
 This document centralizes all CSS selectors used across the project's Page Object Models (POM).
 
-## AsignarViajesPage
+## AsignarPage
 
 | Nombre | Selector | Prioridad |
 | :--- | :--- | :--- |
-| **assignment.perfilTemperatura** | `#perfil_temperatura` | Media |
-| **assignment.perfilTemperaturaBtn** | `button[data-id="perfil_temperatura"]` | Alta |
-| **assignment.transportista** | `#transportista` | Media |
-| **assignment.transportistaBtn** | `button[data-id="transportista"]` | Alta |
-| **assignment.patentePrincipal** | `#patente_principal` | Media |
-| **assignment.patentePrincipalBtn** | `button[data-id="patente_principal"]` | Alta |
-| **assignment.patenteSecundaria** | `#patente_secundaria` | Media |
-| **assignment.patenteSecundariaBtn** | `button[data-id="patente_secundaria"]` | Alta |
-| **assignment.conductores** | `#conductores` | Media |
-| **assignment.conductoresBtn** | `button[data-id="conductores"]` | Alta |
-| **assignment.recalcular** | `#recalcular` | Media |
-| **assignment.btnGuardar** | `#guardar` | Alta |
-| **assignment.btnCerrar** | `a.btn.btn-secondary` | Alta |
-| **table.container** | `#tabla_asignar` | Media |
-| **table.tbody** | `#tabla_asignar tbody` | Media |
-| **table.rows** | `#tabla_asignar tbody tr` | Media |
-| **pagination.previous** | `.page-link.previous` | Alta |
-| **pagination.next** | `.page-link.next` | Alta |
-| **pagination.pageLinks** | `.page-link` | Media |
-| **dropdownMenu** | `.dropdown-menu.show` | Media |
-| **dropdownSearch** | `.bs-searchbox input` | Alta |
-| **dropdownItem** | `.dropdown-item` | Media |
+| **assignment.btnGuardar** | `#btn_guardar_form` | Alta |
+| **table.container** | `#tabla_asignar` | Alta |
+| **table.rows** | `#tabla_asignar tbody tr` | Baja |
 
 ## ClienteFormPage
 
@@ -43,6 +24,10 @@ This document centralizes all CSS selectors used across the project's Page Objec
 | **regionButton** | `button[data-id="clientes-region_id"]` | Alta |
 | **ciudadButton** | `button[data-id="clientes-ciudad_id"]` | Alta |
 | **comunaButton** | `button[data-id="clientes-comuna_id"]` | Alta |
+| **poligonosButton** | `button[data-id="clientes-poligonos"]` | Alta |
+| **transportistasButton** | `button[data-id="clientes-transportistas"]` | Alta |
+| **email** | `#clientes-email` | Alta |
+| **telefono** | `#clientes-telefono` | Alta |
 | **btnGuardar** | `#btn_guardar` | Alta |
 | **invalidField** | `[aria-invalid="true"]` | Baja |
 
@@ -69,40 +54,41 @@ This document centralizes all CSS selectors used across the project's Page Objec
 | Nombre | Selector | Prioridad |
 | :--- | :--- | :--- |
 | **nroContrato** | `#contrato-nro_contrato` | Alta |
-| **tipoContratoDropdown** | `.filter-option-inner-inner` | Alta |
-| **tipoContratoOption** | `.dropdown-item[role="option"]` | Alta |
+| **btnGuardar** | `#btn_guardar` | Alta |
+| **errorMessages** | `.text-danger, .help-block, .alert-danger, .toast-message` | Baja |
+| **tipoContratoDropdown** | `.filter-option-inner-inner` | Baja |
+| **tipoContratoOption** | `.dropdown-item[role="option"]` | Baja |
 | **transportistaButton** | `button[data-id="contrato-transportista_id"]` | Alta |
-| **transportistaOptions** | `.dropdown-menu.show .dropdown-item` | Media |
+| **transportistaOptions** | `.dropdown-menu.show .dropdown-item` | Baja |
 | **fechaVencimiento** | `#contrato-fecha_vencimiento` | Alta |
 | **valorHora** | `#contrato-valor_hora` | Alta |
-| **modalidadButton** | `.btn.dropdown-toggle.btn-light[data-id="modalidad_contrato"]` | Media |
-| **modalidadOption** | `.dropdown-item.selected.active` | Media |
+| **modalidadButton** | `.btn.dropdown-toggle.btn-light[data-id="modalidad_contrato"]` | Baja |
+| **modalidadOption** | `.dropdown-item.selected.active` | Baja |
 | **archivosAdjuntos** | `input[type="file"][name="adjuntos[]"]` | Baja |
-| **btnGuardar** | `#btn_guardar` | Alta |
 | **btnVolver** | `a.btn.btn-primary[href="/contrato/index"]` | Media |
 | **invalidField** | `[aria-invalid="true"]` | Baja |
 | **helpBlock** | `.help-block.badge.badge-danger` | Baja |
-| **btnOutlineSuccess** | `.btn.btn-outline-success.btn-sm` | Media |
-| **btnPlus715** | `#btn_plus_715` | Media |
+| **btnOutlineSuccess** | `.btn.btn-outline-success.btn-sm` | Baja |
+| **btnPlus715** | `#btn_plus_715` | Alta |
 | **btnCerrarModal** | `.btn.btn-secondary.waves-effect.waves-light` | Baja |
-| **btnAddCarga** | `#btn_click_715` | Media |
-| **btnAddRuta** | `#btn_plus_ruta_715_19` | Media |
-| **inputTarifaViaje** | `#txt_tarifa_extra_715` | Media |
-| **inputTarifaConductor** | `#txt_tarifa_conductor_715` | Media |
+| **btnAddCarga** | `#btn_click_715` | Alta |
+| **btnAddRuta** | `#btn_plus_ruta_715_19` | Alta |
+| **inputTarifaViaje** | `#txt_tarifa_extra_715` | Alta |
+| **inputTarifaConductor** | `#txt_tarifa_conductor_715` | Alta |
 
 ## DashboardPage
 
 | Nombre | Selector | Prioridad |
 | :--- | :--- | :--- |
-| **menuHome** | `.fal.fa-home` | Alta |
-| **menuViajes** | `.fal.fa-truck` | Alta |
+| **menuHome** | `.fal.fa-home` | Baja |
+| **menuViajes** | `.fal.fa-truck` | Baja |
 | **menuNotificaciones** | `.fas.fa-bell` | Baja |
-| **menuHamburger** | `.mdi.mdi-menu` | Media |
-| **userDropdown** | `.nav-link.dropdown-toggle.nav-user:not(#main_notification)` | Alta |
-| **userDropdownOpen** | `.dropdown-menu.profile-dropdown.show` | Media |
-| **logoutButton** | `a[href="/login/cerrarsesion"]` | Alta |
-| **planificarViajes** | `a[href="/viajes/crear"]` | Alta |
-| **logoMin** | `.logo-min` | Media |
+| **menuHamburger** | `.mdi.mdi-menu` | Baja |
+| **userDropdown** | `.nav-link.dropdown-toggle.nav-user:not(#main_notification)` | Baja |
+| **userDropdownOpen** | `.dropdown-menu.profile-dropdown.show` | Baja |
+| **logoutButton** | `a[href="/login/cerrarsesion"]` | Media |
+| **planificarViajes** | `a[href="/viajes/crear"]` | Media |
+| **logoMin** | `.logo-min` | Baja |
 | **pageTitle** | `title` | Baja |
 
 ## LoginPage
@@ -111,33 +97,40 @@ This document centralizes all CSS selectors used across the project's Page Objec
 | :--- | :--- | :--- |
 | **usernameInput** | `#login-usuario` | Alta |
 | **passwordInput** | `#login-clave` | Alta |
-| **loginButton** | `button[type="submit"].btn-success` | Alta |
-| **errorMessage** | `[data-notify="message"]` | Baja |
+| **loginButton** | `button[type="submit"].btn-success` | Media |
+| **errorMessage** | `[data-notify="message"]` | Media |
+| **logoMin** | `.logo-min` | Baja |
 | **forgotPasswordLink** | `a[href="/clave/envioclave"]` | Media |
-| **invalidField** | `[aria-invalid="true"]` | Baja |
-| **logoMin** | `.logo-min` | Media |
 
-## PlanificarViajesPage
+## MonitoreoPage
+
+| Nombre | Selector | Prioridad |
+| :--- | :--- | :--- |
+| **filtroIdViaje** | `#id` | Alta |
+| **contenedor** | `#registros` | Alta |
+| **modalVisible** | `.modal.show, .modal.fade.show, .modal[style*="display: block"]` | Baja |
+| **btnConfirmar** | `.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")` | Baja |
+
+## PlanificarPage
 
 | Nombre | Selector | Prioridad |
 | :--- | :--- | :--- |
 | **nroViaje** | `#viajes-nro_viaje` | Alta |
 | **numeroPlanilla** | `#viajes-numero_planilla` | Alta |
 | **valorFlete** | `#viajes-valor_flete` | Alta |
-| **tipoOperacion** | `#tipo_operacion_form` | Alta |
-| **cliente** | `#viajes-cliente_id` | Alta |
-| **tipoServicio** | `#viajes-tipo_servicio_id` | Alta |
-| **tipoViaje** | `#viajes-tipo_viaje_id` | Alta |
-| **unidadNegocio** | `#viajes-unidad_negocio_id` | Alta |
-| **codigoCarga** | `#viajes-carga_id` | Alta |
-| **btnAgregarRuta** | `button:has-text("Agregar Ruta")` | Alta |
-| **modalRutas** | `#modalRutasSugeridas` | Media |
-| **tablaRutas** | `#tabla-rutas tbody tr` | Media |
-| **origen** | `#_origendestinoform-origen` | Alta |
-| **destino** | `#_origendestinoform-destino` | Alta |
-| **fechaEntradaOrigen** | `#_origendestinoform-fechaentradaorigen` | Alta |
+| **btnTipoOperacion** | `button[data-id="tipo_operacion_form"]` | Alta |
+| **btnTipoServicio** | `button[data-id="viajes-tipo_servicio_id"]` | Alta |
+| **btnTipoViaje** | `button[data-id="viajes-tipo_viaje_id"]` | Alta |
+| **btnUnidadNegocio** | `button[data-id="viajes-unidad_negocio_id"]` | Alta |
+| **btnCodigoCarga** | `button[data-id="viajes-carga_id"]` | Alta |
+| **btnCliente** | `button[data-id="viajes-cliente_id"]` | Alta |
+| **btnAgregarRuta** | `button:has-text("Agregar Ruta")` | Baja |
+| **modalRutas** | `#modalRutasSugeridas` | Alta |
+| **tablaRutas** | `#tabla-rutas tbody tr` | Baja |
+| **btnOrigen** | `button[data-id="_origendestinoform-origen"]` | Alta |
+| **btnDestino** | `button[data-id="_origendestinoform-destino"]` | Alta |
 | **btnGuardar** | `#btn_guardar_form` | Alta |
-| **btnVolver** | `a[href="/viajes/index"]` | Media |
+| **fechaEntradaOrigen** | `#_origendestinoform-fechaentradaorigen` | Alta |
 
 ## TransportistaFormPage
 
