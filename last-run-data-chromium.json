@@ -1,0 +1,45 @@
+{
+  "createdAt": "2026-02-24T20:59:04.276Z",
+  "workerIndex": 6,
+  "projectName": "base-entities-chromium",
+  "transportista": {
+    "id": "",
+    "nombre": "Austral Freight 966744",
+    "rut": "10238794-5",
+    "razonSocial": "Austral Freight 966744",
+    "baseNombre": "Austral Freight"
+  },
+  "cliente": {
+    "id": "N/A",
+    "nombre": "Logística 360 SpA 966759",
+    "nombreFantasia": "Logística SpA 966759",
+    "rut": "78701849-1",
+    "email": "logística360spa@test.cl"
+  },
+  "vehiculo": {
+    "patente": "WSDU-42",
+    "muestra": "VEH-1771966789284",
+    "transportistaNombre": "Austral Freight 966744",
+    "capacity": "3 KG"
+  },
+  "conductor": {
+    "nombre": "Juan",
+    "apellido": "Martínez",
+    "rut": "43.570.567-7",
+    "email": "juanmartínez@test.com",
+    "telefono": "+56941332934",
+    "transportistaNombre": "Austral Freight 966744"
+  },
+  "executionTimeSeconds": 77.99,
+  "contratoCliente": {
+    "id": "1809",
+    "nroContrato": "38877"
+  },
+  "seededTransportista": {
+    "id": "1391",
+    "nombre": "TransSur 9958",
+    "baseNombre": "TransSur",
+    "documento": "91573395-6",
+    "razonSocial": "TransSur 9958 SpA"
+  }
+}

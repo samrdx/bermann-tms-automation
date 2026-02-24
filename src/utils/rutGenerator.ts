@@ -93,25 +93,25 @@ export function generateRandomLastName(): string {
 
 /**
  * Generates a Chilean vehicle license plate
- * Format: ABCD-12 (4 uppercase letters + dash + 2 digits)
+ * Randomly picks between:
+ *   Old format: AB-1234 (2 letters + 4 digits)
+ *   New format: ABCD-12 (4 letters + 2 digits)
  */
 export function generatePatente(): string {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let patente = '';
+  const randomLetter = () => letters[Math.floor(Math.random() * letters.length)];
 
-  // Generate 4 random uppercase letters
-  for (let i = 0; i < 4; i++) {
-    patente += letters[Math.floor(Math.random() * letters.length)];
+  if (Math.random() < 0.5) {
+    // Old format: 2 letters + 4 digits (e.g. AB-1234)
+    const letterPart = randomLetter() + randomLetter();
+    const digitPart = Math.floor(Math.random() * 9000 + 1000).toString();
+    return `${letterPart}-${digitPart}`;
+  } else {
+    // New format: 4 letters + 2 digits (e.g. ABCD-12)
+    const letterPart = randomLetter() + randomLetter() + randomLetter() + randomLetter();
+    const digitPart = Math.floor(Math.random() * 90 + 10).toString();
+    return `${letterPart}-${digitPart}`;
   }
-
-  // Add dash
-  patente += '-';
-
-  // Add 2 random digits (10-99)
-  const digits = Math.floor(Math.random() * 90) + 10;
-  patente += digits.toString();
-
-  return patente;
 }
 
 /**

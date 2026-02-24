@@ -188,8 +188,8 @@ export class TmsApiClient {
   }
 
   // --- 1. TRANSPORTISTA ---
-  async createTransportista(nombre: string): Promise<string> {
-    const rut = generateValidChileanRUT();
+  async createTransportista(nombre: string, documento: string): Promise<string> {
+    const rut = documento; // Use the provided documento for form filling and later search
 
     logger.info(`🚀 UI: Creating Transportista [${nombre}] RUT: [${rut}]`);
 
@@ -242,58 +242,98 @@ export class TmsApiClient {
     let currentUrl = this.page.url();
     logger.info(`📍 URL after save: ${currentUrl}`);
 
+    // 1. Intentar extraer de la URL directa (ej: /view/123)
     let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
 
     if (idMatch) {
       id = idMatch[1];
       logger.info(`✅ Transportista ID extracted from URL: ${id}`);
     } else {
-      logger.info(`🔍 Using search filter to find Transportista: ${nombre}`);
+      logger.info('⚠️ Redirected to Index. Executing Grid Rescue...');
+      let foundViaRut = false;
 
-      await this.page.waitForTimeout(1000);
-      const searchInput = this.page.locator('#search');
+      // Navigate to index to ensure we are on the grid page
+      await this.page.goto(`${this.baseUrl}/transportistas/index`);
+      await this.page.waitForTimeout(2000); // Give time for grid to load
 
-      await searchInput.fill(nombre);
-      logger.info(`🔎 Filled search with: ${nombre}`);
+      // PRIMARY STRATEGY: Search by RUT (Documento)
+      logger.info(`🔍 Searching by RUT: ${documento}`);
+      const rutFilterInput = this.page.locator('input[name*="[documento]"]')
+          .or(this.page.locator('input[name*="[rut]"]'))
+          .or(this.page.locator('thead th:has-text("RUT") + th input, thead input').first())
+          .first();
 
-      await this.page.getByRole('link', { name: 'Buscar' }).click();
-      await this.page.waitForLoadState('networkidle');
-      logger.info(`🔎 Clicked Buscar link`);
-
-      await this.page.waitForTimeout(2000);
-
-      // Estrategia de búsqueda en tabla
-      const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
-
-      if (await row.count() > 0) {
-        const dataKey = await row.getAttribute('data-key');
-        if (dataKey) {
-          id = dataKey;
-          logger.info(`✅ Transportista ID from data-key: ${id}`);
-        }
-      } else {
-        logger.info(`🔎 Trying alternative search in table...`);
-        const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
-
-        if (await anyRow.count() > 0) {
-          const dataKey = await anyRow.getAttribute('data-key');
-          if (dataKey) {
-            id = dataKey;
-            logger.info(`✅ Transportista ID from fallback data-key: ${id}`);
-          } else {
-            const link = anyRow.locator('a[href*="/transportistas/"]').first();
-            if (await link.count() > 0) {
-              const href = await link.getAttribute('href');
-              const match = href?.match(/\/(\d+)/);
-              if (match) {
-                id = match[1];
-                logger.info(`✅ Transportista ID from link: ${id}`);
+      if (await rutFilterInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+          const searchRut = documento.replace(/[.-]/g, '');
+          await rutFilterInput.fill(searchRut);
+          await rutFilterInput.press('Enter');
+          await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+          await this.page.waitForTimeout(1500);
+          
+          const rutRow = this.page.locator('table tbody tr').filter({ hasText: new RegExp(searchRut.slice(0, 6), 'i') }).first();
+          if (await rutRow.count() > 0) {
+              const dataKey = await rutRow.getAttribute('data-key');
+              if (dataKey) {
+                  id = dataKey;
+                  foundViaRut = true;
+                  logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
+              } else {
+                  const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
+                  if (await actionLink.count() > 0) {
+                      const href = await actionLink.getAttribute('href');
+                      const match = href?.match(/(\d+)/);
+                      if (match) {
+                          id = match[1];
+                          foundViaRut = true;
+                          logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
+                      }
+                  }
               }
-            }
           }
-        } else {
-          logger.warn(`⚠️ No row found for Transportista: ${nombre}`);
-        }
+      }
+
+      // FALLBACK STRATEGY: Search by Name (if RUT search fails)
+      if (!foundViaRut) {
+          logger.warn('⚠️ RUT search failed, falling back to name-based search...');
+          const searchInput = this.page.locator('#search');
+          await searchInput.fill(nombre);
+          logger.info(`🔎 Filled search with: ${nombre}`);
+
+          await this.page.getByRole('link', { name: 'Buscar' }).click();
+          await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+          await this.page.waitForTimeout(2000);
+
+          const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
+          if (await row.count() > 0) {
+              const dataKey = await row.getAttribute('data-key');
+              if (dataKey) {
+                  id = dataKey;
+                  logger.info(`✅ Transportista ID from data-key: ${id}`);
+              }
+          } else {
+              logger.info(`🔎 Trying alternative search in table...`);
+              const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
+
+              if (await anyRow.count() > 0) {
+                  const dataKey = await anyRow.getAttribute('data-key');
+                  if (dataKey) {
+                      id = dataKey;
+                      logger.info(`✅ Transportista ID from fallback data-key: ${id}`);
+                  } else {
+                      const link = anyRow.locator('a[href*="/transportistas/"]').first();
+                      if (await link.count() > 0) {
+                          const href = await link.getAttribute('href');
+                          const match = href?.match(/\/(\d+)/);
+                          if (match) {
+                              id = match[1];
+                              logger.info(`✅ Transportista ID from link: ${id}`);
+                          }
+                      }
+                  }
+              } else {
+                  logger.warn(`⚠️ No row found for Transportista: ${nombre}`);
+              }
+          }
       }
     }
 

@@ -1,0 +1,45 @@
+{
+  "createdAt": "2026-02-24T20:59:30.449Z",
+  "workerIndex": 7,
+  "projectName": "base-entities-firefox",
+  "transportista": {
+    "id": "",
+    "nombre": "InterModal Sur 966770",
+    "rut": "31123743-8",
+    "razonSocial": "InterModal Sur 966770",
+    "baseNombre": "InterModal Sur"
+  },
+  "cliente": {
+    "id": "N/A",
+    "nombre": "Andes Transport Services 966786",
+    "nombreFantasia": "Andes SpA 966786",
+    "rut": "10048601-6",
+    "email": "andestransportservices@test.cl"
+  },
+  "vehiculo": {
+    "patente": "APDI-41",
+    "muestra": "VEH-1771966814440",
+    "transportistaNombre": "InterModal Sur 966770",
+    "capacity": "3 KG"
+  },
+  "conductor": {
+    "nombre": "Carlos",
+    "apellido": "Pérez",
+    "rut": "35.117.689-K",
+    "email": "carlospérez@test.com",
+    "telefono": "+56975321386",
+    "transportistaNombre": "InterModal Sur 966770"
+  },
+  "executionTimeSeconds": 80.25,
+  "contratoCliente": {
+    "id": "1811",
+    "nroContrato": "37008"
+  },
+  "seededTransportista": {
+    "id": "1390",
+    "nombre": "Cordillera 8509",
+    "baseNombre": "Cordillera",
+    "documento": "85979203-0",
+    "razonSocial": "Cordillera 8509 SpA"
+  }
+}
