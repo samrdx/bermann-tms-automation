@@ -55,5 +55,4 @@ tests/**/*.js.map
 *.test.js.map
 # Playwright auth
 playwright/.auth/
-.gemini/
 gha-creds-*.json
