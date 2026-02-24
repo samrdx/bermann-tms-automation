@@ -28,7 +28,7 @@
     "test:legacy:planificar": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts",
     "test:legacy:planificar:headed": "playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts --headed",
     "// === GRANULAR (Debugging) ===": "",
-    "test:entity:transportista": "playwright test tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts",
+    "test:entity:transportista": "playwright test tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts --project=seed-transportista-chromium",
     "test:entity:cliente": "playwright test tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts",
     "test:entity:vehiculo": "playwright test tests/e2e/modules/01-entidades/vehiculos/vehiculo-crear.test.ts",
     "test:entity:conductor": "playwright test tests/e2e/modules/01-entidades/conductor/conductor-crear.test.ts",

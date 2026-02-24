@@ -33,7 +33,7 @@ export class LoginPage extends BasePage {
   }
 
   async login(username: string, password: string): Promise<void> {
-    logger.info(`Login with user ${username}`);
+    logger.info(`Logueandose con usuario: ${username}`);
     await this.navigate();
     await this.fillUsername(username);
     await this.fillPassword(password);
@@ -44,7 +44,7 @@ export class LoginPage extends BasePage {
     username: string,
     password: string
   ): Promise<void> {
-    logger.info(`Attempting login for user: ${username} and waiting for dashboard...`);
+    logger.info(`Intentando loguearse con usuario: ${username} y esperando el dashboard...`);
     await this.login(username, password);
     
     // Wait for either the URL to change to /site OR the error message to appear
@@ -67,15 +67,15 @@ export class LoginPage extends BasePage {
 
     // Check success
     if (await this.isLoginSuccessful()) {
-      logger.info('Login confirmed: User is on dashboard');
+      logger.info('Inicio de sesión confirmado: Usuario se encuentra en Dashboard');
       return;
     }
 
     // Verification failed (stuck on login page without error, or somewhere else)
     const currentUrl = this.page.url();
-    logger.error(`Login failed. Current URL: ${currentUrl}`);
+    logger.error(`Error en Logueo. URL actual: ${currentUrl}`);
     await this.takeScreenshot('login-failed-unknown');
-    throw new Error(`Login failed: Stuck on URL ${currentUrl} without specific error message`);
+    throw new Error(`Error en Logueo, no se pudo iniciar sesión en la URL: ${currentUrl} sin mensaje de error específico`);
   }
 
   /* ===================== ASSERTIONS ===================== */

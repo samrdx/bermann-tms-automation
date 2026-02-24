@@ -16,7 +16,7 @@ export abstract class BasePage {
     if (!this.url) {
       throw new Error('URL not set for this page');
     }
-    logger.info(`Navigating to: ${this.url}`);
+    logger.info(`Navegando hacia: ${this.url}`);
     await this.page.goto(this.url, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
@@ -205,7 +205,7 @@ export abstract class BasePage {
       path: screenshotPath, 
       fullPage: true 
     });
-    logger.info(`Screenshot saved: ${screenshotPath}`);
+    logger.info(`Captura de Pantalla: ${screenshotPath}`);
     return screenshotPath;
   }
 

@@ -20,6 +20,10 @@ export class DataPathHelper {
      * This ensures that base-entities-chromium and chromium use the same data file
      */
     private static readonly PROJECT_TO_BROWSER: Record<string, string> = {
+        // Seed transportista projects
+        'seed-transportista-chromium': 'chromium',
+        'seed-transportista-firefox': 'firefox',
+
         // Base entities setup projects
         'base-entities-chromium': 'chromium',
         'base-entities-firefox': 'firefox',

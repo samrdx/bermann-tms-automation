@@ -1,6 +1,5 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { TransportistaHelper } from '../../../../../tests/api-helpers/TransportistaHelper.js';
 import { 
     generateRandomName, 
     generateRandomLastName, 
@@ -11,30 +10,28 @@ import {
     generateEmail, 
     generateLicenseType 
 } from '../../../../../src/utils/rutGenerator.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import * as fs from 'fs';
+import { Transportista } from '../../../../api-helpers/TransportistaHelper.js';
 
 test.describe('Transport - Conductor Creation', () => {
 
     let transportistaName: string;
+    let seededTransportista: Transportista;
 
-    test.beforeAll(async ({ browser }) => {
-        // 1. Seed Transportista (Prerequisite)
-        // Use newContext with storageState to ensure authentication
-        const context = await browser.newContext({
-            storageState: 'playwright/.auth/user.json'
-        });
-        const page = await context.newPage();
-        try {
-            logger.info('🏗️ Seeding Transportista for Conductor Test...');
-            const transportista = await TransportistaHelper.createTransportistaViaUI(page, 'Propio');
-            transportistaName = transportista.nombre;
-            logger.info(`✅ Seeded Transportista: ${transportistaName}`);
-        } catch (e) {
-            logger.error('Failed to seed Transportista', e);
-            throw e;
-        } finally {
-            await page.close();
-            await context.close();
+    test.beforeAll(async ({ }, testInfo) => {
+        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        if (!fs.existsSync(dataPath)) {
+            throw new Error(`Data file not found: ${dataPath}. Make sure transportistas-crear.test.ts runs first.`);
         }
+        const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        seededTransportista = data.seededTransportista;
+
+        if (!seededTransportista || !seededTransportista.id) {
+            throw new Error('seededTransportista not found in data file. Make sure transportistas-crear.test.ts runs first and successfully seeds a Transportista.');
+        }
+        transportistaName = seededTransportista.nombre;
+        logger.info(`✅ Loaded seededTransportista: ${transportistaName} (ID: ${seededTransportista.id})`);
     });
 
     test('Should create a new Conductor and link to Transportista', async ({

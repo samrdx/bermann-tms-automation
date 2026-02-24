@@ -83,6 +83,26 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
 
+    // --- SEEDING PROJECTS (Run before main tests that consume their data) ---
+    {
+      name: 'seed-transportista-chromium',
+      testMatch: /tests\/e2e\/modules\/01-entidades\/transport\/transportistas-crear\.test\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json', // Use the authentication state
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'seed-transportista-firefox',
+      testMatch: /tests\/e2e\/modules\/01-entidades\/transport\/transportistas-crear\.test\.ts/,
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: 'playwright/.auth/user.json', // Use the authentication state
+      },
+      dependencies: ['setup'],
+    },
+
     // --- AUTH UTILS ---
     {
       name: 'auth-tests',
@@ -116,7 +136,7 @@ export default defineConfig({
     {
       name: 'chromium',
       testMatch: [
-        /tests\/e2e\/modules\/.+\.test\.ts/,
+        /tests\/e2e\/modules\/(?!01-entidades\/transport\/transportistas-crear\.test\.ts).+\.test\.ts/, // Exclude transportistas-crear.test.ts
         /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {
@@ -132,7 +152,7 @@ export default defineConfig({
     {
       name: 'firefox',
       testMatch: [
-        /tests\/e2e\/modules\/.+\.test\.ts/,
+        /tests\/e2e\/modules\/(?!01-entidades\/transport\/transportistas-crear\.test\.ts).+\.test\.ts/, // Exclude transportistas-crear.test.ts
         /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {

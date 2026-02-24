@@ -37,7 +37,8 @@ export class TransportistaFormPage extends BasePage {
 
   async navigate(): Promise<void> {
     await this.page.goto('https://moveontruckqa.bermanntms.cl/transportistas/crear');
-    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForLoadState('networkidle'); // Wait for network to be idle
+    await this.page.waitForSelector(this.selectors.nombre, { state: 'visible' }); // Wait for the name input to be visible
   }
 
   async fillNombre(nombre: string): Promise<void> {

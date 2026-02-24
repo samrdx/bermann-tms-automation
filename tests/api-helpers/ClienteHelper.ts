@@ -32,14 +32,13 @@ export class ClienteHelper {
         const baseUrl = config.get().baseUrl;
         const clientePage = new ClienteFormPage(page);
 
-        // Data Generation - UNIQUE NAME with 6-digit Unix seconds to guarantee uniqueness
-        // Use % 1000000 to keep names short (TMS truncates long names in dropdowns)
-        const unixTs = Math.floor(Date.now() / 1000) % 1000000;
-        const rawBaseName = generateShortCompanyName();
-        const baseName = rawBaseName.split(' - ')[0].trim(); // Company name before timestamp suffix
+        // Data Generation - Short name + 4 digits (same pattern as Transportista)
+        const shortNames = ['Distribuidora', 'Comercial', 'Importadora', 'Logistica', 'Servicios', 'Industrial', 'Global', 'Central'];
+        const baseName = shortNames[Math.floor(Math.random() * shortNames.length)];
+        const fourDigits = Math.floor(Math.random() * 9000) + 1000;
 
-        const nombre = `${baseName} ${unixTs}`;
-        const nombreFantasia = `${baseName.split(' ')[0]} SpA ${unixTs}`; // e.g. "Titanium SpA 489749"
+        const nombre = `${baseName} ${fourDigits}`;
+        const nombreFantasia = `${baseName} ${fourDigits} SpA`;
         const rawRut = generateValidChileanRUT();
         const rut = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
         const calle = generateChileanStreet();
