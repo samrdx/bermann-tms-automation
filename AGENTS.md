@@ -21,14 +21,15 @@
 | `tms-tests`        | Test file structure, assertions, logging        | [SKILL.md](skills/tms-tests/SKILL.md)        |
 | `tms-data`         | Test data generation and management             | [SKILL.md](skills/tms-data/SKILL.md)          |
 
-### Generic Skills (From Anthropic)
+### Generic Skills
 
 | Skill        | Description               | URL                            |
 | ------------ | ------------------------- | ------------------------------ |
-| `playwright` | Playwright best practices | /mnt/skills/public/playwright/ |
-| `docx`       | Word document automation  | /mnt/skills/public/docx/       |
-| `xlsx`       | Excel automation          | /mnt/skills/public/xlsx/       |
-| `pptx`       | PowerPoint automation     | /mnt/skills/public/pptx/       |
+| `playwright`    | Playwright best practices   | /mnt/skills/public/playwright/       |
+| `playwright-cli`| Browser automation with CLI | [SKILL.md](skills/playwright-cli/SKILL.md) |
+| `docx`          | Word document automation    | /mnt/skills/public/docx/               |
+| `xlsx`          | Excel automation            | /mnt/skills/public/xlsx/               |
+| `pptx`          | PowerPoint automation       | /mnt/skills/public/pptx/               |
 
 ---
 
@@ -106,21 +107,21 @@ git push origin main
 
 ## Quick Reference
 
-### Before asking Claude/Gemini/AI:
+### Before asking Claude/Gemini/AI
 
 ```
 ❌ BAD:  "Create ContratosPage"
 ✅ GOOD: "Using @tms-page-objects and @tms-selectors skills, create ContratosPage"
 ```
 
-### Before writing selector:
+### Before writing selector
 
 ```
 ❌ BAD:  Use XPath or guess class names
 ✅ GOOD: Check Confluence → Use data-id or ID → Document in Confluence
 ```
 
-### Before handling dropdown:
+### Before handling dropdown
 
 ```
 ❌ BAD:  Try .click() and hope it works
@@ -141,6 +142,6 @@ git push origin main
 ## Resources
 
 - **Confluence Selectors:** [Internal TMS Selector Database]
-- **TMS QA Environment:** https://moveontruckqa.bermanntms.cl
-- **GitHub Repository:** https://github.com/samrdx/bermann-tms-automation
+- **TMS QA Environment:** <https://moveontruckqa.bermanntms.cl>
+- **GitHub Repository:** <https://github.com/samrdx/bermann-tms-automation>
 - **Project Documentation:** README.md, CLAUDE.md, GEMINI.md

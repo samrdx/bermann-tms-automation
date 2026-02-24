@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "github-local": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "env": {
+        "CONTEXT7_API_KEY": "ctx7sk-8ea97069-178f-443a-aa06-a2f4e1632b3f"
+      }
+    }
+  },
+  "chrome-devtools": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "chrome-devtools-mcp@latest"
+    ]
+  },
+  "general": {
+    "preferredEditor": "antigravity"
+  }
+}

@@ -243,12 +243,14 @@ viajes-planificar.test.ts -> viajes-asignar.test.ts -> viajes-finalizar.test.ts
 The test suite is organized into two categories:
 
 **Atomic Tests (New Generation):**
+
 - Self-contained, independent tests
 - Do NOT depend on base-entities setup or JSON data files
 - Handle their own authentication and data lookup via API
 - Examples: `viajes-asignar.test.ts`, `viajes-finalizar.test.ts`
 
 **Legacy Tests (Dependent):**
+
 - Depend on `base-entities.setup.ts` for entity creation
 - Read data from `last-run-data-{browser}.json`
 - Must run sequentially in a specific order
