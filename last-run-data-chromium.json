@@ -32,14 +32,39 @@
   },
   "executionTimeSeconds": 77.99,
   "contratoCliente": {
-    "id": "1809",
-    "nroContrato": "38877"
+    "id": "1841",
+    "nroContrato": "22484"
   },
   "seededTransportista": {
-    "id": "1391",
-    "nombre": "TransSur 9958",
-    "baseNombre": "TransSur",
-    "documento": "91573395-6",
-    "razonSocial": "TransSur 9958 SpA"
+    "id": "1399",
+    "nombre": "Austral 5806",
+    "baseNombre": "Austral",
+    "documento": "62346530-6",
+    "razonSocial": "Austral 5806 SpA"
+  },
+  "seededCliente": {
+    "id": "779",
+    "nombre": "Importadora 5504",
+    "nombreFantasia": "Importadora 5504 SpA",
+    "rut": "85079000-0",
+    "email": "importadora@test.cl"
+  },
+  "viaje": {
+    "nroViaje": "59871",
+    "cliente": "Importadora 5504 SpA",
+    "ruta": "05082025-1",
+    "status": "PLANIFICADO"
+  },
+  "seededVehiculo": {
+    "patente": "",
+    "muestra": "",
+    "transportistaNombre": "Austral 5806"
+  },
+  "seededConductor": {
+    "nombre": "Pedro",
+    "apellido": "Rodríguez",
+    "rut": "56.756.723-0",
+    "email": "luisrojas@test.com",
+    "transportistaNombre": "Austral 5806"
   }
 }

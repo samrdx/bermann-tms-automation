@@ -25,7 +25,7 @@ export class ClienteFormPage extends BasePage {
     transportistasButton: 'button[data-id="clientes-transportistas"]',
 
     // Contact fields
-   email: '#clientes-email',
+    email: '#clientes-email',
     telefono: '#clientes-telefono',
 
     // Actions
@@ -40,7 +40,8 @@ export class ClienteFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/clientes/crear');
+    const baseUrl = config.get().baseUrl;
+    await this.page.goto(`${baseUrl}/clientes/crear`);
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -131,7 +132,7 @@ export class ClienteFormPage extends BasePage {
   }
 
   //  ===== REGION/CIUDAD/COMUNA SELECTION =====
-  
+
   async selectRandomRegion(): Promise<void> {
     logger.info('Selecting random Region');
     try {
@@ -261,7 +262,7 @@ export class ClienteFormPage extends BasePage {
           isOpened = true;
           break;
         }
- logger.warn(`Comuna Dropdown not visible on attempt ${i + 1}, retrying...`);
+        logger.warn(`Comuna Dropdown not visible on attempt ${i + 1}, retrying...`);
       }
 
       if (!isOpened) {
@@ -298,19 +299,19 @@ export class ClienteFormPage extends BasePage {
   }
 
   // ===== POLIGONOS =====
-  
+
   async selectAllPoligonos(): Promise<void> {
     logger.info('Selecting all Poligonos');
     try {
       const button = this.page.locator("button[title='Polígonos']").first();
-      
+
       try {
         await button.waitFor({ state: 'visible', timeout: 3000 });
       } catch (e) {
         logger.warn('⚠️ Poligonos button not visible within 3s');
         return;
       }
-      
+
       await button.scrollIntoViewIfNeeded();
 
       // Open dropdown
@@ -320,26 +321,26 @@ export class ClienteFormPage extends BasePage {
       // Try user suggested selectors for "Seleccionar Todos"
       // 1. Specific XPath inside dropdown-menu
       const selAll1 = this.page.locator("//div[contains(@class, 'dropdown-menu') and contains(@class, 'show')]//button[@type='button'][normalize-space()='Seleccionar Todos']");
-      
+
       // 2. Global XPath (first one visible)
       const selAll2 = this.page.locator("(//button[@type='button'][normalize-space()='Seleccionar Todos'])[1]");
-      
+
       // 3. CSS Selector
       const selAll3 = this.page.locator("div.bs-actionsbox button.bs-select-all");
 
       let clicked = false;
       if (await selAll1.first().isVisible()) {
-          await selAll1.first().click();
-          clicked = true;
-          logger.info('✅ Clicked "Seleccionar Todos" (Selector 1)');
+        await selAll1.first().click();
+        clicked = true;
+        logger.info('✅ Clicked "Seleccionar Todos" (Selector 1)');
       } else if (await selAll2.first().isVisible()) {
-          await selAll2.first().click();
-          clicked = true;
-          logger.info('✅ Clicked "Seleccionar Todos" (Selector 2)');
+        await selAll2.first().click();
+        clicked = true;
+        logger.info('✅ Clicked "Seleccionar Todos" (Selector 2)');
       } else if (await selAll3.first().isVisible()) {
-          await selAll3.first().click();
-          clicked = true;
-          logger.info('✅ Clicked "Seleccionar Todos" (Selector 3)');
+        await selAll3.first().click();
+        clicked = true;
+        logger.info('✅ Clicked "Seleccionar Todos" (Selector 3)');
       }
 
       if (!clicked) {
@@ -348,16 +349,16 @@ export class ClienteFormPage extends BasePage {
         const checkboxes = this.page.locator('.dropdown-menu.show li:not(.disabled) a[role="option"]');
         const count = await checkboxes.count();
         for (let i = 0; i < count; i++) {
-            const option = checkboxes.nth(i);
-            const isSelected = await option.getAttribute('class').then(c => c?.includes('selected'));
-            if (!isSelected) await option.click();
+          const option = checkboxes.nth(i);
+          const isSelected = await option.getAttribute('class').then(c => c?.includes('selected'));
+          if (!isSelected) await option.click();
         }
       }
 
       // Close dropdown
       await this.page.keyboard.press('Escape');
       await this.page.waitForTimeout(500);
-      
+
     } catch (error) {
       logger.error('Failed to select all poligonos', error);
       await this.takeScreenshot('select-all-poligonos-error');
@@ -367,28 +368,28 @@ export class ClienteFormPage extends BasePage {
 
   // Helper for opening Bootstrap dropdowns reliably
   private async robustOpenDropdown(button: any, parent: any, name: string): Promise<void> {
-      let isOpened = false;
-      for (let i = 0; i < 3; i++) {
-        await button.click({ force: true });
-        await this.page.waitForTimeout(500);
+    let isOpened = false;
+    for (let i = 0; i < 3; i++) {
+      await button.click({ force: true });
+      await this.page.waitForTimeout(500);
 
-        const menu = parent.locator('.dropdown-menu.show');
-        if (await menu.isVisible()) {
-          isOpened = true;
-          break;
-        }
-        logger.warn(`${name} Dropdown not visible on attempt ${i + 1}, retrying...`);
+      const menu = parent.locator('.dropdown-menu.show');
+      if (await menu.isVisible()) {
+        isOpened = true;
+        break;
       }
-      if (!isOpened) throw new Error(`Failed to open ${name} dropdown`);
+      logger.warn(`${name} Dropdown not visible on attempt ${i + 1}, retrying...`);
+    }
+    if (!isOpened) throw new Error(`Failed to open ${name} dropdown`);
   }
 
   // ===== TRANSPORTISTAS ASOCIADOS =====
-  
+
   async selectTransportista(nombre: string): Promise<void> {
     logger.info(`Selecting transportista: ${nombre}`);
     try {
       const button = this.page.locator(this.selectors.transportistasButton);
-      
+
       // Graceful skip if button not visible (may be conditional field)
       try {
         await button.waitFor({ state: 'visible', timeout: 3000 });
@@ -396,7 +397,7 @@ export class ClienteFormPage extends BasePage {
         logger.warn(`⚠️ Transportistas button not visible within 3s - skipping (may not be required for this form)`);
         return;
       }
-      
+
       await button.scrollIntoViewIfNeeded();
       const parent = button.locator('..');
 
@@ -417,7 +418,7 @@ export class ClienteFormPage extends BasePage {
 
       // Select the option
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre }).first();
-      
+
       if (await option.count() === 0) {
         logger.warn(`Transportista "${nombre}" not found in dropdown - closing and continuing`);
         await this.page.keyboard.press('Escape');
@@ -426,7 +427,7 @@ export class ClienteFormPage extends BasePage {
 
       await option.scrollIntoViewIfNeeded();
       await option.click();
-      
+
       logger.info(`✅ Transportista "${nombre}" selected`);
       await this.page.waitForTimeout(500);
     } catch (error) {
@@ -436,7 +437,7 @@ export class ClienteFormPage extends BasePage {
   }
 
   // ===== CONTACT FIELDS =====
-  
+
   async fillEmail(email: string): Promise<void> {
     logger.info(`Filling email: ${email}`);
     try {
@@ -498,7 +499,7 @@ export class ClienteFormPage extends BasePage {
     try {
       await this.page.waitForTimeout(2000);
       const url = this.page.url();
-      return url.includes('/clientes/index') || url.includes('/clientes/ver');
+      return url.includes('/clientes/index') || url.includes('/clientes/ver') || url.includes('/clientes/view');
     } catch (error) {
       logger.error('Failed to check if form saved', error);
       return false;

@@ -20,170 +20,171 @@ export interface Transportista {
 
 export class TransportistaHelper {
 
-        /**
-         * Extracts Transportista ID and other details after a UI creation.
-         * This logic is adapted from TmsApiClient.createTransportista and TransportistaHelper.createTransportistaViaUI.
-         * 
-         * @param page Playwright Page object
-         * @param nombre The full name of the Transportista (with timestamp)
-         * @param documento The RUT of the Transportista
-         * @param baseNombre The base name of the Transportista (without timestamp)
-         * @param razonSocial The reason social of the Transportista
-         * @returns A Transportista object with extracted ID and other details.
-         */
-        static async extractTransportistaIdAndName(
-            page: Page,
-            nombre: string,
-            documento: string,
-            baseNombre: string,
-            razonSocial: string
-        ): Promise<Transportista> {
-            const baseUrl = config.get().baseUrl;
-            let id = '0';
-            let currentUrl = page.url();
-            logger.info(`📍 Post-save URL for ID extraction: ${currentUrl}`);
-    
-            let savedId = ''; // Variable to hold ID from response if intercepted
-    
-            // Try to rescue ID from response if available (this is usually from createTransportistaViaUI)
-            // For direct test, we assume this is already handled by createTransportistaViaUI or not applicable.
-            // So, we'll focus on URL and grid search.
-    
-            // 1. Attempt to extract from URL (e.g., /view/123)
-            let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
-            if (idMatch) {
-                id = idMatch[1];
-                logger.info(`✅ Transportista ID extracted from URL: ${id}`);
+    /**
+     * Extracts Transportista ID and other details after a UI creation.
+     * This logic is adapted from TmsApiClient.createTransportista and TransportistaHelper.createTransportistaViaUI.
+     * 
+     * @param page Playwright Page object
+     * @param nombre The full name of the Transportista (with timestamp)
+     * @param documento The RUT of the Transportista
+     * @param baseNombre The base name of the Transportista (without timestamp)
+     * @param razonSocial The reason social of the Transportista
+     * @returns A Transportista object with extracted ID and other details.
+     */
+    static async extractTransportistaIdAndName(
+        page: Page,
+        nombre: string,
+        documento: string,
+        baseNombre: string,
+        razonSocial: string
+    ): Promise<Transportista> {
+        const baseUrl = config.get().baseUrl;
+        let id = '0';
+        let currentUrl = page.url();
+        logger.info(`📍 Post-save URL for ID extraction: ${currentUrl}`);
+
+        let savedId = ''; // Variable to hold ID from response if intercepted
+
+        // Try to rescue ID from response if available (this is usually from createTransportistaViaUI)
+        // For direct test, we assume this is already handled by createTransportistaViaUI or not applicable.
+        // So, we'll focus on URL and grid search.
+
+        // 1. Attempt to extract from URL (e.g., /view/123)
+        let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
+        if (idMatch) {
+            id = idMatch[1];
+            logger.info(`✅ Transportista ID extracted from URL: ${id}`);
+        } else {
+            // Redirected to Index or other page - Execute Grid Rescue
+            logger.info('⚠️ Not on view/edit page. Executing Grid Rescue...');
+
+            // Ensure we are on the index page for grid search
+            if (!currentUrl.includes('/transportistas/index')) {
+                await page.goto(`${baseUrl}/transportistas/index`);
+                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Network idle timeout during navigation to index.'));
+                await page.waitForTimeout(2000);
+            }
+
+            // STRATEGY: Search by name using #search + #buscar
+            // TMS transportista index has NO per-column filters (no RUT filter),
+            // only a global #search input and a #buscar link button.
+            // TMS also lowercases names (e.g. "EcoTrans" → "Ecotrans"),
+            // so we must use case-insensitive matching.
+            logger.info(`🔍 Searching by name: ${nombre}`);
+            const searchInput = page.locator('#search');
+
+            if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await searchInput.fill(nombre);
+
+                // Click the Buscar button (TMS requires button click, not Enter)
+                await TransportistaHelper.clickBuscarButton(page);
+                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
+                await page.waitForTimeout(2000);
             } else {
-                // Redirected to Index or other page - Execute Grid Rescue
-                logger.info('⚠️ Not on view/edit page. Executing Grid Rescue...');
-    
-                // Ensure we are on the index page for grid search
-                if (!currentUrl.includes('/transportistas/index')) {
-                    await page.goto(`${baseUrl}/transportistas/index`);
-                    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Network idle timeout during navigation to index.'));
-                    await page.waitForTimeout(2000);
+                logger.warn('⚠️ #search input not found on index page');
+            }
+
+            // TMS grid rows have NO data-key attributes.
+            // ID is only available via the edit link: /transportistas/editar/{id}
+            // Use case-insensitive regex since TMS normalizes names to lowercase
+            const nameRegex = new RegExp(nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            const matchingRow = page.locator('#tabla_transportistas tbody tr')
+                .filter({ hasText: nameRegex })
+                .first();
+
+            if (await matchingRow.count() > 0) {
+                const editLink = matchingRow.locator('a[href*="/editar/"]').first();
+                if (await editLink.count() > 0) {
+                    const href = await editLink.getAttribute('href');
+                    const match = href?.match(/\/editar\/(\d+)/);
+                    if (match) {
+                        id = match[1];
+                        logger.info(`✅ Rescued ID via grid search (edit link): ${id}`);
+                    }
                 }
-    
-                // STRATEGY: Search by name using #search + #buscar
-                // TMS transportista index has NO per-column filters (no RUT filter),
-                // only a global #search input and a #buscar link button.
-                // TMS also lowercases names (e.g. "EcoTrans" → "Ecotrans"),
-                // so we must use case-insensitive matching.
-                logger.info(`🔍 Searching by name: ${nombre}`);
-                const searchInput = page.locator('#search');
-                
-                if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-                    await searchInput.fill(nombre);
-                    
-                    // Click the Buscar button (TMS requires button click, not Enter)
-                    await TransportistaHelper.clickBuscarButton(page);
-                    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-                    await page.waitForTimeout(2000);
-                } else {
-                    logger.warn('⚠️ #search input not found on index page');
-                }
-    
-                // TMS grid rows have NO data-key attributes.
-                // ID is only available via the edit link: /transportistas/editar/{id}
-                // Use case-insensitive regex since TMS normalizes names to lowercase
-                const nameRegex = new RegExp(nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-                const matchingRow = page.locator('#tabla_transportistas tbody tr')
-                    .filter({ hasText: nameRegex })
-                    .first();
-    
-                if (await matchingRow.count() > 0) {
-                    const editLink = matchingRow.locator('a[href*="/editar/"]').first();
-                    if (await editLink.count() > 0) {
-                        const href = await editLink.getAttribute('href');
-                        const match = href?.match(/\/editar\/(\d+)/);
+
+                // Fallback: try onclick in badge span (e.g. cambiarEstado(1376, 1))
+                if (id === '0') {
+                    const badge = matchingRow.locator('span[onclick*="cambiarEstado"]').first();
+                    if (await badge.count() > 0) {
+                        const onclick = await badge.getAttribute('onclick');
+                        const match = onclick?.match(/cambiarEstado\((\d+)/);
                         if (match) {
                             id = match[1];
-                            logger.info(`✅ Rescued ID via grid search (edit link): ${id}`);
+                            logger.info(`✅ Rescued ID via grid search (badge onclick): ${id}`);
                         }
                     }
-    
-                    // Fallback: try onclick in badge span (e.g. cambiarEstado(1376, 1))
-                    if (id === '0') {
-                        const badge = matchingRow.locator('span[onclick*="cambiarEstado"]').first();
-                        if (await badge.count() > 0) {
-                            const onclick = await badge.getAttribute('onclick');
-                            const match = onclick?.match(/cambiarEstado\((\d+)/);
-                            if (match) {
-                                id = match[1];
-                                logger.info(`✅ Rescued ID via grid search (badge onclick): ${id}`);
-                            }
-                        }
-                    }
-                } else {
-                    logger.warn(`⚠️ No row found matching: ${nombre}`);
-                    await page.screenshot({ path: `./reports/screenshots/transportista-grid-no-match-${Date.now()}.png` });
                 }
-    
-                if (id === '0') {
-                    logger.warn(`⚠️ Grid Rescue: Could not determine ID of created Transportista.`);
-                    await page.screenshot({ path: `./reports/screenshots/transportista-id-rescue-failed-${Date.now()}.png` });
-                }
+            } else {
+                logger.warn(`⚠️ No row found matching: ${nombre}`);
+                await page.screenshot({ path: `./reports/screenshots/transportista-grid-no-match-${Date.now()}.png` });
             }
-    
+
             if (id === '0') {
-                logger.error(`❌ Could not extract Transportista ID for: ${nombre}`);
-                throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
+                logger.warn(`⚠️ Grid Rescue: Could not determine ID of created Transportista.`);
+                await page.screenshot({ path: `./reports/screenshots/transportista-id-rescue-failed-${Date.now()}.png` });
             }
-    
-            logger.info(`✅ Successfully extracted Transportista [${nombre}] ID: ${id}`);
-            return {
-                id,
-                nombre,
-                baseNombre,
-                documento,
-                razonSocial
-            };
         }
 
-        /**
-         * Clicks the "Buscar" button on the TMS grid index pages.
-         * Uses the proven pattern from TmsApiClient: link role first, JS fallback for Firefox.
-         */
-        static async clickBuscarButton(page: Page): Promise<void> {
-            try {
-                const buscarLink = page.getByRole('link', { name: 'Buscar' });
-                if (await buscarLink.isVisible({ timeout: 3000 }).catch(() => false)) {
-                    await buscarLink.click();
-                    logger.info('🔎 Clicked Buscar button (link role)');
-                    return;
-                }
-            } catch {
-                // Fallback below
-            }
-
-            // JS fallback (Firefox-safe): click #buscar element directly
-            logger.info('🔎 Using JS fallback to click Buscar button...');
-            await page.evaluate(() => {
-                const btn = document.getElementById('buscar');
-                if (btn) btn.click();
-                else {
-                    // Try finding any link/button with text "Buscar"
-                    const links = Array.from(document.querySelectorAll('a, button'));
-                    const buscar = links.find(el => el.textContent?.trim() === 'Buscar');
-                    if (buscar) (buscar as HTMLElement).click();
-                    else console.error('Botón Buscar no encontrado');
-                }
-            });
-            logger.info('🔎 Clicked Buscar button (JS fallback)');
+        if (id === '0') {
+            logger.error(`❌ Could not extract Transportista ID for: ${nombre}`);
+            throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
         }
-    
-            /**
-             * Creates a Transportista via UI Interactions using the Page Object.
-             * Use this when API seeding is unreliable or silent.
-             * 
-             * @param page Playwright Page object
-             * @param type 'Propio' | 'Tercero'
-             */
-            static async createTransportistaViaUI(
-                page: Page,
-                type: 'Propio' | 'Tercero' = 'Propio'
-            ): Promise<Transportista> {        const baseUrl = config.get().baseUrl;
+
+        logger.info(`✅ Successfully extracted Transportista [${nombre}] ID: ${id}`);
+        return {
+            id,
+            nombre,
+            baseNombre,
+            documento,
+            razonSocial
+        };
+    }
+
+    /**
+     * Clicks the "Buscar" button on the TMS grid index pages.
+     * Uses the proven pattern from TmsApiClient: link role first, JS fallback for Firefox.
+     */
+    static async clickBuscarButton(page: Page): Promise<void> {
+        try {
+            const buscarLink = page.getByRole('link', { name: 'Buscar' });
+            if (await buscarLink.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await buscarLink.click();
+                logger.info('🔎 Clicked Buscar button (link role)');
+                return;
+            }
+        } catch {
+            // Fallback below
+        }
+
+        // JS fallback (Firefox-safe): click #buscar element directly
+        logger.info('🔎 Using JS fallback to click Buscar button...');
+        await page.evaluate(() => {
+            const btn = document.getElementById('buscar');
+            if (btn) btn.click();
+            else {
+                // Try finding any link/button with text "Buscar"
+                const links = Array.from(document.querySelectorAll('a, button'));
+                const buscar = links.find(el => el.textContent?.trim() === 'Buscar');
+                if (buscar) (buscar as HTMLElement).click();
+                else console.error('Botón Buscar no encontrado');
+            }
+        });
+        logger.info('🔎 Clicked Buscar button (JS fallback)');
+    }
+
+    /**
+     * Creates a Transportista via UI Interactions using the Page Object.
+     * Use this when API seeding is unreliable or silent.
+     * 
+     * @param page Playwright Page object
+     * @param type 'Propio' | 'Tercero'
+     */
+    static async createTransportistaViaUI(
+        page: Page,
+        type: 'Propio' | 'Tercero' = 'Propio'
+    ): Promise<Transportista> {
+        const baseUrl = config.get().baseUrl;
         const transportistaPage = new TransportistaFormPage(page);
 
         // Data Generation - UNIQUE NAME with 6-digit Unix seconds to guarantee uniqueness
@@ -272,104 +273,66 @@ export class TransportistaHelper {
                 logger.info(`✅ ID Rescued from URL: ${id}`);
             }
         } else {
-            // Redirected to Index - Execute RUT-based Grid Rescue
-            logger.info('⚠️ Redirected to Index. Executing RUT-based Grid Rescue...');
+            // Redirected to Index - Execute #search-based Grid Rescue
+            logger.info('⚠️ Redirected to Index. Executing Grid Rescue...');
 
-            await page.goto(`${baseUrl}/transportistas/index`);
-            await page.waitForTimeout(2000);
-
-            // PRIMARY STRATEGY: Search by RUT (Documento) - immutable and reliable
-            logger.info(`🔍 Searching by RUT: ${documento}`);
-            
-            const rutFilterInput = page.locator('input[name*="[documento]"]')
-                .or(page.locator('input[name*="[rut]"]'))
-                .or(page.locator('thead th:has-text("RUT") + th input, thead input').first())
-                .first();
-
-            let foundViaRut = false;
-            if (await rutFilterInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-                // Clean RUT for search (remove formatting)
-                const searchRut = documento.replace(/[.-]/g, '');
-                await rutFilterInput.fill(searchRut);
-                await rutFilterInput.press('Enter');
-                await page.waitForTimeout(1500);
-                
-                // Look for row containing the RUT
-                const rutRow = page.locator('table tbody tr').filter({ hasText: new RegExp(searchRut.slice(0, 6), 'i') }).first();
-                
-                if (await rutRow.count() > 0) {
-                    const dataKey = await rutRow.getAttribute('data-key');
-                    if (dataKey) {
-                        id = dataKey;
-                        foundViaRut = true;
-                        logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
-                    } else {
-                        const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
-                        if (await actionLink.count() > 0) {
-                            const href = await actionLink.getAttribute('href');
-                            const match = href?.match(/(\d+)/);
-                            if (match) {
-                                id = match[1];
-                                foundViaRut = true;
-                                logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
-                            }
-                        }
-                    }
-                }
+            if (!currentUrl.includes('/transportistas/index')) {
+                await page.goto(`${baseUrl}/transportistas/index`);
+                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Network idle timeout during navigation to index.'));
+                await page.waitForTimeout(2000);
             }
 
-            // FALLBACK STRATEGY: Search by Name (less reliable due to TMS normalization)
-            if (!foundViaRut) {
-                logger.warn('⚠️ RUT search failed, falling back to name-based search...');
-                
-                const filterInput = page.locator('input[name*="[nombre]"]')
-                    .or(page.locator('.dataTables_filter input'))
-                    .or(page.locator('thead input').first())
-                    .first();
+            // PRIMARY STRATEGY: Search using global #search + #buscar
+            logger.info(`🔍 Searching via global #search: ${nombre}`);
+            const searchInput = page.locator('#search');
 
-                if (await filterInput.isVisible()) {
-                    logger.info(`🔍 Searching by name: ${baseNombre}`);
-                    await filterInput.fill(baseNombre);
-                    await filterInput.press('Enter');
-                    await page.waitForTimeout(1500);
+            if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await searchInput.fill(nombre);
+                await TransportistaHelper.clickBuscarButton(page);
+                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
+                await page.waitForTimeout(2000);
+            } else {
+                logger.warn('⚠️ #search input not found on index page');
+            }
+
+            // Extract ID from the matching row
+            const nameRegex = new RegExp(nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            const matchingRow = page.locator('#tabla_transportistas tbody tr')
+                .filter({ hasText: nameRegex })
+                .first();
+
+            if (await matchingRow.count() > 0) {
+                // Try from edit link first
+                const editLink = matchingRow.locator('a[href*="/editar/"]').first();
+                if (await editLink.count() > 0) {
+                    const href = await editLink.getAttribute('href');
+                    const match = href?.match(/\/editar\/(\d+)/);
+                    if (match) {
+                        id = match[1];
+                        logger.info(`✅ Rescued ID via grid search (edit link): ${id}`);
+                    }
                 }
 
-                // Case-insensitive search through rows
-                try {
-                    const allRows = page.locator('table tbody tr');
-                    const rowCount = await allRows.count();
-                    
-                    for (let i = 0; i < rowCount; i++) {
-                        const currentRow = allRows.nth(i);
-                        const text = await currentRow.innerText();
-                        
-                        if (text.toLowerCase().includes(baseNombre.toLowerCase())) {
-                            const dataKey = await currentRow.getAttribute('data-key');
-                            if (dataKey) {
-                                id = dataKey;
-                                logger.info(`✅ Rescued ID via name search: ${id}`);
-                                break;
-                            }
-                            
-                            const actionLink = currentRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
-                            if (await actionLink.count() > 0) {
-                                const href = await actionLink.getAttribute('href');
-                                const match = href?.match(/(\d+)/);
-                                if (match) {
-                                    id = match[1];
-                                    logger.info(`✅ Rescued ID via name search (link): ${id}`);
-                                    break;
-                                }
-                            }
+                // Fallback: try onclick in badge span (active/inactive)
+                if (!id) {
+                    const badge = matchingRow.locator('span[onclick*="cambiarEstado"]').first();
+                    if (await badge.count() > 0) {
+                        const onclick = await badge.getAttribute('onclick');
+                        const match = onclick?.match(/cambiarEstado\((\d+)/);
+                        if (match) {
+                            id = match[1];
+                            logger.info(`✅ Rescued ID via grid search (badge onclick): ${id}`);
                         }
                     }
-                } catch (e) {
-                    logger.error(`❌ FAILED to find record in grid by name: ${baseNombre}`, e);
                 }
+            } else {
+                logger.warn(`⚠️ No row found matching: ${nombre}`);
+                await page.screenshot({ path: `./reports/screenshots/transportista-grid-no-match-${Date.now()}.png` });
             }
 
             if (!id) {
-                await page.screenshot({ path: `./reports/screenshots/rescue-id-failed-${Date.now()}.png` });
+                logger.warn('⚠️ Grid Rescue: Could not determine ID of created Transportista.');
+                await page.screenshot({ path: `./reports/screenshots/transportista-id-rescue-failed-${Date.now()}.png` });
             }
         }
 

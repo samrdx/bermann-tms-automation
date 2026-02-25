@@ -32,14 +32,39 @@
   },
   "executionTimeSeconds": 80.25,
   "contratoCliente": {
-    "id": "1811",
-    "nroContrato": "37008"
+    "id": "1842",
+    "nroContrato": "26578"
   },
   "seededTransportista": {
-    "id": "1390",
-    "nombre": "Cordillera 8509",
-    "baseNombre": "Cordillera",
-    "documento": "85979203-0",
-    "razonSocial": "Cordillera 8509 SpA"
+    "id": "1400",
+    "nombre": "TransSur 5286",
+    "baseNombre": "TransSur",
+    "documento": "19600667-2",
+    "razonSocial": "TransSur 5286 SpA"
+  },
+  "seededCliente": {
+    "id": "",
+    "nombre": "Servicios 6512",
+    "nombreFantasia": "Servicios 6512 SpA",
+    "rut": "80758409-K",
+    "email": "servicios@test.cl"
+  },
+  "viaje": {
+    "nroViaje": "61781",
+    "cliente": "Servicios 6512 SpA",
+    "ruta": "05082025-1",
+    "status": "PLANIFICADO"
+  },
+  "seededVehiculo": {
+    "patente": "",
+    "muestra": "",
+    "transportistaNombre": "TransSur 5286"
+  },
+  "seededConductor": {
+    "nombre": "José",
+    "apellido": "López",
+    "rut": "22.158.819-3",
+    "email": "josémartínez@test.com",
+    "transportistaNombre": "TransSur 5286"
   }
 }

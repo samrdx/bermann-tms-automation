@@ -1,12 +1,14 @@
 import { test } from '@playwright/test';
 import { logger } from '../../../../../src/utils/logger.js';
 import { ClienteHelper } from '../../../../api-helpers/ClienteHelper.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import * as fs from 'fs';
 
 test.describe('Cliente - Creación de Cliente', () => {
   // Increase timeout for this test
-  test.setTimeout(60000); // Reduced timeout as it no longer creates a Transportista
+  test.setTimeout(60000);
 
-  test('Debe crear un Cliente correctamente y guardar sus datos', async ({ page }) => {
+  test('Debe crear un Cliente correctamente y guardar sus datos', async ({ page }, testInfo) => {
     // Note: Already authenticated via storageState from setup project
     logger.info('📋 PHASE 1: Creando Cliente...');
 
@@ -22,6 +24,23 @@ test.describe('Cliente - Creación de Cliente', () => {
     if (!cliente.nombre) {
       throw new Error('Cliente creation failed - no name returned');
     }
+
+    // Save data to worker-specific JSON as seededCliente (same pattern as seededTransportista)
+    const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+    let currentData: any = {};
+    if (fs.existsSync(dataPath)) {
+      currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    }
+    currentData.seededCliente = {
+      id: cliente.id,
+      nombre: cliente.nombre,
+      nombreFantasia: cliente.nombreFantasia,
+      rut: cliente.rut,
+      email: cliente.email,
+    };
+    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
+    logger.info(`✅ seededCliente data saved to ${dataPath}`);
+    logger.info(`📦 Seeded Cliente: "${cliente.nombre}" (ID: ${cliente.id})`);
 
     logger.info('✅ Test completed successfully!');
   });

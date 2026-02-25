@@ -27,7 +27,7 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
     test('Should create a Vehiculo using Seeded Transportista', async ({
         page,
         vehiculoPage
-    }) => {
+    }, testInfo) => {
 
         await test.step('Navigate to Vehiculo Creation (Direct Link)', async () => {
             // User requirement: navigate directly without ID param
@@ -43,16 +43,16 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
             const patente = generatePatente();
             await vehiculoPage.fillPatente(patente);
             await vehiculoPage.fillMuestra(patente);
-            
+
             await page.waitForTimeout(1000); // Resilience: Wait for dropdown interactivity
             await vehiculoPage.selectTransportista(seededTransportista.nombre);
 
             await vehiculoPage.selectTipoVehiculo('TRACTO');
-            
+
             // Verify TRACTO is selected
             expect(await vehiculoPage.getSelectedTipoVehiculo()).toContain('TRACTO');
 
-            await page.waitForTimeout(1000); 
+            await page.waitForTimeout(1000);
 
             await vehiculoPage.selectCapacidad('3 KG');
         });
@@ -60,7 +60,20 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
         await test.step('Save and Verify', async () => {
             await vehiculoPage.clickGuardar();
             await page.waitForTimeout(2000);
-            expect(await vehiculoPage.isFormSaved()).toBeTruthy();
+            const isSaved = await vehiculoPage.isFormSaved();
+            expect(isSaved).toBeTruthy();
+
+            if (isSaved) {
+                const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+                const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+                data.seededVehiculo = {
+                    patente: await page.locator('#vehiculos-patente').inputValue().catch(() => ''),
+                    muestra: await page.locator('#vehiculos-muestra').inputValue().catch(() => ''),
+                    transportistaNombre: seededTransportista.nombre
+                };
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
+                logger.info(`✅ seededVehiculo saved: ${data.seededVehiculo.patente}`);
+            }
         });
     });
 });

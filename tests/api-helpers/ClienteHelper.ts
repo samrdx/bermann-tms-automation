@@ -126,10 +126,12 @@ export class ClienteHelper {
                 logger.info(`✅ ID Rescued from URL: ${id}`);
             }
         } else {
-            // Redirected to Index - RUT-based Grid Rescue
-            logger.info('⚠️ Redirected to Index. Executing RUT-based Grid Rescue...');
-
-            await page.goto(`${baseUrl}/clientes/index`);
+            // Only goto if we are NOT already there or in a detail page
+            const current = page.url();
+            if (!current.includes('/clientes/index') && !current.includes('/ver/') && !current.includes('/view/')) {
+                logger.info(`🚀 Navigating to index for rescue: ${baseUrl}/clientes/index`);
+                await page.goto(`${baseUrl}/clientes/index`, { waitUntil: 'load', timeout: 30000 });
+            }
             await page.waitForTimeout(2000);
 
             // PRIMARY STRATEGY: Search by RUT - immutable and reliable

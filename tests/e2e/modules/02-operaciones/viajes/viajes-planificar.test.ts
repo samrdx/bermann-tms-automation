@@ -22,7 +22,8 @@ test.describe('Viajes - Planificar (Create)', () => {
   test.setTimeout(120000);
 
   test('Should planificar a new Viaje using entities from JSON', async ({
-    viajesPlanificarPage
+    viajesPlanificarPage,
+    page
   }, testInfo) => {
     const startTime = Date.now();
 
@@ -46,20 +47,26 @@ test.describe('Viajes - Planificar (Create)', () => {
 
     const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
-    // Verify prerequisites
-    if (!operationalData.cliente?.nombre) {
-      throw new Error('❌ Missing required entity: Cliente. Please run base entities setup.');
+    // Prefer seededCliente (set by cliente-crear.test.ts OR base-entities.setup.ts).
+    // Fall back to legacy `cliente` key for backward compatibility.
+    const clienteSource = operationalData.seededCliente || operationalData.cliente;
+    if (!clienteSource?.nombre) {
+      throw new Error(
+        '❌ Missing required entity: Cliente.\n' +
+        'Run base entities setup OR run: npm run test:entity:cliente'
+      );
     }
 
     logger.info('✅ All prerequisites validated');
     logger.info('Loaded entities:');
-    logger.info(`   Cliente: ${operationalData.cliente.nombre}`);
+    logger.info(`   Cliente source: ${operationalData.seededCliente ? 'seededCliente ✅' : 'cliente (fallback) ⚠️'}`);
+    logger.info(`   Cliente: ${clienteSource.nombre}`);
     logger.info('');
 
     // Test data
     const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
     // Use nombreFantasia if available, otherwise nombre
-    const clienteNombre = operationalData.cliente.nombreFantasia || operationalData.cliente.nombre;
+    const clienteNombre = clienteSource.nombreFantasia || clienteSource.nombre;
 
     logger.info(`Generated Nro Viaje: ${nroViaje}`);
 
@@ -116,12 +123,53 @@ test.describe('Viajes - Planificar (Create)', () => {
     });
 
     // =================================================================
-    // PHASE 3: Save Viaje
+    // PHASE 3: Save Viaje and capture ID from redirect URL
     // =================================================================
-    await test.step('Phase 3: Save', async () => {
+    let viajeId: string | null = null;
+
+    await test.step('Phase 3: Save and capture Viaje ID', async () => {
       logger.info('PHASE 3: Save Viaje');
-      await viajesPlanificarPage.clickGuardar();
-      logger.info('Save clicked');
+
+      // Wait for navigation triggered by Guardar — the TMS redirects to:
+      //   /viajes/editar/{id}  or  /viajes/ver/{id}  after a successful save
+      const [_] = await Promise.all([
+        page.waitForNavigation({
+          waitUntil: 'networkidle',
+          timeout: 30000,
+        }).catch(() => null),
+        viajesPlanificarPage.clickGuardar(),
+      ]);
+
+      // Extract the ID from the final URL
+      const finalUrl = page.url();
+      logger.info(`Post-save URL: ${finalUrl}`);
+
+      const urlMatch = finalUrl.match(/\/viajes\/(?:editar|ver)\/(\d+)/);
+      if (urlMatch) {
+        viajeId = urlMatch[1];
+        logger.info(`✅ Viaje ID captured from URL: ${viajeId}`);
+      } else {
+        // Fallback: look for a hidden input or data attribute holding the ID
+        viajeId = await page.evaluate(() => {
+          const candidateSelectors = [
+            'input[name="Viajes[id]"]',
+            'input[name="viajes-id"]',
+            '[data-viaje-id]',
+          ];
+          for (const sel of candidateSelectors) {
+            const el = document.querySelector(sel) as HTMLInputElement | null;
+            if (el) return el.value || el.getAttribute('data-viaje-id') || null;
+          }
+          return null;
+        });
+        if (viajeId) {
+          logger.info(`✅ Viaje ID captured from DOM: ${viajeId}`);
+        } else {
+          logger.warn('⚠️ Could not capture Viaje ID. The assignment test will search by nroViaje instead.');
+        }
+      }
+
+      logger.info('Save clicked and navigation completed');
     });
 
     // =================================================================
