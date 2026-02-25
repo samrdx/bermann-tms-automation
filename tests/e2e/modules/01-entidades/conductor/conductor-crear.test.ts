@@ -1,14 +1,14 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { 
-    generateRandomName, 
-    generateRandomLastName, 
-    generateGenericUser, 
-    generatePassword, 
-    generateDocument, 
-    generatePhone, 
-    generateEmail, 
-    generateLicenseType 
+import {
+    generateRandomName,
+    generateRandomLastName,
+    generateGenericUser,
+    generatePassword,
+    generateDocument,
+    generatePhone,
+    generateEmail,
+    generateLicenseType
 } from '../../../../../src/utils/rutGenerator.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
@@ -37,7 +37,7 @@ test.describe('Transport - Conductor Creation', () => {
     test('Should create a new Conductor and link to Transportista', async ({
         page,
         conductorPage
-    }) => {
+    }, testInfo) => {
 
         const testData = {
             usuario: generateGenericUser(),
@@ -59,7 +59,7 @@ test.describe('Transport - Conductor Creation', () => {
 
         await test.step('Phase 2: Fill Form', async () => {
             logger.info(`📝 Filling Conductor Form for: ${testData.nombre} ${testData.apellido}`);
-            
+
             await conductorPage.fillUsuario(testData.usuario);
             await conductorPage.fillClave(testData.clave);
             await conductorPage.fillNombre(testData.nombre);
@@ -67,18 +67,34 @@ test.describe('Transport - Conductor Creation', () => {
             await conductorPage.fillDocumento(testData.rut);
             await conductorPage.fillTelefono(testData.telefono);
             await conductorPage.fillEmail(testData.email);
-            
+
             // Optional Fields
             await conductorPage.selectLicencia(testData.licencia);
             await conductorPage.setVencimientoLicencia(testData.vencimiento);
-            
+
             // Link Transportista
             await conductorPage.selectTransportista(transportistaName);
         });
 
         await test.step('Phase 3: Save and Verify', async () => {
             await conductorPage.clickGuardar();
-            expect(await conductorPage.isFormSaved()).toBeTruthy();
+            await page.waitForTimeout(2000);
+            const isSaved = await conductorPage.isFormSaved();
+            expect(isSaved).toBeTruthy();
+
+            if (isSaved) {
+                const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+                const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+                data.seededConductor = {
+                    nombre: testData.nombre,
+                    apellido: testData.apellido,
+                    rut: testData.rut,
+                    email: testData.email,
+                    transportistaNombre: transportistaName
+                };
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
+                logger.info(`✅ seededConductor saved: ${testData.nombre} ${testData.apellido}`);
+            }
             logger.info('✅ Conductor Created and Saved Successfully');
         });
 

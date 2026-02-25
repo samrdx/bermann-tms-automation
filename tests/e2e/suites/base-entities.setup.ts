@@ -53,6 +53,7 @@ test.describe('Base Operational Suite - Entity Creation', () => {
             projectName: '',
             transportista: {} as any,
             cliente: {} as any,
+            seededCliente: {} as any,
             vehiculo: {} as any,
             conductor: {} as any,
             executionTimeSeconds: 0, // Will be set at the end
@@ -85,6 +86,16 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         const cliente = await ClienteHelper.createClienteViaUI(page, transportistaBaseName);
 
         operationalData.cliente = {
+            id: cliente.id || 'N/A',
+            nombre: cliente.nombre,
+            nombreFantasia: cliente.nombreFantasia,
+            rut: cliente.rut,
+            email: cliente.email,
+        };
+
+        // Also write as seededCliente (same key used by cliente-crear.test.ts)
+        // so viajes-planificar.test.ts always reads from the same key.
+        operationalData.seededCliente = {
             id: cliente.id || 'N/A',
             nombre: cliente.nombre,
             nombreFantasia: cliente.nombreFantasia,

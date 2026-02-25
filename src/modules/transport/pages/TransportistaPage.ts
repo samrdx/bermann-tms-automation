@@ -285,7 +285,7 @@ export class TransportistaFormPage extends BasePage {
     try {
       await this.page.waitForTimeout(2000);
       const url = this.page.url();
-      return url.includes('/transportistas/index') || url.includes('/transportistas/ver');
+      return url.includes('/transportistas/index') || url.includes('/transportistas/ver') || url.includes('/transportistas/view');
     } catch (error) {
       logger.error('Failed to check if form saved', error);
       return false;
