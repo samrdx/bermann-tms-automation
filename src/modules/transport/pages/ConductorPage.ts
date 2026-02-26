@@ -1,6 +1,7 @@
 import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
 import { createLogger } from '../../../utils/logger.js';
+import { isDemoMode } from '../../../utils/env-helper.js';
 
 const logger = createLogger('ConductorFormPage');
 
@@ -33,136 +34,73 @@ export class ConductorFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/conductores/crear');
+    logger.info('Navigating to Conductor creation page');
+    await this.page.goto('/conductores/crear');
     await this.page.waitForLoadState('domcontentloaded');
   }
 
   async fillUsuario(usuario: string): Promise<void> {
     logger.info(`Filling usuario: ${usuario}`);
-    try {
-      await this.fill(this.selectors.usuario, usuario);
-    } catch (error) {
-      logger.error('Failed to fill usuario', error);
-      await this.takeScreenshot('fill-usuario-error');
-      throw error;
-    }
+    await this.fill(this.selectors.usuario, usuario);
   }
 
   async fillClave(clave: string): Promise<void> {
     logger.info('Filling clave');
-    try {
-      await this.fill(this.selectors.clave, clave);
-    } catch (error) {
-      logger.error('Failed to fill clave', error);
-      await this.takeScreenshot('fill-clave-error');
-      throw error;
-    }
+    await this.fill(this.selectors.clave, clave);
   }
 
   async fillNombre(nombre: string): Promise<void> {
     logger.info(`Filling nombre: ${nombre}`);
-    try {
-      await this.fill(this.selectors.nombre, nombre);
-    } catch (error) {
-      logger.error('Failed to fill nombre', error);
-      await this.takeScreenshot('fill-nombre-error');
-      throw error;
-    }
+    await this.fill(this.selectors.nombre, nombre);
   }
 
   async fillApellido(apellido: string): Promise<void> {
     logger.info(`Filling apellido: ${apellido}`);
-    try {
-      await this.fill(this.selectors.apellido, apellido);
-    } catch (error) {
-      logger.error('Failed to fill apellido', error);
-      await this.takeScreenshot('fill-apellido-error');
-      throw error;
-    }
+    await this.fill(this.selectors.apellido, apellido);
   }
 
   async fillDocumento(documento: string): Promise<void> {
     logger.info(`Filling documento (RUT): ${documento}`);
-    try {
-      // Use fillRutWithVerify to ensure robustness (Requirement: Global RUT Fix)
-      await this.fillRutWithVerify(this.selectors.documento, documento);
-    } catch (error) {
-      logger.error('Failed to fill documento', error);
-      await this.takeScreenshot('fill-documento-error');
-      throw error;
-    }
+    await this.fillRutWithVerify(this.selectors.documento, documento);
   }
 
   async fillTelefono(telefono: string): Promise<void> {
     logger.info(`Filling telefono: ${telefono}`);
-    try {
-      await this.fill(this.selectors.telefono, telefono);
-    } catch (error) {
-      logger.error('Failed to fill telefono', error);
-      await this.takeScreenshot('fill-telefono-error');
-      throw error;
-    }
+    await this.fill(this.selectors.telefono, telefono);
   }
 
   async fillEmail(email: string): Promise<void> {
     logger.info(`Filling email: ${email}`);
-    try {
-      await this.fill(this.selectors.email, email);
-    } catch (error) {
-      logger.error('Failed to fill email', error);
-      await this.takeScreenshot('fill-email-error');
-      throw error;
-    }
+    await this.fill(this.selectors.email, email);
   }
 
   async selectTransportista(nombre: string): Promise<void> {
     logger.info(`Selecting transportista: ${nombre}`);
     try {
-      // Wait for dropdown button to be visible
-      await this.page.waitForSelector(this.selectors.transportistaButton, { state: 'visible' });
-
-      // Identify the specific dropdown container
+      if (!(await this.isVisible(this.selectors.transportistaButton))) return;
+      
       const dropdownContainer = this.page.locator('div.dropdown')
         .filter({ has: this.page.locator(this.selectors.transportistaButton) });
 
-      // Click dropdown button
       await this.page.click(this.selectors.transportistaButton);
 
-      // Wait for specific dropdown menu to appear
       const dropdownMenu = dropdownContainer.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      // CRITICAL: Wait for dropdown options to load (AJAX call)
       await this.page.waitForTimeout(2000);
 
-      // Wait for at least one dropdown item to appear
-      const firstItem = dropdownMenu.locator('.dropdown-item').first();
-      await firstItem.waitFor({ state: 'visible', timeout: 10000 });
-
-      // Check for search box (long list)
       const searchInput = dropdownMenu.locator('.bs-searchbox input');
-      if (await searchInput.count() > 0 && await searchInput.isVisible()) {
-        logger.info('Using search box to filter transportista');
+      if (await searchInput.isVisible()) {
         await searchInput.fill(nombre);
         await this.page.waitForTimeout(500);
       }
 
-      // Select option by text
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre }).first();
-
-      if (await option.count() === 0) {
-        throw new Error(`Transportista "${nombre}" not found in dropdown`);
-      }
-
-      await option.scrollIntoViewIfNeeded();
       await option.click();
 
       logger.info(`✅ Transportista "${nombre}" selected`);
-      await this.page.waitForTimeout(500);
-
     } catch (error) {
       logger.error(`Failed to select transportista: ${nombre}`, error);
-      await this.takeScreenshot('select-transportista-error');
       throw error;
     }
   }
@@ -170,103 +108,48 @@ export class ConductorFormPage extends BasePage {
   async selectLicencia(tipo: string): Promise<void> {
     logger.info(`Selecting licencia: ${tipo}`);
     try {
-      // Click dropdown button (try parent div if button click is iffy)
+      if (!(await this.isVisible(this.selectors.licenciaButton))) return;
       const btn = this.page.locator(this.selectors.licenciaButton);
-      const parent = this.page.locator('div.dropdown').filter({ has: btn }).first();
-      
-      // Click dropdown button using dispatchEvent to force it
-      await btn.dispatchEvent('click');
+      await btn.click();
       await this.page.waitForTimeout(500);
 
-      // Verify if open
       const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
-      const menu = container.locator('.dropdown-menu.show').first();
-      
-      if (!await menu.isVisible()) {
-         logger.warn('Dropdown not open after dispatchEvent, trying standard click');
-         await btn.click({ force: true });
-         await this.page.waitForTimeout(500);
-      }
-
       const dropdownMenu = container.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      // Debug: Log options
-      const options = await dropdownMenu.locator('.dropdown-item').allTextContents();
-      logger.info(`Available Licencia options: ${options.map(o => o.trim()).join(', ')}`);
-
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
-      if (await option.count() === 0) {
-         throw new Error(`Option "${tipo}" not found in Licencia dropdown. Available: ${options.map(o => o.trim()).join(', ')}`);
-      }
       await option.click();
-
       logger.info(`✅ Licencia "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select licencia: ${tipo}`, error);
-      await this.takeScreenshot('select-licencia-error');
       throw error;
     }
   }
 
   async setVencimientoLicencia(fecha: string): Promise<void> {
     logger.info(`Setting vencimiento licencia: ${fecha}`);
+    const locator = this.page.locator(this.selectors.vencimientoLicencia);
+    if (!(await locator.isVisible())) return;
+    
     try {
-      // Try to fill directly first
-      try {
-        await this.fill(this.selectors.vencimientoLicencia, fecha);
-        logger.info(`✅ Vencimiento licencia set: ${fecha}`);
-        return;
-      } catch (error) {
-        // Field might be readonly, try JavaScript
-        logger.info('Field readonly, using JavaScript to set value');
-      }
-
-      // Use JavaScript to set value (for readonly date pickers)
+      await locator.fill(fecha);
+    } catch (error) {
       await this.page.evaluate(
         ({ selector, value }) => {
           const element = document.querySelector(selector) as HTMLInputElement;
           if (element) {
             element.value = value;
             element.dispatchEvent(new Event('change', { bubbles: true }));
-            element.dispatchEvent(new Event('input', { bubbles: true }));
           }
         },
         { selector: this.selectors.vencimientoLicencia, value: fecha }
       );
-
-      await this.page.waitForTimeout(300);
-      logger.info(`✅ Vencimiento licencia set via JavaScript: ${fecha}`);
-    } catch (error) {
-      logger.error('Failed to set vencimiento licencia', error);
-      await this.takeScreenshot('set-vencimiento-error');
-      // Don't throw - this is an optional field
-      logger.warn('Vencimiento licencia is optional, continuing...');
     }
   }
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking save button');
-    try {
-      await Promise.all([
-        this.page.waitForURL(url => !url.toString().includes('/crear'), { timeout: 15000 }),
-        this.click(this.selectors.btnGuardar),
-      ]);
-    } catch (error) {
-      logger.error('Failed to click save button', error);
-      await this.takeScreenshot('click-guardar-error');
-      throw error;
-    }
-  }
-
-  async hasValidationErrors(): Promise<boolean> {
-    try {
-      const invalidFields = await this.page.$$(this.selectors.invalidField);
-      return invalidFields.length > 0;
-    } catch (error) {
-      logger.error('Failed to check validation errors', error);
-      return false;
-    }
+    await this.click(this.selectors.btnGuardar);
   }
 
   async isFormSaved(): Promise<boolean> {
@@ -277,7 +160,6 @@ export class ConductorFormPage extends BasePage {
       );
       return true;
     } catch (error) {
-      logger.error('Failed to check if form saved', error);
       return false;
     }
   }

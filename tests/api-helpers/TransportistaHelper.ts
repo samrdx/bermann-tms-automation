@@ -216,9 +216,7 @@ export class TransportistaHelper {
         await page.waitForTimeout(500);
 
         // Location
-        await transportistaPage.selectRandomRegion();
-        await transportistaPage.selectRandomCiudad();
-        await transportistaPage.selectRandomComuna();
+        await transportistaPage.selectRandomLocationCascade();
 
         await transportistaPage.fillCalle(calle);
         await transportistaPage.fillAltura(altura);

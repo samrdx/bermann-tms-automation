@@ -10,6 +10,11 @@ const __dirname = path.dirname(__filename);
 // Cargar variables de entorno
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+const ENV = process.env.ENV || 'QA';
+const baseURL = ENV === 'DEMO' 
+  ? 'https://demo.bermanntms.cl' 
+  : 'https://moveontruckqa.bermanntms.cl';
+
 export default defineConfig({
   testDir: './tests',
   testIgnore: ['**/examples/**'],
@@ -54,6 +59,7 @@ export default defineConfig({
   },
 
   use: {
+    baseURL,
     /* Headless: True en CI, o lo que diga la variable en local */
     headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),
 

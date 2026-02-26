@@ -15,7 +15,7 @@ export class LoginPage extends BasePage {
   };
 
   constructor(page: Page) {
-    super(page, `${config.get().baseUrl}/login`);
+    super(page, '/login');
   }
 
   /* ===================== ACTIONS ===================== */
