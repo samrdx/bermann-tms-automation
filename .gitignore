@@ -56,3 +56,10 @@ tests/**/*.js.map
 # Playwright auth
 playwright/.auth/
 gha-creds-*.json
+
+# Engram
+.engram/
+.claude/
+.gemini/
+.codex/
+.cursor/
