@@ -1,0 +1,28 @@
+{
+  "seededTransportista": {
+    "id": "37",
+    "nombre": "Pacific 9031",
+    "baseNombre": "Pacific",
+    "documento": "31201225-1",
+    "razonSocial": "Pacific 9031 SpA"
+  },
+  "seededVehiculo": {
+    "patente": "ALHA-85",
+    "muestra": "ALHA-85",
+    "transportistaNombre": "Pacific 9031"
+  },
+  "seededConductor": {
+    "nombre": "Carlos",
+    "apellido": "Muñoz",
+    "rut": "32.117.109-5",
+    "email": "anacontreras@test.com",
+    "transportistaNombre": "TransSur 9772"
+  },
+  "seededCliente": {
+    "id": "36",
+    "nombre": "Distribuidora 8461",
+    "nombreFantasia": "Distribuidora 8461 SpA",
+    "rut": "30849563-9",
+    "email": ""
+  }
+}

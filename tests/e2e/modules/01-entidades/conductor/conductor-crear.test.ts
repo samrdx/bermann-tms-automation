@@ -69,14 +69,21 @@ test.describe('Transport - Conductor Creation', () => {
             await conductorPage.fillEmail(testData.email);
 
             // Optional Fields
-            await conductorPage.selectLicencia(testData.licencia);
-            await conductorPage.setVencimientoLicencia(testData.vencimiento);
+            // License info
+            await conductorPage.selectLicencia('A1');
+            await conductorPage.setVencimientoLicencia('2026-12-31');
 
             // Link Transportista
             await conductorPage.selectTransportista(transportistaName);
         });
 
         await test.step('Phase 3: Save and Verify', async () => {
+            // Capture values BEFORE saving since form will navigate away
+            const expectedNombre = await page.locator('#conductores-nombre').inputValue().catch(() => '');
+            const expectedApellido = await page.locator('#conductores-apellido').inputValue().catch(() => '');
+            const expectedRut = await page.locator('#conductores-documento').inputValue().catch(() => '');
+            const expectedEmail = await page.locator('#conductores-email').inputValue().catch(() => '');
+
             await conductorPage.clickGuardar();
             await page.waitForTimeout(2000);
             const isSaved = await conductorPage.isFormSaved();
@@ -86,14 +93,14 @@ test.describe('Transport - Conductor Creation', () => {
                 const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
                 const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
                 data.seededConductor = {
-                    nombre: testData.nombre,
-                    apellido: testData.apellido,
-                    rut: testData.rut,
-                    email: testData.email,
+                    nombre: expectedNombre,
+                    apellido: expectedApellido,
+                    rut: expectedRut,
+                    email: expectedEmail,
                     transportistaNombre: transportistaName
                 };
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
-                logger.info(`✅ seededConductor saved: ${testData.nombre} ${testData.apellido}`);
+                logger.info(`✅ seededConductor saved: ${expectedNombre} ${expectedApellido}`);
             }
             logger.info('✅ Conductor Created and Saved Successfully');
         });

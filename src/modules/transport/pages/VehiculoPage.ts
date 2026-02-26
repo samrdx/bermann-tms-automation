@@ -11,10 +11,15 @@ export class VehiculoFormPage extends BasePage {
     patente: '#vehiculos-patente',
     muestra: '#vehiculos-muestra',
 
-    // Dropdowns
+    // Underlying select elements (for page.evaluate scoping)
+    tipoVehiculoSelect: '#vehiculos-tipo_vehiculo_id',
+    transportistaSelect: '#vehiculos-transportista_id',
+    capacidadSelect: '#vehiculos-capacidad_id',
+
+    // Dropdown trigger buttons (data-id)
     tipoVehiculoButton: 'button[data-id="vehiculos-tipo_vehiculo_id"]',
     tipoRamplaButton: 'button[data-id="vehiculos-tipo_rampla_id"]',
-    transportistaButton: 'button[data-id="vehiculos-transportista_id"]', // Cascading!
+    transportistaButton: 'button[data-id="vehiculos-transportista_id"]',
     capacidadButton: 'button[data-id="vehiculos-capacidad_id"]',
 
     // Actions
@@ -44,29 +49,76 @@ export class VehiculoFormPage extends BasePage {
     await this.fill(this.selectors.muestra, muestra);
   }
 
+  /**
+   * Generic Bootstrap Select dropdown helper using page.evaluate for reliability.
+   * Opens dropdown, optionally searches, clicks the matching option, and closes.
+   */
+  private async selectFromBootstrapDropdown(
+    selectSelector: string,
+    optionText: string,
+    useSearch: boolean = false
+  ): Promise<void> {
+    const result = await this.page.evaluate(
+      ({ selectSelector, optionText, useSearch }) => {
+        const select = document.querySelector(selectSelector) as HTMLSelectElement;
+        if (!select) return { success: false, error: `Select not found: ${selectSelector}` };
+
+        const container = select.closest('.bootstrap-select') as HTMLElement;
+        if (!container) return { success: false, error: `Bootstrap Select container not found for ${selectSelector}` };
+
+        // Open dropdown
+        const toggleBtn = container.querySelector('button.dropdown-toggle') as HTMLElement;
+        if (!toggleBtn) return { success: false, error: 'Toggle button not found' };
+        toggleBtn.click();
+
+        return { success: true, opened: true };
+      },
+      { selectSelector, optionText, useSearch }
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to open dropdown');
+    }
+
+    // Wait for dropdown to render
+    await this.page.waitForTimeout(500);
+
+    // If search is needed, type in the searchbox
+    if (useSearch) {
+      const searchInput = this.page.locator(`${selectSelector}`)
+        .locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]')
+        .locator('.bs-searchbox input');
+
+      const searchVisible = await searchInput.isVisible({ timeout: 2000 }).catch(() => false);
+      if (searchVisible) {
+        await searchInput.fill(optionText);
+        await this.page.waitForTimeout(1000);
+      }
+    }
+
+    // Click the matching dropdown-item in the open menu
+    const container = this.page.locator(selectSelector)
+      .locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
+    const option = container.locator('.dropdown-menu .dropdown-item')
+      .filter({ hasText: optionText })
+      .first();
+
+    await option.waitFor({ state: 'visible', timeout: 5000 });
+    await option.click();
+  }
+
+  /**
+   * Selects a transportista from the Bootstrap Select dropdown using search.
+   */
   async selectTransportista(nombre: string): Promise<void> {
     logger.info(`Selecting transportista: ${nombre}`);
     try {
-      if (!(await this.isVisible(this.selectors.transportistaButton))) return;
-      const dropdownContainer = this.page.locator('div.dropdown')
-        .filter({ has: this.page.locator(this.selectors.transportistaButton) });
-
-      await this.page.click(this.selectors.transportistaButton);
-
-      const dropdownMenu = dropdownContainer.locator('.dropdown-menu.show:visible').first();
-      await dropdownMenu.waitFor({ state: 'visible' });
-
-      await this.page.waitForTimeout(2000);
-
-      const searchInput = dropdownMenu.locator('.bs-searchbox input');
-      if (await searchInput.isVisible()) {
-        await searchInput.fill(nombre);
-        await this.page.waitForTimeout(1000);
+      const btn = this.page.locator(this.selectors.transportistaButton);
+      if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) {
+        logger.warn('⚠️ Transportista dropdown not visible — skipping');
+        return;
       }
-
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre }).first();
-      await option.click();
-
+      await this.selectFromBootstrapDropdown(this.selectors.transportistaSelect, nombre, true);
       logger.info(`✅ Transportista "${nombre}" selected`);
     } catch (error) {
       logger.error(`Failed to select transportista: ${nombre}`, error);
@@ -74,19 +126,15 @@ export class VehiculoFormPage extends BasePage {
     }
   }
 
+  /**
+   * Selects a tipo vehiculo from the Bootstrap Select dropdown.
+   */
   async selectTipoVehiculo(tipo: string): Promise<void> {
     logger.info(`Selecting tipo vehículo: ${tipo}`);
     try {
-      if (!(await this.isVisible(this.selectors.tipoVehiculoButton))) return;
       const btn = this.page.locator(this.selectors.tipoVehiculoButton);
-      await btn.click();
-      await this.page.waitForTimeout(500);
-
-      const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
-      await dropdownMenu.waitFor({ state: 'visible' });
-
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
-      await option.click();
+      if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) return;
+      await this.selectFromBootstrapDropdown(this.selectors.tipoVehiculoSelect, tipo, false);
       logger.info(`✅ Tipo vehículo "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select tipo vehículo: ${tipo}`, error);
@@ -94,22 +142,44 @@ export class VehiculoFormPage extends BasePage {
     }
   }
 
+  /**
+   * Selects a capacidad from the Bootstrap Select dropdown.
+   */
   async selectCapacidad(capacidad: string): Promise<void> {
     logger.info(`Selecting capacidad: ${capacidad}`);
     try {
-      if (!(await this.isVisible(this.selectors.capacidadButton))) return;
       const btn = this.page.locator(this.selectors.capacidadButton);
-      await btn.click();
-      await this.page.waitForTimeout(500);
-
-      const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
-      await dropdownMenu.waitFor({ state: 'visible' });
-
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: capacidad }).first();
-      await option.click();
+      if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) return;
+      await this.selectFromBootstrapDropdown(this.selectors.capacidadSelect, capacidad, false);
       logger.info(`✅ Capacidad "${capacidad}" selected`);
     } catch (error) {
       logger.error(`Failed to select capacidad: ${capacidad}`, error);
+      throw error;
+    }
+  }
+
+  async getSelectedTipoVehiculo(): Promise<string> {
+    const btn = this.page.locator(this.selectors.tipoVehiculoButton);
+    return (await btn.textContent()) || '';
+  }
+
+  async selectTipoRampla(tipo: string): Promise<void> {
+    logger.info(`Selecting tipo rampla: ${tipo}`);
+    try {
+      const btn = this.page.locator(this.selectors.tipoRamplaButton);
+      if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) {
+        logger.warn('⚠️ Tipo Rampla dropdown not visible — skipping');
+        return;
+      }
+      await btn.click();
+      await this.page.waitForTimeout(500);
+      const option = this.page.locator('.dropdown-menu.show .dropdown-item')
+        .filter({ hasText: tipo }).first();
+      await option.waitFor({ state: 'visible', timeout: 5000 });
+      await option.click();
+      logger.info(`✅ Tipo rampla "${tipo}" selected`);
+    } catch (error) {
+      logger.error(`Failed to select tipo rampla: ${tipo}`, error);
       throw error;
     }
   }

@@ -1,0 +1,28 @@
+{
+  "seededTransportista": {
+    "id": "1444",
+    "nombre": "Titanium 3654",
+    "baseNombre": "Titanium",
+    "documento": "25815175-5",
+    "razonSocial": "Titanium 3654 SpA"
+  },
+  "seededVehiculo": {
+    "patente": "ZCKC-92",
+    "muestra": "ZCKC-92",
+    "transportistaNombre": "Titanium 3654"
+  },
+  "seededConductor": {
+    "nombre": "Juan",
+    "apellido": "Silva",
+    "rut": "29.958.611-1",
+    "email": "maríaaraya@test.com",
+    "transportistaNombre": "Horizonte 6744"
+  },
+  "seededCliente": {
+    "id": "812",
+    "nombre": "Comercial 3822",
+    "nombreFantasia": "Comercial 3822 SpA",
+    "rut": "46871565-1",
+    "email": ""
+  }
+}

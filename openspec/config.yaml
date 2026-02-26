@@ -2,10 +2,12 @@
 schema: spec-driven
 
 context: |
-  Tech stack: TypeScript, Playwright, Node.js, Winston
-  Architecture: Page Object Model (POM), Skills System
-  Testing: Playwright
-  Style: TypeScript strict mode
+  Tech stack: TypeScript ^5.9.3, Playwright ^1.58.0, Node.js 20, Winston ^3.19.0
+  Architecture: Page Object Model (POM), Domain-Driven Modules, Skills System
+  Testing: Playwright (Chromium + Firefox), 13 tests across 6 modules
+  Style: TypeScript strict mode, ES Modules, .js extensions on imports
+  CI/CD: GitHub Actions (hybrid workflow: atomic + legacy suites)
+  Environments: QA (moveontruckqa.bermanntms.cl), Demo (demo.bermanntms.cl)
 
 rules:
   proposal:
@@ -23,7 +25,7 @@ rules:
     - Keep tasks small enough to complete in one session
   apply:
     - Follow existing code patterns and conventions
-    - Load relevant coding skills for the project stack
+    - Load relevant coding skills for the project stack (tms-selectors, tms-dropdowns, tms-page-objects, tms-tests, tms-data)
   verify:
     - Run tests if test infrastructure exists
     - Compare implementation against every spec scenario

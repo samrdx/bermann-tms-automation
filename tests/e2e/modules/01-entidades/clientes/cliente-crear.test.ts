@@ -1,47 +1,103 @@
-import { test } from '@playwright/test';
+import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { ClienteHelper } from '../../../../api-helpers/ClienteHelper.js';
+import {
+  generateValidChileanRUT,
+  generateChileanStreet
+} from '../../../../../src/utils/rutGenerator.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { ClienteHelper, Cliente } from '../../../../api-helpers/ClienteHelper.js';
 import * as fs from 'fs';
 
 test.describe('Cliente - Creación de Cliente', () => {
-  // Increase timeout for this test
-  test.setTimeout(60000);
 
-  test('Debe crear un Cliente correctamente y guardar sus datos', async ({ page }, testInfo) => {
-    // Note: Already authenticated via storageState from setup project
-    logger.info('📋 PHASE 1: Creando Cliente...');
+  test('Debe crear un Cliente correctamente y guardar sus datos', async ({
+    page,
+    clientePage,
+  }, testInfo) => {
 
-    // Create Cliente without associating a Transportista
-    const cliente = await ClienteHelper.createClienteViaUI(page);
+    // Test data
+    const shortNames = ['Distribuidora', 'Comercial', 'Importadora', 'Logistica', 'Servicios', 'Industrial', 'Global', 'Central'];
+    const baseName = shortNames[Math.floor(Math.random() * shortNames.length)];
+    const fourDigits = Math.floor(Math.random() * 9000) + 1000;
+    const randomStreetNumber = Math.floor(Math.random() * 900) + 100;
 
-    logger.info(`✅ Cliente creado: ${cliente.nombre}`);
-    logger.info(`✅ Client RUT: ${cliente.rut}`);
-    logger.info(`✅ Client ID: ${cliente.id || 'N/A (grid rescue failed)'}`);
-    logger.info(`✅ Client Email: ${cliente.email}`);
-
-    // Verify client was created
-    if (!cliente.nombre) {
-      throw new Error('Cliente creation failed - no name returned');
-    }
-
-    // Save data to worker-specific JSON as seededCliente (same pattern as seededTransportista)
-    const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
-    let currentData: any = {};
-    if (fs.existsSync(dataPath)) {
-      currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-    }
-    currentData.seededCliente = {
-      id: cliente.id,
-      nombre: cliente.nombre,
-      nombreFantasia: cliente.nombreFantasia,
-      rut: cliente.rut,
-      email: cliente.email,
+    const testData = {
+      nombre: `${baseName} ${fourDigits}`,
+      baseNombre: baseName,
+      nombreFantasia: `${baseName} ${fourDigits} SpA`,
+      rut: generateValidChileanRUT(),
+      calle: generateChileanStreet(),
+      altura: randomStreetNumber.toString(),
+      tipoCliente: 'Distribución', // Exists in both QA and Demo
     };
-    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
-    logger.info(`✅ seededCliente data saved to ${dataPath}`);
-    logger.info(`📦 Seeded Cliente: "${cliente.nombre}" (ID: ${cliente.id})`);
 
-    logger.info('✅ Test completed successfully!');
+    await test.step('Phase 1: Navigate', async () => {
+      logger.info('🧭 PHASE 1: Navigate to Create Cliente');
+      await clientePage.navigate();
+      logger.info('✅ Navigation successful');
+    });
+
+    await test.step('Phase 2: Fill Form', async () => {
+      logger.info('📝 PHASE 2: Fill Cliente Form');
+      await clientePage.fillNombre(testData.nombre);
+      await clientePage.fillRut(testData.rut);
+      await clientePage.fillNombreFantasia(testData.nombreFantasia);
+      await clientePage.selectTipoCliente(testData.tipoCliente);
+      await page.waitForTimeout(500);
+
+      await clientePage.selectRandomLocationCascade();
+
+      await clientePage.fillCalle(testData.calle);
+      await clientePage.fillAltura(testData.altura);
+
+      // Select all Polígonos (required)
+      await clientePage.selectAllPoligonos();
+
+      logger.info('✅ Form filled');
+    });
+
+    await test.step('Phase 3: Save', async () => {
+      logger.info('💾 PHASE 3: Save Cliente');
+      await clientePage.clickGuardar();
+      await page.waitForTimeout(5000);
+      logger.info('✅ Save initiated');
+    });
+
+    let createdCliente: Cliente;
+
+    await test.step('Phase 4: Verify and Save Data', async () => {
+      logger.info('✅ PHASE 4: Verification and Data Storage');
+      const isSaved = await clientePage.isFormSaved();
+
+      if (!isSaved) {
+        const hasErrors = await clientePage.hasValidationErrors();
+        if (hasErrors) {
+          logger.error('❌ Validation errors detected');
+          await page.screenshot({ path: './reports/screenshots/cliente-validation-error.png', fullPage: true });
+        }
+      }
+      expect(isSaved).toBeTruthy();
+
+      // Extract ID and name for storage
+      createdCliente = await ClienteHelper.extractClienteIdAndName(
+        page,
+        testData.nombre,
+        testData.rut,
+        testData.baseNombre,
+        testData.nombreFantasia
+      );
+
+      // Save data to worker-specific JSON
+      const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+      let currentData: any = {};
+      if (fs.existsSync(dataPath)) {
+        currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+      }
+      currentData.seededCliente = createdCliente;
+      fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
+
+      logger.info(`✅ Cliente data saved to ${dataPath}`);
+      logger.info('✅ Test PASSED');
+    });
   });
 });
