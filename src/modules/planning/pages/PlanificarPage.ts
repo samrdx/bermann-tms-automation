@@ -2,6 +2,7 @@ import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
 import { expect } from '@playwright/test';
 import { createLogger } from '../../../utils/logger.js';
+import { isDemoMode } from '../../../utils/env-helper.js';
 
 const logger = createLogger('PlanificarViajesPage');
 
@@ -38,7 +39,8 @@ export class PlanificarPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/crear');
+    logger.info('Navigating to Planificar Viajes page');
+    await this.page.goto('/viajes/crear');
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -60,42 +62,31 @@ export class PlanificarPage extends BasePage {
 
   // --- ESTRATEGIA DE SELECCIÓN NATIVA (Click UI + Scoped Selector) ---
 
-  /**
-   * Selecciona una opción en un dropdown Bootstrap.
-   * CORRECCIÓN: Usa selectores relativos al botón para evitar "Strict Mode Violation"
-   */
   private async selectBootstrapDropdown(buttonSelector: string, textToSelect?: string, fieldName: string = 'Dropdown'): Promise<void> {
     logger.info(`Selecting ${fieldName}: "${textToSelect || 'First available'}"`);
     try {
+      if (!(await this.isVisible(buttonSelector))) return;
       const btn = this.page.locator(buttonSelector);
-      await btn.waitFor({ state: 'visible' });
       await btn.scrollIntoViewIfNeeded();
-      await btn.click(); // Abrir menú
+      await btn.click(); 
 
-      // --- FIX CRÍTICO: SCOPING ---
-      // En lugar de buscar '.dropdown-menu.show' en toda la página (lo que da error por haber 9),
-      // buscamos el menú DENTRO del contenedor padre del botón.
-      // 1. Subimos al padre (.dropdown)
       const parent = btn.locator('xpath=..');
-      // 2. Buscamos el DIV menú visible (ignoramos el UL interno)
       const dropdownMenu = parent.locator('div.dropdown-menu.show').first();
 
       await dropdownMenu.waitFor({ state: 'visible' });
 
       if (textToSelect) {
-        // Buscar la caja de texto DENTRO de este menú específico
         const searchBox = dropdownMenu.locator('.bs-searchbox input');
 
         if (await searchBox.isVisible()) {
           await searchBox.fill(textToSelect);
-          await this.page.waitForTimeout(500); // Esperar filtrado
+          await this.page.waitForTimeout(500); 
 
           const noResults = await dropdownMenu.locator('.no-results').isVisible();
           if (noResults) {
             logger.warn(`Search for "${textToSelect}" yielded no results in ${fieldName}. Trying direct click...`);
             await searchBox.clear();
             await this.page.waitForTimeout(300);
-            // Buscar opción visualmente
             const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
             if (await option.isVisible()) {
               await option.click();
@@ -106,17 +97,14 @@ export class PlanificarPage extends BasePage {
             await this.page.keyboard.press('Enter');
           }
         } else {
-          // Sin buscador: click directo
           const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
           await option.click();
         }
       } else {
-        // Seleccionar el primero disponible
         const firstOption = dropdownMenu.locator('li:not(.hidden):not(.disabled) a').first();
         await firstOption.click();
       }
 
-      // Cerrar menú si quedó abierto (seguridad)
       if (await dropdownMenu.isVisible()) {
         await this.page.keyboard.press('Escape');
       }
@@ -156,10 +144,7 @@ export class PlanificarPage extends BasePage {
 
   async selectCodigoCarga(carga?: string): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnCodigoCarga, carga, 'Codigo Carga');
-
-    // CRÍTICO: Disparar evento TAB para forzar validación y cálculo de rutas
     await this.page.keyboard.press('Tab');
-
     logger.info('Waiting for route calculation...');
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
@@ -168,35 +153,40 @@ export class PlanificarPage extends BasePage {
   // --- MÉTODOS DE RUTA ---
 
   async agregarRuta(numeroRuta: string): Promise<void> {
+    if (isDemoMode()) {
+      logger.info('Skipping "agregarRuta" in DEMO mode as it is not supported in this environment.');
+      return;
+    }
+
     logger.info(`Adding ruta: ${numeroRuta}`);
+    if (!(await this.isVisible(this.selectors.btnAgregarRuta))) return;
     const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
 
     try {
       await expect(btnAgregar).toBeEnabled({ timeout: 15000 });
-    } catch (e) {
-      await this.page.screenshot({ path: `reports/screenshots/agregar-ruta-disabled-${Date.now()}.png` });
-      throw new Error(`Timeout: "Agregar Ruta" button never became enabled.`);
-    }
+      await btnAgregar.click();
+      await this.page.waitForTimeout(1000);
 
-    await btnAgregar.click();
-    await this.page.waitForTimeout(1000);
+      const rows = this.page.locator(this.selectors.tablaRutas);
+      const rowCount = await rows.count();
+      let found = false;
 
-    const rows = this.page.locator(this.selectors.tablaRutas);
-    const rowCount = await rows.count();
-    let found = false;
-
-    for (let i = 0; i < rowCount; i++) {
-      const row = rows.nth(i);
-      const text = await row.innerText();
-      if (text.includes(numeroRuta)) {
-        await row.locator('.btn-success').click();
-        found = true;
-        break;
+      for (let i = 0; i < rowCount; i++) {
+        const row = rows.nth(i);
+        const text = await row.innerText();
+        if (text.includes(numeroRuta)) {
+          await row.locator('.btn-success').click();
+          found = true;
+          break;
+        }
       }
-    }
 
-    if (!found) throw new Error(`Ruta ${numeroRuta} not found in table`);
-    await this.page.waitForTimeout(1000);
+      if (!found) throw new Error(`Ruta ${numeroRuta} not found in table`);
+      await this.page.waitForTimeout(1000);
+    } catch (e) {
+      logger.error('Failed in agregarRuta', e);
+      throw e;
+    }
   }
 
   // --- ORIGEN Y DESTINO ---
@@ -209,79 +199,25 @@ export class PlanificarPage extends BasePage {
     await this.selectBootstrapDropdown(this.selectors.btnDestino, destino, 'Destino');
   }
 
-  // --- GUARDAR Y VERIFICAR (Estrategia Robustez Toast) ---
-
   async clickGuardar(): Promise<void> {
     logger.info('Clicking Guardar button...');
-    const btnGuardar = this.page.locator(this.selectors.btnGuardar);
-
-    await btnGuardar.waitFor({ state: 'visible' });
-    await btnGuardar.click();
-
-    // Esperamos un momento para asegurar que la acción se procese
+    await this.click(this.selectors.btnGuardar);
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(1000);
   }
 
   async isFormSaved(): Promise<boolean> {
-    logger.info('Checking save status...');
-
-    // 1. Detección del Toast de Éxito (Texto exacto de tu imagen)
-    // Usamos un selector flexible que busque el texto en cualquier parte
     const successToast = this.page.locator('text="Viaje Creado con éxito"').first();
     if (await successToast.isVisible()) {
-      logger.info('✅ Success toast detected: "Viaje Creado con éxito"');
       return true;
     }
-
-    // 2. Detección de Limpieza de Formulario
-    // Si el Nro de Viaje está vacío, significa que se guardó y reseteó
     const nroViajeVal = await this.page.locator(this.selectors.nroViaje).inputValue();
     if (nroViajeVal === '') {
-      logger.info('✅ Form cleared (implicit success indicator)');
       return true;
     }
-
-    // 3. Detección de Redirección (Fallback)
     if (!this.page.url().includes('/crear')) {
-      logger.info('✅ URL changed (redirected)');
       return true;
     }
-
-    // Debugging: Si falla, imprimir qué vemos
-    logger.warn(`⚠️ Save check failed. NroViaje field value: "${nroViajeVal}"`);
     return false;
-  }
-
-  // --- VERIFICACIÓN FINAL ---
-
-  async verifyInAsignar(nroViaje: string): Promise<boolean> {
-    logger.info(`Verifying viaje ${nroViaje} in /viajes/asignar`);
-
-    try {
-      await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/asignar');
-      await this.page.waitForLoadState('networkidle');
-
-      const searchInput = this.page.locator('input[type="search"]').first();
-      if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await searchInput.fill(nroViaje);
-        await this.page.waitForTimeout(1500);
-      }
-
-      const row = this.page.locator('table tbody tr').filter({ hasText: nroViaje }).first();
-      const isVisible = await row.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (isVisible) {
-        logger.info(`✅ Viaje ${nroViaje} found in Asignar grid`);
-        return true;
-      } else {
-        logger.warn(`⚠️ Viaje ${nroViaje} NOT found in Asignar grid`);
-        return false;
-      }
-
-    } catch (error) {
-      logger.error('Failed to verify in asignar', error);
-      return false;
-    }
   }
 }

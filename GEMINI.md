@@ -2,6 +2,11 @@
 
 # Bermann TMS QA Automation Framework
 
+## Multi-Environment Support
+
+- **QA (Default):** `ENV=QA npx playwright test` (URL: https://moveontruckqa.bermanntms.cl/login)
+- **Demo:** `ENV=DEMO npx playwright test` (URL: https://demo.bermanntms.cl/)
+
 ## Quick Start for AI Assistants
 
 **IMPORTANT:** This project uses a skills system to prevent hallucinations and enforce consistent patterns.

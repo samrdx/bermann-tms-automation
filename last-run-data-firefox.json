@@ -36,11 +36,11 @@
     "nroContrato": "26578"
   },
   "seededTransportista": {
-    "id": "1400",
-    "nombre": "TransSur 5286",
+    "id": "26",
+    "nombre": "TransSur 8008",
     "baseNombre": "TransSur",
-    "documento": "19600667-2",
-    "razonSocial": "TransSur 5286 SpA"
+    "documento": "97856840-8",
+    "razonSocial": "TransSur 8008 SpA"
   },
   "seededCliente": {
     "id": "",

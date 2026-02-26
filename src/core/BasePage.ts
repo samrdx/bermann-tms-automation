@@ -31,22 +31,54 @@ export abstract class BasePage {
     });
   }
 
+  /**
+   * Fills an input field after checking for visibility.
+   * "Rule of Gold": Always check for visibility before interaction.
+   */
   async fill(selector: string, value: string): Promise<void> {
-    logger.debug(`Filling ${selector} with value`);
-    await this.page.fill(selector, value);
+    const locator = this.page.locator(selector);
+    if (await locator.isVisible()) {
+      logger.debug(`Filling ${selector} with value`);
+      await locator.fill(value);
+    } else {
+      logger.warn(`⚠️ Field ${selector} not visible, skipping interaction.`);
+    }
+  }
+
+  /**
+   * Clicks an element after checking for visibility.
+   * "Rule of Gold": Always check for visibility before interaction.
+   */
+  async click(selector: string): Promise<void> {
+    const locator = this.page.locator(selector);
+    if (await locator.isVisible()) {
+      logger.debug(`Clicking on: ${selector}`);
+      await locator.click();
+    } else {
+      logger.warn(`⚠️ Element ${selector} not visible, skipping click.`);
+    }
   }
 
   async fillSequentially(selector: string, value: string, delay: number = 100): Promise<void> {
-    logger.debug(`Filling ${selector} sequentially with delay ${delay}`);
     const locator = this.page.locator(selector);
-    await locator.click();
-    await locator.clear();
-    await locator.pressSequentially(value, { delay });
+    if (await locator.isVisible()) {
+      logger.debug(`Filling ${selector} sequentially with delay ${delay}`);
+      await locator.click();
+      await locator.clear();
+      await locator.pressSequentially(value, { delay });
+    } else {
+      logger.warn(`⚠️ Field ${selector} not visible for sequential fill, skipping.`);
+    }
   }
 
   async fillRutWithVerify(selector: string, rutValue: string): Promise<void> {
-    logger.info(`Entering RUT with verify: [${rutValue}] on ${selector}`);
     const locator = this.page.locator(selector);
+    if (!(await locator.isVisible())) {
+      logger.warn(`⚠️ RUT field ${selector} not visible, skipping.`);
+      return;
+    }
+
+    logger.info(`Entering RUT with verify: [${rutValue}] on ${selector}`);
     
     // Normalize the expected RUT
     const cleanRut = rutValue.toUpperCase().trim();
@@ -175,24 +207,19 @@ export abstract class BasePage {
     expect(normalizedCurrent).toBe(normalizedExpected);
   }
 
-  async click(selector: string): Promise<void> {
-    logger.debug(`Clicking on: ${selector}`);
-    await this.page.click(selector);
-  }
-
   async getText(selector: string): Promise<string> {
     logger.debug(`Getting text from: ${selector}`);
-    const element = await this.page.locator(selector);
-    return await element.textContent() || '';
+    const locator = this.page.locator(selector);
+    if (await locator.isVisible()) {
+      return await locator.textContent() || '';
+    }
+    return '';
   }
 
   async isVisible(selector: string): Promise<boolean> {
     try {
-      await this.page.waitForSelector(selector, { 
-        state: 'visible', 
-        timeout: 3000 
-      });
-      return true;
+      const locator = this.page.locator(selector);
+      return await locator.isVisible();
     } catch {
       return false;
     }

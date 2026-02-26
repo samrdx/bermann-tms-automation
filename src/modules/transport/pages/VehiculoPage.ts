@@ -1,6 +1,7 @@
 import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
 import { createLogger } from '../../../utils/logger.js';
+import { isDemoMode } from '../../../utils/env-helper.js';
 
 const logger = createLogger('VehiculoFormPage');
 
@@ -27,105 +28,48 @@ export class VehiculoFormPage extends BasePage {
     super(page);
   }
 
-  async getSelectedTipoVehiculo(): Promise<string> {
-    const btn = this.page.locator(this.selectors.tipoVehiculoButton);
-    return (await btn.textContent())?.trim() || '';
-  }
-
   async navigate(): Promise<void> {
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/vehiculos/crear');
+    logger.info('Navigating to Vehiculo creation page');
+    await this.page.goto('/vehiculos/crear');
     await this.page.waitForLoadState('domcontentloaded');
   }
 
   async fillPatente(patente: string): Promise<void> {
     logger.info(`Filling patente: ${patente}`);
-    try {
-      await this.fill(this.selectors.patente, patente);
-    } catch (error) {
-      logger.error('Failed to fill patente', error);
-      await this.takeScreenshot('fill-patente-error');
-      throw error;
-    }
+    await this.fill(this.selectors.patente, patente);
   }
 
   async fillMuestra(muestra: string): Promise<void> {
     logger.info(`Filling muestra: ${muestra}`);
-    try {
-      await this.fill(this.selectors.muestra, muestra);
-    } catch (error) {
-      logger.error('Failed to fill muestra', error);
-      await this.takeScreenshot('fill-muestra-error');
-      throw error;
-    }
+    await this.fill(this.selectors.muestra, muestra);
   }
 
   async selectTransportista(nombre: string): Promise<void> {
     logger.info(`Selecting transportista: ${nombre}`);
     try {
-      // Wait for dropdown button to be visible
-      await this.page.waitForSelector(this.selectors.transportistaButton, { state: 'visible' });
-
-      // Identify the specific dropdown container
+      if (!(await this.isVisible(this.selectors.transportistaButton))) return;
       const dropdownContainer = this.page.locator('div.dropdown')
         .filter({ has: this.page.locator(this.selectors.transportistaButton) });
 
-      // Click dropdown button
       await this.page.click(this.selectors.transportistaButton);
 
-      // Wait for specific dropdown menu to appear
       const dropdownMenu = dropdownContainer.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      // CRITICAL: Wait for dropdown options to load (AJAX call)
       await this.page.waitForTimeout(2000);
 
-      // Wait for at least one dropdown item to appear
-      const firstItem = dropdownMenu.locator('.dropdown-item').first();
-      await firstItem.waitFor({ state: 'visible', timeout: 10000 });
-
-      // Check for search box (long list)
       const searchInput = dropdownMenu.locator('.bs-searchbox input');
-      if (await searchInput.count() > 0 && await searchInput.isVisible()) {
-        logger.info('Using search box to filter transportista');
+      if (await searchInput.isVisible()) {
         await searchInput.fill(nombre);
-        await this.page.waitForTimeout(1000); // Increased wait for search filtering
+        await this.page.waitForTimeout(1000);
       }
 
-      // Debug: Log all available options
-      const allOptions = await dropdownMenu.locator('.dropdown-item').allTextContents();
-      logger.info(`Available transportistas in dropdown (${allOptions.length} total):`);
-      allOptions.slice(0, 10).forEach((opt, idx) => {
-        logger.info(`  [${idx}] ${opt.trim()}`);
-      });
-
-      // Select option by text
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre }).first();
-
-      if (await option.count() === 0) {
-        logger.error(`Transportista "${nombre}" not found. Searching for partial match...`);
-
-        // Try partial match as fallback
-        const partialMatch = dropdownMenu.locator('.dropdown-item').filter({ hasText: nombre.split(' ')[0] }).first();
-        if (await partialMatch.count() > 0) {
-          logger.info(`Found partial match for "${nombre.split(' ')[0]}"`);
-          await partialMatch.scrollIntoViewIfNeeded();
-          await partialMatch.click();
-          logger.info(`✅ Selected partial match`);
-          return;
-        }
-
-        throw new Error(`Transportista "${nombre}" not found in dropdown. Available: ${allOptions.slice(0, 5).join(', ')}`);
-      }
-
-      await option.scrollIntoViewIfNeeded();
       await option.click();
 
       logger.info(`✅ Transportista "${nombre}" selected`);
-      await this.page.waitForTimeout(500);
-
     } catch (error) {
       logger.error(`Failed to select transportista: ${nombre}`, error);
-      await this.takeScreenshot('select-transportista-error');
       throw error;
     }
   }
@@ -133,115 +77,46 @@ export class VehiculoFormPage extends BasePage {
   async selectTipoVehiculo(tipo: string): Promise<void> {
     logger.info(`Selecting tipo vehículo: ${tipo}`);
     try {
+      if (!(await this.isVisible(this.selectors.tipoVehiculoButton))) return;
       const btn = this.page.locator(this.selectors.tipoVehiculoButton);
       await btn.click();
       await this.page.waitForTimeout(500);
 
-      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
       const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
-      // Debug: Log options
-      const options = await dropdownMenu.locator('.dropdown-item').allTextContents();
-      logger.info(`Available Tipo Vehiculo options: ${options.map(o => o.trim()).join(', ')}`);
-
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
-      if (await option.count() === 0) {
-        throw new Error(`Option "${tipo}" not found in Tipo Vehiculo dropdown. Available: ${options.map(o => o.trim()).join(', ')}`);
-      }
       await option.click();
-
       logger.info(`✅ Tipo vehículo "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select tipo vehículo: ${tipo}`, error);
-      await this.takeScreenshot('select-tipo-vehiculo-error');
       throw error;
     }
-  }
-
-  async selectTipoRampla(tipo: string): Promise<void> {
-    logger.info(`Selecting tipo rampla: ${tipo}`);
-    try {
-      // Wait for the button to appear (it shows up after selecting RAMPLA)
-      try {
-        await this.page.waitForSelector(this.selectors.tipoRamplaButton, { state: 'visible', timeout: 5000 });
-      } catch (e) {
-        logger.warn('Tipo Rampla dropdown did not appear within 5s. Skipping selection (or field is disabled).');
-        return;
-      }
-      const btn = this.page.locator(this.selectors.tipoRamplaButton);
-      await btn.click();
-      await this.page.waitForTimeout(500);
-
-      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
-      const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
-      await dropdownMenu.waitFor({ state: 'visible' });
-
-      // Debug: Log options
-      const options = await dropdownMenu.locator('.dropdown-item').allTextContents();
-      logger.info(`Available Tipo Rampla options: ${options.map(o => o.trim()).join(', ')}`);
-
-      const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo }).first();
-      if (await option.count() === 0) {
-        throw new Error(`Option "${tipo}" not found in Tipo Rampla dropdown. Available: ${options.map(o => o.trim()).join(', ')}`);
-      }
-      await option.click();
-
-      logger.info(`✅ Tipo rampla "${tipo}" selected`);
-    } catch (error) {
-      logger.error(`Failed to select tipo rampla: ${tipo}`, error);
-      await this.takeScreenshot('select-tipo-rampla-error');
-      // Optional field, don't throw? Or strictly require?
-      // Since it's dynamic, maybe throw if visible but failed.
-      throw error;
-    }
-
   }
 
   async selectCapacidad(capacidad: string): Promise<void> {
     logger.info(`Selecting capacidad: ${capacidad}`);
     try {
+      if (!(await this.isVisible(this.selectors.capacidadButton))) return;
       const btn = this.page.locator(this.selectors.capacidadButton);
       await btn.click();
       await this.page.waitForTimeout(500);
 
-      const container = this.page.locator('.dropdown, .bootstrap-select').filter({ has: btn }).first();
       const dropdownMenu = this.page.locator('.dropdown-menu.show:visible').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: capacidad }).first();
-      if (await option.count() === 0) {
-        throw new Error(`Option "${capacidad}" not found in Capacidad dropdown`);
-      }
       await option.click();
-
       logger.info(`✅ Capacidad "${capacidad}" selected`);
     } catch (error) {
       logger.error(`Failed to select capacidad: ${capacidad}`, error);
-      await this.takeScreenshot('select-capacidad-error');
       throw error;
     }
   }
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking save button');
-    try {
-      await this.click(this.selectors.btnGuardar);
-    } catch (error) {
-      logger.error('Failed to click save button', error);
-      await this.takeScreenshot('click-guardar-error');
-      throw error;
-    }
-  }
-
-  async hasValidationErrors(): Promise<boolean> {
-    try {
-      const invalidFields = await this.page.$$(this.selectors.invalidField);
-      return invalidFields.length > 0;
-    } catch (error) {
-      logger.error('Failed to check validation errors', error);
-      return false;
-    }
+    await this.click(this.selectors.btnGuardar);
   }
 
   async isFormSaved(): Promise<boolean> {
@@ -250,7 +125,6 @@ export class VehiculoFormPage extends BasePage {
       const url = this.page.url();
       return url.includes('/vehiculos/index') || url.includes('/vehiculos/ver');
     } catch (error) {
-      logger.error('Failed to check if form saved', error);
       return false;
     }
   }

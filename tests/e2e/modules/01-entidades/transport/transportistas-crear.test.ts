@@ -1,5 +1,6 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
+import { isDemoMode } from '../../../../../src/utils/env-helper.js';
 import {
   generateValidChileanRUT,
   generateChileanStreet
@@ -28,7 +29,9 @@ test.describe('Transportista - Creación de Transportista', () => {
       documento: generateValidChileanRUT(),
       calle: generateChileanStreet(),
       altura: randomStreetNumber.toString(),
-      tipo: 'Terceros Con Flota Si Genera Contrato',
+      tipo: isDemoMode()
+        ? 'Terceros'
+        : 'Terceros Con Flota Si Genera Contrato',
       formaPago: 'Contado'
     };
 
@@ -46,9 +49,7 @@ test.describe('Transportista - Creación de Transportista', () => {
       await transportistaPage.selectTipoTransportista(testData.tipo);
       await page.waitForTimeout(500);
 
-      await transportistaPage.selectRandomRegion();
-      await transportistaPage.selectRandomCiudad();
-      await transportistaPage.selectRandomComuna();
+      await transportistaPage.selectRandomLocationCascade();
 
       await transportistaPage.fillCalle(testData.calle);
       await transportistaPage.fillAltura(testData.altura);

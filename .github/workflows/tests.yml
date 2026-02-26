@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run tests'
+        required: true
+        default: 'QA'
+        type: choice
+        options:
+          - QA
+          - DEMO
 
 jobs:
   # ------------------------------------------------------------------
@@ -44,6 +53,7 @@ jobs:
           HEADLESS: true
           LOG_LEVEL: info
           TIMEOUT: 60000
+          ENV: ${{ github.event.inputs.environment || 'QA' }}
 
           # Compatibilidad Legacy
           BASE_URL_DEV: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
@@ -101,6 +111,7 @@ jobs:
           ENVIRONMENT: dev
           HEADLESS: true
           TIMEOUT: 60000
+          ENV: ${{ github.event.inputs.environment || 'QA' }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}

@@ -36,11 +36,11 @@
     "nroContrato": "22484"
   },
   "seededTransportista": {
-    "id": "1399",
-    "nombre": "Austral 5806",
-    "baseNombre": "Austral",
-    "documento": "62346530-6",
-    "razonSocial": "Austral 5806 SpA"
+    "id": "25",
+    "nombre": "Titanium 4365",
+    "baseNombre": "Titanium",
+    "documento": "96946772-0",
+    "razonSocial": "Titanium 4365 SpA"
   },
   "seededCliente": {
     "id": "779",

@@ -96,6 +96,13 @@ qa-automation-framework/
 
 ## Running Tests
 
+### Multi-Environment Support
+
+The framework supports multiple environments using the `ENV` variable:
+
+- **QA (Default):** `ENV=QA npx playwright test`
+- **Demo:** `ENV=DEMO npx playwright test`
+
 ### Local Development
 
 | Command | Description |
