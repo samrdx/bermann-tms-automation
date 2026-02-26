@@ -1,0 +1,28 @@
+{
+  "seededTransportista": {
+    "id": "38",
+    "nombre": "EcoTrans 5535",
+    "baseNombre": "EcoTrans",
+    "documento": "62542431-3",
+    "razonSocial": "EcoTrans 5535 SpA"
+  },
+  "seededVehiculo": {
+    "patente": "APBM-52",
+    "muestra": "APBM-52",
+    "transportistaNombre": "EcoTrans 5535"
+  },
+  "seededConductor": {
+    "nombre": "Pedro",
+    "apellido": "Contreras",
+    "rut": "95.237.022-7",
+    "email": "sofíalópez@test.com",
+    "transportistaNombre": "EcoTrans 5535"
+  },
+  "seededCliente": {
+    "id": "37",
+    "nombre": "Central 1599",
+    "nombreFantasia": "Central 1599 SpA",
+    "rut": "34183733-2",
+    "email": ""
+  }
+}

@@ -43,11 +43,11 @@
     "razonSocial": "TransSur 8008 SpA"
   },
   "seededCliente": {
-    "id": "",
-    "nombre": "Servicios 6512",
-    "nombreFantasia": "Servicios 6512 SpA",
-    "rut": "80758409-K",
-    "email": "servicios@test.cl"
+    "id": "35",
+    "nombre": "Importadora 7703",
+    "nombreFantasia": "Importadora 7703 SpA",
+    "rut": "33063674-2",
+    "email": ""
   },
   "viaje": {
     "nroViaje": "61781",

@@ -43,11 +43,11 @@
     "razonSocial": "Titanium 4365 SpA"
   },
   "seededCliente": {
-    "id": "779",
-    "nombre": "Importadora 5504",
-    "nombreFantasia": "Importadora 5504 SpA",
-    "rut": "85079000-0",
-    "email": "importadora@test.cl"
+    "id": "34",
+    "nombre": "Industrial 1374",
+    "nombreFantasia": "Industrial 1374 SpA",
+    "rut": "16692014-0",
+    "email": ""
   },
   "viaje": {
     "nroViaje": "59871",

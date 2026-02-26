@@ -2,7 +2,7 @@ import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { Transportista } from '../../../../../tests/api-helpers/TransportistaHelper.js';
 import { generatePatente } from '../../../../../src/utils/rutGenerator.js';
-import { config } from '../../../../../src/config/environment.js';
+import { isDemoMode } from '../../../../../src/utils/env-helper.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
 
@@ -29,12 +29,8 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
         vehiculoPage
     }, testInfo) => {
 
-        await test.step('Navigate to Vehiculo Creation (Direct Link)', async () => {
-            // User requirement: navigate directly without ID param
-            const baseUrl = config.get().baseUrl;
-            const url = `${baseUrl}/vehiculos/crear`;
-            logger.info(`🧭 Navigating to: ${url}`);
-            await page.goto(url);
+        await test.step('Navigate to Vehiculo Creation', async () => {
+            await vehiculoPage.navigate();
         });
 
         await test.step('Fill Form', async () => {
@@ -54,10 +50,15 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
 
             await page.waitForTimeout(1000);
 
-            await vehiculoPage.selectCapacidad('3 KG');
+            const capacidad = isDemoMode() ? '28 TON' : '3 KG';
+            await vehiculoPage.selectCapacidad(capacidad);
         });
 
         await test.step('Save and Verify', async () => {
+            // Capture values BEFORE saving since form will navigate away
+            const expectedPatente = await page.locator('#vehiculos-patente').inputValue().catch(() => '');
+            const expectedMuestra = await page.locator('#vehiculos-muestra').inputValue().catch(() => '');
+
             await vehiculoPage.clickGuardar();
             await page.waitForTimeout(2000);
             const isSaved = await vehiculoPage.isFormSaved();
@@ -67,8 +68,8 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
                 const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
                 const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
                 data.seededVehiculo = {
-                    patente: await page.locator('#vehiculos-patente').inputValue().catch(() => ''),
-                    muestra: await page.locator('#vehiculos-muestra').inputValue().catch(() => ''),
+                    patente: expectedPatente,
+                    muestra: expectedMuestra,
                     transportistaNombre: seededTransportista.nombre
                 };
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');

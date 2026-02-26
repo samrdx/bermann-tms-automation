@@ -82,8 +82,7 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         // =================================================================
         logger.info('👤 STEP 2/4: Creating Cliente...');
 
-        const transportistaBaseName = transportista.baseNombre || transportista.nombre.split(' - ')[0];
-        const cliente = await ClienteHelper.createClienteViaUI(page, transportistaBaseName);
+        const cliente = await ClienteHelper.createClienteViaUI(page);
 
         operationalData.cliente = {
             id: cliente.id || 'N/A',

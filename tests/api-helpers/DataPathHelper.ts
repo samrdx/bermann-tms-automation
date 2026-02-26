@@ -53,7 +53,8 @@ export class DataPathHelper {
     static getWorkerDataPath(testInfo: TestInfo): string {
         const projectName = testInfo.project.name;
         const browserName = this.PROJECT_TO_BROWSER[projectName] || 'default';
-        const filename = `last-run-data-${browserName}.json`;
+        const env = (process.env.ENV || 'QA').toLowerCase();
+        const filename = `last-run-data-${browserName}-${env}.json`;
 
         return path.join(process.cwd(), filename);
     }
