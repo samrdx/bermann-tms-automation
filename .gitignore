@@ -58,6 +58,7 @@ playwright/.auth/
 gha-creds-*.json
 
 # Engram
+engram/ 
 .engram/
 .claude/
 .gemini/
