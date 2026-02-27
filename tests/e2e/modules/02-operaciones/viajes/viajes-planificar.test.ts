@@ -23,6 +23,7 @@ test.describe('Viajes - Planificar (Create)', () => {
 
   test('Should planificar a new Viaje using entities from JSON', async ({
     viajesPlanificarPage,
+    viajesAsignarPage,
     page
   }, testInfo) => {
     const startTime = Date.now();
@@ -183,7 +184,8 @@ test.describe('Viajes - Planificar (Create)', () => {
       expect(isSaved, 'Form should be saved and URL changed').toBeTruthy();
 
       // Verify in Grid
-      const foundInAsignar = await viajesPlanificarPage.verifyInAsignar(nroViaje);
+      await viajesAsignarPage.navigate();
+      const foundInAsignar = await viajesAsignarPage.findViajeRow(nroViaje).then(row => !!row);
 
       if (foundInAsignar) {
         logger.info(`✅ Viaje ${nroViaje} verified in /viajes/asignar`);
