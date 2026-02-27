@@ -2,6 +2,7 @@ import { test, expect } from '../../../../../src/fixtures/base.js';
 import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
 import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
 import { logger } from '../../../../../src/utils/logger.js';
+import { generateValidChileanRUT } from '../../../../../src/utils/rutGenerator.js';
 
 
 test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
@@ -19,7 +20,7 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
         // 2. Crear Entidades
 
-        await api.createTransportista(transName);
+        await api.createTransportista(transName, generateValidChileanRUT());
         await api.createCliente(cliName);
 
         // 3. Crear Vehículo y Conductor (Capturamos datos)

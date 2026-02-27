@@ -2,7 +2,6 @@ import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
-import { config } from '../../../../../src/config/environment.js';
 import fs from 'fs';
 
 /**
@@ -45,7 +44,6 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
     logger.info(`📝 Nro Contrato: ${nroContrato}`);
 
     const contratosPage = new ContratosFormPage(page);
-    const baseUrl = config.get().baseUrl;
 
     // ---------------------------------------------------------------
     // PHASE 2: Fill contract header and save
@@ -107,8 +105,25 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
     // ---------------------------------------------------------------
     await test.step('Phase 5: Verify contract exists in index (ground truth)', async () => {
       logger.info('PHASE 5: Navigating to /contrato/index to verify creation...');
-      await page.goto(`${baseUrl}/contrato/index`);
-      await page.waitForLoadState('networkidle', { timeout: 20000 });
+      let navigated = false;
+      for (let i = 0; i < 3; i++) {
+        try {
+          await page.goto('/contrato/index');
+          navigated = true;
+          break;
+        } catch (e) {
+          logger.warn(`⚠️ page.goto failed (attempt ${i + 1}/3): ${e instanceof Error ? e.message : String(e)}`);
+          await page.waitForTimeout(2000);
+        }
+      }
+
+      if (!navigated) {
+        throw new Error('❌ Failed to navigate to /contrato/index after 3 attempts');
+      }
+
+      await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {
+        logger.warn('⚠️ networkidle timeout in index page — continuing');
+      });
 
       // Use DataTables search to filter by nroContrato
       const searchInput = page.locator('input[type="search"]').first();

@@ -3,6 +3,7 @@ import { MonitoreoPage } from '../../../../../src/modules/monitoring/pages/Monit
 import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
 import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
 import { createLogger } from '../../../../../src/utils/logger.js';
+import { generateValidChileanRUT } from '../../../../../src/utils/rutGenerator.js';
 
 const logger = createLogger('ViajesFinalizarTest');
 
@@ -32,7 +33,7 @@ test.describe('Operaciones - Monitoreo - Finalizar Viaje', () => {
     logger.info(`Datos: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
 
     // 1.1 Entidades base
-    await api.createTransportista(transName);
+    await api.createTransportista(transName, generateValidChileanRUT());
     await api.createCliente(cliName);
     const patente = await api.createVehiculo(transName);
     const conductor = await api.createConductor(transName);

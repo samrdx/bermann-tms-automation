@@ -2,6 +2,7 @@ import type { Page } from 'playwright';
 import { ContratosFormPage } from '../pages/ContratosPage.js';
 import { createLogger } from '../../../utils/logger.js';
 import { generateUniqueId } from '../../../utils/rutGenerator.js';
+import { config } from '../../../config/environment.js';
 
 const logger = createLogger('ContratoFactory');
 
@@ -14,7 +15,7 @@ export interface ContratoData {
 }
 
 export class ContratoFactory {
-  constructor(private page: Page) {}
+  constructor(private page: Page) { }
 
   generateDefaultData(transportistaNombre: string): ContratoData {
     return {
@@ -56,7 +57,7 @@ export class ContratoFactory {
       logger.info(`✅ Contrato created with ID: ${contractId}`);
 
       // Navigate to index to confirm
-      await this.page.goto('https://moveontruckqa.bermanntms.cl/contrato/index');
+      await this.page.goto(`${config.get().baseUrl}/contrato/index`);
       await this.page.waitForTimeout(2000);
 
       logger.info(`✅ Verified contrato: ${contratoData.nroContrato}`);
