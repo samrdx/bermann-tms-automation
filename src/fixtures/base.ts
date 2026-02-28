@@ -36,6 +36,10 @@ import { ConductorFactory } from '../modules/transport/factories/ConductorFactor
 // Commercial Module
 import { ClienteFactory } from '../modules/commercial/factories/ClienteFactory.js';
 
+// Ultima Milla Module
+import { UltimaMillaFormPage } from '../modules/ultimamilla/pages/UltimaMillaPage.js';
+import { UltimaMillaFactory } from '../modules/ultimamilla/factories/UltimaMillaFactory.js';
+
 // Declare the types of your fixtures.
 type MyFixtures = {
   // Pages
@@ -58,6 +62,10 @@ type MyFixtures = {
   conductorFactory: ConductorFactory;
   clienteFactory: ClienteFactory;
   contratoFactory: ContratoFactory;
+
+  // Ultima Milla
+  ultimaMillaPage: UltimaMillaFormPage;
+  ultimaMillaFactory: UltimaMillaFactory;
 };
 
 // Extend base test to include fixtures.
@@ -112,6 +120,14 @@ export const test = base.extend<MyFixtures>({
   },
   contratoFactory: async ({ page }, use) => {
     await use(new ContratoFactory(page));
+  },
+
+  // Ultima Milla
+  ultimaMillaPage: async ({ page }, use) => {
+    await use(new UltimaMillaFormPage(page));
+  },
+  ultimaMillaFactory: async ({ page }, use) => {
+    await use(new UltimaMillaFactory(page));
   },
 });
 

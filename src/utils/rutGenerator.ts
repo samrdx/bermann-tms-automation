@@ -148,7 +148,10 @@ export function generatePhone(): string {
  * Format: name@test.com
  */
 export function generateEmail(name: string): string {
-  return `${name.toLowerCase().replace(/\s+/g, '')}@test.com`;
+  const domains = ['gmail.com', 'hotmail.com'];
+  const domain = domains[Math.floor(Math.random() * domains.length)];
+  const cleanName = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, '');
+  return `${cleanName}@${domain}`;
 }
 
 /**
@@ -240,6 +243,20 @@ export function generateChileanStreet(): string {
 }
 
 /**
+ * Generates a specific, highly resolvable Chilean address (ideal for geocoding APIs)
+ */
+export function generateFullChileanAddress(): string {
+  const specificAddresses = [
+    'Argomedo 344, Santiago, Chile',
+    'Av. Providencia 1208, Providencia, Chile',
+    'Apoquindo 4500, Las Condes, Chile',
+    'Santa Rosa 1240, Santiago, Chile',
+    'Avenida Grecia 2000, Ñuñoa, Chile'
+  ];
+  return specificAddresses[Math.floor(Math.random() * specificAddresses.length)];
+}
+
+/**
  * Generates a random apartment number
  */
 export function generateApartmentNumber(): string {
@@ -251,21 +268,21 @@ export function generateApartmentNumber(): string {
  * Format: prefix + 2 digits (e.g., manuh12)
  */
 export function generateGenericUser(prefixLength: number = 6): string {
-    const chars = 'abcdefghijklmnopqrstuvwxyz';
-    let prefix = '';
-    for (let i = 0; i < prefixLength; i++) {
-        prefix += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    const digits = Math.floor(Math.random() * 90 + 10); // 10-99
-    return `${prefix}${digits}`;
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  let prefix = '';
+  for (let i = 0; i < prefixLength; i++) {
+    prefix += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const digits = Math.floor(Math.random() * 90 + 10); // 10-99
+  return `${prefix}${digits}`;
 }
 
 /**
  * Generates a random Chilean driver's license type
  */
 export function generateLicenseType(): string {
-    const types = ['A1', 'A2', 'A3', 'A4', 'A5'];
-    return types[Math.floor(Math.random() * types.length)];
+  const types = ['A1', 'A2', 'A3', 'A4', 'A5'];
+  return types[Math.floor(Math.random() * types.length)];
 }
 
 /**
@@ -273,31 +290,31 @@ export function generateLicenseType(): string {
  * For RUT: Returns formatted as XX.XXX.XXX-V (with dots and verification digit)
  */
 export function generateDocument(type: 'RUT' | 'EXTRANJERO'): string {
-    if (type === 'RUT') {
-        const rawRut = generateValidChileanRUT(); // Format: "12345678-9" or "12345678-K"
-        const [numberPart, dv] = rawRut.split('-');
+  if (type === 'RUT') {
+    const rawRut = generateValidChileanRUT(); // Format: "12345678-9" or "12345678-K"
+    const [numberPart, dv] = rawRut.split('-');
 
-        // Format number with dots (from right to left, every 3 digits)
-        const formatted = numberPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    // Format number with dots (from right to left, every 3 digits)
+    const formatted = numberPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-        return `${formatted}-${dv}`;
-    } else {
-        // Extranjero: 90M+ range usually
-        const num = Math.floor(Math.random() * 5000000) + 90000000;
-        return num.toString();
-    }
+    return `${formatted}-${dv}`;
+  } else {
+    // Extranjero: 90M+ range usually
+    const num = Math.floor(Math.random() * 5000000) + 90000000;
+    return num.toString();
+  }
 }
 
 /**
  * Generates a random contract number (6 digits)
  */
 export function generateContractNumber(): string {
-    return Math.floor(Math.random() * 900000 + 100000).toString();
+  return Math.floor(Math.random() * 900000 + 100000).toString();
 }
 
 /**
  * Generates a random hourly rate (100 - 20000)
  */
 export function generateValorHora(): string {
-    return Math.floor(Math.random() * (20000 - 100 + 1) + 100).toString();
+  return Math.floor(Math.random() * (20000 - 100 + 1) + 100).toString();
 }
