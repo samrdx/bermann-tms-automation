@@ -20,6 +20,7 @@
 | `tms-page-objects` | Page Object Model structure for TMS             | [SKILL.md](skills/tms-page-objects/SKILL.md) |
 | `tms-tests`        | Test file structure, assertions, logging        | [SKILL.md](skills/tms-tests/SKILL.md)        |
 | `tms-data`         | Test data generation and management             | [SKILL.md](skills/tms-data/SKILL.md)          |
+| `jql-tickets`      | Provides JQL for tickets ready to test          | [SKILL.md](.agents/skills/jql-tickets/SKILL.md)      |
 
 ### Generic Skills
 
@@ -104,18 +105,21 @@ git push origin main
 ```
 
 ---
+
 ## Spec-Driven Development (SDD) Orchestrator
 
 You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD workflow by launching specialized sub-agents via the Task tool. Your job is to STAY LIGHTWEIGHT — delegate all heavy work to sub-agents and only track state and user decisions.
 
 ### Operating Mode
+
 - **Delegate-only**: You NEVER execute phase work inline.
 - If work requires analysis, design, planning, implementation, verification, or migration, ALWAYS launch a sub-agent.
 - The lead agent only coordinates, tracks DAG state, and synthesizes results.
 
 ### Artifact Store Policy
+
 - `artifact_store.mode`: `auto | engram | openspec | none` (default: `auto`)
-- Recommended backend: `engram` — https://github.com/gentleman-programming/engram
+- Recommended backend: `engram` — <https://github.com/gentleman-programming/engram>
 - `auto` resolution:
   1. If user explicitly requested file artifacts, use `openspec`
   2. Else if Engram is available, use `engram` (recommended)
@@ -124,6 +128,7 @@ You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD wor
 - In `none`, do not write project files unless user asks.
 
 ### SDD Triggers
+
 - User says: "sdd init", "iniciar sdd", "initialize specs"
 - User says: "sdd new <name>", "nuevo cambio", "new change", "sdd explore"
 - User says: "sdd ff <name>", "fast forward", "sdd continue"
@@ -133,6 +138,7 @@ You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD wor
 - User describes a feature/change and you detect it needs planning
 
 ### SDD Commands
+
 | Command | Action |
 |---------|--------|
 | `/sdd:init` | Bootstrap openspec/ in current project |
@@ -145,6 +151,7 @@ You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD wor
 | `/sdd:archive [change-name]` | Sync specs + archive |
 
 ### Command → Skill Mapping
+
 | Command | Skill to Invoke | Skill Path |
 |---------|----------------|------------|
 | `/sdd:init` | sdd-init | `~/.claude/skills/sdd-init/SKILL.md` |
@@ -157,6 +164,7 @@ You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD wor
 | `/sdd:archive` | sdd-archive | `~/.claude/skills/sdd-archive/SKILL.md` |
 
 ### Available Skills
+
 - `sdd-init/SKILL.md` — Bootstrap project
 - `sdd-explore/SKILL.md` — Investigate codebase
 - `sdd-propose/SKILL.md` — Create proposal
@@ -168,6 +176,7 @@ You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD wor
 - `sdd-archive/SKILL.md` — Archive change
 
 ### Orchestrator Rules
+
 1. You NEVER read source code directly — sub-agents do that
 2. You NEVER write implementation code — sdd-apply does that
 3. You NEVER write specs/proposals/design — sub-agents do that
@@ -201,35 +210,42 @@ Task(
 ```
 
 ### Dependency Graph
+
 ```
 proposal → specs ──→ tasks → apply → verify → archive
               ↕
            design
 ```
+
 - specs and design can be created in parallel (both depend only on proposal)
 - tasks depends on BOTH specs and design
 - verify is optional but recommended before archive
 
 ### State Tracking
+
 After each sub-agent completes, track:
+
 - Change name
 - Which artifacts exist (proposal ✓, specs ✓, design ✗, tasks ✗)
 - Which tasks are complete (if in apply phase)
 - Any issues or blockers reported
 
 ### Fast-Forward (/sdd:ff)
+
 Launch sub-agents in sequence: sdd-propose → sdd-spec → sdd-design → sdd-tasks.
 Show user a summary after ALL are done, not between each one.
 
 ### Apply Strategy
+
 For large task lists, batch tasks to sub-agents (e.g., "implement Phase 1, tasks 1.1-1.3").
 Do NOT send all tasks at once — break into manageable batches.
 After each batch, show progress to user and ask to continue.
 
 ### When to Suggest SDD
+
 If the user describes something substantial (new feature, refactor, multi-file change), suggest SDD:
 "This sounds like a good candidate for SDD. Want me to start with /sdd:new {suggested-name}?"
-Do NOT force SDD on small tasks (single file edits, quick fixes, questions).
+Do NOT force SDD on small tasks (single file edits, quick fixes, questions)
 ---
 
 ## Quick Reference
@@ -268,7 +284,7 @@ Do NOT force SDD on small tasks (single file edits, quick fixes, questions).
 
 ## Resources
 
-- **Confluence Selectors:** [Internal TMS Selector Database]
+- **Confluence Selectors:** <https://bermann.atlassian.net/wiki/spaces/QA/database/95125505>  
 - **TMS QA Environment:** <https://moveontruckqa.bermanntms.cl>
 - **GitHub Repository:** <https://github.com/samrdx/bermann-tms-automation>
 - **Project Documentation:** README.md, CLAUDE.md, GEMINI.md
