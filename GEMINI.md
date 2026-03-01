@@ -4,29 +4,66 @@
 
 ## Multi-Environment Support
 
-- **QA (Default):** `ENV=QA npx playwright test` (URL: https://moveontruckqa.bermanntms.cl/login)
-- **Demo:** `ENV=DEMO npx playwright test` (URL: https://demo.bermanntms.cl/)
+- **QA (Default):** `ENV=QA npx playwright test` (URL: <https://moveontruckqa.bermanntms.cl/login>)
+- **Demo:** `ENV=DEMO npx playwright test` (URL: <https://demo.bermanntms.cl/>)
 
 ## Quick Start for AI Assistants
 
 **IMPORTANT:** This project uses a skills system to prevent hallucinations and enforce consistent patterns.
 
 - **For skill index and auto-invoke rules:** See [AGENTS.md](AGENTS.md)
-- **For skill documentation:** See [skills/](skills/) directory
+- **For skill documentation:** See [.agents/skills/](.agents/skills/) directory
 - **For project overview:** Continue reading this file
 
 ### Available Skills
+
+#### TMS-Specific Skills
 
 - **tms-selectors** - Selector priority & Confluence integration
 - **tms-dropdowns** - Bootstrap Select patterns (5 proven patterns)
 - **tms-page-objects** - Page Object Model template
 - **tms-tests** - Test structure and phases
 - **tms-data** - Data generation strategies (RUT, timestamps, factories)
+
+#### Spec-Driven Development (SDD) Skills
+
+- **sdd-init** - Bootstrap openspec/ in current project
+- **sdd-explore** - Investigate codebase and explore ideas
+- **sdd-propose** - Create change proposal
+- **sdd-spec** - Write specifications
+- **sdd-design** - Technical design documents
+- **sdd-tasks** - Break change into tasks
+- **sdd-apply** - Implement code
+- **sdd-verify** - Validate implementation
+- **sdd-archive** - Sync specs and archive change
+
+#### Generic & Utility Skills
+
 - **skill-creator** - Meta-skill for creating new skills
+- **playwright-cli** - Automates browser interactions directly from CLI
 
-**Note:** 5 TMS-specific skills + 1 meta-skill provide comprehensive automation guidance.
+**Note:** The combination of TMS-specific skills, SDD orchestrator tools, and utility skills provides comprehensive automation guidance.
 
-**Always check AGENTS.md before creating Page Objects, tests, or working with dropdowns.**
+### Auto-invoke Skills
+
+When executing tasks or receiving specific commands, ALWAYS invoke the corresponding skill FIRST:
+
+| Scenario / Action | Skill to Auto-Invoke |
+| --- | --- |
+| Creating a new Page Object | `tms-page-objects` |
+| Working with Bootstrap Select dropdowns | `tms-dropdowns` |
+| Selecting ANY element on a page | `tms-selectors` |
+| Writing a new test file | `tms-tests` |
+| Generating test data (RUT, dates, factories) | `tms-data` |
+| Browser navigation, screenshots, form filling natively | `playwright-cli` |
+| User says: `/sdd:init`, "sdd init", "iniciar sdd" | `sdd-init` |
+| User says: `/sdd:new`, "sdd explore", "new change" | `sdd-explore` → `sdd-propose` |
+| User says: `/sdd:apply`, "implementar", "implement" | `sdd-apply` |
+| User says: `/sdd:verify`, "verificar" | `sdd-verify` |
+| User says: `/sdd:archive`, "archivar" | `sdd-archive` |
+| Substantial multi-file feature/refactor request | Suggest `/sdd:new` format |
+
+**Always check AGENTS.md before creating Page Objects, tests, or working with SDD.**
 
 ---
 
@@ -38,7 +75,7 @@
 | Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-02-20 |
 | Completed Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) | 2026-02-20 |
 | Pass Rate | 100% | 2026-02-20 |
-| Operational Skills | 5 TMS-specific + 1 meta-skill | 2026-02-20 |
+| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-02-28 |
 | E2E Coverage | Entities -> Contracts -> Trips -> Monitoring (complete) | 2026-02-20 |
 | TypeScript Compilation | Clean (0 errors) | 2026-02-20 |
 | Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-02-20 |
@@ -62,7 +99,7 @@
 - **Logging:** Winston ^3.19.0 (professional structured logging)
 - **Skills System:** Prowler-inspired pattern for AI guidance
 - **CI/CD:** GitHub Actions (hybrid workflow)
-- **IDE:** Cursor with Claude integration
+- **IDE:** Antigravity by Google
 - **Runtime:** Node.js 20, ES Modules
 
 ## Project Structure
