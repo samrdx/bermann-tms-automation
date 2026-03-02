@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import { TestInfo } from '@playwright/test';
 
 /**
@@ -55,8 +56,13 @@ export class DataPathHelper {
         const browserName = this.PROJECT_TO_BROWSER[projectName] || 'default';
         const env = (process.env.ENV || 'QA').toLowerCase();
         const filename = `last-run-data-${browserName}-${env}.json`;
+        const dirPath = path.join(process.cwd(), 'playwright', '.data');
 
-        return path.join(process.cwd(), filename);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+
+        return path.join(dirPath, filename);
     }
 
     /**

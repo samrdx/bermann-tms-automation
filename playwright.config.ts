@@ -11,8 +11,8 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const ENV = process.env.ENV || 'QA';
-const baseURL = ENV === 'DEMO' 
-  ? 'https://demo.bermanntms.cl' 
+const baseURL = ENV === 'DEMO'
+  ? 'https://demo.bermanntms.cl'
   : 'https://moveontruckqa.bermanntms.cl';
 
 export default defineConfig({
@@ -153,7 +153,7 @@ export default defineConfig({
           args: ['--disable-dev-shm-usage', '--no-sandbox']
         }
       },
-      dependencies: ['setup'],
+      dependencies: ['setup', 'seed-transportista-chromium'],
     },
     {
       name: 'firefox',
@@ -166,7 +166,7 @@ export default defineConfig({
         storageState: 'playwright/.auth/user.json',
         // IMPORTANTE: Sin launchOptions.args que rompan Firefox
       },
-      dependencies: ['setup'],
+      dependencies: ['setup', 'seed-transportista-firefox'],
     },
 
     /* 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY

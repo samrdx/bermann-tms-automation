@@ -63,7 +63,7 @@ export class ConductorFormPage extends BasePage {
 
   async fillDocumento(documento: string): Promise<void> {
     logger.info(`Llenando documento: ${documento}`);
-    await this.fill(this.selectors.documento, documento);
+    await this.fillRutWithVerify(this.selectors.documento, documento);
     await this.page.keyboard.press('Tab'); // Trigger validation
   }
 
@@ -94,7 +94,7 @@ export class ConductorFormPage extends BasePage {
    */
   async setVencimientoLicencia(date: string): Promise<void> {
     logger.info(`Configurando vencimiento licencia: [${date}]`);
-    
+
     // Normalize format to DD-MM-YYYY if it's YYYY-MM-DD
     let formattedDate = date;
     if (date.includes('-') && date.split('-')[0].length === 4) {
@@ -103,7 +103,7 @@ export class ConductorFormPage extends BasePage {
     }
 
     await this.page.waitForSelector(this.selectors.vencimientoLicenciaInput, { state: 'visible' });
-    
+
     await this.page.evaluate(({ selector, value }) => {
       const input = document.querySelector(selector) as HTMLInputElement;
       if (input) {
@@ -113,7 +113,7 @@ export class ConductorFormPage extends BasePage {
         input.dispatchEvent(new Event('blur', { bubbles: true }));
       }
     }, { selector: this.selectors.vencimientoLicenciaInput, value: formattedDate });
-    
+
     logger.debug(`Fecha configurada via JS: ${formattedDate}`);
   }
 
@@ -122,9 +122,9 @@ export class ConductorFormPage extends BasePage {
    */
   private async selectFromBootstrapDropdown(btnSelector: string, optionText: string): Promise<void> {
     const button = this.page.locator(btnSelector);
-    await button.scrollIntoViewIfNeeded();
-    await button.waitFor({ state: 'visible' });
-    
+    await button.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+    await button.waitFor({ state: 'visible', timeout: 1500 }).catch(() => { });
+
     // 1. Open dropdown via evaluate to be extremely robust
     await this.page.evaluate((sel) => {
       const btn = document.querySelector(sel) as HTMLElement;
@@ -134,7 +134,7 @@ export class ConductorFormPage extends BasePage {
     // 2. Locate the container
     const container = this.page.locator('div.bootstrap-select').filter({ has: button });
     const searchInput = container.locator('div.bs-searchbox input');
-    
+
     // 3. Search and select
     if (await searchInput.isVisible({ timeout: 1000 }).catch(() => false)) {
       await searchInput.fill(optionText);
@@ -143,29 +143,31 @@ export class ConductorFormPage extends BasePage {
 
     // Use a more relaxed search for the option
     const option = container.locator('ul.dropdown-menu li a').filter({ hasText: optionText }).first();
-    
-    await option.scrollIntoViewIfNeeded();
-    await option.click({ force: true });
-    
-    // 4. Verification & Force Sync (Crucial for Demo)
+    await option.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+    await option.evaluate((node: HTMLElement) => node.click());
+
+    // 4. Verification & Force Sync (Crucial for Demo & Firefox)
     await this.page.waitForTimeout(500);
     const selectedText = await button.innerText();
     if (!selectedText.toLowerCase().includes(optionText.toLowerCase())) {
-        logger.warn(`⚠️ Dropdown UI didn't update to [${optionText}]. Current: [${selectedText}]. Forcing value via JS...`);
-        await this.page.evaluate(({ btnSel, text }) => {
-            const btn = document.querySelector(btnSel) as HTMLElement;
-            const container = btn.closest('.bootstrap-select');
-            const select = container?.querySelector('select') as HTMLSelectElement;
-            const options = Array.from(select?.options || []);
-            const target = options.find(o => o.text.trim().toLowerCase().includes(text.toLowerCase()));
-            if (select && target) {
-                select.value = target.value;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                // Try to trigger bootstrap-select refresh if possible
-                try { (window as any).$(select).selectpicker('refresh'); } catch(e) {}
-            }
-        }, { btnSel: btnSelector, text: optionText });
+      logger.warn(`⚠️ Dropdown UI didn't update to [${optionText}]. Current: [${selectedText}]. Forcing value via JS...`);
     }
+
+    // ALWAYS force sync the underlying <select> to prevent validation errors like "Transportista ID no puede estar vacío"
+    // even if the Bootstrap UI button updated correctly, Firefox sometimes drops the underlying change event.
+    await this.page.evaluate(({ btnSel, text }) => {
+      const btn = document.querySelector(btnSel) as HTMLElement;
+      const container = btn.closest('.bootstrap-select');
+      const select = container?.querySelector('select') as HTMLSelectElement;
+      const options = Array.from(select?.options || []);
+      const target = options.find(o => o.text.trim().toLowerCase().includes(text.toLowerCase()));
+      if (select && target) {
+        select.value = target.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        // Try to trigger bootstrap-select refresh if possible
+        try { (window as any).$(select).selectpicker('refresh'); } catch (e) { }
+      }
+    }, { btnSel: btnSelector, text: optionText });
   }
 
   async clickGuardar(): Promise<void> {

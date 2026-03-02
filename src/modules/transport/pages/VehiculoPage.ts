@@ -104,7 +104,7 @@ export class VehiculoFormPage extends BasePage {
       .first();
 
     await option.waitFor({ state: 'visible', timeout: 5000 });
-    await option.click();
+    await option.evaluate((node: HTMLElement) => node.click());
   }
 
   /**
@@ -176,7 +176,7 @@ export class VehiculoFormPage extends BasePage {
       const option = this.page.locator('.dropdown-menu.show .dropdown-item')
         .filter({ hasText: tipo }).first();
       await option.waitFor({ state: 'visible', timeout: 5000 });
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
       logger.info(`✅ Tipo rampla "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select tipo rampla: ${tipo}`, error);

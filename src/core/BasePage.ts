@@ -17,17 +17,17 @@ export abstract class BasePage {
       throw new Error('URL not set for this page');
     }
     logger.info(`Navegando hacia: ${this.url}`);
-    await this.page.goto(this.url, { 
+    await this.page.goto(this.url, {
       waitUntil: 'domcontentloaded',
-      timeout: 30000 
+      timeout: 30000
     });
   }
 
   async waitForElement(selector: string, timeout: number = 10000): Promise<void> {
     logger.debug(`Waiting for element: ${selector}`);
-    await this.page.waitForSelector(selector, { 
-      state: 'visible', 
-      timeout 
+    await this.page.waitForSelector(selector, {
+      state: 'visible',
+      timeout
     });
   }
 
@@ -48,12 +48,26 @@ export abstract class BasePage {
   /**
    * Clicks an element after checking for visibility.
    * "Rule of Gold": Always check for visibility before interaction.
+   * Includes a JavaScript fallback for cross-browser resilience, especially for Firefox.
    */
-  async click(selector: string): Promise<void> {
+  async click(selector: string, force: boolean = false): Promise<void> {
     const locator = this.page.locator(selector);
     if (await locator.isVisible()) {
       logger.debug(`Clicking on: ${selector}`);
-      await locator.click();
+      try {
+        // Standard click with a shorter timeout to fail fast if blocked or animating
+        await locator.click({ force, timeout: 1000 });
+      } catch (error) {
+        logger.warn(`⚠️ Standard click blocked or timed out for ${selector}. Attempting JS fallback...`);
+        try {
+          // JS evaluation click bypasses Playwright's strict actionability checks (flaky in Firefox)
+          await locator.evaluate((el) => (el as HTMLElement).click());
+          logger.debug(`✅ Successfully clicked ${selector} via JS fallback`);
+        } catch (fallbackError) {
+          logger.error(`❌ Both standard and JS clicks failed for ${selector}`);
+          throw error; // Throw original error to retain the stack trace and timeout context
+        }
+      }
     } else {
       logger.warn(`⚠️ Element ${selector} not visible, skipping click.`);
     }
@@ -79,38 +93,43 @@ export abstract class BasePage {
     }
 
     logger.info(`Entering RUT with verify: [${rutValue}] on ${selector}`);
-    
+
     // Normalize the expected RUT
     const cleanRut = rutValue.toUpperCase().trim();
     const normalize = (val: string) => val.toUpperCase().replace(/[^0-9K]/g, '');
     const normalizedExpected = normalize(cleanRut);
-    
+
     // Extract verification digit (last character after removing non-alphanumeric)
     const verificationDigit = normalizedExpected.slice(-1); // 'K' or digit
     const rutWithoutDv = normalizedExpected.slice(0, -1); // Just the number part
-    
+
     // Strategy 1: Try direct fill first (simplest approach)
-    await locator.click({ clickCount: 3 });
+    try {
+      await locator.click({ clickCount: 3, force: true, timeout: 5000 });
+    } catch (e) {
+      logger.warn(`⚠️ Standard click blocked on ${selector}, forcing focus via JS`);
+      await locator.evaluate((el) => (el as HTMLInputElement).focus());
+    }
     await this.page.keyboard.press('Backspace');
     await this.page.waitForTimeout(200);
-    
+
     // Try typing with the standard RUT format (with hyphen)
     const formattedRut = `${rutWithoutDv}-${verificationDigit}`;
     await locator.pressSequentially(formattedRut, { delay: 80 });
     await this.page.waitForTimeout(300);
-    
+
     // Check value
     let currentValue = await locator.inputValue();
     let normalizedCurrent = normalize(currentValue);
-    
+
     if (normalizedCurrent === normalizedExpected) {
       logger.info(`✅ RUT Entered and Verified: ${currentValue}`);
       return;
     }
-    
+
     // Strategy 2: Force DV using JavaScript - disable input mask first
     logger.warn(`RUT Mismatch! Expected: ${normalizedExpected}, Got: ${normalizedCurrent}. Using JS to force value...`);
-    
+
     // Format RUT like TMS does: XX.XXX.XXX-V
     const formatTmsRut = (body: string, dv: string) => {
       // Add thousands separators
@@ -123,9 +142,9 @@ export abstract class BasePage {
       if (remaining) parts.unshift(remaining);
       return parts.join('.') + '-' + dv;
     };
-    
+
     const tmsFormattedRut = formatTmsRut(rutWithoutDv, verificationDigit);
-    
+
     await this.page.evaluate(
       ({ sel, formattedValue }) => {
         const input = document.querySelector(sel) as HTMLInputElement;
@@ -134,19 +153,19 @@ export abstract class BasePage {
           const oldOnInput = input.oninput;
           const oldOnChange = input.onchange;
           const oldOnKeydown = input.onkeydown;
-          
+
           input.oninput = null;
           input.onchange = null;
           input.onkeydown = null;
-          
+
           // Set value directly
           input.value = formattedValue;
-          
+
           // Restore handlers
           input.oninput = oldOnInput;
           input.onchange = oldOnChange;
           input.onkeydown = oldOnKeydown;
-          
+
           // Trigger events
           input.dispatchEvent(new Event('input', { bubbles: true }));
           input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -155,23 +174,23 @@ export abstract class BasePage {
       },
       { sel: selector, formattedValue: tmsFormattedRut }
     );
-    
+
     await this.page.waitForTimeout(300);
-    
+
     // Check again
     currentValue = await locator.inputValue();
     normalizedCurrent = normalize(currentValue);
-    
+
     if (normalizedCurrent === normalizedExpected) {
       logger.info(`✅ RUT Entered via JS: ${currentValue}`);
       return;
     }
-    
+
     // Strategy 3: If DV is 'K' and still missing, try with lowercase k
     if (verificationDigit === 'K' && !normalizedCurrent.endsWith('K')) {
       logger.warn('Trying lowercase k for verification digit...');
       const tmsFormattedRutLower = formatTmsRut(rutWithoutDv, 'k');
-      
+
       await this.page.evaluate(
         ({ sel, val }) => {
           const input = document.querySelector(sel) as HTMLInputElement;
@@ -183,12 +202,12 @@ export abstract class BasePage {
         },
         { sel: selector, val: tmsFormattedRutLower }
       );
-      
+
       await this.page.waitForTimeout(300);
       currentValue = await locator.inputValue();
       normalizedCurrent = normalize(currentValue);
     }
-    
+
     // Final validation
     if (normalizedCurrent !== normalizedExpected) {
       const msg = `CRITICAL: RUT validation failed. Raw Final: [${currentValue}], Expected: [${cleanRut}]. Normalized: ${normalizedCurrent} vs ${normalizedExpected}`;
@@ -197,13 +216,13 @@ export abstract class BasePage {
       // Don't throw immediately - let the test continue and screenshot the state
       await this.takeScreenshot('fill-rut-error');
     }
-    
+
     // Soft assertion - log but don't fail test if RUT body matches
     if (normalizedCurrent.slice(0, -1) === rutWithoutDv) {
       logger.warn(`⚠️ RUT body matches but DV may be missing - continuing test`);
       return;
     }
-    
+
     expect(normalizedCurrent).toBe(normalizedExpected);
   }
 
@@ -228,9 +247,9 @@ export abstract class BasePage {
   async takeScreenshot(name: string): Promise<string> {
     const timestamp = Date.now();
     const screenshotPath = `./reports/screenshots/${name}-${timestamp}.png`;
-    await this.page.screenshot({ 
-      path: screenshotPath, 
-      fullPage: true 
+    await this.page.screenshot({
+      path: screenshotPath,
+      fullPage: true
     });
     logger.info(`Captura de Pantalla: ${screenshotPath}`);
     return screenshotPath;

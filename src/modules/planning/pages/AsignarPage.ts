@@ -61,23 +61,23 @@ export class AsignarPage extends BasePage {
   async selectViajeRow(nroViaje: string): Promise<boolean> {
     logger.info(`Selecting viaje row: ${nroViaje}`);
     let row = await this.findViajeRow(nroViaje);
-    
+
     // Reintento si no aparece (común en CI secuencial)
     if (!row) {
-        logger.warn('Row not found, reloading...');
-        await this.page.reload();
-        await this.page.waitForLoadState('networkidle');
-        row = await this.findViajeRow(nroViaje);
+      logger.warn('Row not found, reloading...');
+      await this.page.reload();
+      await this.page.waitForLoadState('networkidle');
+      row = await this.findViajeRow(nroViaje);
     }
-    
+
     if (!row) throw new Error(`Viaje ${nroViaje} not found in table`);
 
-    await row.scrollIntoViewIfNeeded();
+    await row.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
     const editIcon = row.locator('i.fa-pencil, i.fa-edit, a[title="Editar"]').first();
 
     if (await editIcon.isVisible()) {
       await Promise.all([
-        this.page.waitForURL(/\/editar\//, { timeout: 30000 }), 
+        this.page.waitForURL(/\/editar\//, { timeout: 30000 }),
         editIcon.click()
       ]);
     } else {
@@ -85,8 +85,8 @@ export class AsignarPage extends BasePage {
     }
 
     await this.page.waitForLoadState('domcontentloaded');
-    try { await this.page.waitForSelector('.bootstrap-select', { timeout: 30000 }); } catch {}
-    
+    try { await this.page.waitForSelector('.bootstrap-select', { timeout: 30000 }); } catch { }
+
     logger.info('✅ Assignment Form Loaded');
     return true;
   }
@@ -94,22 +94,22 @@ export class AsignarPage extends BasePage {
   // --- ARMA SECRETA: INYECCIÓN DIRECTA ---
   private async injectValueByText(textToFind: string, label: string): Promise<void> {
     logger.info(`💉 Injecting ${label}: "${textToFind}"`);
-    
+
     const success = await this.page.evaluate((text) => {
-        // Buscar en todos los selects del documento
-        const selects = Array.from(document.querySelectorAll('select'));
-        for (const select of selects) {
-            const option = Array.from(select.options).find(opt => opt.text.includes(text));
-            if (option) {
-                select.value = option.value;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                // Actualizar Bootstrap visualmente
-                // @ts-ignore
-                if (window.$) window.$(select).selectpicker('refresh');
-                return true;
-            }
+      // Buscar en todos los selects del documento
+      const selects = Array.from(document.querySelectorAll('select'));
+      for (const select of selects) {
+        const option = Array.from(select.options).find(opt => opt.text.includes(text));
+        if (option) {
+          select.value = option.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          // Actualizar Bootstrap visualmente
+          // @ts-ignore
+          if (window.$) window.$(select).selectpicker('refresh');
+          return true;
         }
-        return false;
+      }
+      return false;
     }, textToFind);
 
     if (!success) logger.warn(`⚠️ Could not inject "${textToFind}". Will try standard click as fallback.`);
@@ -118,8 +118,8 @@ export class AsignarPage extends BasePage {
 
   async clickGuardar(): Promise<void> {
     await this.page.evaluate((sel) => {
-        const btn = document.querySelector(sel) as HTMLElement;
-        if(btn) btn.click();
+      const btn = document.querySelector(sel) as HTMLElement;
+      if (btn) btn.click();
     }, this.selectors.assignment.btnGuardar);
     await this.page.waitForLoadState('networkidle');
     await this.page.waitForTimeout(2000);
@@ -131,7 +131,7 @@ export class AsignarPage extends BasePage {
 
     // 1. Inyectar Transportista
     await this.injectValueByText(data.transportista, 'Transportista');
-    
+
     logger.info('Waiting for cascade (loading vehicles)...');
     await this.page.waitForTimeout(6000); // Espera pasiva para que el backend cargue los vehículos
 
@@ -140,7 +140,7 @@ export class AsignarPage extends BasePage {
 
     // 3. Inyectar Conductor
     await this.injectValueByText(data.conductor, 'Conductor');
-    
+
     // 4. Guardar
     await this.clickGuardar();
     logger.info('✅ Assignment flow complete');

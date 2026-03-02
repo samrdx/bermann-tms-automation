@@ -159,8 +159,10 @@ export class ContratosFormPage extends BasePage {
       // Step B: Select the route
       logger.info(`Selecting Route ${rc.routeId}`);
       const btnRoute = this.page.locator(rc.routeButtonSelector);
-      await btnRoute.scrollIntoViewIfNeeded();
-      await btnRoute.click();
+      if (await btnRoute.isVisible()) {
+        await btnRoute.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+        await btnRoute.click();
+      }
       await this.page.waitForTimeout(1000);
 
       // Step B.5: Close the routes modal via "Cerrar" button
@@ -189,8 +191,10 @@ export class ContratosFormPage extends BasePage {
       logger.info(`Selecting Cargo via: ${rc.cargoButtonSelector}`);
       const btnCargo = this.page.locator(rc.cargoButtonSelector);
       await btnCargo.waitFor({ state: 'visible', timeout: 5000 });
-      await btnCargo.scrollIntoViewIfNeeded();
-      await btnCargo.click();
+      if (await btnCargo.isVisible()) {
+        await btnCargo.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+        await btnCargo.click();
+      }
       await this.page.waitForTimeout(500);
 
       // Step C.6: Close the cargo modal via "Cerrar" button
@@ -311,7 +315,7 @@ export class ContratosFormPage extends BasePage {
    */
   private async fillTariffField(selector: string, value: string): Promise<void> {
     const input = this.page.locator(selector);
-    await input.scrollIntoViewIfNeeded();
+    await input.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
     await input.click();
     await this.page.waitForTimeout(300);
 
