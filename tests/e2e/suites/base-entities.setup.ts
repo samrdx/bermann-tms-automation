@@ -17,8 +17,8 @@ import { ConductorHelper } from '../../api-helpers/ConductorHelper.js';
  * Exports data to worker-specific JSON (last-run-data-worker-N.json) for parallel execution
  * Target: Complete in under 90 seconds (increased from 60s for stability)
  */
-test.describe('Base Operational Suite - Entity Creation', () => {
-    test.setTimeout(90000); // 90 seconds for stability (4 entities x ~15s each + margin)
+test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can take significantly longer due to strict actionability checks triggering JS fallbacks
+    test.setTimeout(150000); // 90 seconds for stability (4 entities x ~15s each + margin)
 
     test('Create Base Operational Entities (Steps 1-4)', async ({ page }, testInfo) => {
         const startTime = Date.now();

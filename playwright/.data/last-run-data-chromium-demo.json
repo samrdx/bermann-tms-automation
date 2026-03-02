@@ -1,0 +1,28 @@
+{
+  "seededTransportista": {
+    "id": "53",
+    "nombre": "EcoTrans 1066",
+    "baseNombre": "EcoTrans",
+    "documento": "99769475-9",
+    "razonSocial": "EcoTrans 1066 SpA"
+  },
+  "seededCliente": {
+    "id": "45",
+    "nombre": "Central 3290",
+    "nombreFantasia": "Central 3290 SpA",
+    "rut": "23006647-7",
+    "email": ""
+  },
+  "seededConductor": {
+    "nombre": "Valentina",
+    "apellido": "López",
+    "rut": "42.481.325-7",
+    "email": "valentinasoto@hotmail.com",
+    "transportistaNombre": "EcoTrans 1066"
+  },
+  "seededVehiculo": {
+    "patente": "CPFD-76",
+    "muestra": "CPFD-76",
+    "transportistaNombre": "EcoTrans 1066"
+  }
+}

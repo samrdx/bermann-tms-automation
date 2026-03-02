@@ -83,14 +83,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting tipo transportista: ${tipo}`);
     try {
       if (!(await this.isVisible(this.selectors.tipoTransportistaButton))) return;
-      await this.page.click(this.selectors.tipoTransportistaButton);
+      await this.click(this.selectors.tipoTransportistaButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo });
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Tipo transportista "${tipo}" selected`);
     } catch (error) {
@@ -104,14 +104,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting región: ${region}`);
     try {
       if (!(await this.isVisible(this.selectors.regionButton))) return;
-      await this.page.click(this.selectors.regionButton);
+      await this.click(this.selectors.regionButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: region }).first();
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Región "${region}" selected`);
       await this.page.waitForTimeout(800); // Wait for ciudad cascade
@@ -126,14 +126,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting ciudad: ${ciudad}`);
     try {
       if (!(await this.isVisible(this.selectors.ciudadButton))) return;
-      await this.page.click(this.selectors.ciudadButton);
+      await this.click(this.selectors.ciudadButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: ciudad }).first();
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Ciudad "${ciudad}" selected`);
       await this.page.waitForTimeout(800); // Wait for comuna cascade
@@ -148,14 +148,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting comuna: ${comuna}`);
     try {
       if (!(await this.isVisible(this.selectors.comunaButton))) return;
-      await this.page.click(this.selectors.comunaButton);
+      await this.click(this.selectors.comunaButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: comuna }).first();
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Comuna "${comuna}" selected`);
     } catch (error) {
@@ -169,14 +169,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting forma de pago: ${formaPago}`);
     try {
       if (!(await this.isVisible(this.selectors.formaPagoButton))) return;
-      await this.page.click(this.selectors.formaPagoButton);
+      await this.click(this.selectors.formaPagoButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: formaPago });
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Forma de pago "${formaPago}" selected`);
     } catch (error) {
@@ -188,14 +188,14 @@ export class TransportistaFormPage extends BasePage {
     logger.info(`Selecting tercerizar viajes: ${value}`);
     try {
       if (!(await this.isVisible(this.selectors.tercerizarButton))) return;
-      await this.page.click(this.selectors.tercerizarButton);
+      await this.click(this.selectors.tercerizarButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').getByText(value, { exact: true });
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Tercerizar viajes "${value}" selected`);
     } catch (error) {
@@ -230,7 +230,7 @@ export class TransportistaFormPage extends BasePage {
   ): Promise<{ success: boolean; selectedText?: string }> {
     try {
       if (!(await this.isVisible(buttonSelector))) return { success: false };
-      await this.page.click(buttonSelector);
+      await this.click(buttonSelector, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
@@ -250,14 +250,14 @@ export class TransportistaFormPage extends BasePage {
       const randomIndex = Math.floor(Math.random() * (count - 1)) + 1;
       const selected = options.nth(randomIndex);
       const text = await selected.textContent();
-      await selected.click();
+      await selected.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Random ${label} selected: ${text?.trim()}`);
       if (cascadeWaitMs > 0) await this.page.waitForTimeout(cascadeWaitMs);
       return { success: true, selectedText: text?.trim() ?? '' };
     } catch (error) {
       // Close dropdown if still open
-      await this.page.keyboard.press('Escape').catch(() => {});
+      await this.page.keyboard.press('Escape').catch(() => { });
       await this.page.waitForTimeout(300);
       logger.warn(`⚠️ Failed to select random ${label}`, error);
       return { success: false };

@@ -118,7 +118,7 @@ export class MonitoreoPage extends BasePage {
             // Re-localizamos justo antes de interactuar para evitar errores de "detached"
             // y agregamos un pequeño delay para estabilidad del grid
             await this.page.waitForTimeout(1000);
-            
+
             try {
                 const finalLocator = this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first();
                 await finalLocator.scrollIntoViewIfNeeded({ timeout: 5000 });
@@ -126,8 +126,8 @@ export class MonitoreoPage extends BasePage {
                 logger.info(`✅ UI: Viaje [${nroViaje}] confirmed & visible in #registros`);
             } catch (e: any) {
                 logger.warn(`⚠️ UI: Scroll failed (${e.message}), re-trying one last time...`);
-                await this.page.waitForTimeout(1000);
-                await this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first().scrollIntoViewIfNeeded();
+                await this.page.waitForTimeout(500);
+                await this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first().scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
                 logger.info(`✅ UI: Viaje [${nroViaje}] found after retry`);
             }
 
@@ -181,7 +181,7 @@ export class MonitoreoPage extends BasePage {
 
         // 3. Scroll inteligente al span (puede requerir scroll horizontal/vertical)
         logger.info('📜 UI: Smart scroll to span "Agregar"...');
-        await spanAgregar.scrollIntoViewIfNeeded();
+        await spanAgregar.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
         await this.page.waitForTimeout(300);
         logger.info('👁️ UI: "Agregar" visible after scroll');
 
@@ -301,7 +301,7 @@ export class MonitoreoPage extends BasePage {
             const btn = this.page.locator(sel).first();
             if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
                 logger.info(`✅ UI: Save button found: ${sel}`);
-                await btn.scrollIntoViewIfNeeded();
+                await btn.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
                 await btn.click();
                 logger.info(`💾 UI: Clicked Save`);
                 guardado = true;

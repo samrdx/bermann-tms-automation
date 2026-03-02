@@ -1,0 +1,60 @@
+{
+  "createdAt": "2026-03-02T19:39:37.734Z",
+  "workerIndex": 2,
+  "projectName": "base-entities-firefox",
+  "transportista": {
+    "id": "",
+    "nombre": "Prime Cargo Solutions 480377",
+    "rut": "47389008-9",
+    "razonSocial": "Prime Cargo Solutions 480377",
+    "baseNombre": "Prime Cargo Solutions"
+  },
+  "cliente": {
+    "id": "N/A",
+    "nombre": "Industrial 5108",
+    "nombreFantasia": "Industrial 5108 SpA",
+    "rut": "69260033-9",
+    "email": "industrial@test.cl"
+  },
+  "seededCliente": {
+    "id": "880",
+    "nombre": "Distribuidora 6720",
+    "nombreFantasia": "Distribuidora 6720 SpA",
+    "rut": "97428388-3",
+    "email": ""
+  },
+  "vehiculo": {
+    "patente": "QAUA-70",
+    "muestra": "VEH-1772480411926",
+    "transportistaNombre": "Prime Cargo Solutions 480377",
+    "capacity": "3 KG"
+  },
+  "conductor": {
+    "nombre": "José",
+    "apellido": "Silva",
+    "rut": "92.688.491-3",
+    "email": "josesilva@gmail.com",
+    "telefono": "+56951783890",
+    "transportistaNombre": "Prime Cargo Solutions 480377"
+  },
+  "executionTimeSeconds": 56.53,
+  "seededTransportista": {
+    "id": "1515",
+    "nombre": "Cordillera 1127",
+    "baseNombre": "Cordillera",
+    "documento": "98557216-K",
+    "razonSocial": "Cordillera 1127 SpA"
+  },
+  "seededVehiculo": {
+    "patente": "QOSN-53",
+    "muestra": "QOSN-53",
+    "transportistaNombre": "Cordillera 1127"
+  },
+  "seededConductor": {
+    "nombre": "Pedro",
+    "apellido": "García",
+    "rut": "84.199.234-2",
+    "email": "elenatorres@hotmail.com",
+    "transportistaNombre": "Cordillera 1127"
+  }
+}

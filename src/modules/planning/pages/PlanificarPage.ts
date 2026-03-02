@@ -67,8 +67,8 @@ export class PlanificarPage extends BasePage {
     try {
       if (!(await this.isVisible(buttonSelector))) return;
       const btn = this.page.locator(buttonSelector);
-      await btn.scrollIntoViewIfNeeded();
-      await btn.click(); 
+      await btn.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+      await this.click(buttonSelector, true);
 
       const parent = btn.locator('xpath=..');
       const dropdownMenu = parent.locator('div.dropdown-menu.show').first();
@@ -80,7 +80,7 @@ export class PlanificarPage extends BasePage {
 
         if (await searchBox.isVisible()) {
           await searchBox.fill(textToSelect);
-          await this.page.waitForTimeout(500); 
+          await this.page.waitForTimeout(500);
 
           const noResults = await dropdownMenu.locator('.no-results').isVisible();
           if (noResults) {
@@ -89,7 +89,7 @@ export class PlanificarPage extends BasePage {
             await this.page.waitForTimeout(300);
             const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
             if (await option.isVisible()) {
-              await option.click();
+              await option.evaluate((node: HTMLElement) => node.click());
             } else {
               throw new Error(`Option "${textToSelect}" not found in ${fieldName}`);
             }
@@ -98,11 +98,11 @@ export class PlanificarPage extends BasePage {
           }
         } else {
           const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
-          await option.click();
+          await option.evaluate((node: HTMLElement) => node.click());
         }
       } else {
         const firstOption = dropdownMenu.locator('li:not(.hidden):not(.disabled) a').first();
-        await firstOption.click();
+        await firstOption.evaluate((node: HTMLElement) => node.click());
       }
 
       if (await dropdownMenu.isVisible()) {

@@ -1,0 +1,28 @@
+{
+  "seededTransportista": {
+    "id": "52",
+    "nombre": "TransSur 1561",
+    "baseNombre": "TransSur",
+    "documento": "20789833-3",
+    "razonSocial": "TransSur 1561 SpA"
+  },
+  "seededCliente": {
+    "id": "46",
+    "nombre": "Servicios 6545",
+    "nombreFantasia": "Servicios 6545 SpA",
+    "rut": "55183833-1",
+    "email": ""
+  },
+  "seededVehiculo": {
+    "patente": "IN-5951",
+    "muestra": "IN-5951",
+    "transportistaNombre": "TransSur 1561"
+  },
+  "seededConductor": {
+    "nombre": "Francisco",
+    "apellido": "Martínez",
+    "rut": "23.052.214-6",
+    "email": "antonioperez@hotmail.com",
+    "transportistaNombre": "TransSur 1561"
+  }
+}

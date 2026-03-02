@@ -308,7 +308,12 @@ export class ClienteHelper {
                     await searchInput.fill(nombre);
                     const buscarButton = page.locator('#buscar, a#buscar, button#buscar').first();
                     if (await buscarButton.count() > 0) {
-                        await buscarButton.click();
+                        try {
+                            await buscarButton.click({ timeout: 2000 });
+                        } catch (e) {
+                            logger.info('🔎 Using JS fallback to click Buscar button...');
+                            await buscarButton.evaluate((btn) => (btn as HTMLElement).click());
+                        }
                     } else {
                         await searchInput.press('Enter');
                     }

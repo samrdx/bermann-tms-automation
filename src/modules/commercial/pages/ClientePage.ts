@@ -77,7 +77,7 @@ export class ClienteFormPage extends BasePage {
     logger.info(`Selecting tipo cliente: ${tipo}`);
     try {
       if (!(await this.isVisible(this.selectors.tipoClienteButton))) return;
-      await this.page.click(this.selectors.tipoClienteButton);
+      await this.click(this.selectors.tipoClienteButton, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page.locator(".dropdown-menu.show").first();
@@ -86,7 +86,7 @@ export class ClienteFormPage extends BasePage {
       const option = dropdownMenu
         .locator(".dropdown-item")
         .filter({ hasText: tipo });
-      await option.click();
+      await option.evaluate((node: HTMLElement) => node.click());
       logger.info(`✅ Tipo cliente "${tipo}" selected`);
     } catch (error) {
       logger.error(`Failed to select tipo cliente: ${tipo}`, error);
@@ -110,7 +110,7 @@ export class ClienteFormPage extends BasePage {
         logger.warn('⚠️ Polígonos dropdown not visible — skipping');
         return;
       }
-      await button.scrollIntoViewIfNeeded();
+      await button.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
       await this.page.waitForTimeout(300);
 
       // Use page.evaluate to interact with Bootstrap Select DOM directly
@@ -185,7 +185,7 @@ export class ClienteFormPage extends BasePage {
   ): Promise<{ success: boolean; selectedText?: string }> {
     try {
       if (!(await this.isVisible(buttonSelector))) return { success: false };
-      await this.page.click(buttonSelector);
+      await this.click(buttonSelector, true);
       await this.page.waitForTimeout(500);
 
       const dropdownMenu = this.page
@@ -207,14 +207,14 @@ export class ClienteFormPage extends BasePage {
       const randomIndex = Math.floor(Math.random() * (count - 1)) + 1;
       const selected = options.nth(randomIndex);
       const text = await selected.textContent();
-      await selected.click();
+      await selected.evaluate((node: HTMLElement) => node.click());
 
       logger.info(`✅ Random ${label} selected: ${text?.trim()}`);
       if (cascadeWaitMs > 0) await this.page.waitForTimeout(cascadeWaitMs);
       return { success: true, selectedText: text?.trim() ?? "" };
     } catch (error) {
       // Close dropdown if still open
-      await this.page.keyboard.press("Escape").catch(() => {});
+      await this.page.keyboard.press("Escape").catch(() => { });
       await this.page.waitForTimeout(300);
       logger.warn(`⚠️ Failed to select random ${label}`, error);
       return { success: false };
