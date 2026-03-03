@@ -1,8 +1,8 @@
-import { test, expect } from '../../../../../src/fixtures/base.js';
-import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
-import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
-import { logger } from '../../../../../src/utils/logger.js';
-import { generateValidChileanRUT } from '../../../../../src/utils/rutGenerator.js';
+import { test, expect } from '../../../src/fixtures/base.js';
+import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
+import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
+import { logger } from '../../../src/utils/logger.js';
+import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 
 
 test.describe('Viajes - Asignar (Business Logic Workflow)', () => {

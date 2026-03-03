@@ -52,6 +52,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             workerIndex: 0,
             projectName: '',
             transportista: {} as any,
+            seededTransportista: {} as any,
             cliente: {} as any,
             seededCliente: {} as any,
             vehiculo: {} as any,
@@ -66,6 +67,14 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         const transportista = await TransportistaHelper.createTransportistaViaUI(page, 'Propio');
 
         operationalData.transportista = {
+            id: transportista.id,
+            nombre: transportista.nombre,
+            rut: transportista.documento,
+            razonSocial: transportista.razonSocial,
+            baseNombre: transportista.baseNombre || transportista.nombre.split(' - ')[0],
+        };
+
+        operationalData.seededTransportista = {
             id: transportista.id,
             nombre: transportista.nombre,
             rut: transportista.documento,

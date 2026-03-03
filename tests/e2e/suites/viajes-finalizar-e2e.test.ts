@@ -1,13 +1,13 @@
-import { test, expect } from '../../../../../src/fixtures/base.js';
-import { MonitoreoPage } from '../../../../../src/modules/monitoring/pages/MonitoreoPage.js';
-import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
-import { TmsApiClient } from '../../../../api-helpers/TmsApiClient.js';
-import { createLogger } from '../../../../../src/utils/logger.js';
-import { generateValidChileanRUT } from '../../../../../src/utils/rutGenerator.js';
+import { test, expect } from '../../../src/fixtures/base.js';
+import { MonitoreoPage } from '../../../src/modules/monitoring/pages/MonitoreoPage.js';
+import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
+import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
+import { createLogger } from '../../../src/utils/logger.js';
+import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 
 const logger = createLogger('ViajesFinalizarTest');
 
-test.describe('Operaciones - Monitoreo - Finalizar Viaje', () => {
+test.describe('Operaciones - Monitoreo - Finalizar Viaje (E2E)', () => {
   test.setTimeout(420000); // 7 min para creación de datos + test
 
   test('Debería buscar y finalizar un viaje asignado en Monitoreo', async ({ page }) => {

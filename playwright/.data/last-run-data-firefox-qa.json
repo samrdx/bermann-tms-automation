@@ -1,60 +1,70 @@
 {
-  "createdAt": "2026-03-02T19:39:37.734Z",
+  "createdAt": "2026-03-03T18:18:54.633Z",
   "workerIndex": 2,
   "projectName": "base-entities-firefox",
   "transportista": {
     "id": "",
-    "nombre": "Prime Cargo Solutions 480377",
-    "rut": "47389008-9",
-    "razonSocial": "Prime Cargo Solutions 480377",
-    "baseNombre": "Prime Cargo Solutions"
+    "nombre": "LogiChile Connect 561934",
+    "rut": "11579684-4",
+    "razonSocial": "LogiChile Connect 561934",
+    "baseNombre": "LogiChile Connect"
+  },
+  "seededTransportista": {
+    "id": "1580",
+    "nombre": "Pacific 9692",
+    "baseNombre": "Pacific",
+    "documento": "80931795-1",
+    "razonSocial": "Pacific 9692 SpA"
   },
   "cliente": {
     "id": "N/A",
-    "nombre": "Industrial 5108",
-    "nombreFantasia": "Industrial 5108 SpA",
-    "rut": "69260033-9",
-    "email": "industrial@test.cl"
+    "nombre": "Global 9674",
+    "nombreFantasia": "Global 9674 SpA",
+    "rut": "10775225-0",
+    "email": "global@test.cl"
   },
   "seededCliente": {
-    "id": "880",
-    "nombre": "Distribuidora 6720",
-    "nombreFantasia": "Distribuidora 6720 SpA",
-    "rut": "97428388-3",
+    "id": "915",
+    "nombre": "Servicios 7706",
+    "nombreFantasia": "Servicios 7706 SpA",
+    "rut": "80703451-0",
     "email": ""
   },
   "vehiculo": {
-    "patente": "QAUA-70",
-    "muestra": "VEH-1772480411926",
-    "transportistaNombre": "Prime Cargo Solutions 480377",
+    "patente": "BT-8076",
+    "muestra": "VEH-1772561983146",
+    "transportistaNombre": "LogiChile Connect 561934",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "José",
-    "apellido": "Silva",
-    "rut": "92.688.491-3",
-    "email": "josesilva@gmail.com",
-    "telefono": "+56951783890",
-    "transportistaNombre": "Prime Cargo Solutions 480377"
+    "nombre": "Sofía",
+    "apellido": "Torres",
+    "rut": "65.573.272-1",
+    "email": "sofiatorres@gmail.com",
+    "telefono": "+56934082949",
+    "transportistaNombre": "LogiChile Connect 561934"
   },
-  "executionTimeSeconds": 56.53,
-  "seededTransportista": {
-    "id": "1515",
-    "nombre": "Cordillera 1127",
-    "baseNombre": "Cordillera",
-    "documento": "98557216-K",
-    "razonSocial": "Cordillera 1127 SpA"
-  },
-  "seededVehiculo": {
-    "patente": "QOSN-53",
-    "muestra": "QOSN-53",
-    "transportistaNombre": "Cordillera 1127"
+  "executionTimeSeconds": 86.42,
+  "contratoCliente": {
+    "id": "2005",
+    "nroContrato": "453939"
   },
   "seededConductor": {
-    "nombre": "Pedro",
-    "apellido": "García",
-    "rut": "84.199.234-2",
-    "email": "elenatorres@hotmail.com",
-    "transportistaNombre": "Cordillera 1127"
+    "nombre": "Sofía",
+    "apellido": "Contreras",
+    "rut": "17.506.229-7",
+    "email": "elenacontreras@gmail.com",
+    "transportistaNombre": "Pacific 9692"
+  },
+  "seededVehiculo": {
+    "patente": "EUAN-69",
+    "muestra": "EUAN-69",
+    "transportistaNombre": "Pacific 9692"
+  },
+  "viaje": {
+    "nroViaje": "64228",
+    "cliente": "Industrial 9940 SpA",
+    "ruta": "05082025-1",
+    "status": "PLANIFICADO"
   }
 }

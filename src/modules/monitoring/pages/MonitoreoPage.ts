@@ -29,26 +29,45 @@ export class MonitoreoPage extends BasePage {
     private readonly selectors = {
         filtroIdViaje: '#id',
         contenedor: '#registros',
+        // Verified via Playwright MCP inspection:
+        modalCambioEstado: '#modalCambioEstadoSinGps',
+        selectEstado: '#drop_state_without_gps',
+        btnGuardarModal: '#modificarEstadoViaje_sinGps',
         modalVisible: '.modal.show, .modal.fade.show, .modal[style*="display: block"]',
         btnConfirmar: '.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")',
     };
 
     constructor(page: Page) {
-        super(page);
-        this.monitoreoUrl = `${config.get().baseUrl}/viajes/monitoreo`;
+        const monitoreoUrl = `${config.get().baseUrl}/viajes/monitoreo`;
+        super(page, monitoreoUrl);
+        this.monitoreoUrl = monitoreoUrl;
     }
 
     // ================================================================
     // 1. NAVEGACIÓN
     // ================================================================
 
-    async navegar(): Promise<void> {
-        logger.info(`📍 UI: Navigating to: ${this.monitoreoUrl}`);
-        await this.page.goto(this.monitoreoUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await this.page.waitForLoadState('networkidle');
-        logger.info(`📍 UI: Current URL: ${this.page.url()}`);
-        logger.info('✅ UI: Monitoreo page loaded');
+    async navigate(): Promise<void> {
+        logger.info(`📍 Navigating to: /viajes/monitoreo`);
+        // Use relative path so Playwright resolves against configured baseURL
+        // (same pattern as PlanificarPage, avoids absolute URL + domcontentloaded race)
+        await this.page.goto('/viajes/monitoreo');
+        await this.page.waitForLoadState('networkidle').catch(() => {
+            logger.warn('⚠️ networkidle timeout on monitoreo, continuing...');
+        });
+        const currentUrl = this.page.url();
+        logger.info(`📍 Current URL: ${currentUrl}`);
+        if (currentUrl.includes('/login')) {
+            throw new Error('❌ Redirected to /login — storageState auth may be expired or missing');
+        }
+        logger.info('✅ Monitoreo page loaded successfully');
     }
+
+    /** @deprecated Use navigate() instead */
+    async navegar(): Promise<void> {
+        return this.navigate();
+    }
+
 
     // ================================================================
     // 2. BUSCAR VIAJE EN TABLA #registros
@@ -161,41 +180,27 @@ export class MonitoreoPage extends BasePage {
     async clickAgregarHorarioGPS(): Promise<void> {
         logger.info('🕰️ UI: Accessing "Horario GPS" (Agregar)...');
 
-        // 1. Verificar que "Horario GPS" es visible en la página
-        logger.info('🔎 UI: Looking for label "Horario GPS"...');
-        const labelHorarioGPS = this.page.getByText('Horario GPS');
-        try {
-            await labelHorarioGPS.first().waitFor({ state: 'visible', timeout: 10000 });
-            logger.info('✅ UI: Label "Horario GPS" found');
-        } catch {
-            logger.warn('⚠️ UI: Label "Horario GPS" not visible, continuing with "Agregar"...');
-            await this.takeScreenshot('horario-gps-label-no-visible');
-        }
-
-        // 2. Buscar span "Agregar" globalmente (único tras filtrar por ID de viaje)
-        logger.info('🔎 UI: Looking for span "Agregar"...');
-        const spanAgregar = this.page.locator('span').filter({ hasText: 'Agregar' }).first();
+        // 1. Find first span.manito with onclick="showModalEditTripWithoutGPSManually"
+        logger.info('🔎 UI: Looking for Agregar (Horario GPS) span...');
+        const spanAgregar = this.page.locator('span.manito').filter({ hasText: 'Agregar' }).first();
 
         await spanAgregar.waitFor({ state: 'visible', timeout: 15000 });
-        logger.info('✅ UI: Span "Agregar" found & visible');
+        logger.info('✅ UI: Span Agregar found');
 
-        // 3. Scroll inteligente al span (puede requerir scroll horizontal/vertical)
-        logger.info('📜 UI: Smart scroll to span "Agregar"...');
-        await spanAgregar.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
-        await this.page.waitForTimeout(300);
-        logger.info('👁️ UI: "Agregar" visible after scroll');
+        // 2. Use JS click to avoid backdrop/overlay interception
+        await this.page.evaluate(() => {
+            const spans = Array.from(document.querySelectorAll('span.manito'));
+            const agregar = spans.find(s => s.textContent?.trim() === 'Agregar') as HTMLElement;
+            if (agregar) agregar.click();
+        });
+        logger.info('✅ UI: Clicked Agregar via JS');
 
-        // 4. Click
-        logger.info('👆 UI: Clicking "Agregar"...');
-        await spanAgregar.click();
-        logger.info('✅ UI: Clicked "Agregar"');
-
-        // 5. Esperar que el modal se abra
-        logger.info('⏳ UI: Waiting for modal to open...');
-        const modal = this.page.locator(this.selectors.modalVisible).first();
+        // 3. Esperar que el modal #modalCambioEstadoSinGps se abra
+        logger.info('⏳ UI: Waiting for modal #modalCambioEstadoSinGps...');
+        const modal = this.page.locator(this.selectors.modalCambioEstado);
         try {
             await modal.waitFor({ state: 'visible', timeout: 15000 });
-            logger.info('✅ UI: Modal Horario GPS open');
+            logger.info('✅ UI: Modal #modalCambioEstadoSinGps open');
         } catch {
             logger.warn('⚠️ UI: Modal not detected, taking screenshot...');
             await this.takeScreenshot('modal-post-agregar');
@@ -214,117 +219,38 @@ export class MonitoreoPage extends BasePage {
      * 4. Maneja confirmación bootbox si aparece
      */
     async confirmarFinalizacion(): Promise<void> {
-        logger.info('📝 UI: Processing Horario GPS Modal...');
-
-        // Screenshot del modal para diagnóstico
+        logger.info('📝 UI: Processing modal #modalCambioEstadoSinGps...');
         await this.takeScreenshot('modal-horario-gps-contenido');
 
-        // --- PASO 1: Cambiar estado a FINALIZADO ---
-        logger.info('🔎 UI: Searching select for FINALIZADO option...');
-        const estadoResult = await this.page.evaluate(() => {
-            const modal = document.querySelector('.modal.show')
-                || document.querySelector('.modal.fade.show')
-                || document.querySelector('.modal[style*="display: block"]');
+        // --- PASO 1: Select "Finalizado" via verified ID #drop_state_without_gps ---
+        logger.info('🔎 UI: Selecting "Finalizado" in #drop_state_without_gps...');
+        const selectEstado = this.page.locator(this.selectors.selectEstado);
+        await selectEstado.waitFor({ state: 'visible', timeout: 10000 });
+        await selectEstado.selectOption({ label: 'Finalizado' });
+        logger.info('✅ UI: Finalizado selected');
 
-            const scope = modal || document;
-            const selects = Array.from(scope.querySelectorAll('select'));
-
-            for (const select of selects) {
-                const options = Array.from(select.options);
-                const optFinalizado = options.find(opt =>
-                    opt.text.toUpperCase().includes('FINALIZADO') ||
-                    opt.value.toUpperCase().includes('FINALIZADO')
-                );
-
-                if (optFinalizado) {
-                    const selectId = select.id || select.name || '(sin id)';
-                    select.value = optFinalizado.value;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-
-                    // @ts-ignore
-                    if (window.jQuery) {
-                        // @ts-ignore
-                        const $sel = window.jQuery(select);
-                        // @ts-ignore
-                        $sel.trigger('change');
-                        // @ts-ignore
-                        if ($sel.selectpicker) $sel.selectpicker('refresh');
-                        // @ts-ignore
-                        if ($sel.data('select2')) $sel.select2('val', optFinalizado.value);
-                    }
-
-                    return { success: true, selectId, value: optFinalizado.value, text: optFinalizado.text };
-                }
+        // Trigger jQuery change for selectpicker
+        await this.page.evaluate(() => {
+            const sel = document.getElementById('drop_state_without_gps') as HTMLSelectElement;
+            if (sel) {
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                // @ts-ignore
+                if (window.jQuery) window.jQuery(sel).trigger('change');
             }
-
-            // Diagnóstico
-            const selectInfo = selects.map(s => {
-                const opts = Array.from(s.options).map(o => `"${o.text}"(${o.value})`).join(', ');
-                return `#${s.id || s.name || 'sin-id'}: [${opts}]`;
-            });
-            const inputs = Array.from(scope.querySelectorAll('input, textarea'));
-            const inputInfo = inputs.map(i => {
-                const el = i as HTMLInputElement;
-                return `${el.type}#${el.id || el.name || 'sin-id'}="${el.value}"`;
-            });
-
-            return {
-                success: false,
-                msg: `Selects: ${selectInfo.join(' | ') || 'NINGUNO'} | Inputs: ${inputInfo.join(' | ') || 'NINGUNO'}`,
-            };
         });
 
-        if (estadoResult.success) {
-            logger.info(`✅ UI: State changed to "${estadoResult.text}" (value=${estadoResult.value}) in [${estadoResult.selectId}]`);
-        } else {
-            logger.error(`❌ UI: Option FINALIZADO not found: ${estadoResult.msg}`);
-            await this.takeScreenshot('estado-finalizado-no-encontrado');
-            throw new Error(`No se pudo cambiar estado a Finalizado: ${estadoResult.msg}`);
-        }
+        await this.page.waitForTimeout(500);
 
-        await this.page.waitForTimeout(1000);
-
-        // --- PASO 2: Guardar ---
-        logger.info('🔎 UI: Searching save button in modal...');
-
-        const guardarSelectors = [
-            '.modal.show .btn-primary',
-            '.modal.show button:has-text("Guardar")',
-            '.modal.show button:has-text("Aceptar")',
-            '.modal.show button[type="submit"]',
-            '.modal.fade.show .btn-primary',
-            '#btn_guardar_form',
-        ];
-
-        let guardado = false;
-        for (const sel of guardarSelectors) {
-            const btn = this.page.locator(sel).first();
-            if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
-                logger.info(`✅ UI: Save button found: ${sel}`);
-                await btn.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
-                await btn.click();
-                logger.info(`💾 UI: Clicked Save`);
-                guardado = true;
-                break;
-            }
-        }
-
-        if (!guardado) {
-            logger.warn('⚠️ UI: Save button not found by locator, using JS...');
-            await this.page.evaluate(() => {
-                const modal = document.querySelector('.modal.show') || document.querySelector('.modal.fade.show');
-                if (modal) {
-                    const btn = modal.querySelector('.btn-primary') as HTMLElement
-                        || modal.querySelector('button[type="submit"]') as HTMLElement;
-                    if (btn) btn.click();
-                }
-            });
-        }
+        // --- PASO 2: Guardar via verified ID #modificarEstadoViaje_sinGps ---
+        logger.info('💾 UI: Clicking Guardar (#modificarEstadoViaje_sinGps)...');
+        const btnGuardar = this.page.locator(this.selectors.btnGuardarModal);
+        await btnGuardar.waitFor({ state: 'visible', timeout: 5000 });
+        await btnGuardar.click();
+        logger.info('✅ UI: Guardar clicked');
 
         await this.page.waitForTimeout(2000);
 
-        // --- PASO 3: Confirmación bootbox/sweetalert ---
-        logger.info('🔎 UI: Checking confirmation modal...');
+        // --- PASO 3: Confirmación bootbox/sweetalert si aparece ---
         try {
             const btnConfirmar = this.page.locator(this.selectors.btnConfirmar).first();
             if (await btnConfirmar.isVisible({ timeout: 5000 })) {
@@ -339,7 +265,6 @@ export class MonitoreoPage extends BasePage {
 
         await this.page.waitForLoadState('networkidle').catch(() => { });
         await this.forceCloseModal();
-
         logger.info('🏁 UI: Finalization confirmed successfully');
     }
 
