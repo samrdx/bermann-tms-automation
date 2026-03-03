@@ -32,6 +32,7 @@ export class PlanificarPage extends BasePage {
 
     // Acciones
     btnGuardar: '#btn_guardar_form',
+    spinner: '#modalCargando',
   };
 
   constructor(page: Page) {
@@ -42,9 +43,32 @@ export class PlanificarPage extends BasePage {
     logger.info('Navigating to Planificar Viajes page');
     await this.page.goto('/viajes/crear');
     await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForTimeout(1500); // Allow BS to initialize
   }
 
-  // --- MÉTODOS DE LLENADO SIMPLE ---
+  async planificarViaje(nroViaje: string, operation: string, service: string, cliente: string): Promise<void> {
+    logger.info(`Starting Step 6.4: Planificar Viaje (Robust Flow)`);
+    logger.info('='.repeat(80));
+
+    await this.navigate();
+    await this.fillNroViaje(nroViaje);
+    
+    // Step 2: Select Operation
+    await this.selectTipoOperacion(operation);
+    await this.waitForLoading(20000);
+    await this.page.waitForTimeout(1500); 
+
+    // Step 3: Select Service
+    await this.selectTipoServicio(service);
+    await this.waitForLoading(20000);
+    await this.page.waitForTimeout(1500);
+
+    // Step 4: Select Cliente
+    await this.selectCliente(cliente);
+    await this.waitForLoading(20000);
+    
+    await this.click(this.selectors.btnGuardar);
+  }
 
   async fillNroViaje(nro?: string): Promise<void> {
     const nroViaje = nro || String(Math.floor(10000 + Math.random() * 90000));
@@ -52,72 +76,115 @@ export class PlanificarPage extends BasePage {
     await this.fill(this.selectors.nroViaje, nroViaje);
   }
 
-  async fillNumeroPlanilla(numero: string): Promise<void> {
-    await this.fill(this.selectors.numeroPlanilla, numero);
-  }
-
-  async fillValorFlete(valor: string): Promise<void> {
-    await this.fill(this.selectors.valorFlete, valor);
-  }
-
-  // --- ESTRATEGIA DE SELECCIÓN NATIVA (Click UI + Scoped Selector) ---
-
-  private async selectBootstrapDropdown(buttonSelector: string, textToSelect?: string, fieldName: string = 'Dropdown'): Promise<void> {
-    logger.info(`Selecting ${fieldName}: "${textToSelect || 'First available'}"`);
+  private async waitForLoading(timeout: number = 20000): Promise<void> {
+    const spinner = this.page.locator(this.selectors.spinner);
     try {
-      if (!(await this.isVisible(buttonSelector))) return;
-      const btn = this.page.locator(buttonSelector);
-      await btn.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
-      await this.click(buttonSelector, true);
-
-      const parent = btn.locator('xpath=..');
-      const dropdownMenu = parent.locator('div.dropdown-menu.show').first();
-
-      await dropdownMenu.waitFor({ state: 'visible' });
-
-      if (textToSelect) {
-        const searchBox = dropdownMenu.locator('.bs-searchbox input');
-
-        if (await searchBox.isVisible()) {
-          await searchBox.fill(textToSelect);
-          await this.page.waitForTimeout(500);
-
-          const noResults = await dropdownMenu.locator('.no-results').isVisible();
-          if (noResults) {
-            logger.warn(`Search for "${textToSelect}" yielded no results in ${fieldName}. Trying direct click...`);
-            await searchBox.clear();
-            await this.page.waitForTimeout(300);
-            const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
-            if (await option.isVisible()) {
-              await option.evaluate((node: HTMLElement) => node.click());
-            } else {
-              throw new Error(`Option "${textToSelect}" not found in ${fieldName}`);
-            }
-          } else {
-            await this.page.keyboard.press('Enter');
-          }
-        } else {
-          const option = dropdownMenu.locator('li a').filter({ hasText: textToSelect }).first();
-          await option.evaluate((node: HTMLElement) => node.click());
-        }
-      } else {
-        const firstOption = dropdownMenu.locator('li:not(.hidden):not(.disabled) a').first();
-        await firstOption.evaluate((node: HTMLElement) => node.click());
+      // Small buffer to let spinner appear
+      await this.page.waitForTimeout(500);
+      if (await spinner.isVisible()) {
+        logger.debug('Waiting for loading modal to disappear...');
+        await spinner.waitFor({ state: 'hidden', timeout });
+        logger.debug('Loading modal disappeared');
+        await this.page.waitForTimeout(500); // Settle time
       }
-
-      if (await dropdownMenu.isVisible()) {
-        await this.page.keyboard.press('Escape');
-      }
-
-      await this.page.waitForTimeout(300);
-
-    } catch (error) {
-      logger.error(`Failed to select ${fieldName}`, error);
-      throw error;
+    } catch (e) {
+      logger.warn('Timeout waiting for loading modal - continuing anyway');
     }
   }
 
-  // --- IMPLEMENTACIÓN DE SELECTS ---
+  /**
+   * Private helper to handle persistent modal backdrops that prevent interaction.
+   */
+  private async handleModalBackdrop(): Promise<void> {
+    const backdrop = this.page.locator('.modal-backdrop');
+    if (await backdrop.isVisible().catch(() => false)) {
+      logger.info('🛡️ Modal backdrop detected, waiting for it to disappear...');
+      await backdrop.waitFor({ state: 'hidden', timeout: 5000 }).catch(async () => {
+        logger.warn('⚠️ Backdrop still visible after timeout, attempting to force removal via JS...');
+        await this.page.evaluate(() => {
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          document.body.classList.remove('modal-open');
+        });
+      });
+      await this.page.waitForTimeout(500); // Settle time
+    }
+  }
+
+  /**
+   * Private helper for Bootstrap Select dropdowns (Hybrid Pattern)
+   */
+  private async selectBootstrapDropdown(btnSelector: string, optionText: string, fieldName: string = 'Dropdown'): Promise<void> {
+    logger.info(`Selecting ${fieldName}: [${optionText}]`);
+    
+    try {
+      await this.waitForLoading();
+      
+      const button = this.page.locator(btnSelector);
+      await button.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => { });
+      await button.waitFor({ state: 'visible', timeout: 2000 }).catch(() => { });
+
+      // Ensure no backdrop is blocking the dropdown click
+      await this.handleModalBackdrop();
+
+      // 1. Open dropdown via evaluate to be extremely robust
+      await this.page.evaluate((sel) => {
+        const btn = document.querySelector(sel) as HTMLElement;
+        if (btn) btn.click();
+      }, btnSelector);
+
+      // 2. Locate the container
+      const container = this.page.locator('div.bootstrap-select').filter({ has: button });
+      const searchInput = container.locator('div.bs-searchbox input');
+
+      // 3. Search and select
+      if (await searchInput.isVisible({ timeout: 1500 }).catch(() => false)) {
+        logger.debug(`Searching for "${optionText}" in ${fieldName}`);
+        await searchInput.clear();
+        await searchInput.fill(optionText);
+        await this.page.waitForTimeout(1000); // Wait for filter
+      }
+
+      // Use a more relaxed search for the option
+      const option = container.locator('ul.dropdown-menu li a').filter({ hasText: optionText }).first();
+      await option.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => { });
+      await option.evaluate((node: HTMLElement) => node.click());
+
+      // 4. Verification & Force Sync
+      await this.page.waitForTimeout(800);
+      const selectedText = await button.innerText();
+      if (!selectedText.toLowerCase().includes(optionText.toLowerCase())) {
+        logger.warn(`⚠️ Dropdown UI [${fieldName}] didn't update to [${optionText}]. Current: [${selectedText}]. Forcing value via JS...`);
+      }
+
+      // ALWAYS force sync the underlying <select> to prevent validation errors 
+      // even if the Bootstrap UI button updated correctly.
+      await this.page.evaluate(({ btnSel, text }) => {
+        const btn = document.querySelector(btnSel) as HTMLElement;
+        const container = btn.closest('.bootstrap-select');
+        const select = container?.querySelector('select') as HTMLSelectElement;
+        const options = Array.from(select?.options || []);
+        // Strict match fallback to includes
+        let target = options.find(o => o.text.trim() === text);
+        if (!target) {
+            target = options.find(o => o.text.trim().toLowerCase().includes(text.toLowerCase()));
+        }
+
+        if (select && target) {
+          select.value = target.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          // Try to trigger bootstrap-select refresh if possible (for internal state)
+          try { (window as any).$(select).selectpicker('val', target.value); } catch (e) { }
+          try { (window as any).$(select).selectpicker('refresh'); } catch (e) { }
+        }
+      }, { btnSel: btnSelector, text: optionText });
+
+      await this.page.waitForTimeout(1000); // Stabilization
+    } catch (error) {
+      logger.error(`Dropdown failure [${fieldName}]:`, error);
+      await this.takeScreenshot(`fail-${fieldName}`);
+      throw error;
+    }
+  }
 
   async selectTipoOperacion(tipo: string = 'tclp2210'): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnTipoOperacion, tipo, 'Tipo Operacion');
@@ -133,35 +200,26 @@ export class PlanificarPage extends BasePage {
 
   async selectUnidadNegocio(unidad: string = 'Defecto'): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnUnidadNegocio, unidad, 'Unidad Negocio');
-    await this.page.waitForLoadState('networkidle');
   }
 
   async selectCliente(cliente: string): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnCliente, cliente, 'Cliente');
-    logger.info('Waiting for cascading updates...');
-    await this.page.waitForLoadState('networkidle');
   }
 
-  async selectCodigoCarga(carga?: string): Promise<void> {
+  async selectCodigoCarga(carga: string): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnCodigoCarga, carga, 'Codigo Carga');
     await this.page.keyboard.press('Tab');
-    logger.info('Waiting for route calculation...');
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(2000);
   }
-
-  // --- MÉTODOS DE RUTA ---
 
   async agregarRuta(numeroRuta: string): Promise<void> {
     if (isDemoMode()) {
-      logger.info('Skipping "agregarRuta" in DEMO mode as it is not supported in this environment.');
+      logger.info('Skipping "agregarRuta" in DEMO mode');
       return;
     }
 
     logger.info(`Adding ruta: ${numeroRuta}`);
-    if (!(await this.isVisible(this.selectors.btnAgregarRuta))) return;
+    await this.handleModalBackdrop();
     const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
-
     try {
       await expect(btnAgregar).toBeEnabled({ timeout: 15000 });
       await btnAgregar.click();
@@ -181,15 +239,13 @@ export class PlanificarPage extends BasePage {
         }
       }
 
-      if (!found) throw new Error(`Ruta ${numeroRuta} not found in table`);
+      if (!found) throw new Error(`Ruta ${numeroRuta} not found`);
       await this.page.waitForTimeout(1000);
     } catch (e) {
       logger.error('Failed in agregarRuta', e);
       throw e;
     }
   }
-
-  // --- ORIGEN Y DESTINO ---
 
   async selectOrigen(origen: string): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnOrigen, origen, 'Origen');
@@ -200,24 +256,14 @@ export class PlanificarPage extends BasePage {
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info('Clicking Guardar button...');
+    logger.info('Clicking Guardar...');
     await this.click(this.selectors.btnGuardar);
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(1000);
   }
 
   async isFormSaved(): Promise<boolean> {
     const successToast = this.page.locator('text="Viaje Creado con éxito"').first();
-    if (await successToast.isVisible()) {
-      return true;
-    }
-    const nroViajeVal = await this.page.locator(this.selectors.nroViaje).inputValue();
-    if (nroViajeVal === '') {
-      return true;
-    }
-    if (!this.page.url().includes('/crear')) {
-      return true;
-    }
-    return false;
+    const currentUrl = this.page.url();
+    return (await successToast.isVisible()) || !currentUrl.includes('/crear');
   }
 }

@@ -220,11 +220,21 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
                 logger.warn('⚠️ networkidle timeout post-redirect, continuing...');
             });
 
-            // Search for the trip to confirm it's visible
-            const searchInput = page.locator('input[type="search"]').first();
-            await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+            // Wait for the table to render
+            await page.locator('#tabla_asignar_wrapper, #tabla_asignar').first()
+                .waitFor({ state: 'visible', timeout: 15000 }).catch(() => {
+                    logger.warn('⚠️ DataTable wrapper not found, continuing anyway...');
+                });
+            await page.waitForTimeout(1000);
+
+            // The /viajes/asignar page uses a CUSTOM search input with id="search" (type="text"),
+            // not a standard DataTables input[type="search"]
+            const searchInput = page.locator('#search').first();
+            await searchInput.waitFor({ state: 'visible', timeout: 15000 });
             await searchInput.fill(nroViaje);
-            await page.waitForTimeout(1500);
+            // Click the dedicated search button
+            await page.locator('a#buscar').click();
+            await page.waitForTimeout(2000);
 
             const viajeRow = page.locator('#tabla_asignar tbody tr')
                 .filter({ hasText: nroViaje }).first();

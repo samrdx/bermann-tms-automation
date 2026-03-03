@@ -103,7 +103,7 @@ test.describe('Viajes - Planificar (Create)', () => {
       // 3. Tipo Servicio
       await viajesPlanificarPage.selectTipoServicio('tclp2210');
 
-      // 4. Cliente - Critical Cascade Trigger
+      // 4. Cliente - from seededCliente JSON
       logger.info(`Selecting Cliente: ${clienteNombre}`);
       await viajesPlanificarPage.selectCliente(clienteNombre);
 
@@ -111,8 +111,7 @@ test.describe('Viajes - Planificar (Create)', () => {
       await viajesPlanificarPage.selectTipoViaje('Normal');
       await viajesPlanificarPage.selectUnidadNegocio('Defecto');
 
-      // 6. Código Carga - The "Magical" Trigger
-      // We look for '715' or the cargo name 'Pallet_Furgon_Frio_10ton'
+      // 6. Código Carga
       logger.info('Selecting Codigo Carga (Pallet_Furgon_Frio_10ton)...');
       await viajesPlanificarPage.selectCodigoCarga('Pallet_Furgon_Frio_10ton');
 

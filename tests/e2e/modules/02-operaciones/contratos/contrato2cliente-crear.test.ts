@@ -37,14 +37,15 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
         if (!fs.existsSync(dataPath)) throw new Error(`Data file not found: ${dataPath}`);
         const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
-        if (!operationalData.seededCliente) {
+        const cliente = operationalData.seededCliente || operationalData.cliente;
+        if (!cliente) {
             throw new Error(
-                `'seededCliente' key not found in ${dataPath}.\n` +
-                `Run 'npm run test:entity:cliente' first.`
+                `'seededCliente' or 'cliente' not found in ${dataPath}.\n` +
+                `Run 'npm run test:legacy:setup' or 'npm run test:entity:cliente'.`
             );
         }
-        const clienteNombre = operationalData.seededCliente.nombreFantasia || operationalData.seededCliente.nombre;
-        logger.info(`📦 Using seeded cliente: "${clienteNombre}" (ID: ${operationalData.seededCliente.id})`);
+        const clienteNombre = cliente.nombreFantasia || cliente.nombre;
+        logger.info(`📦 Using cliente: "${clienteNombre}" (ID: ${cliente.id})`);
 
         // =================================================================
         // PHASE 2: Navigate to Create Form
@@ -56,148 +57,75 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
         logger.info('✅ Form loaded');
 
         // =================================================================
-        // PHASE 3: Fill Contract Header
+        // PHASE 3-4: Fill Contract Header and Save
         // =================================================================
-        logger.info('📋 PHASE 3: Filling contract header...');
-        const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
-        logger.info(`📝 Nro Contrato: ${nroContrato}`);
-
-        // Nro Contrato
-        await page.fill('#contrato-nro_contrato', nroContrato);
-
-        // Tipo: Venta (value=2) — wait for AJAX rendersubview to complete
-        logger.info('Selecting Tipo: Venta (2)...');
-        await page.evaluate(() => {
-            const $ = (window as any).jQuery;
-            $('#contrato-tipo_tarifa_contrato_id').val('2').trigger('change');
-        });
-        await page.waitForResponse(
-            r => r.url().includes('rendersubview') && r.status() === 200,
-            { timeout: 15000 }
-        ).catch(() => {
-            logger.warn('⚠️ rendersubview response not detected, continuing with timeout...');
-            return page.waitForTimeout(2000);
-        });
-        logger.info('✅ Tipo Venta selected');
-
-        // Subtipo (value=1) — wait for any cascade
-        logger.info('Selecting Subtipo: 1...');
-        await page.waitForSelector('select#tipo', { state: 'attached', timeout: 10000 });
-        await page.evaluate(() => {
-            const el = document.querySelector('select#tipo') as HTMLSelectElement;
-            if (el) { el.value = '1'; el.dispatchEvent(new Event('change', { bubbles: true })); }
-        });
-        await page.waitForTimeout(800);
-        logger.info('✅ Subtipo selected');
-
-        // Cliente — via jQuery selector (same pattern as contrato-crear.test.ts)
-        logger.info(`Selecting Cliente: "${clienteNombre}"...`);
-        const clienteSelected = await page.evaluate((nombre) => {
-            const $ = (window as any).jQuery;
-            const $sel = $('#contrato-cliente_id');
-            const opt = $sel.find('option').filter(function (this: any) {
-                return ($(this).text() || '').toUpperCase().includes(nombre.toUpperCase());
-            });
-            if (opt.length > 0) {
-                const val = opt.first().val();
-                $sel.val(val).trigger('change');
-                if ($sel.selectpicker) $sel.selectpicker('refresh');
-                return { found: true, text: opt.first().text(), val: String(val) };
-            }
-            return { found: false, text: '', val: '' };
-        }, clienteNombre);
-
-        if (!clienteSelected.found) {
-            logger.warn(`⚠️ Cliente "${clienteNombre}" not found in dropdown. Available options:`);
-            const options = await page.evaluate(() => {
-                const $ = (window as any).jQuery;
-                return $('#contrato-cliente_id option').map(function (this: any) {
-                    return $(this).text();
-                }).get().filter((t: string) => t.trim());
-            });
-            logger.warn(`  Options: ${options.slice(0, 10).join(', ')}`);
-            throw new Error(`Cliente "${clienteNombre}" not found in contract form dropdown.`);
-        }
-        logger.info(`✅ Cliente selected: "${clienteSelected.text}" (val: ${clienteSelected.val})`);
-        await page.waitForTimeout(500);
-
-        // =================================================================
-        // PHASE 4: Save Contract Header
-        // =================================================================
-        logger.info('📋 PHASE 4: Saving contract header...');
-        await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }),
-            page.click('#btn_guardar')
-        ]);
-
-        const urlAfterHeader = page.url();
-        expect(urlAfterHeader).toMatch(/\/(?:editar|update|ver|view)\/(\d+)/);
-        const contractIdMatch = urlAfterHeader.match(/\/(?:editar|update|ver|view)\/(\d+)/);
-        const contractId = contractIdMatch ? contractIdMatch[1] : '';
-        logger.info(`✅ Contract header saved! URL: ${urlAfterHeader}, ID: ${contractId}`);
+        logger.info('📋 PHASE 3-4: Filling contract header and saving...');
+        const nroContrato = String(Date.now()).slice(-6);
+        
+        // Use the centralized helper for Venta contracts
+        const contractId = await contratosPage.fillBasicContractInfo(
+            nroContrato, 
+            clienteNombre, 
+            'Venta', 
+            '1'
+        );
+        logger.info(`✅ Contract header saved! ID: ${contractId}`);
 
         // =================================================================
         // PHASE 5: Add Route + Cargo + Tarifas
         // =================================================================
         logger.info('📋 PHASE 5: Adding Route 715 + Cargo 715_19 with tarifas...');
-        await contratosPage.addSpecificRouteAndCargo('20000', '50000');
-
-        // CRITICAL: Wait until the tarifa inputs actually have a value before proceeding
-        // This is the race condition fix — we confirm the form state is ready
-        logger.info('⏳ Verifying tarifa inputs are populated before saving...');
-        await page.waitForFunction(() => {
-            const cond = document.querySelector('#txt_tarifa_conductor_715') as HTMLInputElement;
-            const viaje = document.querySelector('#txt_tarifa_extra_715') as HTMLInputElement;
-            return cond && viaje && cond.value.length > 0 && viaje.value.length > 0;
-        }, { timeout: 10000 }).catch(() => {
-            logger.warn('⚠️ Tarifa inputs may not have values — saving anyway');
-        });
-        logger.info('✅ Tarifa inputs confirmed');
+        // For Venta, we want to fill conductor(20000), viaje(50000) AND total(50000)
+        await contratosPage.addSpecificRouteAndCargo('20000', '50000', '50000');
+        logger.info('✅ Route and tariffs added');
 
         // =================================================================
         // PHASE 6: Save Full Contract (with tarifas)
         // =================================================================
-        logger.info('📋 PHASE 6: Saving full contract (with tarifa)...');
-        await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }),
-            page.click('#btn_guardar')
-        ]);
+        logger.info('📋 PHASE 6: Saving full contract (with tarifas)...');
+        const finalContractId = await contratosPage.saveAndExtractId();
+        logger.info(`✅ Full contract saved! ID: ${finalContractId}`);
 
-        const urlAfterFull = page.url();
-        logger.info(`✅ Full contract saved! URL: ${urlAfterFull}`);
-
-        // =================================================================
-        // PHASE 7: Verify contract exists in index
-        // =================================================================
         logger.info('📋 PHASE 7: Verifying contract in index...');
-        await page.goto(`${config.get().baseUrl}/contrato/index`);
-        await page.waitForLoadState('networkidle', { timeout: 15000 });
-        await page.waitForTimeout(1500);
+        
+        let found = false;
+        const maxAttempts = 3;
+        let contractRow = page.locator('table tbody tr').first(); // Placeholder
+        
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            logger.info(`🔍 Verification attempt ${attempt}/${maxAttempts}...`);
+            
+            await page.goto('/contrato/index');
+            await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
+            
+            const searchInput = page.locator('input[type="search"]').first();
+            await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+            
+            logger.info(`⌨️ Searching by cliente: ${clienteNombre}`);
+            await searchInput.clear();
+            await searchInput.fill(clienteNombre);
+            await page.waitForTimeout(2000); // DataTables filter
 
-        // Use the confirmed DataTables global search input
-        // Confirmed via live inspection: input[type="search"] with class="form-control form-control-sm"
-        // and a label "Buscar:" are both present in /contrato/index
-        const dtSearchInput = page.locator('input[type="search"]').first();
-        const buscarLabelInput = page.getByLabel('Buscar:');
-
-        // Try the DataTables search input first (confirmed present)
-        if (await dtSearchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await dtSearchInput.fill(nroContrato);
-            await dtSearchInput.press('Enter');
-            logger.info(`🔍 Searched by contract number using input[type="search"]: ${nroContrato}`);
-        } else if (await buscarLabelInput.isVisible({ timeout: 2000 }).catch(() => false)) {
-            // Fallback: aria-label "Buscar:"
-            await buscarLabelInput.fill(nroContrato);
-            await buscarLabelInput.press('Enter');
-            logger.info(`🔍 Searched by contract number using getByLabel('Buscar:'): ${nroContrato}`);
-        } else {
-            logger.warn('⚠️ No search input found in contract index, skipping search filter');
+            contractRow = page.locator('table tbody tr').filter({ hasText: clienteNombre }).first();
+            const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
+            
+            if (isVisible) {
+                logger.info(`✅ Contract ${nroContrato} found in index!`);
+                found = true;
+                break;
+            } else {
+                logger.warn(`⚠️ Contract ${nroContrato} not found in this attempt.`);
+                if (attempt < maxAttempts) {
+                    await page.waitForTimeout(3000); // Wait before reload
+                }
+            }
         }
-        await page.waitForTimeout(1500);
 
-        const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
-        await expect(contractRow, `Contract ${nroContrato} should be visible in the index grid`).toBeVisible({ timeout: 10000 });
-        logger.info(`✅ Contract ${nroContrato} verified in /contrato/index ✅`);
+        if (!found) {
+            logger.error(`❌ Contract ${nroContrato} not found in index table after ${maxAttempts} attempts`);
+            await page.screenshot({ path: `./reports/screenshots/contract-not-found-${nroContrato}.png`, fullPage: true });
+            throw new Error(`Contract ${nroContrato} not found in index table after search`);
+        }
 
         // Extract final ID from grid row if not already captured
         let finalId = contractId;

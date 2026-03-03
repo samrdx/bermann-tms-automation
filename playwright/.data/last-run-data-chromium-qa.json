@@ -1,60 +1,73 @@
 {
-  "createdAt": "2026-03-02T19:39:33.771Z",
+  "createdAt": "2026-03-03T18:18:38.897Z",
   "workerIndex": 1,
   "projectName": "base-entities-chromium",
   "transportista": {
-    "id": "1511",
-    "nombre": "Rutas del Maule 480373",
-    "rut": "28437294-8",
-    "razonSocial": "Rutas del Maule 480373",
-    "baseNombre": "Rutas del Maule"
+    "id": "1570",
+    "nombre": "Fletes El Roble 561918",
+    "rut": "19414728-7",
+    "razonSocial": "Fletes El Roble 561918",
+    "baseNombre": "Fletes El Roble"
+  },
+  "seededTransportista": {
+    "id": "1579",
+    "nombre": "EcoTrans 9839",
+    "baseNombre": "EcoTrans",
+    "documento": "26911327-8",
+    "razonSocial": "EcoTrans 9839 SpA"
   },
   "cliente": {
     "id": "871",
-    "nombre": "Logistica 1949",
-    "nombreFantasia": "Logistica 1949 SpA",
-    "rut": "97580073-3",
+    "nombre": "Logistica 9632",
+    "nombreFantasia": "Logistica 9632 SpA",
+    "rut": "50260095-8",
     "email": "logistica@test.cl"
   },
   "seededCliente": {
-    "id": "879",
-    "nombre": "Global 1891",
-    "nombreFantasia": "Global 1891 SpA",
-    "rut": "93976402-K",
+    "id": "914",
+    "nombre": "Logistica 8903",
+    "nombreFantasia": "Logistica 8903 SpA",
+    "rut": "38667849-9",
     "email": ""
   },
   "vehiculo": {
-    "patente": "FI-7039",
-    "muestra": "VEH-1772480408733",
-    "transportistaNombre": "Rutas del Maule 480373",
+    "patente": "JR-5390",
+    "muestra": "VEH-1772561972709",
+    "transportistaNombre": "Fletes El Roble 561918",
     "capacity": "3 KG"
   },
   "conductor": {
-    "nombre": "Sofía",
-    "apellido": "Silva",
-    "rut": "86.531.486-8",
-    "email": "sofiasilva@hotmail.com",
-    "telefono": "+56914908307",
-    "transportistaNombre": "Rutas del Maule 480373"
+    "nombre": "María",
+    "apellido": "López",
+    "rut": "28.480.424-4",
+    "email": "marialopez@hotmail.com",
+    "telefono": "+56926408845",
+    "transportistaNombre": "Fletes El Roble 561918"
   },
-  "executionTimeSeconds": 56.21,
-  "seededTransportista": {
-    "id": "1516",
-    "nombre": "EcoTrans 6604",
-    "baseNombre": "EcoTrans",
-    "documento": "70566212-6",
-    "razonSocial": "EcoTrans 6604 SpA"
-  },
-  "seededVehiculo": {
-    "patente": "LSUI-99",
-    "muestra": "LSUI-99",
-    "transportistaNombre": "EcoTrans 6604"
+  "executionTimeSeconds": 80.62,
+  "contratoCliente": {
+    "id": "2004",
+    "nroContrato": "389835"
   },
   "seededConductor": {
-    "nombre": "Carmen",
-    "apellido": "Rojas",
-    "rut": "84.902.932-0",
-    "email": "rosarodriguez@gmail.com",
-    "transportistaNombre": "EcoTrans 6604"
+    "nombre": "Luis",
+    "apellido": "Silva",
+    "rut": "29.599.064-3",
+    "email": "mariaaraya@hotmail.com",
+    "transportistaNombre": "EcoTrans 9839"
+  },
+  "seededVehiculo": {
+    "patente": "LJON-46",
+    "muestra": "LJON-46",
+    "transportistaNombre": "EcoTrans 9839"
+  },
+  "viaje": {
+    "nroViaje": "78387",
+    "cliente": "Comercial 1160 SpA",
+    "ruta": "05082025-1",
+    "status": "FINALIZADO",
+    "transportista": "Titanium 9860",
+    "vehiculo": "QUOJ-64",
+    "conductor": "José Martínez"
   }
 }

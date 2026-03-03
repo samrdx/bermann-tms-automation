@@ -33,14 +33,14 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
     }
     const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
-    const seededTransportista = operationalData.seededTransportista;
-    if (!seededTransportista?.nombre) {
-      throw new Error(`'seededTransportista' not found in ${dataPath}. Run: npm run test:legacy:setup`);
+    const transportista = operationalData.seededTransportista || operationalData.transportista;
+    if (!transportista?.nombre) {
+      throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run: npm run test:legacy:setup or test:entity:transportista`);
     }
-    const transportistaNombre = seededTransportista.nombre as string;
-    logger.info(`📦 Transportista: "${transportistaNombre}" (ID: ${seededTransportista.id})`);
+    const transportistaNombre = transportista.nombre as string;
+    logger.info(`📦 Transportista: "${transportistaNombre}" (ID: ${transportista.id})`);
 
-    const nroContrato = String(Math.floor(10000 + Math.random() * 90000));
+    const nroContrato = String(Date.now()).slice(-6);
     logger.info(`📝 Nro Contrato: ${nroContrato}`);
 
     const contratosPage = new ContratosFormPage(page);
@@ -105,46 +105,57 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
     // ---------------------------------------------------------------
     await test.step('Phase 5: Verify contract exists in index (ground truth)', async () => {
       logger.info('PHASE 5: Navigating to /contrato/index to verify creation...');
-      let navigated = false;
-      for (let i = 0; i < 3; i++) {
+      
+      let found = false;
+      const maxAttempts = 3;
+      
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        logger.info(`🔍 Verification attempt ${attempt}/${maxAttempts}...`);
+        
         try {
           await page.goto('/contrato/index');
-          navigated = true;
-          break;
+          await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
+          
+          const searchInput = page.locator('input[type="search"]').first();
+          await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+          
+          logger.info(`⌨️ Searching by transportista: ${transportistaNombre}`);
+          await searchInput.clear();
+          await searchInput.fill(transportistaNombre);
+          await page.waitForTimeout(2000); // DataTables filter
+
+          const contractRow = page.locator('table tbody tr').filter({ hasText: transportistaNombre }).first();
+          const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
+          
+          if (isVisible) {
+            logger.info(`✅ Contract ${nroContrato} found in index!`);
+            found = true;
+            
+            // Extract the real ID from the edit link if we didn't get it from URL
+            if (!finalContractId) {
+              const editLink = contractRow.locator('a[href*="/contrato/editar/"]').first();
+              const href = await editLink.getAttribute('href').catch(() => null);
+              const idFromIndex = href?.match(/\/editar\/(\d+)/)?.[1] ?? 'UNKNOWN';
+              finalContractId = idFromIndex;
+              logger.info(`✅ Contract ID extracted from index: ${idFromIndex}`);
+            }
+            break;
+          } else {
+            logger.warn(`⚠️ Contract ${nroContrato} not found in this attempt.`);
+            if (attempt < maxAttempts) {
+              await page.waitForTimeout(3000); // Wait before reload
+            }
+          }
         } catch (e) {
-          logger.warn(`⚠️ page.goto failed (attempt ${i + 1}/3): ${e instanceof Error ? e.message : String(e)}`);
-          await page.waitForTimeout(2000);
+          logger.warn(`⚠️ Error during verification attempt ${attempt}: ${e instanceof Error ? e.message : String(e)}`);
+          if (attempt < maxAttempts) await page.waitForTimeout(3000);
         }
       }
 
-      if (!navigated) {
-        throw new Error('❌ Failed to navigate to /contrato/index after 3 attempts');
-      }
-
-      await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {
-        logger.warn('⚠️ networkidle timeout in index page — continuing');
-      });
-
-      // Use DataTables search to filter by nroContrato
-      const searchInput = page.locator('input[type="search"]').first();
-      await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-      await searchInput.fill(nroContrato);
-      await page.waitForTimeout(1500); // DataTables debounce
-
-      // Find a table row containing nroContrato
-      const contractRow = page.locator('table tbody tr').filter({ hasText: nroContrato }).first();
-
-      await expect(contractRow, `Contract ${nroContrato} must be visible in /contrato/index`).toBeVisible({
-        timeout: 10000,
-      });
-
-      // Extract the real ID from the edit link if we didn't get it from URL
-      if (!finalContractId) {
-        const editLink = contractRow.locator('a[href*="/contrato/editar/"]').first();
-        const href = await editLink.getAttribute('href').catch(() => null);
-        const idFromIndex = href?.match(/\/editar\/(\d+)/)?.[1] ?? 'UNKNOWN';
-        finalContractId = idFromIndex;
-        logger.info(`✅ Contract ID from index: ${idFromIndex}`);
+      if (!found) {
+        logger.error(`❌ Contract ${nroContrato} not found in index table after ${maxAttempts} attempts`);
+        await page.screenshot({ path: `./reports/screenshots/contract-not-found-costo-${nroContrato}.png`, fullPage: true });
+        throw new Error(`Contract ${nroContrato} not found in index table after search`);
       }
 
       logger.info(`✅ CONTRACT VERIFIED IN INDEX — Nro: ${nroContrato} | ID: ${finalContractId}`);

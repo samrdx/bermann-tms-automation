@@ -153,7 +153,7 @@ export default defineConfig({
           args: ['--disable-dev-shm-usage', '--no-sandbox']
         }
       },
-      dependencies: ['setup', 'seed-transportista-chromium'],
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
@@ -166,7 +166,7 @@ export default defineConfig({
         storageState: 'playwright/.auth/user.json',
         // IMPORTANTE: Sin launchOptions.args que rompan Firefox
       },
-      dependencies: ['setup', 'seed-transportista-firefox'],
+      dependencies: ['setup'],
     },
 
     /* 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY

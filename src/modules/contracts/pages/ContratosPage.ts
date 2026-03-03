@@ -23,12 +23,14 @@ interface RouteConfig {
 export class ContratosFormPage extends BasePage {
   private readonly selectors = {
     nroContrato: '#contrato-nro_contrato',
-    tipoContratoButton: 'button[data-id="contrato-tipo_tarifa_contrato_id"]',
+    tipoContratoButton: 'button[data-id="contrato-tipo_tarifa_contrato_id"]', // for bootstrap select helper
+    subtipoDropdown: 'select#tipo', // for selecting subtype value
     transportistaButton: 'button[data-id="contrato-transportista_id"]',
+    clienteDropdown: '#contrato-cliente_id', // for direct jQuery selection
     fechaVencimiento: '#contrato-fecha_vencimiento',
     unidadNegocioButton: 'button[data-id="drop_business_unit"]',
-    btnGuardar: '#btn_guardar',
-    btnGuardarContrato: '#btn_guardar_contrato',
+    btnGuardar: '#formContrato #btn_guardar, #form-dinamico #btn_guardar',
+    btnGuardarContrato: '#formContrato #btn_guardar_contrato, #form-dinamico #btn_guardar_contrato',
     btnAddRuta: 'button:has-text("Añadir Ruta")',
     modalRutas: '#modal_rutas',
     errorMessages: '.text-danger, .help-block, .alert-danger, .toast-message',
@@ -46,20 +48,96 @@ export class ContratosFormPage extends BasePage {
     // Use relative path — Playwright's baseURL (set in playwright.config.ts) handles ENV=QA/DEMO
     logger.info('Navigating to contract creation page: /contrato/crear');
     await this.page.goto('/contrato/crear');
-    await this.page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {
-      logger.warn('⚠️ navigateToCreate: networkidle timeout — continuing anyway');
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {
+      logger.warn('⚠️ navigateToCreate: domcontentloaded timeout — continuing anyway');
     });
+    await this.page.waitForSelector(this.selectors.nroContrato, { state: 'visible', timeout: 10000 });
+    logger.info('✅ Contract creation page loaded and Nro Contrato input visible');
   }
 
   // ---------------------------------------------------------------------------
-  // PHASE 1: Fill basic contract info, save, extract ID
+  // TYPE AND SUBTYPE SELECTION
+  // ---------------------------------------------------------------------------
+
+  async selectTipoContrato(tipo: 'Costo' | 'Venta'): Promise<void> {
+    logger.info(`🔽 Selecting Tipo Contrato = ${tipo}...`);
+    // The dropdown itself is #contrato-tipo_tarifa_contrato_id, but the visible element is a button.
+    await this.selectBootstrapDropdown(this.selectors.tipoContratoButton, tipo);
+    await this.page.waitForTimeout(2500); // Wait for cascade (Transportista/Cliente dropdowns)
+
+    // If 'Venta' is selected, wait for rendersubview AJAX call to complete
+    if (tipo === 'Venta') {
+      logger.info('⏳ Waiting for rendersubview (AJAX)...');
+      await this.page.waitForResponse(
+        r => r.url().includes('rendersubview') && r.status() === 200,
+        { timeout: 15000 }
+      ).catch(() => {
+        logger.warn('⚠️ rendersubview response not detected for Tipo Venta, continuing with extra timeout...');
+        return this.page.waitForTimeout(3000);
+      });
+      await this.page.waitForTimeout(1000); // Stability buffer
+    }
+    logger.info(`✅ Tipo ${tipo} selected`);
+  }
+
+  async selectSubtipo(subtipoValue: string): Promise<void> {
+    logger.info(`Selecting Subtipo: ${subtipoValue}...`);
+    await this.page.waitForSelector(this.selectors.subtipoDropdown, { state: 'attached', timeout: 10000 });
+    await this.page.evaluate((value) => {
+      const el = document.querySelector('select#tipo') as HTMLSelectElement; // select#tipo is the actual ID
+      if (el) { el.value = value; el.dispatchEvent(new Event('change', { bubbles: true })); }
+    }, subtipoValue);
+    await this.page.waitForTimeout(800); // Give time for any cascade
+    logger.info(`✅ Subtipo ${subtipoValue} selected`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // CLIENTE SELECTION
+  // ---------------------------------------------------------------------------
+
+  async selectCliente(clienteNombre: string): Promise<void> {
+    logger.info(`Selecting Cliente: "${clienteNombre}"...`);
+    const clienteSelected = await this.page.evaluate(({ nombre, selectorId }) => {
+      const $ = (window as any).jQuery;
+      const $sel = $(selectorId);
+      const opt = $sel.find('option').filter(function (this: any) {
+        return ($(this).text() || '').toUpperCase().includes(nombre.toUpperCase());
+      });
+      if (opt.length > 0) {
+        const val = opt.first().val();
+        $sel.val(val).trigger('change');
+        if ($sel.selectpicker) $sel.selectpicker('refresh');
+        return { found: true, text: opt.first().text(), val: String(val) };
+      }
+      return { found: false, text: '', val: '' };
+    }, { nombre: clienteNombre, selectorId: this.selectors.clienteDropdown });
+
+    if (!clienteSelected.found) {
+      logger.warn(`⚠️ Cliente "${clienteNombre}" not found in dropdown. Available options:`);
+      const options = await this.page.evaluate((selectorId) => {
+        const $ = (window as any).jQuery;
+        return $(selectorId + ' option').map(function (this: any) {
+          return $(this).text();
+        }).get().filter((t: string) => t.trim());
+      }, this.selectors.clienteDropdown);
+      logger.warn(`  Options: ${options.slice(0, 10).join(', ')}`);
+      throw new Error(`Cliente "${clienteNombre}" not found in contract form dropdown.`);
+    }
+    logger.info(`✅ Cliente selected: "${clienteSelected.text}" (val: ${clienteSelected.val})`);
+    await this.page.waitForTimeout(500);
+  }
+
+  // ---------------------------------------------------------------------------
+  // BASIC CONTRACT INFO (Phase 1)
   // ---------------------------------------------------------------------------
 
   async fillBasicContractInfo(
     nroContrato: string,
-    transportistaNombre: string
+    entityNombre: string, // transportista for Costo, cliente for Venta
+    tipo: 'Costo' | 'Venta' = 'Costo',
+    subtipoValue: string = '1'
   ): Promise<string> {
-    logger.info('📝 Filling basic contract information (Phase 1)');
+    logger.info(`📝 Filling basic contract information (Phase 1) - Tipo: ${tipo}`);
 
     try {
       if (!this.page.url().includes('/contrato/crear')) {
@@ -71,22 +149,30 @@ export class ContratosFormPage extends BasePage {
       await this.page.fill(this.selectors.nroContrato, nroContrato);
       await this.page.waitForTimeout(300);
 
-      // 2. Select Tipo Contrato = "Costo"
-      logger.info('🔽 Selecting Tipo Contrato = Costo...');
-      await this.selectBootstrapDropdown(this.selectors.tipoContratoButton, 'Costo');
-      await this.page.waitForTimeout(2500); // Wait for cascade (Transportista dropdown)
+      // 2. Select Tipo Contrato
+      await this.selectTipoContrato(tipo);
 
-      // 3. Select Transportista
-      logger.info(`🔽 Selecting transportista: "${transportistaNombre}"...`);
-      await this.selectTransportista(transportistaNombre);
+      // 3. Select Subtipo if Venta
+      if (tipo === 'Venta') {
+        await this.selectSubtipo(subtipoValue);
+      }
 
-      // 4. [DEMO ONLY] Set Fecha vencimiento via daypicker
+      // 4. Select Entity (Transportista or Cliente)
+      if (tipo === 'Costo') {
+        logger.info(`🔽 Selecting transportista: "${entityNombre}"...`);
+        await this.selectTransportista(entityNombre);
+      } else {
+        logger.info(`🔽 Selecting cliente: "${entityNombre}"...`);
+        await this.selectCliente(entityNombre);
+      }
+
+      // 5. [DEMO ONLY] Set Fecha vencimiento via daypicker
       if (isDemoMode()) {
         logger.info('📅 [DEMO] Selecting Fecha vencimiento: 31/12/2026');
         await this.selectFechaVencimiento();
       }
 
-      // 5. [DEMO ONLY] Select Unidad de negocio = "Defecto"
+      // 6. [DEMO ONLY] Select Unidad de negocio = "Defecto"
       if (isDemoMode()) {
         logger.info('🏢 [DEMO] Selecting Unidad de negocio: Defecto');
         await this.selectUnidadNegocio('Defecto');
@@ -98,22 +184,22 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(500);
 
       // 7. Save the contract header
-      logger.info('💾 Saving basic contract...');
-      await this.page.click('button.btn-success:has-text("Guardar"), #btn_guardar');
+      logger.info('💾 Saving basic contract header...');
+      await this.click(this.selectors.btnGuardar);
 
-      // Wait for navigation to edit page
-      await this.page.waitForURL(/\/contrato\/editar\/\d+/, { timeout: 15000 });
+      // Wait for navigation to edit/view page - broadened regex and increased timeout
+      await this.page.waitForURL(/\/contrato\/(?:editar|update|ver|view)\/\d+/, { timeout: 30000 });
 
       // Extract contract ID from URL
       const currentUrl = this.page.url();
-      const contractIdMatch = currentUrl.match(/\/contrato\/editar\/(\d+)/);
+      const contractIdMatch = currentUrl.match(/\/contrato\/(?:editar|update|ver|view)\/(\d+)/);
 
       if (!contractIdMatch) {
         throw new Error(`Failed to extract contract ID from URL: ${currentUrl}`);
       }
 
       const contractId = contractIdMatch[1];
-      logger.info(`✅ Contract created successfully with ID: ${contractId}`);
+      logger.info(`✅ Contract header created successfully with ID: ${contractId}`);
       logger.info(`📍 Redirected to: ${currentUrl}`);
 
       return contractId;
@@ -136,7 +222,8 @@ export class ContratosFormPage extends BasePage {
    */
   async addSpecificRouteAndCargo(
     tarifaConductor: string,
-    tarifaViaje: string
+    tarifaViaje: string,
+    tarifaTotal?: string
   ): Promise<void> {
     const rc = this.getRouteConfig();
     logger.info(`🛣️ Adding Route ${rc.routeId} (${isDemoMode() ? 'DEMO' : 'QA'} environment)`);
@@ -144,7 +231,7 @@ export class ContratosFormPage extends BasePage {
     try {
       // Step A: Click "Añadir Ruta" button
       logger.info('Clicking "Añadir Ruta" button');
-      await this.page.click(this.selectors.btnAddRuta);
+      await this.click(this.selectors.btnAddRuta);
       await this.page.waitForTimeout(1500);
 
       // Wait for route modal (QA uses #modal_rutas, Demo uses #modalRutas)
@@ -218,7 +305,11 @@ export class ContratosFormPage extends BasePage {
         if (rc.tarifaConductorSelector) {
           await this.fillTariffField(rc.tarifaConductorSelector, tarifaConductor);
         }
-        // Note: tarifaClienteSelector is readonly (auto-calculated), skip it
+
+        // Fill cliente tariff (Total) if available (usually for Venta contracts)
+        if (rc.tarifaClienteSelector && tarifaTotal) {
+          await this.fillTariffField(rc.tarifaClienteSelector, tarifaTotal);
+        }
       } catch (e) {
         logger.warn('⚠️ Some tariff fields may not be available, continuing...');
       }
@@ -252,10 +343,10 @@ export class ContratosFormPage extends BasePage {
 
       // Wait for navigation after save (Bermann TMS typically reloads the edit/view page)
       await Promise.all([
-        this.page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }).catch(() => {
+        this.page.waitForNavigation({ waitUntil: 'load', timeout: 30000 }).catch(() => {
           logger.warn('⚠️ No navigation detected after save — continuing anyway');
         }),
-        saveBtn.click()
+        this.click(`${this.selectors.btnGuardarContrato}, ${this.selectors.btnGuardar}`)
       ]);
 
       await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
@@ -264,7 +355,7 @@ export class ContratosFormPage extends BasePage {
       const url = this.page.url();
       logger.info(`Current URL after save: ${url}`);
 
-      const match = url.match(/\/contrato\/(?:ver|editar)\/(\d+)/);
+      const match = url.match(/\/contrato\/(?:ver|view|editar|update)\/(\d+)/);
 
       if (match && match[1]) {
         const contractId = match[1];
@@ -287,18 +378,44 @@ export class ContratosFormPage extends BasePage {
 
   /**
    * Clicks a Bootstrap Select dropdown button and selects an option by text.
+   * Uses the robust Hybrid Pattern to ensure reliability.
    */
   private async selectBootstrapDropdown(
     buttonSelector: string,
     optionText: string
   ): Promise<void> {
-    const btn = this.page.locator(buttonSelector);
-    if (await btn.isVisible()) {
-      await btn.click();
-      await this.page.waitForTimeout(400);
-      await this.page.click(
-        `.bootstrap-select.show .dropdown-menu .dropdown-item:has-text("${optionText}")`
-      );
+    const container = this.page.locator('div.bootstrap-select').filter({
+      has: this.page.locator(buttonSelector)
+    });
+
+    if (!(await container.isVisible().catch(() => false))) {
+      logger.warn(`⚠️ selectBootstrapDropdown: Button container ${buttonSelector} not found`);
+      return;
+    }
+
+    try {
+      // 1. Open dropdown
+      await container.locator('button.dropdown-toggle').evaluate(el => (el as HTMLElement).click());
+      await this.page.waitForTimeout(500);
+
+      // 2. Select option
+      const option = container.locator('.dropdown-menu .dropdown-item').filter({ hasText: optionText }).first();
+      await option.waitFor({ state: 'visible', timeout: 5000 });
+      await option.click();
+
+      // 3. Sync underlying select
+      await container.locator('select').evaluate((el, val) => {
+        const select = el as HTMLSelectElement;
+        const opt = Array.from(select.options).find(o => o.text.trim().includes(val));
+        if (opt) {
+          select.value = opt.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }, optionText);
+
+      await this.page.waitForTimeout(800);
+    } catch (error) {
+      logger.warn(`⚠️ Error in selectBootstrapDropdown for "${optionText}": ${error}`);
     }
   }
 
@@ -476,7 +593,7 @@ export class ContratosFormPage extends BasePage {
       cargoButtonSelector: 'a#btn_plus_ruta_715_19',
       tarifaViajeSelector: '#txt_tarifa_extra_715',
       tarifaConductorSelector: '#txt_tarifa_conductor_715',
-      tarifaClienteSelector: null, // Not present in QA for route 715
+      tarifaClienteSelector: '#txt_tarifa_cliente_715',
     };
   }
 
