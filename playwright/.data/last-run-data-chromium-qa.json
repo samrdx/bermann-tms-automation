@@ -10,11 +10,11 @@
     "baseNombre": "Fletes El Roble"
   },
   "seededTransportista": {
-    "id": "1579",
-    "nombre": "EcoTrans 9839",
-    "baseNombre": "EcoTrans",
-    "documento": "26911327-8",
-    "razonSocial": "EcoTrans 9839 SpA"
+    "id": "1583",
+    "nombre": "Cordillera 3223",
+    "baseNombre": "Cordillera",
+    "documento": "87546040-4",
+    "razonSocial": "Cordillera 3223 SpA"
   },
   "cliente": {
     "id": "871",
@@ -24,10 +24,10 @@
     "email": "logistica@test.cl"
   },
   "seededCliente": {
-    "id": "914",
-    "nombre": "Logistica 8903",
-    "nombreFantasia": "Logistica 8903 SpA",
-    "rut": "38667849-9",
+    "id": "917",
+    "nombre": "Importadora 9218",
+    "nombreFantasia": "Importadora 9218 SpA",
+    "rut": "67902724-7",
     "email": ""
   },
   "vehiculo": {
@@ -46,28 +46,25 @@
   },
   "executionTimeSeconds": 80.62,
   "contratoCliente": {
-    "id": "2004",
-    "nroContrato": "389835"
+    "id": "2010",
+    "nroContrato": "490964"
   },
   "seededConductor": {
-    "nombre": "Luis",
-    "apellido": "Silva",
-    "rut": "29.599.064-3",
-    "email": "mariaaraya@hotmail.com",
-    "transportistaNombre": "EcoTrans 9839"
+    "nombre": "Carlos",
+    "apellido": "Araya",
+    "rut": "43.617.797-6",
+    "email": "sofiamunoz@hotmail.com",
+    "transportistaNombre": "Cordillera 3223"
   },
   "seededVehiculo": {
-    "patente": "LJON-46",
-    "muestra": "LJON-46",
-    "transportistaNombre": "EcoTrans 9839"
+    "patente": "DSVI-99",
+    "muestra": "DSVI-99",
+    "transportistaNombre": "Cordillera 3223"
   },
   "viaje": {
-    "nroViaje": "78387",
-    "cliente": "Comercial 1160 SpA",
+    "nroViaje": "47100",
+    "cliente": "Importadora 9218 SpA",
     "ruta": "05082025-1",
-    "status": "FINALIZADO",
-    "transportista": "Titanium 9860",
-    "vehiculo": "QUOJ-64",
-    "conductor": "José Martínez"
+    "status": "PLANIFICADO"
   }
 }

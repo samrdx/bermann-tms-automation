@@ -10,11 +10,11 @@
     "baseNombre": "LogiChile Connect"
   },
   "seededTransportista": {
-    "id": "1580",
-    "nombre": "Pacific 9692",
+    "id": "1584",
+    "nombre": "Pacific 4719",
     "baseNombre": "Pacific",
-    "documento": "80931795-1",
-    "razonSocial": "Pacific 9692 SpA"
+    "documento": "82424423-5",
+    "razonSocial": "Pacific 4719 SpA"
   },
   "cliente": {
     "id": "N/A",
@@ -24,10 +24,10 @@
     "email": "global@test.cl"
   },
   "seededCliente": {
-    "id": "915",
-    "nombre": "Servicios 7706",
-    "nombreFantasia": "Servicios 7706 SpA",
-    "rut": "80703451-0",
+    "id": "918",
+    "nombre": "Industrial 7575",
+    "nombreFantasia": "Industrial 7575 SpA",
+    "rut": "42002260-3",
     "email": ""
   },
   "vehiculo": {
@@ -46,24 +46,24 @@
   },
   "executionTimeSeconds": 86.42,
   "contratoCliente": {
-    "id": "2005",
-    "nroContrato": "453939"
+    "id": "2011",
+    "nroContrato": "541663"
   },
   "seededConductor": {
-    "nombre": "Sofía",
-    "apellido": "Contreras",
-    "rut": "17.506.229-7",
-    "email": "elenacontreras@gmail.com",
-    "transportistaNombre": "Pacific 9692"
+    "nombre": "Rosa",
+    "apellido": "García",
+    "rut": "37.227.380-1",
+    "email": "franciscosilva@gmail.com",
+    "transportistaNombre": "Pacific 4719"
   },
   "seededVehiculo": {
-    "patente": "EUAN-69",
-    "muestra": "EUAN-69",
-    "transportistaNombre": "Pacific 9692"
+    "patente": "HL-4789",
+    "muestra": "HL-4789",
+    "transportistaNombre": "Pacific 4719"
   },
   "viaje": {
-    "nroViaje": "64228",
-    "cliente": "Industrial 9940 SpA",
+    "nroViaje": "21642",
+    "cliente": "Industrial 7575 SpA",
     "ruta": "05082025-1",
     "status": "PLANIFICADO"
   }
