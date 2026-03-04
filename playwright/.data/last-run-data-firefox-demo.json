@@ -1,28 +1,32 @@
 {
   "seededTransportista": {
-    "id": "52",
-    "nombre": "TransSur 1561",
-    "baseNombre": "TransSur",
-    "documento": "20789833-3",
-    "razonSocial": "TransSur 1561 SpA"
+    "id": "67",
+    "nombre": "Delta 7459",
+    "baseNombre": "Delta",
+    "documento": "82192495-2",
+    "razonSocial": "Delta 7459 SpA"
   },
   "seededCliente": {
-    "id": "46",
-    "nombre": "Servicios 6545",
-    "nombreFantasia": "Servicios 6545 SpA",
-    "rut": "55183833-1",
+    "id": "60",
+    "nombre": "Comercial 3793",
+    "nombreFantasia": "Comercial 3793 SpA",
+    "rut": "68280555-2",
     "email": ""
   },
   "seededVehiculo": {
-    "patente": "IN-5951",
-    "muestra": "IN-5951",
-    "transportistaNombre": "TransSur 1561"
+    "patente": "OA-8156",
+    "muestra": "OA-8156",
+    "transportistaNombre": "Delta 7459"
   },
   "seededConductor": {
-    "nombre": "Francisco",
-    "apellido": "Martínez",
-    "rut": "23.052.214-6",
-    "email": "antonioperez@hotmail.com",
-    "transportistaNombre": "TransSur 1561"
+    "nombre": "Carmen",
+    "apellido": "Rojas",
+    "rut": "70.351.507-k",
+    "email": "carlosfernandez@gmail.com",
+    "transportistaNombre": "Delta 7459"
+  },
+  "contratoCliente": {
+    "id": "130",
+    "nroContrato": "569426"
   }
 }

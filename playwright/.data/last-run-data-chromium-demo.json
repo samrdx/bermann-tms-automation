@@ -1,28 +1,42 @@
 {
   "seededTransportista": {
-    "id": "53",
-    "nombre": "EcoTrans 1066",
-    "baseNombre": "EcoTrans",
-    "documento": "99769475-9",
-    "razonSocial": "EcoTrans 1066 SpA"
+    "id": "66",
+    "nombre": "Horizonte 3470",
+    "baseNombre": "Horizonte",
+    "documento": "58928977-3",
+    "razonSocial": "Horizonte 3470 SpA"
   },
   "seededCliente": {
-    "id": "45",
-    "nombre": "Central 3290",
-    "nombreFantasia": "Central 3290 SpA",
-    "rut": "23006647-7",
+    "id": "59",
+    "nombre": "Central 9178",
+    "nombreFantasia": "Central 9178 SpA",
+    "rut": "55224954-2",
     "email": ""
   },
   "seededConductor": {
-    "nombre": "Valentina",
-    "apellido": "López",
-    "rut": "42.481.325-7",
-    "email": "valentinasoto@hotmail.com",
-    "transportistaNombre": "EcoTrans 1066"
+    "nombre": "María",
+    "apellido": "Pérez",
+    "rut": "27.103.873-9",
+    "email": "rosamunoz@gmail.com",
+    "transportistaNombre": "Horizonte 3470"
   },
   "seededVehiculo": {
-    "patente": "CPFD-76",
-    "muestra": "CPFD-76",
-    "transportistaNombre": "EcoTrans 1066"
+    "patente": "TQPO-66",
+    "muestra": "TQPO-66",
+    "transportistaNombre": "Horizonte 3470"
+  },
+  "contratoCliente": {
+    "id": "129",
+    "nroContrato": "507166"
+  },
+  "viaje": {
+    "nroViaje": "51977",
+    "cliente": "Central 9178 SpA",
+    "ruta": "05082025-1",
+    "status": "ASIGNADO",
+    "id": "6517",
+    "transportista": "Horizonte 3470",
+    "vehiculo": "TQPO-66",
+    "conductor": "María Pérez"
   }
 }

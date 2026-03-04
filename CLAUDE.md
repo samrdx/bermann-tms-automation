@@ -451,28 +451,28 @@ npm run test:auth:login        # Run login test only
 npm run test:auth:logout       # Run logout test only
 
 # === ATOMIC (Stable, Independent Tests) ===
-npm run test:atomic:asignar    # Assign trip (atomic, self-contained)
-npm run test:atomic:finalizar  # Finalize trip (atomic, self-contained)
-npm run test:atomic:all        # Run all atomic tests
-npm run test:atomic:all:headed # Run all atomic tests with visible browser
+npm run test:qa:trip:asignar   # Assign trip (atomic, self-contained)
+npm run test:qa:trip:finalizar  # Finalize trip (atomic, self-contained)
+npm run test:qa:trip:all        # Run all atomic tests
+npm run test:qa:trip:all:headed # Run all atomic tests with visible browser
 
 # === LEGACY (Dependent, Sequential Tests) ===
-npm run test:legacy:setup           # Run base entities setup
-npm run test:legacy:setup:headed    # Run base setup with visible browser
-npm run test:legacy:entidades       # Run entity creation tests
-npm run test:legacy:entidades:headed
-npm run test:legacy:contratos       # Run contract tests
-npm run test:legacy:contratos:headed
-npm run test:legacy:planificar      # Run trip planning test
-npm run test:legacy:planificar:headed
+npm run test:qa:legacy:setup           # Run base entities setup
+npm run test:qa:legacy:setup:headed    # Run base setup with visible browser
+npm run test:qa:legacy:entidades       # Run entity creation tests
+npm run test:qa:legacy:entidades:headed
+npm run test:qa:legacy:contratos       # Run contract tests
+npm run test:qa:legacy:contratos:headed
+npm run test:qa:legacy:planificar      # Run trip planning test
+npm run test:qa:legacy:planificar:headed
 
 # === GRANULAR (Debugging Individual Tests) ===
-npm run test:entity:transportista   # Create transportista entity
-npm run test:entity:cliente         # Create cliente entity
-npm run test:entity:vehiculo        # Create vehiculo entity
-npm run test:entity:conductor       # Create conductor entity
-npm run test:op:contrato            # Create contract (Costo type)
-npm run test:op:contrato2cliente    # Create contract (Ingreso type)
+npm run test:qa:entity:transportista   # Create transportista entity
+npm run test:qa:entity:cliente         # Create cliente entity
+npm run test:qa:entity:vehiculo        # Create vehiculo entity
+npm run test:qa:entity:conductor       # Create conductor entity
+npm run test:qa:op:contrato            # Create contract (Costo type)
+npm run test:qa:op:contrato2cliente    # Create contract (Ingreso type)
 
 # === FULL FLOWS ===
 npm run test:full-flow         # Run complete E2E flow (setup -> contratos -> viajes -> monitoreo)

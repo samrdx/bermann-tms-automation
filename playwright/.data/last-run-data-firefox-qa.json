@@ -10,11 +10,11 @@
     "baseNombre": "LogiChile Connect"
   },
   "seededTransportista": {
-    "id": "1584",
-    "nombre": "Pacific 4719",
-    "baseNombre": "Pacific",
-    "documento": "82424423-5",
-    "razonSocial": "Pacific 4719 SpA"
+    "id": "1599",
+    "nombre": "Delta 4825",
+    "baseNombre": "Delta",
+    "documento": "45774959-7",
+    "razonSocial": "Delta 4825 SpA"
   },
   "cliente": {
     "id": "N/A",
@@ -24,10 +24,10 @@
     "email": "global@test.cl"
   },
   "seededCliente": {
-    "id": "918",
-    "nombre": "Industrial 7575",
-    "nombreFantasia": "Industrial 7575 SpA",
-    "rut": "42002260-3",
+    "id": "929",
+    "nombre": "Central 7035",
+    "nombreFantasia": "Central 7035 SpA",
+    "rut": "28550327-2",
     "email": ""
   },
   "vehiculo": {
@@ -46,25 +46,28 @@
   },
   "executionTimeSeconds": 86.42,
   "contratoCliente": {
-    "id": "2011",
-    "nroContrato": "541663"
+    "id": "2031",
+    "nroContrato": "434333"
   },
   "seededConductor": {
-    "nombre": "Rosa",
-    "apellido": "García",
-    "rut": "37.227.380-1",
-    "email": "franciscosilva@gmail.com",
-    "transportistaNombre": "Pacific 4719"
+    "nombre": "Carmen",
+    "apellido": "Díaz",
+    "rut": "58.529.498-5",
+    "email": "rosatorres@hotmail.com",
+    "transportistaNombre": "Delta 4825"
   },
   "seededVehiculo": {
-    "patente": "HL-4789",
-    "muestra": "HL-4789",
-    "transportistaNombre": "Pacific 4719"
+    "patente": "QXXC-82",
+    "muestra": "QXXC-82",
+    "transportistaNombre": "Delta 4825"
   },
   "viaje": {
-    "nroViaje": "21642",
-    "cliente": "Industrial 7575 SpA",
+    "nroViaje": "25464",
+    "cliente": "Central 7035 SpA",
     "ruta": "05082025-1",
-    "status": "PLANIFICADO"
+    "status": "FINALIZADO",
+    "transportista": "Delta 4825",
+    "vehiculo": "QXXC-82",
+    "conductor": "Carmen Díaz"
   }
 }

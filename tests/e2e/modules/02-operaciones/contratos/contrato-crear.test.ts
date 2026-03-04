@@ -35,7 +35,7 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
 
     const transportista = operationalData.seededTransportista || operationalData.transportista;
     if (!transportista?.nombre) {
-      throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run: npm run test:legacy:setup or test:entity:transportista`);
+      throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run: npm run test:qa:legacy:setup or test:qa:entity:transportista`);
     }
     const transportistaNombre = transportista.nombre as string;
     logger.info(`📦 Transportista: "${transportistaNombre}" (ID: ${transportista.id})`);

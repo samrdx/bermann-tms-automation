@@ -9,7 +9,7 @@ import fs from 'fs';
  * Contract Creation - Tipo Venta (Uses Seeded Cliente)
  *
  * Prerequisites:
- * - Run `npm run test:entity:cliente` first (writes seededCliente to JSON)
+ * - Run `npm run test:qa:entity:cliente` first (writes seededCliente to JSON)
  *   OR run `npm run test:legacy:setup` (base-entities.setup.ts also writes seededCliente)
  *
  * This test:
@@ -41,7 +41,7 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
         if (!cliente) {
             throw new Error(
                 `'seededCliente' or 'cliente' not found in ${dataPath}.\n` +
-                `Run 'npm run test:legacy:setup' or 'npm run test:entity:cliente'.`
+                `Run 'npm run test:qa:legacy:setup' or 'npm run test:qa:entity:cliente'.`
             );
         }
         const clienteNombre = cliente.nombreFantasia || cliente.nombre;

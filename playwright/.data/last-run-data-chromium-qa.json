@@ -10,11 +10,11 @@
     "baseNombre": "Fletes El Roble"
   },
   "seededTransportista": {
-    "id": "1583",
-    "nombre": "Cordillera 3223",
-    "baseNombre": "Cordillera",
-    "documento": "87546040-4",
-    "razonSocial": "Cordillera 3223 SpA"
+    "id": "1598",
+    "nombre": "Pacific 9523",
+    "baseNombre": "Pacific",
+    "documento": "18263968-0",
+    "razonSocial": "Pacific 9523 SpA"
   },
   "cliente": {
     "id": "871",
@@ -24,10 +24,10 @@
     "email": "logistica@test.cl"
   },
   "seededCliente": {
-    "id": "917",
-    "nombre": "Importadora 9218",
-    "nombreFantasia": "Importadora 9218 SpA",
-    "rut": "67902724-7",
+    "id": "928",
+    "nombre": "Industrial 5125",
+    "nombreFantasia": "Industrial 5125 SpA",
+    "rut": "55116545-0",
     "email": ""
   },
   "vehiculo": {
@@ -46,25 +46,28 @@
   },
   "executionTimeSeconds": 80.62,
   "contratoCliente": {
-    "id": "2010",
-    "nroContrato": "490964"
+    "id": "2029",
+    "nroContrato": "314317"
   },
   "seededConductor": {
-    "nombre": "Carlos",
-    "apellido": "Araya",
-    "rut": "43.617.797-6",
-    "email": "sofiamunoz@hotmail.com",
-    "transportistaNombre": "Cordillera 3223"
+    "nombre": "María",
+    "apellido": "Soto",
+    "rut": "64.413.385-0",
+    "email": "josefernandez@hotmail.com",
+    "transportistaNombre": "Pacific 9523"
   },
   "seededVehiculo": {
-    "patente": "DSVI-99",
-    "muestra": "DSVI-99",
-    "transportistaNombre": "Cordillera 3223"
+    "patente": "ADFC-68",
+    "muestra": "ADFC-68",
+    "transportistaNombre": "Pacific 9523"
   },
   "viaje": {
-    "nroViaje": "47100",
-    "cliente": "Importadora 9218 SpA",
+    "nroViaje": "59726",
+    "cliente": "Industrial 5125 SpA",
     "ruta": "05082025-1",
-    "status": "PLANIFICADO"
+    "status": "FINALIZADO",
+    "transportista": "Pacific 9523",
+    "vehiculo": "ADFC-68",
+    "conductor": "María Soto"
   }
 }

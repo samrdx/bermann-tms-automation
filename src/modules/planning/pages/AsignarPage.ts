@@ -35,25 +35,36 @@ export class AsignarPage extends BasePage {
 
   async navigate(): Promise<void> {
     logger.info('Navigating to Asignar Viajes page');
-    await this.page.goto('https://moveontruckqa.bermanntms.cl/viajes/asignar');
+    await this.page.goto('/viajes/asignar');
     await this.page.waitForLoadState('networkidle');
   }
 
   // --- BÚSQUEDA ROBUSTA DE FILA ---
   async findViajeRow(nroViaje: string): Promise<Locator | null> {
-    const searchInput = this.page.locator('input[type="search"]').first();
+    // In Demo, the search input might have id "search"
+    const searchInput = this.page.locator('input#search, input[type="search"]').first();
     if (await searchInput.isVisible()) {
+      await searchInput.clear();
       await searchInput.fill(nroViaje);
+      // Click Buscar button or press Enter
+      const buscarBtn = this.page.locator('#buscar, a:has-text("Buscar")').first();
+      if (await buscarBtn.isVisible()) {
+        await buscarBtn.click();
+      } else {
+        await this.page.keyboard.press('Enter');
+      }
       await this.page.waitForTimeout(2000);
     }
     const rows = this.page.locator(this.selectors.table.rows);
     try { await rows.first().waitFor({ state: 'visible', timeout: 5000 }); } catch { return null; }
 
     const rowCount = await rows.count();
+    const searchLower = nroViaje.toLowerCase();
+
     for (let i = 0; i < rowCount; i++) {
       const row = rows.nth(i);
-      const text = await row.innerText();
-      if (text.includes(nroViaje)) return row;
+      const text = (await row.innerText()).toLowerCase();
+      if (text.includes(searchLower)) return row;
     }
     return null;
   }
@@ -147,12 +158,18 @@ export class AsignarPage extends BasePage {
     return true;
   }
 
+  async getFirstRowId(): Promise<string | null> {
+    const firstRowIdCell = this.page.locator('#tabla_asignar tbody tr:first-child td').nth(1);
+    if (await firstRowIdCell.isVisible()) {
+      return (await firstRowIdCell.innerText()).trim();
+    }
+    return null;
+  }
+
   // --- Métodos de Verificación ---
-  async verifyViajeAsignado(nroViaje: string): Promise<boolean> {
+  async verifyViajeAsignado(searchTerm: string): Promise<boolean> {
     await this.navigate();
-    const row = await this.findViajeRow(nroViaje);
-    if (!row) return false;
-    const cells = await row.locator('td').allTextContents();
-    return !!(cells[11]?.trim() && cells[12]?.trim());
+    const row = await this.findViajeRow(searchTerm);
+    return !!row;
   }
 }

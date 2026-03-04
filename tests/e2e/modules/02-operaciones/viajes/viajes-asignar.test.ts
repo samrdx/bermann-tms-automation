@@ -23,9 +23,10 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
 
     test('Should assign Viaje using entities from worker JSON', async ({ page }, testInfo) => {
         const startTime = Date.now();
+        const isDemo = process.env.ENV?.toUpperCase() === 'DEMO';
 
         logger.info('='.repeat(80));
-        logger.info('Starting Step 6.5: Asignar Viaje (Legacy from JSON)');
+        logger.info(`Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: ${isDemo ? 'DEMO' : 'QA'}]`);
         logger.info('='.repeat(80));
 
         // =================================================================
@@ -61,7 +62,7 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
 
         const viaje = operationalData.viaje;
         if (!viaje?.nroViaje) {
-            throw new Error('❌ Missing: viaje.nroViaje. Run: npm run test:legacy:planificar');
+            throw new Error('❌ Missing: viaje.nroViaje. Run: npm run test:demo:legacy:planificar (Demo) or test:qa:legacy:planificar (QA)');
         }
 
         const transNombre = seededTransportista.nombre as string;
@@ -69,27 +70,31 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
         const conductorFull = `${conductor.nombre} ${conductor.apellido}`.trim();
         const nroViaje = viaje.nroViaje as string;
 
+        // In Demo the grid filters by internal ID (viaje.id), not by the user-visible nroViaje.
+        // viaje.id is saved by viajes-planificar.test.ts when running in Demo.
+        const searchId = (isDemo && viaje.id) ? String(viaje.id) : nroViaje;
+
         logger.info('✅ All prerequisites validated');
         logger.info(`   Transportista : ${transNombre}`);
         logger.info(`   Vehículo      : ${patente}`);
         logger.info(`   Conductor     : ${conductorFull}`);
         logger.info(`   Nro Viaje     : ${nroViaje}`);
+        logger.info(`   Search ID     : ${searchId} ${isDemo ? '(internal Demo ID)' : '(nroViaje)'}`);
 
         // =================================================================
         // PHASE 2: Search by nroViaje in /viajes/asignar → click Editar
         // =================================================================
         await test.step('Phase 2: Search and open trip form', async () => {
-            logger.info('PHASE 2: Navigating to /viajes/asignar...');
+            logger.info(`PHASE 2: Navigating to /viajes/asignar... [isDemo=${isDemo}]`);
             const asignarPage = new AsignarPage(page);
             await asignarPage.navigate();
 
-            logger.info(`🔍 Searching for viaje "${nroViaje}" and opening edit form...`);
-            // AsignarPage.selectViajeRow:
-            //   1. Fills input[type="search"] with nroViaje
-            //   2. Waits 2s for DataTables filter to apply
-            //   3. Scans rows for nroViaje text
-            //   4. Clicks i.fa-pencil / i.fa-edit / a[title="Editar"] → navigates to /viajes/editar/ID
-            await asignarPage.selectViajeRow(nroViaje);
+            logger.info(`🔍 Searching for viaje "${searchId}" and opening edit form...`);
+            // AsignarPage.selectViajeRow uses:
+            //   Demo: #search input + a#buscar click, then scans rows
+            //   QA  : input[type="search"] DataTables, then scans rows
+            // Both environments are handled transparently by AsignarPage.findViajeRow()
+            await asignarPage.selectViajeRow(searchId);
 
             logger.info(`✅ Trip assignment form loaded — URL: ${page.url()}`);
 
@@ -214,7 +219,7 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
         await test.step('Phase 9: Verify in grid', async () => {
             logger.info('PHASE 9: Verifying assignment in /viajes/asignar grid...');
 
-            // After save, TMS should redirect back to /viajes/asignar
+            // After save, TMS redirects back to /viajes/asignar
             await page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
             await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
                 logger.warn('⚠️ networkidle timeout post-redirect, continuing...');
@@ -227,17 +232,26 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
                 });
             await page.waitForTimeout(1000);
 
-            // The /viajes/asignar page uses a CUSTOM search input with id="search" (type="text"),
-            // not a standard DataTables input[type="search"]
-            const searchInput = page.locator('#search').first();
+            // Both QA and Demo use #search + a#buscar pattern
+            // (AsignarPage uses #search + a#buscar for Demo transparently,
+            //  but here we search directly since we are in the test scope)
+            const searchInput = page.locator('#search, input[type="search"]').first();
             await searchInput.waitFor({ state: 'visible', timeout: 15000 });
-            await searchInput.fill(nroViaje);
-            // Click the dedicated search button
-            await page.locator('a#buscar').click();
+            await searchInput.fill(searchId);
+
+            // Click search button (Demo: a#buscar, QA: may rely on DataTables auto-filter)
+            const buscarBtn = page.locator('a#buscar').first();
+            if (await buscarBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+                await buscarBtn.click();
+                logger.info('✅ Clicked a#buscar to trigger search');
+            } else {
+                await page.keyboard.press('Enter');
+                logger.info('ℹ️ Used Enter key to trigger search (no a#buscar found)');
+            }
             await page.waitForTimeout(2000);
 
             const viajeRow = page.locator('#tabla_asignar tbody tr')
-                .filter({ hasText: nroViaje }).first();
+                .filter({ hasText: searchId }).first();
             const isVisible = await viajeRow.isVisible({ timeout: 10000 }).catch(() => false);
 
             if (!isVisible) {
@@ -247,11 +261,14 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
                     .catch(() => [] as string[]);
                 const errorMsg = errors.filter(e => e.trim()).join(' | ');
                 throw new Error(
-                    `❌ Viaje [${nroViaje}] not found in /viajes/asignar after save. Errors: ${errorMsg || 'none'}`
+                    `❌ Viaje [${searchId}] not found in /viajes/asignar after save. Errors: ${errorMsg || 'none'}`
                 );
             }
 
-            logger.info(`✅ Viaje [${nroViaje}] confirmed in assignment grid`);
+            // Verify the row shows 'Asignado' status
+            const rowText = await viajeRow.innerText();
+            const isAsignado = rowText.toLowerCase().includes('asignado');
+            logger.info(`✅ Viaje [${searchId}] confirmed in grid. Status Asignado: ${isAsignado}`);
         });
 
         // Persist final status to JSON

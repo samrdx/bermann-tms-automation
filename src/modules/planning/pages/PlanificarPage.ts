@@ -14,11 +14,11 @@ export class PlanificarPage extends BasePage {
     valorFlete: '#viajes-valor_flete',
 
     // Botones de Dropdowns (Bootstrap Select) - Usamos data-id
-    btnTipoOperacion: 'button[data-id="tipo_operacion_form"]',
+    btnTipoOperacion: isDemoMode() ? 'button[data-id="tipo_operacion_form"]' : 'button[data-id="viajes-tipo_operacion_id"]',
     btnTipoServicio: 'button[data-id="viajes-tipo_servicio_id"]',
-    btnTipoViaje: 'button[data-id="viajes-tipo_viaje_id"]',
+    btnTipoViaje: isDemoMode() ? 'button[data-id="viajes-tipo_viaje_id"]' : 'button[data-id="viajes-tipo_viaje"]',
     btnUnidadNegocio: 'button[data-id="viajes-unidad_negocio_id"]',
-    btnCodigoCarga: 'button[data-id="viajes-carga_id"]',
+    btnCodigoCarga: isDemoMode() ? 'button[data-id="viajes-carga_id"]' : 'button[data-id="viajes-codigo_carga_id"]',
     btnCliente: 'button[data-id="viajes-cliente_id"]',
 
     // Ruta
@@ -132,9 +132,10 @@ export class PlanificarPage extends BasePage {
         if (btn) btn.click();
       }, btnSelector);
 
-      // 2. Locate the container
+      // 2. Locate the container and ITS menu
       const container = this.page.locator('div.bootstrap-select').filter({ has: button });
-      const searchInput = container.locator('div.bs-searchbox input');
+      const menu = container.locator('div.dropdown-menu');
+      const searchInput = menu.locator('div.bs-searchbox input');
 
       // 3. Search and select
       if (await searchInput.isVisible({ timeout: 1500 }).catch(() => false)) {
@@ -144,8 +145,8 @@ export class PlanificarPage extends BasePage {
         await this.page.waitForTimeout(1000); // Wait for filter
       }
 
-      // Use a more relaxed search for the option
-      const option = container.locator('ul.dropdown-menu li a').filter({ hasText: optionText }).first();
+      const option = menu.locator('ul.dropdown-menu li a').filter({ hasText: optionText }).first();
+      
       await option.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => { });
       await option.evaluate((node: HTMLElement) => node.click());
 
@@ -157,13 +158,13 @@ export class PlanificarPage extends BasePage {
       }
 
       // ALWAYS force sync the underlying <select> to prevent validation errors 
-      // even if the Bootstrap UI button updated correctly.
       await this.page.evaluate(({ btnSel, text }) => {
         const btn = document.querySelector(btnSel) as HTMLElement;
         const container = btn.closest('.bootstrap-select');
         const select = container?.querySelector('select') as HTMLSelectElement;
         const options = Array.from(select?.options || []);
-        // Strict match fallback to includes
+        
+        // Try strict match first, then includes
         let target = options.find(o => o.text.trim() === text);
         if (!target) {
             target = options.find(o => o.text.trim().toLowerCase().includes(text.toLowerCase()));
@@ -172,7 +173,7 @@ export class PlanificarPage extends BasePage {
         if (select && target) {
           select.value = target.value;
           select.dispatchEvent(new Event('change', { bubbles: true }));
-          // Try to trigger bootstrap-select refresh if possible (for internal state)
+          // Try to trigger bootstrap-select refresh if possible
           try { (window as any).$(select).selectpicker('val', target.value); } catch (e) { }
           try { (window as any).$(select).selectpicker('refresh'); } catch (e) { }
         }
@@ -211,39 +212,63 @@ export class PlanificarPage extends BasePage {
     await this.page.keyboard.press('Tab');
   }
 
-  async agregarRuta(numeroRuta: string): Promise<void> {
-    if (isDemoMode()) {
-      logger.info('Skipping "agregarRuta" in DEMO mode');
-      return;
-    }
-
+  async agregarRuta(numeroRuta: string): Promise<boolean> {
     logger.info(`Adding ruta: ${numeroRuta}`);
     await this.handleModalBackdrop();
     const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
+    
     try {
       await expect(btnAgregar).toBeEnabled({ timeout: 15000 });
       await btnAgregar.click();
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(2000); // Demo might be slow
 
+      // We look for the route in the table
       const rows = this.page.locator(this.selectors.tablaRutas);
+      
+      // If we have a search box in the modal, we use it
+      const searchBox = this.page.locator('#modalRutasSugeridas .dataTables_filter input');
+      if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await searchBox.fill(numeroRuta);
+        await this.page.waitForTimeout(1200);
+      }
+
       const rowCount = await rows.count();
       let found = false;
 
       for (let i = 0; i < rowCount; i++) {
         const row = rows.nth(i);
         const text = await row.innerText();
+        // Exact match for the ID column or includes
         if (text.includes(numeroRuta)) {
-          await row.locator('.btn-success').click();
+          logger.info(`Found ruta [${numeroRuta}] in row ${i + 1}`);
+          const selectBtn = row.locator('.btn-success, .btn-primary').first();
+          await selectBtn.click();
           found = true;
           break;
         }
       }
 
-      if (!found) throw new Error(`Ruta ${numeroRuta} not found`);
-      await this.page.waitForTimeout(1000);
+      if (!found) {
+        logger.warn(`Ruta ${numeroRuta} not found in the list`);
+        await this.page.keyboard.press('Escape').catch(() => {});
+        return false;
+      }
+
+      // CRITICAL: Wait for Origen/Destino to populate after modal selection
+      logger.info('Waiting for Origen/Destino to populate...');
+      await this.page.waitForFunction(() => {
+        const o = document.querySelector('button[data-id="_origendestinoform-origen"]') as HTMLElement;
+        const d = document.querySelector('button[data-id="_origendestinoform-destino"]') as HTMLElement;
+        return o && o.innerText.trim() !== 'Seleccione' && d && d.innerText.trim() !== 'Seleccione';
+      }, { timeout: 10000 }).catch(() => {
+        logger.warn('⚠️ Origen/Destino did not populate after 10s');
+      });
+
+      return true;
     } catch (e) {
       logger.error('Failed in agregarRuta', e);
-      throw e;
+      await this.page.keyboard.press('Escape').catch(() => {});
+      return false;
     }
   }
 
@@ -262,8 +287,7 @@ export class PlanificarPage extends BasePage {
   }
 
   async isFormSaved(): Promise<boolean> {
-    const successToast = this.page.locator('text="Viaje Creado con éxito"').first();
-    const currentUrl = this.page.url();
-    return (await successToast.isVisible()) || !currentUrl.includes('/crear');
+    const url = this.page.url();
+    return !url.includes('/viajes/crear') || url.includes('id=');
   }
 }
