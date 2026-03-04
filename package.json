@@ -30,7 +30,7 @@
     "// === e2e API legacy option 2 ===": "",
     "test:legacy:setup": "playwright test tests/e2e/suites/base-entities.setup.ts --trace on",
     "test:legacy:contratos": "playwright test tests/e2e/modules/02-operaciones/contratos/ --trace on",
-    "test:legacy:viajes": "playwright test tests/e2e/modules/02-operaciones/viajes/ --trace on",
+    "test:legacy:viajes": "npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts --workers=1 --trace on && npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --workers=1 --trace on",
     "test:legacy:monitoreo": "playwright test tests/e2e/modules/02-operaciones/Monitoreo/ --trace on",
     "// === e2e  solo Viajes ===": "",
     "test:legacy:fullviajes": "npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts --project=chromium --workers=1 && npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --project=chromium --workers=1 && npx playwright test tests/e2e/modules/02-operaciones/Monitoreo/viajes-monitoreo.test.ts --project=chromium --workers=1",

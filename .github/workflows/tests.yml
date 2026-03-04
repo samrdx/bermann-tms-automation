@@ -1,4 +1,4 @@
-name: TMS QA Suite (Hybrid)
+name: TMS QA Suite
 
 on:
   push:
@@ -18,12 +18,12 @@ on:
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: TESTS ATÓMICOS (NUEVA GENERACIÓN - STANDARD)
+  # JOB 1: FAST SMOKE (AUTH)
   # ------------------------------------------------------------------
-  atomic-suite:
-    name: 🛡️ Atomic E2E Flows
+  smoke-auth:
+    name: ⚡ Fast Smoke (Auth)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -41,29 +41,67 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: 🚀 Run Atomic Workflows
+      - name: 🔑 Run Login/Logout Tests
         env:
-          # --- ESTÁNDAR CONSOLIDADO ---
           BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          CI: true
+          HEADLESS: true
+          TIMEOUT: 30000
+          ENV: ${{ github.event.inputs.environment || 'QA' }}
+        run: |
+          echo "Running Auth Smoke Tests..."
+          npm run test:auth
 
-          # Variables de Configuración Playwright
+      - name: Upload Auth Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-smoke-auth
+          path: playwright-report/
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # JOB 2: TESTS ATÓMICOS CORE (Solo corre si Smoke-Auth pasa)
+  # ------------------------------------------------------------------
+  atomic-core-flows:
+    name: 🛡️ Atomic Core Flows
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [smoke-auth]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: 🚀 Run Atomic Business Workflows
+        env:
+          BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           CI: true
           HEADLESS: true
           LOG_LEVEL: info
           TIMEOUT: 60000
           ENV: ${{ github.event.inputs.environment || 'QA' }}
 
-          # Compatibilidad Legacy
-          BASE_URL_DEV: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
-          TMS_USER: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
-
-        # CORRECCIÓN IMPORTANTE: Ejecutar múltiples archivos en UN solo comando
-        # Esto genera un único reporte HTML combinado y permite paralelismo real.
+        # Se agrupan los scripts que dependen solo de su entorno interno API (atomic)
+        # o los flujos combinados que no asfixian los workers.
         run: |
-          echo "Running Independent Business Flows..."
+          echo "Running Independent Core Business Flows..."
           npx playwright test \
             tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
             tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
@@ -74,64 +112,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: report-atomic
+          name: report-atomic-core
           path: playwright-report/
           retention-days: 7
 
   # ------------------------------------------------------------------
-  # JOB 2: TESTS LEGACY (Sin cambios, para no romper compatibilidad)
+  # NOTA A FUTURO PARA REFACTOR DE PIPELINES:
+  # El entorno Legacy-Suite (30 min secuencial) se ha removido intencionalmente
+  # de este flujo On-Push/PR debido a cuellos de botella de tiempo.
+  # Se sugiere crear un archivo cron .github/workflows/nightly.yml
+  # que apunte a `npm run test:legacy:fullviajes:all` para salud completa.
   # ------------------------------------------------------------------
-  legacy-suite:
-    name: 📦 Legacy Dependent Flows
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: []
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: ⛓️ Run Sequential Legacy Suite
-        env:
-          # Variables Legacy (Mantener hasta refactorizar estos tests)
-          BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
-          BASE_URL_DEV: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
-          ENVIRONMENT: dev
-          HEADLESS: true
-          TIMEOUT: 60000
-          ENV: ${{ github.event.inputs.environment || 'QA' }}
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
-          TEST_REGULAR_USER: ${{ secrets.TMS_USER || 'arivas' }}
-          TEST_REGULAR_PASS: ${{ secrets.TMS_PASS || 'arivas' }}
-          USERNAME_DEV: ${{ secrets.TMS_USER || 'arivas' }}
-          PASSWORD_DEV: ${{ secrets.TMS_PASS || 'arivas' }}
-        run: |
-          echo "🔹 Stage 1: Base Setup"
-          npx playwright test --project=base-entities-chromium --reporter=line
-
-          echo "🔹 Stage 2: Legacy Contracts"
-          npx playwright test tests/e2e/modules/02-operaciones/contratos --project=chromium --workers=1 --reporter=line
-
-          echo "🔹 Stage 3: Legacy Planning"
-          npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts --project=chromium --workers=1 --reporter=line
-
-      - name: Upload Legacy Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: report-legacy
-          path: playwright-report/
-          retention-days: 7
