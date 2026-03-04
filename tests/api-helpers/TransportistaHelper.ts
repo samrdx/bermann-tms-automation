@@ -9,6 +9,7 @@ import {
 import { config } from '../../src/config/environment.js';
 import { TransportistaFormPage } from '../../src/modules/transport/pages/TransportistaPage.js';
 import { TmsApiClient } from './TmsApiClient.js';
+import { isDemoMode } from '../../src/utils/env-helper.js';
 
 export interface Transportista {
     id: string;
@@ -210,8 +211,9 @@ export class TransportistaHelper {
         await transportistaPage.fillRazonSocial(razonSocial);
         await transportistaPage.fillDocumento(documento);
 
-        // Select Type - Always use "Terceros Con Flota Si Genera Contrato" for contract generation
-        await transportistaPage.selectTipoTransportista('Terceros Con Flota Si Genera Contrato');
+        // Select Type - Use "Terceros" in Demo, otherwise "Terceros Con Flota Si Genera Contrato"
+        const transportistaType = isDemoMode() ? 'Terceros' : 'Terceros Con Flota Si Genera Contrato';
+        await transportistaPage.selectTipoTransportista(transportistaType);
 
         await page.waitForTimeout(500);
 

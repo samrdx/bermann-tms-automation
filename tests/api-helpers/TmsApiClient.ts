@@ -15,10 +15,15 @@ export class TmsApiClient {
   private baseUrl: string;
 
   constructor(private page: Page) {
-
-
-
-    this.baseUrl = process.env.BASE_URL || 'https://moveontruckqa.bermanntms.cl';
+    // IMPORTANT: Use the same URL resolution logic as playwright.config.ts
+    // to ensure TmsApiClient navigates to the same domain as the storageState cookies.
+    // playwright.config.ts uses ENV (not BASE_URL) to pick the environment URL.
+    // Using BASE_URL directly can cause a domain mismatch (e.g. BASE_URL=demo but
+    // storageState cookies are for QA), which silently redirects to /login.
+    const ENV = process.env.ENV || 'QA';
+    this.baseUrl = ENV === 'DEMO'
+      ? (process.env.BASE_URL_DEMO || 'https://demo.bermanntms.cl')
+      : 'https://moveontruckqa.bermanntms.cl';
 
 
 

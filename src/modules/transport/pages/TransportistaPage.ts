@@ -86,7 +86,7 @@ export class TransportistaFormPage extends BasePage {
       await this.click(this.selectors.tipoTransportistaButton, true);
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo });
@@ -107,7 +107,7 @@ export class TransportistaFormPage extends BasePage {
       await this.click(this.selectors.regionButton, true);
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: region }).first();
@@ -129,7 +129,7 @@ export class TransportistaFormPage extends BasePage {
       await this.click(this.selectors.ciudadButton, true);
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: ciudad }).first();
@@ -151,7 +151,7 @@ export class TransportistaFormPage extends BasePage {
       await this.click(this.selectors.comunaButton, true);
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: comuna }).first();
@@ -172,7 +172,7 @@ export class TransportistaFormPage extends BasePage {
       await this.click(this.selectors.formaPagoButton, true);
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
       await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
 
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: formaPago });
@@ -191,7 +191,7 @@ export class TransportistaFormPage extends BasePage {
       await this.click(this.selectors.tercerizarButton, true);
       await this.page.waitForTimeout(500);
 
-      const dropdownMenu = this.page.locator('.dropdown-menu.show').first();
+      const dropdownMenu = this.page.locator('.dropdown-menu.show:not(.inner)').first();
       await dropdownMenu.waitFor({ state: 'visible' });
 
       const option = dropdownMenu.locator('.dropdown-item').getByText(value, { exact: true });
