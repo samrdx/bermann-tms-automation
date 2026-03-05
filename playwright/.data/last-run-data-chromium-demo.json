@@ -1,16 +1,16 @@
 {
   "seededTransportista": {
-    "id": "66",
-    "nombre": "Horizonte 3470",
-    "baseNombre": "Horizonte",
-    "documento": "58928977-3",
-    "razonSocial": "Horizonte 3470 SpA"
+    "id": "68",
+    "nombre": "Cordillera 4923",
+    "baseNombre": "Cordillera",
+    "documento": "90314491-2",
+    "razonSocial": "Cordillera 4923 SpA"
   },
   "seededCliente": {
-    "id": "59",
-    "nombre": "Central 9178",
-    "nombreFantasia": "Central 9178 SpA",
-    "rut": "55224954-2",
+    "id": "61",
+    "nombre": "Comercial 3140",
+    "nombreFantasia": "Comercial 3140 SpA",
+    "rut": "25317374-2",
     "email": ""
   },
   "seededConductor": {
@@ -30,11 +30,11 @@
     "nroContrato": "507166"
   },
   "viaje": {
-    "nroViaje": "51977",
+    "nroViaje": "17652",
     "cliente": "Central 9178 SpA",
     "ruta": "05082025-1",
-    "status": "ASIGNADO",
-    "id": "6517",
+    "status": "FINALIZADO",
+    "id": "6520",
     "transportista": "Horizonte 3470",
     "vehiculo": "TQPO-66",
     "conductor": "María Pérez"
