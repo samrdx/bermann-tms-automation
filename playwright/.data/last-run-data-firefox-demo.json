@@ -1,16 +1,16 @@
 {
   "seededTransportista": {
-    "id": "67",
-    "nombre": "Delta 7459",
-    "baseNombre": "Delta",
-    "documento": "82192495-2",
-    "razonSocial": "Delta 7459 SpA"
+    "id": "69",
+    "nombre": "Austral 9502",
+    "baseNombre": "Austral",
+    "documento": "29953601-7",
+    "razonSocial": "Austral 9502 SpA"
   },
   "seededCliente": {
-    "id": "60",
-    "nombre": "Comercial 3793",
-    "nombreFantasia": "Comercial 3793 SpA",
-    "rut": "68280555-2",
+    "id": "62",
+    "nombre": "Distribuidora 1190",
+    "nombreFantasia": "Distribuidora 1190 SpA",
+    "rut": "78273684-1",
     "email": ""
   },
   "seededVehiculo": {

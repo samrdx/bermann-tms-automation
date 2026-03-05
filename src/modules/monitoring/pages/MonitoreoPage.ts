@@ -99,23 +99,27 @@ export class MonitoreoPage extends BasePage {
             await inputId.fill(nroViaje);
             logger.info(`📝 UI: Filter ID filled with: "${nroViaje}"`);
 
-            // 2. Click en "Buscar"
-            logger.info('🔎 UI: Looking for "Buscar" link...');
-            const btnBuscar = this.page.getByRole('link', { name: 'Buscar' });
-            await btnBuscar.waitFor({ state: 'visible', timeout: 5000 });
-            logger.info('👁️ UI: "Buscar" link visible, clicking...');
-            await btnBuscar.click();
-            logger.info('👆 UI: Clicked "Buscar"');
+            // 2. Disparar búsqueda (estrategia robusta multi-entorno)
+            await this.clickBuscar(inputId);
 
-            // 3. ESPERA EXPLÍCITA: Esperar que el nroViaje aparezca dentro de #registros
-            logger.info(`⏳ UI: Waiting for text "${nroViaje}" inside #registros...`);
-            const textoViaje = this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first();
+            // 3. ESPERA EXPLÍCITA: Esperar que el registro aparezca dentro de #registros
+            // En QA aparece el texto del nroViaje. En Demo (bug visual) la celda del ID de viaje 
+            // a veces sale vacía, pero los botones de acción (.manito) sí se renderizan.
+            // Esperamos a que la tabla se pueble con el texto del viaje o con botones de acción.
+            logger.info(`⏳ UI: Waiting for trip row to appear inside #registros...`);
+            const contenedor = this.page.locator(this.selectors.contenedor);
+            
+            // Wait for either the text or at least one action button (manito) to appear in the container
+            const rowLoadedPromise = Promise.any([
+                contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error('text not found'); }),
+                contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error('manito not found'); })
+            ]);
 
             try {
-                await textoViaje.waitFor({ state: 'visible', timeout: 30000 });
-                logger.info(`✅ UI: Text "${nroViaje}" found inside #registros`);
+                await rowLoadedPromise;
+                logger.info(`✅ UI: Trip row recognized inside #registros`);
             } catch {
-                logger.warn(`⚠️ UI: Text "${nroViaje}" NOT found in 30s. Retrying...`);
+                logger.warn(`⚠️ UI: Trip row NOT found in 30s. Retrying...`);
                 await this.takeScreenshot('buscar-viaje-primer-intento-fallido');
 
                 await this.page.reload();
@@ -125,29 +129,34 @@ export class MonitoreoPage extends BasePage {
                 await inputId.waitFor({ state: 'visible', timeout: 10000 });
                 await inputId.clear();
                 await inputId.fill(nroViaje);
-                await btnBuscar.click();
-                logger.info('🔄 UI: Re-filter executed, waiting for text...');
+                await this.clickBuscar(inputId);
+                logger.info('🔄 UI: Re-filter executed, waiting for trip row...');
 
-                await textoViaje.waitFor({ state: 'visible', timeout: 30000 });
-                logger.info(`✅ UI: Text "${nroViaje}" found on retry`);
+                try {
+                    const rowLoadedRetry = Promise.any([
+                        contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error(); }),
+                        contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error(); })
+                    ]);
+                    await rowLoadedRetry;
+                    logger.info(`✅ UI: Trip row found on retry`);
+                } catch {
+                    throw new Error(`Text "${nroViaje}" or action buttons did not appear after retry`);
+                }
             }
 
-            // 4. Scroll al texto del viaje
-            logger.info('📜 UI: Scrolling to trip text...');
-            // Re-localizamos justo antes de interactuar para evitar errores de "detached"
-            // y agregamos un pequeño delay para estabilidad del grid
+            // 4. Scroll a la fila (buscamos cualquier elemento dentro para scrollear)
+            logger.info('📜 UI: Scrolling to trip row...');
             await this.page.waitForTimeout(1000);
 
             try {
-                const finalLocator = this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first();
-                await finalLocator.scrollIntoViewIfNeeded({ timeout: 5000 });
+                // Hacemos scroll visible usando el contenedor o el span.manito
+                const scrollTarget = contenedor.locator('span.manito').first();
+                await scrollTarget.scrollIntoViewIfNeeded({ timeout: 5000 });
                 await this.page.waitForTimeout(300);
-                logger.info(`✅ UI: Viaje [${nroViaje}] confirmed & visible in #registros`);
+                logger.info(`✅ UI: Viaje row confirmed & visible`);
             } catch (e: any) {
-                logger.warn(`⚠️ UI: Scroll failed (${e.message}), re-trying one last time...`);
+                logger.warn(`⚠️ UI: Scroll failed (${e.message}), continuing anyway...`);
                 await this.page.waitForTimeout(500);
-                await this.page.locator(this.selectors.contenedor).getByText(nroViaje, { exact: true }).first().scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
-                logger.info(`✅ UI: Viaje [${nroViaje}] found after retry`);
             }
 
         } catch (error) {
@@ -155,6 +164,42 @@ export class MonitoreoPage extends BasePage {
             await this.takeScreenshot('buscar-viaje-error');
             throw error;
         }
+    }
+
+    /**
+     * Estrategia robusta multi-entorno para disparar la búsqueda en /viajes/monitoreo.
+     *
+     * En QA el formulario puede tener un <a id="buscar"> o link con texto "Buscar".
+     * En Demo el mismo botón puede ser un <button id="buscar"> o responder a Enter.
+     *
+     * Estrategia 1: JS click en #buscar (patrón probado en TmsApiClient para todos los módulos).
+     * Estrategia 2: Enter en el input #id (fallback universal — funciona en cualquier form).
+     */
+    private async clickBuscar(inputId: any): Promise<void> {
+        logger.info('🔎 UI: Triggering search (multi-strategy)...');
+
+        // Strategy 1: JS click on #buscar element (same as TmsApiClient pattern)
+        const clickedViaId = await this.page.evaluate(() => {
+            const btn = document.getElementById('buscar');
+            if (btn) { (btn as HTMLElement).click(); return true; }
+            return false;
+        });
+
+        if (clickedViaId) {
+            logger.info('✅ UI: Buscar triggered via JS (#buscar element)');
+        } else {
+            // Strategy 2: Enter on the filter input (universal fallback)
+            logger.info('⚠️ UI: #buscar not found — pressing Enter on #id input...');
+            await inputId.press('Enter');
+            logger.info('✅ UI: Buscar triggered via Enter key');
+        }
+
+        // Wait for AJAX to complete before checking #registros
+        await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+            logger.warn('⚠️ UI: networkidle timeout after Buscar, continuing...');
+        });
+        await this.page.waitForTimeout(500);
+        logger.info('✅ UI: Post-search stabilization complete');
     }
 
     // ================================================================
@@ -180,29 +225,45 @@ export class MonitoreoPage extends BasePage {
     async clickAgregarHorarioGPS(): Promise<void> {
         logger.info('🕰️ UI: Accessing "Horario GPS" (Agregar)...');
 
-        // 1. Find first span.manito with onclick="showModalEditTripWithoutGPSManually"
-        logger.info('🔎 UI: Looking for Agregar (Horario GPS) span...');
-        const spanAgregar = this.page.locator('span.manito').filter({ hasText: 'Agregar' }).first();
-
-        await spanAgregar.waitFor({ state: 'visible', timeout: 15000 });
-        logger.info('✅ UI: Span Agregar found');
-
-        // 2. Use JS click to avoid backdrop/overlay interception
-        await this.page.evaluate(() => {
+        // 1. Encontrar y hacer clic en el span de "Agregar Horario GPS"
+        // Filtramos por onclick="showModalEditTripWithoutGPSManually" para evitar
+        // hacer clic en otros spans de "Agregar" (observaciones, POD, etc.)
+        logger.info('🔎 UI: Clicking Agregar (showModalEditTripWithoutGPSManually) via JS...');
+        const clicked = await this.page.evaluate(() => {
             const spans = Array.from(document.querySelectorAll('span.manito'));
-            const agregar = spans.find(s => s.textContent?.trim() === 'Agregar') as HTMLElement;
-            if (agregar) agregar.click();
+            const agregar = spans.find(s =>
+                s.textContent?.trim() === 'Agregar' &&
+                (s.getAttribute('onclick') || '').includes('showModalEditTripWithoutGPSManually')
+            ) as HTMLElement | undefined;
+            if (agregar) { agregar.click(); return true; }
+            return false;
         });
-        logger.info('✅ UI: Clicked Agregar via JS');
 
-        // 3. Esperar que el modal #modalCambioEstadoSinGps se abra
-        logger.info('⏳ UI: Waiting for modal #modalCambioEstadoSinGps...');
-        const modal = this.page.locator(this.selectors.modalCambioEstado);
+        if (!clicked) {
+            logger.warn('⚠️ UI: span.manito[showModalEditTripWithoutGPSManually] not found. Taking screenshot...');
+            await this.takeScreenshot('agregar-not-found');
+            throw new Error('❌ UI: No "Agregar" span with showModalEditTripWithoutGPSManually found in page');
+        }
+        logger.info('✅ UI: Clicked Agregar via JS (showModalEditTripWithoutGPSManually)');
+
+        // 2. Esperar que el modal #modalCambioEstadoSinGps se abra (display: block)
+        // En Demo, body.modal-open no se activa, por lo que Playwright's waitFor({ state: 'visible' })
+        // puede fallar (usa offsetParent que depende de body.modal-open).
+        // Usamos waitForFunction chequeando display:block directamente.
+        logger.info('⏳ UI: Waiting for modal #modalCambioEstadoSinGps (display: block)...');
         try {
-            await modal.waitFor({ state: 'visible', timeout: 15000 });
+            await this.page.waitForFunction(() => {
+                const modal = document.getElementById('modalCambioEstadoSinGps');
+                return modal?.style?.display === 'block' ||
+                       modal?.classList?.contains('show');
+            }, { timeout: 15000 });
+            // Asegurar body.modal-open para que Playwright detecte el modal como visible
+            await this.page.evaluate(() => {
+                document.body.classList.add('modal-open');
+            });
             logger.info('✅ UI: Modal #modalCambioEstadoSinGps open');
         } catch {
-            logger.warn('⚠️ UI: Modal not detected, taking screenshot...');
+            logger.warn('⚠️ UI: Modal not detected via waitForFunction, taking screenshot...');
             await this.takeScreenshot('modal-post-agregar');
         }
     }

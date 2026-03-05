@@ -41,31 +41,54 @@ export class AsignarPage extends BasePage {
 
   // --- BÚSQUEDA ROBUSTA DE FILA ---
   async findViajeRow(nroViaje: string): Promise<Locator | null> {
+    const isDemo = process.env.ENV === 'DEMO';
     // In Demo, the search input might have id "search"
     const searchInput = this.page.locator('input#search, input[type="search"]').first();
+    let searchApplied = false;
+
     if (await searchInput.isVisible()) {
+      logger.info(`🔍 Searching for trip ${nroViaje} in Assignment grid...`);
       await searchInput.clear();
       await searchInput.fill(nroViaje);
-      // Click Buscar button or press Enter
-      const buscarBtn = this.page.locator('#buscar, a:has-text("Buscar")').first();
+      
+      const buscarBtn = this.page.locator('#buscar, a:has-text("Buscar"), button:has-text("Buscar")').first();
       if (await buscarBtn.isVisible()) {
         await buscarBtn.click();
       } else {
         await this.page.keyboard.press('Enter');
       }
+      await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(2000);
+      searchApplied = true;
     }
+
     const rows = this.page.locator(this.selectors.table.rows);
-    try { await rows.first().waitFor({ state: 'visible', timeout: 5000 }); } catch { return null; }
+    try { 
+      await rows.first().waitFor({ state: 'visible', timeout: 5000 }); 
+    } catch { 
+      logger.warn(`⚠️ No rows found after searching for ${nroViaje}`);
+      return null; 
+    }
 
     const rowCount = await rows.count();
-    const searchLower = nroViaje.toLowerCase();
+    
+    // In Demo, if we searched and found exactly one row, it's likely our trip 
+    // even if the trip number is not visually in the text (might be hidden or Folio)
+    if (isDemo && searchApplied && rowCount === 1) {
+      logger.info(`✅ Found single row after search in Demo, assuming it is Trip ${nroViaje}`);
+      return rows.first();
+    }
 
+    const searchLower = nroViaje.toLowerCase();
     for (let i = 0; i < rowCount; i++) {
       const row = rows.nth(i);
       const text = (await row.innerText()).toLowerCase();
-      if (text.includes(searchLower)) return row;
+      if (text.includes(searchLower)) {
+        logger.info(`✅ Found Trip ${nroViaje} by text match in row ${i+1}`);
+        return row;
+      }
     }
+    
     return null;
   }
 

@@ -1376,16 +1376,40 @@ export class TmsApiClient {
 
     await this.page.waitForTimeout(500);
 
+    // 4.5 [DEMO ONLY] Set Fecha vencimiento + Unidad de negocio
+    const isDemo = process.env.ENV === 'DEMO';
+    if (isDemo) {
+      logger.info('📅 [DEMO] Setting Fecha vencimiento via JS con Eventos...');
+      await this.page.evaluate(() => {
+        const dp = document.getElementById('contrato-fecha_vencimiento') as HTMLInputElement;
+        if (dp) {
+            dp.value = '31-12-2026';
+            dp.dispatchEvent(new Event('input', { bubbles: true }));
+            dp.dispatchEvent(new Event('change', { bubbles: true }));
+            dp.dispatchEvent(new Event('blur', { bubbles: true }));
+        }
+      });
 
-
-
-
-
+      logger.info('🏢 [DEMO] Selecting Unidad de negocio: Defecto...');
+      await this.page.evaluate(() => {
+        const selectId = 'drop_business_unit';
+        const select = document.getElementById(selectId) as HTMLSelectElement;
+        if (select) {
+            const opt = Array.from(select.options).find(o => o.text.includes('Defecto'));
+            if (opt) {
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                // @ts-ignore
+                const $ = window.jQuery;
+                if ($ && $(`#${selectId}`).selectpicker) {
+                    $(`#${selectId}`).selectpicker('refresh');
+                }
+            }
+        }
+      });
+    }
 
     // 5. Save with navigation wait
-
-
-
     logger.info('💾 Saving contract header...');
 
 
@@ -1439,45 +1463,32 @@ export class TmsApiClient {
 
 
     } else if (currentUrl.includes('/crear')) {
+      logger.warn(`⚠️ Still on create page. URL: ${currentUrl}. Extrayendo campos con error...`);
+      
+      const errorFields = await this.page.evaluate(() => {
+        const errorElements = document.querySelectorAll('.has-error, .is-invalid');
+        const fields: string[] = [];
+        errorElements.forEach(el => {
+           // Si el propio elemento es un input/select
+           if (['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) {
+               fields.push(el.id || el.getAttribute('name') || 'unknown');
+           } else {
+               // Si es un contenedor, buscar dentro
+               const input = el.querySelector('input, select, textarea');
+               if (input) fields.push(input.id || input.getAttribute('name') || 'unknown');
+           }
+        });
+        return fields;
+      });
 
+      logger.error(`❌ Validation error fields: ${errorFields.join(', ')}`);
+      await this.page.screenshot({ path: `reports/screenshots/stuck-contrato-${Date.now()}.png`, fullPage: true });
 
-
-      // Check for validation errors
-
-
-
-      const errors = await this.page.locator('.has-error, .invalid-feedback, .alert-danger').allTextContents();
-
-
-
-      if (errors.length > 0) {
-
-
-
-        logger.error(`❌ Validation errors: ${errors.join(' | ')}`);
-
-
-
-        throw new Error(`Contract save failed with errors: ${errors.join(' | ')}`);
-
-
-
+      if (errorFields.length > 0) {
+        throw new Error(`Contract save failed. Invalid fields: ${errorFields.join(', ')}`);
       }
-
-
-
-      logger.warn(`⚠️ Still on create page. URL: ${currentUrl}`);
-
-
-
     } else {
-
-
-
       logger.info(`⚠️ Contract form submitted (URL: ${currentUrl})`);
-
-
-
     }
 
 
@@ -1485,10 +1496,11 @@ export class TmsApiClient {
   }
 
   private async addRouteAndTarifas(tarifaConductor: string, tarifaViaje: string): Promise<void> {
-
-
-
-    logger.info('🛣️ Adding Route 715 and Cargo with SLOW tarifa entry...');
+    const isDemo = process.env.ENV === 'DEMO';
+    const routeId = isDemo ? '47' : '715';
+    const routeCargoId = isDemo ? '47_6' : '715_19';
+    
+    logger.info(`🛣️ Adding Route ${routeId} and Cargo ${routeCargoId} with SLOW tarifa entry...`);
 
 
 
@@ -1584,7 +1596,7 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('a#btn_plus_715');
+    await this.page.click(`a#btn_plus_${routeId}`);
 
     // Wait for loading modal to disappear (CRITICAL: blocks all clicks)
     logger.info('⏳ Waiting for loading modal to disappear...');
@@ -1616,7 +1628,7 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('#btn_click_715');
+    await this.page.click(`#btn_click_${routeId}`);
 
     // Wait for loading modal after expanding route
     try {
@@ -1632,7 +1644,12 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('a#btn_plus_ruta_715_19');
+    if (isDemo) {
+      // In ContratosPage, it uses an xpath selector for the exact button
+      await this.page.click(`//a[@id='btn_plus_ruta_${routeCargoId}']//i[@class='fa fa-plus']`);
+    } else {
+      await this.page.click(`a#btn_plus_ruta_${routeCargoId}`);
+    }
 
     // Wait for loading modal after adding route tariff
     logger.info('⏳ Waiting for loading modal after route tariff...');
@@ -1685,7 +1702,7 @@ export class TmsApiClient {
 
 
 
-    await this.fillSlowly('#txt_tarifa_conductor_715', tarifaConductor, 100);
+    await this.fillSlowly(`#txt_tarifa_conductor_${routeId}`, tarifaConductor, 100);
 
 
 
@@ -1697,7 +1714,7 @@ export class TmsApiClient {
 
 
 
-    await this.fillSlowly('#txt_tarifa_extra_715', tarifaViaje, 100);
+    await this.fillSlowly(`#txt_tarifa_extra_${routeId}`, tarifaViaje, 100);
 
 
 
@@ -1789,34 +1806,35 @@ export class TmsApiClient {
       // 1. Campos de Texto
       await this.page.fill('#viajes-nro_viaje', nroViaje);
 
+      const isDemo = process.env.ENV === 'DEMO';
+      const tipoOperacionText = isDemo ? 'Distribución' : 'tclp2210';
+      const tipoServicioText = isDemo ? 'Lcl' : 'tclp2210';
+
       // 2. Dropdowns Simples (Operación, Servicio, Cliente)
       // Usamos JS directo si es retry para mayor velocidad y seguridad
       if (isRetry) {
-        await this.forceSelectByText('tipo_operacion_form', 'tclp2210'); // Asumiendo ID del select oculto
-        await this.forceSelectByText('viajes-tipo_servicio_id', 'tclp2210');
+        await this.forceSelectByText('tipo_operacion_form', tipoOperacionText); // Asumiendo ID del select oculto
+        await this.forceSelectByText('viajes-tipo_servicio_id', tipoServicioText);
         await this.forceSelectByText('viajes-cliente_id', clienteNombre);
       } else {
-        await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', 'tclp2210', 'Tipo Operación');
-        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', 'tclp2210', 'Tipo Servicio');
+        await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', tipoOperacionText, 'Tipo Operación');
+        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', tipoServicioText, 'Tipo Servicio');
         await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
       }
 
       if (!isRetry) await this.page.waitForTimeout(1000); // Esperar carga de datos del cliente
 
+      const tipoViajeText = isDemo ? 'DIRECTO' : 'Normal';
+      const codigoCargaText = isDemo ? 'CONTENEDOR DRY' : 'Pallet_Furgon_Frio_10ton';
+
       // 3. Tipos de Viaje
       if (isRetry) {
-        await this.forceSelectByText('viajes-tipo_viaje_id', 'Normal');
+        await this.forceSelectByText('viajes-tipo_viaje_id', tipoViajeText);
         await this.forceSelectByText('viajes-unidad_negocio_id', 'Defecto');
       } else {
-        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_viaje_id"]', 'Normal', 'Tipo Viaje');
+        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_viaje_id"]', tipoViajeText, 'Tipo Viaje');
         await this.selectBootstrapDropdownSimple('button[data-id="viajes-unidad_negocio_id"]', 'Defecto', 'Unidad Negocio');
       }
-
-      // 4. SELECCIÓN DE CARGA (CRÍTICO - FIX ANTERIOR)
-      // Usamos inyección JS directa para evitar problemas de "click fuera del modal" o dropdown cerrado
-      logger.info('📦 Seleccionando Carga (Force JS)...');
-      await this.forceSelectByText('viajes-carga_id', 'Pallet_Furgon_Frio_10ton');
-      await this.page.waitForTimeout(500);
     };
 
     // 1. LLENADO INICIAL
@@ -1839,20 +1857,26 @@ export class TmsApiClient {
     const origenDropdown = this.page.locator('button[data-id="_origendestinoform-origen"]').locator('xpath=..').locator('.dropdown-menu.show').first();
     await origenDropdown.waitFor({ state: 'visible', timeout: 5000 });
 
+    // Setup dynamic environment variables for Origen/Destino
+    const isDemoForCarga = process.env.ENV === 'DEMO';
+    const origenText = isDemoForCarga ? '233_CD SuperZoo_Quilicura' : '1_Agunsa_Lampa_RM-18';
+    const destinoSearchText = isDemoForCarga ? 'Divisa' : '225_Starken';
+    const destinoText = isDemoForCarga ? 'Divisa' : '225_Starken_Sn Bernardo-19';
+
     // Buscar en el searchbox si existe
     const origenSearchBox = origenDropdown.locator('.bs-searchbox input');
     if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await origenSearchBox.fill('1_Agunsa_Lampa');
+      await origenSearchBox.fill(origenText);
       await this.page.waitForTimeout(500);
     }
-
+    
     // PASO 2: Seleccionar opción Origen
-    logger.info('📍 PASO 2: Seleccionando "1_Agunsa_Lampa_RM-18"...');
-    const origenOption = origenDropdown.locator('li a, li span.text').filter({ hasText: '1_Agunsa_Lampa_RM-18' }).first();
+    logger.info(`📍 PASO 2: Seleccionando "${origenText}"...`);
+    const origenOption = origenDropdown.locator('li a, li span.text').filter({ hasText: origenText }).first();
     await origenOption.waitFor({ state: 'visible', timeout: 5000 });
     await origenOption.click();
     await this.page.waitForTimeout(1000);
-    logger.info('✅ Origen seleccionado: 1_Agunsa_Lampa_RM-18');
+    logger.info(`✅ Origen seleccionado: ${origenText}`);
 
     // PASO 3: DESTINO
     logger.info('📍 PASO 3: Abriendo dropdown Destino...');
@@ -1868,21 +1892,42 @@ export class TmsApiClient {
     // Buscar en el searchbox si existe
     const destinoSearchBox = destinoDropdown.locator('.bs-searchbox input');
     if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await destinoSearchBox.fill('225_Starken');
+      await destinoSearchBox.fill(destinoSearchText);
       await this.page.waitForTimeout(500);
     }
 
     // PASO 4: Seleccionar opción Destino
-    logger.info('📍 PASO 4: Seleccionando "225_Starken_Sn Bernardo-19"...');
-    const destinoOption = destinoDropdown.locator('li a, li span.text').filter({ hasText: '225_Starken_Sn Bernardo-19' }).first();
-    await destinoOption.waitFor({ state: 'visible', timeout: 5000 });
-    await destinoOption.click();
+    logger.info(`📍 PASO 4: Seleccionando "${destinoText}"...`);
+    const destinoOptionItem = destinoDropdown.locator('ul.dropdown-menu.inner li a span.text').filter({ hasText: destinoText }).first();
+    await destinoOptionItem.waitFor({ state: 'visible', timeout: 5000 });
+    await destinoOptionItem.click();
     await this.page.waitForTimeout(1000);
-    logger.info('✅ Destino seleccionado: 225_Starken_Sn Bernardo-19');
+    logger.info(`✅ Destino seleccionado: ${destinoText}`);
 
     // Esperar estabilización (sin networkidle que puede causar problemas)
-    await this.page.waitForTimeout(1500);
+    await this.page.waitForTimeout(2000);
 
+    // =======================================================================
+    // 3. SELECCIÓN DE CARGA (POST ORIGEN/DESTINO)
+    // Se movió aquí porque elegir origen/destino puede gatillar AJAX
+    // y limpiar las opciones de carga (quedando EMPTY) en Demo.
+    // =======================================================================
+    const codigoCargaTextFinal = isDemoForCarga ? 'CONTENEDOR DRY' : 'Pallet_Furgon_Frio_10ton';
+    const cargaSelectIdFinal = isDemoForCarga ? 'viajes-carga_id' : 'viajes-codigo_carga_id';
+    
+    logger.info(`📦 SELECCIONANDO CARGA AL FINAL (Polling DOM for ${cargaSelectIdFinal} to have option ${codigoCargaTextFinal})...`);
+    
+    // Esperar explícitamente a que el AJAX traiga la opción de Carga
+    await this.page.waitForFunction(({ id, text }) => {
+      const select = document.getElementById(id) as HTMLSelectElement;
+      if (!select) return false;
+      return Array.from(select.options).some(opt => opt.text.toUpperCase().includes(text.toUpperCase()));
+    }, { id: cargaSelectIdFinal, text: codigoCargaTextFinal }, { timeout: 15000 }).catch(() => {
+      logger.warn(`⚠️ Timeout esperando que la opción de carga '${codigoCargaTextFinal}' apareciera en '#${cargaSelectIdFinal}'.`);
+    });
+
+    await this.forceSelectByText(cargaSelectIdFinal, codigoCargaTextFinal);
+    await this.page.waitForTimeout(1000);
     // DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
     const formDiag = await this.page.evaluate(() => {
       const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
