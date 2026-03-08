@@ -14,11 +14,12 @@ export class PlanificarPage extends BasePage {
     valorFlete: '#viajes-valor_flete',
 
     // Botones de Dropdowns (Bootstrap Select) - Usamos data-id
-    btnTipoOperacion: isDemoMode() ? 'button[data-id="tipo_operacion_form"]' : 'button[data-id="viajes-tipo_operacion_id"]',
+    // NOTA: Ambos ambientes (QA y Demo) usan los mismos selectores tipo_operacion_form y viajes-carga_id
+    btnTipoOperacion: 'button[data-id="tipo_operacion_form"]',
     btnTipoServicio: 'button[data-id="viajes-tipo_servicio_id"]',
-    btnTipoViaje: isDemoMode() ? 'button[data-id="viajes-tipo_viaje_id"]' : 'button[data-id="viajes-tipo_viaje"]',
+    btnTipoViaje: 'button[data-id="viajes-tipo_viaje_id"]',
     btnUnidadNegocio: 'button[data-id="viajes-unidad_negocio_id"]',
-    btnCodigoCarga: isDemoMode() ? 'button[data-id="viajes-carga_id"]' : 'button[data-id="viajes-codigo_carga_id"]',
+    btnCodigoCarga: 'button[data-id="viajes-carga_id"]',
     btnCliente: 'button[data-id="viajes-cliente_id"]',
 
     // Ruta
@@ -52,11 +53,11 @@ export class PlanificarPage extends BasePage {
 
     await this.navigate();
     await this.fillNroViaje(nroViaje);
-    
+
     // Step 2: Select Operation
     await this.selectTipoOperacion(operation);
     await this.waitForLoading(20000);
-    await this.page.waitForTimeout(1500); 
+    await this.page.waitForTimeout(1500);
 
     // Step 3: Select Service
     await this.selectTipoServicio(service);
@@ -66,7 +67,7 @@ export class PlanificarPage extends BasePage {
     // Step 4: Select Cliente
     await this.selectCliente(cliente);
     await this.waitForLoading(20000);
-    
+
     await this.click(this.selectors.btnGuardar);
   }
 
@@ -98,13 +99,11 @@ export class PlanificarPage extends BasePage {
   private async handleModalBackdrop(): Promise<void> {
     const backdrop = this.page.locator('.modal-backdrop');
     if (await backdrop.isVisible().catch(() => false)) {
-      logger.info('🛡️ Modal backdrop detected, waiting for it to disappear...');
-      await backdrop.waitFor({ state: 'hidden', timeout: 5000 }).catch(async () => {
-        logger.warn('⚠️ Backdrop still visible after timeout, attempting to force removal via JS...');
-        await this.page.evaluate(() => {
-          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-          document.body.classList.remove('modal-open');
-        });
+      logger.info('🛡️ Modal backdrop detected, forcefully removing it to unblock UI...');
+      await this.page.evaluate(() => {
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.paddingRight = '';
       });
       await this.page.waitForTimeout(500); // Settle time
     }
@@ -115,12 +114,12 @@ export class PlanificarPage extends BasePage {
    */
   private async selectBootstrapDropdown(btnSelector: string, optionText: string, fieldName: string = 'Dropdown'): Promise<void> {
     logger.info(`Selecting ${fieldName}: [${optionText}]`);
-    
+
     try {
       await this.waitForLoading();
-      
+
       const button = this.page.locator(btnSelector);
-      await button.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => { });
+      await button.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
       await button.waitFor({ state: 'visible', timeout: 2000 }).catch(() => { });
 
       // Ensure no backdrop is blocking the dropdown click
@@ -146,8 +145,8 @@ export class PlanificarPage extends BasePage {
       }
 
       const option = menu.locator('ul.dropdown-menu li a').filter({ hasText: optionText }).first();
-      
-      await option.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => { });
+
+      await option.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
       await option.evaluate((node: HTMLElement) => node.click());
 
       // 4. Verification & Force Sync
@@ -163,11 +162,11 @@ export class PlanificarPage extends BasePage {
         const container = btn.closest('.bootstrap-select');
         const select = container?.querySelector('select') as HTMLSelectElement;
         const options = Array.from(select?.options || []);
-        
+
         // Try strict match first, then includes
         let target = options.find(o => o.text.trim() === text);
         if (!target) {
-            target = options.find(o => o.text.trim().toLowerCase().includes(text.toLowerCase()));
+          target = options.find(o => o.text.trim().toLowerCase().includes(text.toLowerCase()));
         }
 
         if (select && target) {
@@ -216,15 +215,16 @@ export class PlanificarPage extends BasePage {
     logger.info(`Adding ruta: ${numeroRuta}`);
     await this.handleModalBackdrop();
     const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
-    
+
     try {
+      await btnAgregar.evaluate(el => el.scrollIntoView({ block: 'center' })).catch(() => { });
       await expect(btnAgregar).toBeEnabled({ timeout: 15000 });
-      await btnAgregar.click();
+      await btnAgregar.evaluate(el => (el as HTMLElement).click());
       await this.page.waitForTimeout(2000); // Demo might be slow
 
       // We look for the route in the table
       const rows = this.page.locator(this.selectors.tablaRutas);
-      
+
       // If we have a search box in the modal, we use it
       const searchBox = this.page.locator('#modalRutasSugeridas .dataTables_filter input');
       if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -242,7 +242,9 @@ export class PlanificarPage extends BasePage {
         if (text.includes(numeroRuta)) {
           logger.info(`Found ruta [${numeroRuta}] in row ${i + 1}`);
           const selectBtn = row.locator('.btn-success, .btn-primary').first();
-          await selectBtn.click();
+          await selectBtn.evaluate(el => el.scrollIntoView({ block: 'center' })).catch(() => { });
+          await selectBtn.waitFor({ state: 'visible', timeout: 3000 }).catch(() => { });
+          await selectBtn.evaluate(el => (el as HTMLElement).click());
           found = true;
           break;
         }
@@ -250,7 +252,7 @@ export class PlanificarPage extends BasePage {
 
       if (!found) {
         logger.warn(`Ruta ${numeroRuta} not found in the list`);
-        await this.page.keyboard.press('Escape').catch(() => {});
+        await this.page.keyboard.press('Escape').catch(() => { });
         return false;
       }
 
@@ -267,7 +269,7 @@ export class PlanificarPage extends BasePage {
       return true;
     } catch (e) {
       logger.error('Failed in agregarRuta', e);
-      await this.page.keyboard.press('Escape').catch(() => {});
+      await this.page.keyboard.press('Escape').catch(() => { });
       return false;
     }
   }
@@ -282,6 +284,7 @@ export class PlanificarPage extends BasePage {
 
   async clickGuardar(): Promise<void> {
     logger.info('Clicking Guardar...');
+    await this.handleModalBackdrop();
     await this.click(this.selectors.btnGuardar);
     await this.page.waitForLoadState('networkidle');
   }

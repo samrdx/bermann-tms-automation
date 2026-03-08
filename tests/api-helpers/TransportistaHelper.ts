@@ -150,7 +150,7 @@ export class TransportistaHelper {
         try {
             const buscarLink = page.getByRole('link', { name: 'Buscar' });
             if (await buscarLink.isVisible({ timeout: 3000 }).catch(() => false)) {
-                await buscarLink.click();
+                await buscarLink.click({ force: true, timeout: 1500 });
                 logger.info('🔎 Clicked Buscar button (link role)');
                 return;
             }

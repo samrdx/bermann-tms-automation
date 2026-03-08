@@ -3,6 +3,7 @@ import { MonitoreoPage } from '../../../../../src/modules/monitoring/pages/Monit
 import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 /**
  * Operaciones - Monitoreo - Finalizar Viaje (Legacy)
@@ -12,10 +13,14 @@ import fs from 'fs';
  *   2. npm run test:legacy:planificar
  *   3. npm run test:legacy:asignar
  */
-test.describe('Operaciones - Monitoreo - Finalizar Viaje (Legacy)', () => {
+test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
     test.setTimeout(120000);
 
     test('Should finalize an assigned trip using data from worker JSON', async ({ page }, testInfo) => {
+        await allure.epic('TMS Legacy Flow');
+        await allure.feature('03-Viajes');
+        await allure.story('Finalizar Viaje');
+
         const startTime = Date.now();
 
         logger.info('='.repeat(80));
@@ -39,6 +44,12 @@ test.describe('Operaciones - Monitoreo - Finalizar Viaje (Legacy)', () => {
 
         logger.info(`✅ Loaded Viaje: ${nroViaje}`);
 
+        await allure.parameter('Nro Viaje', String(nroViaje));
+        await allure.parameter('Ambiente', process.env.ENV || 'QA');
+        await allure.attachment('Monitoreo Data', JSON.stringify({
+            NroViaje: nroViaje,
+        }, null, 2), 'application/json');
+
         // PHASE 2: Navigation to Monitoreo
         const monitoreo = new MonitoreoPage(page);
         await test.step('Phase 2: Navigate to Monitoreo', async () => {
@@ -58,6 +69,7 @@ test.describe('Operaciones - Monitoreo - Finalizar Viaje (Legacy)', () => {
         operationalData.viaje.status = 'FINALIZADO';
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
         logger.info('✅ JSON updated: viaje.status = FINALIZADO');
+        await allure.parameter('Estado Viaje', 'FINALIZADO');
 
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info('='.repeat(80));

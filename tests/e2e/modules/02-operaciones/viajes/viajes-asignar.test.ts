@@ -3,6 +3,7 @@ import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPa
 import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 /**
  * Step 6.5: Asignar Viaje (Legacy - uses seeded data from JSON)
@@ -18,10 +19,14 @@ import fs from 'fs';
  *   4. Assign Transportista, Vehículo, Conductor
  *   5. Save and verify
  */
-test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
+test.describe('[V02] Viajes - Asignar', () => {
     test.setTimeout(120000);
 
     test('Should assign Viaje using entities from worker JSON', async ({ page }, testInfo) => {
+        await allure.epic('TMS Legacy Flow');
+        await allure.feature('03-Viajes');
+        await allure.story('Asignar Viaje');
+
         const startTime = Date.now();
         const isDemo = process.env.ENV?.toUpperCase() === 'DEMO';
 
@@ -79,7 +84,29 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
         logger.info(`   Vehículo      : ${patente}`);
         logger.info(`   Conductor     : ${conductorFull}`);
         logger.info(`   Nro Viaje     : ${nroViaje}`);
-        logger.info(`   Search ID     : ${searchId} ${isDemo ? '(internal Demo ID)' : '(nroViaje)'}`);
+        logger.info(`   Search ID     : ${searchId} (${isDemo && viaje.id ? 'internal grid ID' : 'nroViaje'})`);
+
+        await allure.parameter('Transportista', transNombre);
+        await allure.parameter('Vehículo', patente);
+        await allure.parameter('Conductor', conductorFull);
+        await allure.parameter('Nro Viaje', nroViaje);
+        await allure.parameter('Ambiente', isDemo ? 'DEMO' : 'QA');
+        await allure.attachment('Entidades Asignadas (JSON)', JSON.stringify({
+            transportista: transNombre,
+            vehiculo: patente,
+            conductor: conductorFull,
+            nroViaje,
+            searchId
+        }, null, 2), 'application/json');
+
+        await allure.attachment('Viaje Data', JSON.stringify({
+            Transportista: transNombre,
+            Vehiculo: patente,
+            Conductor: conductorFull,
+            NroViaje: nroViaje,
+            SearchId: searchId,
+            IsDemo: isDemo
+        }, null, 2), 'application/json');
 
         // =================================================================
         // PHASE 2: Search by nroViaje in /viajes/asignar → click Editar
@@ -185,7 +212,9 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
         // =================================================================
         await test.step('Phase 8: Save assignment', async () => {
             logger.info('PHASE 8: Clicking Guardar...');
-            await page.click('#btn_guardar_form');
+            const btnGuardar = page.locator('#btn_guardar_form');
+            await btnGuardar.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+            await btnGuardar.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
 
             // Handle possible confirmation modal
             try {
@@ -242,7 +271,8 @@ test.describe('Viajes - Asignar (Legacy, from JSON)', () => {
             // Click search button (Demo: a#buscar, QA: may rely on DataTables auto-filter)
             const buscarBtn = page.locator('a#buscar').first();
             if (await buscarBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
-                await buscarBtn.click();
+                await buscarBtn.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+                await buscarBtn.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
                 logger.info('✅ Clicked a#buscar to trigger search');
             } else {
                 await page.keyboard.press('Enter');
@@ -307,16 +337,19 @@ async function selectTransportistaRobust(page: any, nombre: string): Promise<voi
     logger.info(`🛡️ Robust Selection: Transportista "${nombre}"`);
 
     const btnDropdown = page.locator('button[data-id="viajes-transportista_id"]');
-    await btnDropdown.click();
+    await btnDropdown.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+    await btnDropdown.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
 
     const searchBox = page.locator('.bs-searchbox input').filter({ visible: true }).first();
-    await searchBox.click();
+    await searchBox.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+    await searchBox.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
     await searchBox.pressSequentially(nombre, { delay: 100 });
 
     const opcionFiltrada = page.locator('.dropdown-menu.show li a').filter({ hasText: nombre }).first();
+    await opcionFiltrada.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
     await opcionFiltrada.waitFor({ state: 'visible', timeout: 5000 });
+    await opcionFiltrada.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
     await page.waitForTimeout(500);
-    await opcionFiltrada.click();
 
     await page.waitForTimeout(1000);
     const textoBoton = await btnDropdown.textContent();
@@ -357,7 +390,8 @@ async function selectBootstrapDropdownByDataId(
 ): Promise<void> {
     try {
         const dropdownBtn = page.locator(`button[data-id="${dataId}"]`);
-        await dropdownBtn.click();
+        await dropdownBtn.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+        await dropdownBtn.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
         await page.waitForTimeout(300);
 
         const searchInput = page.locator(
@@ -376,18 +410,22 @@ async function selectBootstrapDropdownByDataId(
 
         logger.info(`✅ Bootstrap dropdown [${dataId}] → "${textToSelect}"`);
     } catch (e) {
-        logger.warn(`⚠️ selectBootstrapDropdownByDataId failed for "${dataId}": ${e}. JS fallback...`);
+        logger.warn(`⚠️ selectBootstrapDropdownByDataId failed for "${dataId}": JS fallback...`);
         await page.evaluate(({ selectId, text }: { selectId: string; text: string }) => {
-            const select = document.getElementById(selectId) as HTMLSelectElement;
+            const select = document.querySelector(`select[id$="${selectId.split('-')[1]}"]`) as HTMLSelectElement;
             if (!select) return;
             const opt = Array.from(select.options)
                 .find(o => o.text.toUpperCase().includes(text.toUpperCase()));
             if (opt) {
                 select.value = opt.value;
                 // @ts-ignore
-                if (window.jQuery && window.jQuery(select).selectpicker) {
+                if (window.jQuery) {
                     // @ts-ignore
-                    window.jQuery(select).selectpicker('refresh');
+                    const $s = window.jQuery(select);
+                    // @ts-ignore
+                    if ($s.selectpicker) {
+                        $s.selectpicker('val', opt.value);
+                    }
                 }
             }
         }, { selectId: dataId, text: textToSelect });

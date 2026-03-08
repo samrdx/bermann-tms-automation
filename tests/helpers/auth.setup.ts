@@ -5,8 +5,8 @@ import { getTestUser } from '../../src/config/credentials.js';
 import path from 'path';
 import fs from 'fs';
 
-// path.resolve starts from CWD (root), so this remains valid without changes
-const authFile = path.resolve('playwright/.auth/user.json');
+const envName = (process.env.ENV || 'QA').toLowerCase();
+const authFile = path.resolve(`playwright/.auth/user-${envName}.json`);
 
 setup('authenticate', async ({ page }) => {
     // Ensure the auth directory exists

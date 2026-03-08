@@ -108,7 +108,7 @@ export class MonitoreoPage extends BasePage {
             // Esperamos a que la tabla se pueble con el texto del viaje o con botones de acción.
             logger.info(`⏳ UI: Waiting for trip row to appear inside #registros...`);
             const contenedor = this.page.locator(this.selectors.contenedor);
-            
+
             // Wait for either the text or at least one action button (manito) to appear in the container
             const rowLoadedPromise = Promise.any([
                 contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error('text not found'); }),
@@ -151,7 +151,8 @@ export class MonitoreoPage extends BasePage {
             try {
                 // Hacemos scroll visible usando el contenedor o el span.manito
                 const scrollTarget = contenedor.locator('span.manito').first();
-                await scrollTarget.scrollIntoViewIfNeeded({ timeout: 5000 });
+                // Ensure element is somewhat into view
+                await scrollTarget.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
                 await this.page.waitForTimeout(300);
                 logger.info(`✅ UI: Viaje row confirmed & visible`);
             } catch (e: any) {
@@ -255,7 +256,7 @@ export class MonitoreoPage extends BasePage {
             await this.page.waitForFunction(() => {
                 const modal = document.getElementById('modalCambioEstadoSinGps');
                 return modal?.style?.display === 'block' ||
-                       modal?.classList?.contains('show');
+                    modal?.classList?.contains('show');
             }, { timeout: 15000 });
             // Asegurar body.modal-open para que Playwright detecte el modal como visible
             await this.page.evaluate(() => {
@@ -306,7 +307,7 @@ export class MonitoreoPage extends BasePage {
         logger.info('💾 UI: Clicking Guardar (#modificarEstadoViaje_sinGps)...');
         const btnGuardar = this.page.locator(this.selectors.btnGuardarModal);
         await btnGuardar.waitFor({ state: 'visible', timeout: 5000 });
-        await btnGuardar.click();
+        await btnGuardar.evaluate(el => (el as HTMLElement).click());
         logger.info('✅ UI: Guardar clicked');
 
         await this.page.waitForTimeout(2000);
@@ -316,7 +317,7 @@ export class MonitoreoPage extends BasePage {
             const btnConfirmar = this.page.locator(this.selectors.btnConfirmar).first();
             if (await btnConfirmar.isVisible({ timeout: 5000 })) {
                 logger.info('⚠️ UI: Confirmation modal detected, accepting...');
-                await btnConfirmar.click();
+                await btnConfirmar.evaluate(el => (el as HTMLElement).click());
                 await this.page.waitForTimeout(1000);
                 logger.info('✅ UI: Confirmation accepted');
             }

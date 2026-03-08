@@ -8,13 +8,19 @@ import {
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { Transportista, TransportistaHelper } from '../../../../api-helpers/TransportistaHelper.js';
 import * as fs from 'fs';
+import { allure } from 'allure-playwright';
 
-test.describe('Transportista - Creación de Transportista', () => {
+test.describe('[E01] Entidades - Crear Transportista', () => {
+  test.setTimeout(120000);
+
 
   test('Debe crear un Transportista correctamente y guardar sus datos', async ({
     page,
     transportistaPage,
   }, testInfo) => {
+    await allure.epic('TMS Legacy Flow');
+    await allure.feature('01-Entidades');
+    await allure.story('Crear Transportista');
 
     // Test data
     const shortNames = ['TransSur', 'Cordillera', 'Pacific', 'Austral', 'Delta', 'Titanium', 'Horizonte', 'EcoTrans'];
@@ -97,6 +103,9 @@ test.describe('Transportista - Creación de Transportista', () => {
       }
       currentData.seededTransportista = createdTransportista;
       fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
+
+      await allure.parameter('Nombre Transportista', createdTransportista.nombre);
+      await allure.parameter('Transportista ID', String(createdTransportista.id ?? 'N/A'));
 
       logger.info(`✅ Transportista data saved to ${dataPath}`);
       logger.info('✅ Test PASSED');

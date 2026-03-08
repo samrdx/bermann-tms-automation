@@ -55,7 +55,7 @@ export abstract class BasePage {
     if (await locator.isVisible()) {
       logger.debug(`Clicking on: ${selector}`);
       try {
-        // Standard click with a reasonable timeout. Firefox can be slower with actionability.
+        // Standard click with a reasonable timeout.
         await locator.click({ force, timeout: 5000 });
       } catch (error) {
         logger.warn(`⚠️ Standard click blocked or timed out for ${selector}. Attempting JS fallback...`);

@@ -38,15 +38,22 @@ Thumbs.db
 *.swo
 *~
 
-# Playwright
+# Playwright & Allure Reports
 playwright-report/
+playwright-report-*/
 test-results/
+test-results-*/
 playwright/.cache/
+allure-results/
+allure-results-*/
+allure-report/
+allure-report-*/
 
-# Temporal
+# Temporal & Worker Data
 tmp/
 temp/
 *.tmp
+playwright/.data/last-run-data-*.json
 
 # Test artifacts
 tests/**/*.js

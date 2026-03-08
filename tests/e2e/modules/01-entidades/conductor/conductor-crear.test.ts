@@ -13,8 +13,11 @@ import {
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
 import { Transportista } from '../../../../api-helpers/TransportistaHelper.js';
+import { allure } from 'allure-playwright';
 
-test.describe('Transport - Conductor Creation', () => {
+test.describe('[E04] Entidades - Crear Conductor', () => {
+    test.setTimeout(120000);
+
 
     let transportistaName: string;
     let seededTransportista: Transportista;
@@ -38,6 +41,11 @@ test.describe('Transport - Conductor Creation', () => {
         page,
         conductorPage
     }, testInfo) => {
+        await allure.epic('TMS Legacy Flow');
+        await allure.feature('01-Entidades');
+        await allure.story('Crear Conductor');
+        await allure.parameter('Transportista (Seeded)', transportistaName);
+        await allure.parameter('Transportista ID', String(seededTransportista.id));
 
         const testData = {
             usuario: generateGenericUser(),
@@ -101,6 +109,9 @@ test.describe('Transport - Conductor Creation', () => {
                 };
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
                 logger.info(`✅ seededConductor saved: ${expectedNombre} ${expectedApellido}`);
+
+                await allure.parameter('Conductor', `${expectedNombre} ${expectedApellido}`.trim());
+                await allure.parameter('RUT Conductor', expectedRut);
             }
             logger.info('✅ Conductor Created and Saved Successfully');
         });

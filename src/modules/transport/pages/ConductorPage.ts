@@ -122,7 +122,7 @@ export class ConductorFormPage extends BasePage {
    */
   private async selectFromBootstrapDropdown(btnSelector: string, optionText: string): Promise<void> {
     const button = this.page.locator(btnSelector);
-    await button.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+    await button.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
     await button.waitFor({ state: 'visible', timeout: 1500 }).catch(() => { });
 
     // 1. Open dropdown via evaluate to be extremely robust
@@ -143,7 +143,7 @@ export class ConductorFormPage extends BasePage {
 
     // Use a more relaxed search for the option
     const option = container.locator('ul.dropdown-menu li a').filter({ hasText: optionText }).first();
-    await option.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+    await option.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
     await option.evaluate((node: HTMLElement) => node.click());
 
     // 4. Verification & Force Sync (Crucial for Demo & Firefox)
@@ -171,10 +171,11 @@ export class ConductorFormPage extends BasePage {
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info("Haciendo clic en Guardar");
-    const button = this.page.locator(this.selectors.guardarBtn);
-    await button.scrollIntoViewIfNeeded();
-    await button.click({ force: true });
+    logger.info('Haciendo clic en Guardar');
+    const btn = this.page.locator(this.selectors.guardarBtn);
+    await btn.waitFor({ state: 'visible', timeout: 5000 });
+    // Use evaluate to bypass Firefox backdrop/overlay interception (same fix as ContratosPage)
+    await btn.evaluate((el: HTMLElement) => el.click());
   }
 
   async isFormSaved(): Promise<boolean> {
@@ -187,13 +188,14 @@ export class ConductorFormPage extends BasePage {
         return false;
       }
 
+      // Firefox can be slower navigating after form submit — increased to 25s
       await this.page.waitForURL(
         url => url.toString().includes('/conductores/index') || url.toString().includes('/conductores/ver'),
-        { timeout: 15000 }
+        { timeout: 25000 }
       );
       return true;
     } catch (error) {
-      logger.error("Error esperando el guardado del formulario", error);
+      logger.error('Error esperando el guardado del formulario', error);
       return false;
     }
   }
