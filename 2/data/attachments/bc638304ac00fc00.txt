@@ -1,0 +1,35 @@
+2026-03-08 23:44:25 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-08 23:44:25 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-08 23:44:28 [INFO]: ✅ Navigation successful
+2026-03-08 23:44:28 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-08 23:44:28 [INFO]: [ClienteFormPage] Filling nombre (razón social): Central 6840
+2026-03-08 23:44:28 [INFO]: [ClienteFormPage] Filling RUT: 20688182-8
+2026-03-08 23:44:28 [INFO]: [BasePage] Entering RUT with verify: [20688182-8] on #clientes-rut
+2026-03-08 23:44:29 [INFO]: [BasePage] ✅ RUT Entered and Verified: 20.688.182-8
+2026-03-08 23:44:29 [INFO]: [ClienteFormPage] Filling nombre fantasia: Central 6840 SpA
+2026-03-08 23:44:29 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-08 23:44:30 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-08 23:44:31 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-08 23:44:31 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-08 23:44:31 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de los Lagos
+2026-03-08 23:44:33 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Osorno
+2026-03-08 23:44:34 [INFO]: [ClienteFormPage] ✅ Random comuna selected: San Pablo
+2026-03-08 23:44:34 [INFO]: [ClienteFormPage] ✅ Location selected: Region de los Lagos → Osorno → San Pablo
+2026-03-08 23:44:34 [INFO]: [ClienteFormPage] Filling calle: Av. Kennedy
+2026-03-08 23:44:34 [INFO]: [ClienteFormPage] Filling altura: 486
+2026-03-08 23:44:35 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-08 23:44:35 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 837/837
+2026-03-08 23:44:35 [INFO]: ✅ Form filled
+2026-03-08 23:44:35 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-08 23:44:35 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-08 23:44:40 [INFO]: ✅ Save initiated
+2026-03-08 23:44:40 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-08 23:44:42 [INFO]: 📍 Post-save URL for ID extraction: https://demo.bermanntms.cl/clientes/index
+2026-03-08 23:44:42 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-08 23:44:42 [INFO]: 🔍 Searching by RUT: 20688182-8 (clean: 206881828)
+2026-03-08 23:44:42 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-08 23:44:45 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-08 23:44:45 [INFO]: ✅ Rescued ID via name search (link): 166
+2026-03-08 23:44:45 [INFO]: ✅ Successfully identified Cliente [Central 6840] ID: 166
+2026-03-08 23:44:45 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-demo.json
+2026-03-08 23:44:45 [INFO]: ✅ Test PASSED

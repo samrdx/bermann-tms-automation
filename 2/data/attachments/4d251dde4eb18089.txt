@@ -1,0 +1,63 @@
+2026-03-08 23:30:44 [INFO]: ================================================================================
+2026-03-08 23:30:44 [INFO]: 🚀 Starting Contract Creation - Tipo Venta (Seeded Cliente Mode)
+2026-03-08 23:30:44 [INFO]: ================================================================================
+2026-03-08 23:30:44 [INFO]: 📋 PHASE 1: Loading seeded client data...
+2026-03-08 23:30:44 [INFO]: 📦 Using cliente: "Distribuidora 5798 SpA" (ID: 1036)
+2026-03-08 23:30:44 [INFO]: 📋 PHASE 2: Navigating to contract creation form...
+2026-03-08 23:30:44 [INFO]: [ContratosFormPage] Navigating to contract creation page: /contrato/crear
+2026-03-08 23:30:47 [INFO]: [ContratosFormPage] ✅ Contract creation page loaded and Nro Contrato input visible
+2026-03-08 23:30:47 [INFO]: ✅ Form loaded
+2026-03-08 23:30:47 [INFO]: 📋 PHASE 3-4: Filling contract header and saving...
+2026-03-08 23:30:47 [INFO]: [ContratosFormPage] 📝 Filling basic contract information (Phase 1) - Tipo: Venta
+2026-03-08 23:30:47 [INFO]: [ContratosFormPage] Filling Nro Contrato: 647107
+2026-03-08 23:30:47 [INFO]: [ContratosFormPage] 🔽 Selecting Tipo Contrato = Venta...
+2026-03-08 23:30:49 [INFO]: [ContratosFormPage] ⏳ Waiting for AJAX...
+2026-03-08 23:30:54 [WARN]: [ContratosFormPage] ⚠️ rendersubview expected response not detected, but logged all XHR
+2026-03-08 23:30:56 [INFO]: [ContratosFormPage] ✅ Tipo Venta selected
+2026-03-08 23:30:56 [INFO]: [ContratosFormPage] Selecting Subtipo: 1...
+2026-03-08 23:30:57 [INFO]: [ContratosFormPage] ✅ Subtipo 1 selected
+2026-03-08 23:30:57 [INFO]: [ContratosFormPage] 🔽 Selecting cliente: "Distribuidora 5798 SpA"...
+2026-03-08 23:30:57 [INFO]: [ContratosFormPage] Selecting Cliente: "Distribuidora 5798 SpA"...
+2026-03-08 23:30:57 [INFO]: [ContratosFormPage] ✅ Cliente selected: "DISTRIBUIDORA 5798 SPA" (val: 1036)
+2026-03-08 23:30:58 [INFO]: [ContratosFormPage] 🔧 Forcing cleanup of any modal backdrops...
+2026-03-08 23:30:59 [INFO]: [ContratosFormPage] 💾 Saving basic contract header...
+2026-03-08 23:31:02 [INFO]: [ContratosFormPage] ✅ Contract header created successfully with ID: 2212
+2026-03-08 23:31:02 [INFO]: [ContratosFormPage] 📍 Redirected to: https://moveontruckqa.bermanntms.cl/contrato/editar/2212
+2026-03-08 23:31:02 [INFO]: ✅ Contract header saved! ID: 2212
+2026-03-08 23:31:02 [INFO]: 📋 PHASE 5: Adding Route 715 + Cargo 715_19 with tarifas...
+2026-03-08 23:31:02 [INFO]: [ContratosFormPage] 🛣️ Adding Route 715 (QA environment)
+2026-03-08 23:31:02 [INFO]: [ContratosFormPage] Clicking "Añadir Ruta" button
+2026-03-08 23:31:04 [INFO]: [ContratosFormPage] Waiting for route modal to appear...
+2026-03-08 23:31:04 [INFO]: [ContratosFormPage] ✅ Route modal visible
+2026-03-08 23:31:05 [INFO]: [ContratosFormPage] Selecting Route 715
+2026-03-08 23:31:07 [INFO]: [ContratosFormPage] Closing routes modal
+2026-03-08 23:31:08 [INFO]: [ContratosFormPage] Clicking "Añadir Carga" for Route 715
+2026-03-08 23:31:09 [INFO]: [ContratosFormPage] ✅ Cargo modal visible
+2026-03-08 23:31:09 [INFO]: [ContratosFormPage] Selecting Cargo via: a#btn_plus_ruta_715_19
+2026-03-08 23:31:10 [INFO]: [ContratosFormPage] Closing cargo modal
+2026-03-08 23:31:11 [INFO]: [ContratosFormPage] Filling tariffs: Conductor=20000, Viaje=50000
+2026-03-08 23:31:14 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_extra_715 set to "50000"
+2026-03-08 23:31:16 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_conductor_715 set to "20000"
+2026-03-08 23:31:19 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_cliente_715 set to "50000"
+2026-03-08 23:31:20 [INFO]: [ContratosFormPage] 🔧 Forcing cleanup of any remaining modals
+2026-03-08 23:31:20 [INFO]: [ContratosFormPage] ✅ Route 715 and cargo added successfully
+2026-03-08 23:31:20 [INFO]: ✅ Route and tariffs added
+2026-03-08 23:31:20 [INFO]: 📋 PHASE 6: Saving full contract (with tarifas)...
+2026-03-08 23:31:20 [INFO]: [ContratosFormPage] 💾 Saving contract and extracting ID
+2026-03-08 23:31:27 [INFO]: [ContratosFormPage] Current URL after save: https://moveontruckqa.bermanntms.cl/contrato/index
+2026-03-08 23:31:27 [WARN]: [ContratosFormPage] ⚠️ Failed to extract contract ID from URL: https://moveontruckqa.bermanntms.cl/contrato/index, returning empty string to rely on index search
+2026-03-08 23:31:27 [INFO]: ✅ Full contract saved! ID: 
+2026-03-08 23:31:27 [INFO]: 📋 PHASE 7: Verifying contract in index...
+2026-03-08 23:31:27 [INFO]: 🔍 Verification attempt 1/3...
+2026-03-08 23:31:30 [INFO]: ⌨️ Searching by cliente: Distribuidora 5798 SpA
+2026-03-08 23:31:32 [INFO]: ✅ Contract 647107 found in index!
+2026-03-08 23:31:32 [INFO]: 📋 PHASE 8: Persisting contract data to JSON...
+2026-03-08 23:31:32 [INFO]: ✅ contratoCliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-08 23:31:32 [INFO]: ================================================================================
+2026-03-08 23:31:32 [INFO]: ✅ VENTA CONTRACT CREATION COMPLETE!
+2026-03-08 23:31:32 [INFO]: ================================================================================
+2026-03-08 23:31:32 [INFO]:    Nro Contrato: 647107
+2026-03-08 23:31:32 [INFO]:    Contract ID: 2212
+2026-03-08 23:31:32 [INFO]:    Cliente: Distribuidora 5798 SpA
+2026-03-08 23:31:32 [INFO]:    Execution Time: 47.97s
+2026-03-08 23:31:32 [INFO]: ================================================================================

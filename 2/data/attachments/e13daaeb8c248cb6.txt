@@ -1,0 +1,40 @@
+2026-03-08 23:28:18 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-08 23:28:18 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-08 23:28:21 [INFO]: ✅ Navigation successful
+2026-03-08 23:28:21 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-08 23:28:21 [INFO]: [ClienteFormPage] Filling nombre (razón social): Importadora 9348
+2026-03-08 23:28:21 [INFO]: [ClienteFormPage] Filling RUT: 17699287-5
+2026-03-08 23:28:21 [INFO]: [BasePage] Entering RUT with verify: [17699287-5] on #clientes-rut
+2026-03-08 23:28:22 [INFO]: [BasePage] ✅ RUT Entered and Verified: 17.699.287-5
+2026-03-08 23:28:22 [INFO]: [ClienteFormPage] Filling nombre fantasia: Importadora 9348 SpA
+2026-03-08 23:28:22 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-08 23:28:23 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-08 23:28:24 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-08 23:28:24 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-08 23:28:25 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de los Lagos
+2026-03-08 23:28:26 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Puerto Montt
+2026-03-08 23:28:28 [WARN]: [ClienteFormPage] ⚠️ No comuna options available (count=1)
+2026-03-08 23:28:28 [WARN]: [ClienteFormPage] ⚠️ No comuna options for ciudad "Puerto Montt" (región: "Region de los Lagos"), retrying...
+2026-03-08 23:28:28 [INFO]: [ClienteFormPage] 📍 Location attempt 2/5
+2026-03-08 23:28:29 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de Antofagasta
+2026-03-08 23:28:30 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: El Loa
+2026-03-08 23:28:32 [INFO]: [ClienteFormPage] ✅ Random comuna selected: San Pedro de Atacama
+2026-03-08 23:28:32 [INFO]: [ClienteFormPage] ✅ Location selected: Region de Antofagasta → El Loa → San Pedro de Atacama
+2026-03-08 23:28:32 [INFO]: [ClienteFormPage] Filling calle: Av. Pajaritos
+2026-03-08 23:28:32 [INFO]: [ClienteFormPage] Filling altura: 471
+2026-03-08 23:28:32 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-08 23:28:32 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 570/570
+2026-03-08 23:28:33 [INFO]: ✅ Form filled
+2026-03-08 23:28:33 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-08 23:28:33 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-08 23:28:38 [INFO]: ✅ Save initiated
+2026-03-08 23:28:38 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-08 23:28:40 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-08 23:28:40 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-08 23:28:40 [INFO]: 🔍 Searching by RUT: 17699287-5 (clean: 176992875)
+2026-03-08 23:28:40 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-08 23:28:42 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-08 23:28:42 [INFO]: ✅ Rescued ID via name search (link): 1037
+2026-03-08 23:28:42 [INFO]: ✅ Successfully identified Cliente [Importadora 9348] ID: 1037
+2026-03-08 23:28:42 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-08 23:28:42 [INFO]: ✅ Test PASSED

@@ -1,0 +1,18 @@
+2026-03-08 23:29:41 [INFO]: ✅ Loaded seededTransportista: Delta 8998 (ID: 1730)
+2026-03-08 23:29:42 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-08 23:29:45 [INFO]: 📝 Filling Conductor Form for: Diego López
+2026-03-08 23:29:45 [INFO]: [ConductorFormPage] Llenando usuario: ylkwjo79
+2026-03-08 23:29:45 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-08 23:29:45 [INFO]: [ConductorFormPage] Llenando nombre: Diego
+2026-03-08 23:29:45 [INFO]: [ConductorFormPage] Llenando apellido: López
+2026-03-08 23:29:45 [INFO]: [ConductorFormPage] Llenando documento: 29.983.967-2
+2026-03-08 23:29:45 [INFO]: [BasePage] Entering RUT with verify: [29.983.967-2] on #conductores-documento
+2026-03-08 23:29:47 [INFO]: [BasePage] ✅ RUT Entered and Verified: 29.983.967-2
+2026-03-08 23:29:47 [INFO]: [ConductorFormPage] Llenando telefono: +56962179081
+2026-03-08 23:29:47 [INFO]: [ConductorFormPage] Llenando email: diegodiaz@hotmail.com
+2026-03-08 23:29:47 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-08 23:29:48 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-08 23:29:49 [INFO]: [ConductorFormPage] Seleccionando transportista: [Delta 8998]
+2026-03-08 23:29:50 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-08 23:29:52 [INFO]: ✅ seededConductor saved: Diego López
+2026-03-08 23:29:52 [INFO]: ✅ Conductor Created and Saved Successfully

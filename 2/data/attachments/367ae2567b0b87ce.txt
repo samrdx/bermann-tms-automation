@@ -1,0 +1,13 @@
+2026-03-08 23:45:09 [INFO]: ✅ Loaded seededTransportista: EcoTrans 6734 (ID: 179)
+2026-03-08 23:45:10 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-08 23:45:12 [INFO]: 📝 Filling form for Transportista: EcoTrans 6734
+2026-03-08 23:45:12 [INFO]: [VehiculoFormPage] Filling patente: RMIM-53
+2026-03-08 23:45:13 [INFO]: [VehiculoFormPage] Filling muestra: RMIM-53
+2026-03-08 23:45:14 [INFO]: [VehiculoFormPage] Selecting transportista: EcoTrans 6734
+2026-03-08 23:45:15 [INFO]: [VehiculoFormPage] ✅ Transportista "EcoTrans 6734" selected
+2026-03-08 23:45:15 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-08 23:45:16 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-08 23:45:17 [INFO]: [VehiculoFormPage] Selecting capacidad: 28 TON
+2026-03-08 23:45:18 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" selected
+2026-03-08 23:45:18 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-08 23:45:22 [INFO]: ✅ seededVehiculo saved: RMIM-53

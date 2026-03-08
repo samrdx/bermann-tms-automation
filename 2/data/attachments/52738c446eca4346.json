@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 182783",
+  "cliente": "CliMon 182783",
+  "vehiculo": "REJD-21",
+  "conductor": "María",
+  "nroViaje": "355443",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "187.82",
+  "ambiente": "QA"
+}

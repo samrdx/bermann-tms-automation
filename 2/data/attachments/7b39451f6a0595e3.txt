@@ -1,0 +1,64 @@
+2026-03-08 23:49:12 [INFO]: ================================================================================
+2026-03-08 23:49:12 [INFO]: Starting Step 6: Planificar Viaje
+2026-03-08 23:49:12 [INFO]: ================================================================================
+2026-03-08 23:49:12 [INFO]: Loading existing entity data from worker-specific JSON...
+2026-03-08 23:49:12 [INFO]: ✅ All prerequisites validated
+2026-03-08 23:49:12 [INFO]: Loaded entities:
+2026-03-08 23:49:12 [INFO]:    Cliente source: seededCliente ✅
+2026-03-08 23:49:12 [INFO]:    Cliente: Central 6755
+2026-03-08 23:49:12 [INFO]: 
+2026-03-08 23:49:12 [INFO]: Environment: DEMO
+2026-03-08 23:49:12 [INFO]: Configuration: {
+  "tipoOperacion": "Distribución",
+  "tipoServicio": "Lcl",
+  "tipoViaje": "DIRECTO",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "CONTENEDOR DRY",
+  "ruta": "47",
+  "origenManual": "233_CD SuperZoo_Quilicura",
+  "destinoManual": "Divisa"
+}
+2026-03-08 23:49:12 [INFO]: PHASE 1: Navigate to Planificar Viajes
+2026-03-08 23:49:12 [INFO]: [PlanificarViajesPage] Navigating to Planificar Viajes page
+2026-03-08 23:49:16 [INFO]: Navigation successful
+2026-03-08 23:49:16 [INFO]: PHASE 2: Fill Complete Viaje Form
+2026-03-08 23:49:16 [INFO]: [PlanificarViajesPage] Filling Nro Viaje: 96606
+2026-03-08 23:49:16 [INFO]: [PlanificarViajesPage] Selecting Tipo Operacion: [Distribución]
+2026-03-08 23:49:19 [INFO]: [PlanificarViajesPage] Selecting Tipo Servicio: [Lcl]
+2026-03-08 23:49:22 [INFO]: Selecting Cliente: Central 6755 SpA
+2026-03-08 23:49:22 [INFO]: [PlanificarViajesPage] Selecting Cliente: [Central 6755 SpA]
+2026-03-08 23:49:26 [INFO]: [PlanificarViajesPage] Selecting Tipo Viaje: [DIRECTO]
+2026-03-08 23:49:30 [INFO]: [PlanificarViajesPage] Selecting Unidad Negocio: [Defecto]
+2026-03-08 23:49:34 [INFO]: [PlanificarViajesPage] Selecting Codigo Carga: [CONTENEDOR DRY]
+2026-03-08 23:49:37 [INFO]: Attempting to add Route: 47...
+2026-03-08 23:49:37 [INFO]: [PlanificarViajesPage] Adding ruta: 47
+2026-03-08 23:49:41 [INFO]: [PlanificarViajesPage] Found ruta [47] in row 1
+2026-03-08 23:49:41 [INFO]: [PlanificarViajesPage] Waiting for Origen/Destino to populate...
+2026-03-08 23:49:41 [INFO]: Form filled completely
+2026-03-08 23:49:41 [INFO]: PHASE 3: Save Viaje
+2026-03-08 23:49:41 [INFO]: [PlanificarViajesPage] Clicking Guardar...
+2026-03-08 23:49:41 [INFO]: [PlanificarViajesPage] 🛡️ Modal backdrop detected, forcefully removing it to unblock UI...
+2026-03-08 23:49:44 [INFO]: Post-save URL: https://demo.bermanntms.cl/viajes/crear
+2026-03-08 23:49:44 [WARN]: ⚠️ Could not capture Viaje ID. The assignment test will search by nroViaje instead.
+2026-03-08 23:49:44 [INFO]: Save clicked and navigation completed
+2026-03-08 23:49:44 [INFO]: PHASE 4: Verification
+2026-03-08 23:49:44 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-08 23:49:46 [INFO]: ✅ Captured internal grid ID in Demo: 6589
+2026-03-08 23:49:46 [INFO]: Searching in Asignar grid using: 6589
+2026-03-08 23:49:46 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 6589 in Assignment grid...
+2026-03-08 23:49:49 [INFO]: [AsignarViajesPage] ✅ Found 1 rows after search in Demo, assuming first is Trip 6589
+2026-03-08 23:49:49 [INFO]: ✅ Viaje found in /viajes/asignar using search: 6589
+2026-03-08 23:49:49 [INFO]: ✅ Saved internal grid ID to JSON: viaje.id = 6589
+2026-03-08 23:49:49 [INFO]: Updating worker-specific JSON with viaje...
+2026-03-08 23:49:49 [INFO]: Saved viaje.nroViaje: 96606
+2026-03-08 23:49:49 [INFO]: ================================================================================
+2026-03-08 23:49:49 [INFO]: STEP 6: PLANIFICAR VIAJE COMPLETE!
+2026-03-08 23:49:49 [INFO]: ================================================================================
+2026-03-08 23:49:49 [INFO]: Execution Time: 36.90s
+2026-03-08 23:49:49 [INFO]: 
+2026-03-08 23:49:49 [INFO]: Viaje Details:
+2026-03-08 23:49:49 [INFO]:    Nro Viaje: 96606
+2026-03-08 23:49:49 [INFO]:    Cliente: Central 6755 SpA
+2026-03-08 23:49:49 [INFO]:    Ruta: 05082025-1
+2026-03-08 23:49:49 [INFO]:    Status: PLANIFICADO
+2026-03-08 23:49:49 [INFO]: ================================================================================

@@ -1,0 +1,42 @@
+2026-03-08 23:35:12 [INFO]: ================================================================================
+2026-03-08 23:35:12 [INFO]: Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: QA]
+2026-03-08 23:35:12 [INFO]: ================================================================================
+2026-03-08 23:35:12 [INFO]: PHASE 1: Loading worker-specific JSON data...
+2026-03-08 23:35:12 [INFO]: ✅ All prerequisites validated
+2026-03-08 23:35:12 [INFO]:    Transportista : Delta 8998
+2026-03-08 23:35:12 [INFO]:    Vehículo      : DANR-43
+2026-03-08 23:35:12 [INFO]:    Conductor     : Diego López
+2026-03-08 23:35:12 [INFO]:    Nro Viaje     : 50962
+2026-03-08 23:35:12 [INFO]:    Search ID     : 50962 (nroViaje)
+2026-03-08 23:35:12 [INFO]: PHASE 2: Navigating to /viajes/asignar... [isDemo=false]
+2026-03-08 23:35:12 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-08 23:35:16 [INFO]: 🔍 Searching for viaje "50962" and opening edit form...
+2026-03-08 23:35:16 [INFO]: [AsignarViajesPage] Selecting viaje row: 50962
+2026-03-08 23:35:16 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 50962 in Assignment grid...
+2026-03-08 23:35:19 [INFO]: [AsignarViajesPage] ✅ Found Trip 50962 by text match in row 1
+2026-03-08 23:35:21 [INFO]: [AsignarViajesPage] ✅ Assignment Form Loaded
+2026-03-08 23:35:21 [INFO]: ✅ Trip assignment form loaded — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/5468
+2026-03-08 23:35:21 [INFO]: PHASE 3: Selecting Transportista: Delta 8998
+2026-03-08 23:35:21 [INFO]: 🛡️ Robust Selection: Transportista "Delta 8998"
+2026-03-08 23:35:25 [INFO]: ✅ Transportista verified: Delta 8998
+2026-03-08 23:35:25 [INFO]: PHASE 4: Waiting for cascading dropdowns to reload...
+2026-03-08 23:35:26 [INFO]: PHASE 5: Selecting Vehículo: DANR-43
+2026-03-08 23:35:27 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "DANR-43"
+2026-03-08 23:35:27 [INFO]: PHASE 6: Selecting Conductor: Diego López
+2026-03-08 23:35:29 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Diego López"
+2026-03-08 23:35:29 [INFO]: PHASE 7: Final anti-reset check for Transportista...
+2026-03-08 23:35:29 [INFO]: ✅ Transportista confirmed: "Delta 8998"
+2026-03-08 23:35:29 [INFO]: PHASE 8: Clicking Guardar...
+2026-03-08 23:35:30 [INFO]: 💾 Save completed
+2026-03-08 23:35:30 [INFO]: PHASE 9: Verifying assignment in /viajes/asignar grid...
+2026-03-08 23:35:34 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-08 23:35:36 [INFO]: ✅ Viaje [50962] confirmed in grid. Status Asignado: true
+2026-03-08 23:35:36 [INFO]: ✅ JSON updated: viaje.status = ASIGNADO
+2026-03-08 23:35:36 [INFO]: ================================================================================
+2026-03-08 23:35:36 [INFO]: STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!
+2026-03-08 23:35:36 [INFO]:    Nro Viaje    : 50962
+2026-03-08 23:35:36 [INFO]:    Transportista: Delta 8998
+2026-03-08 23:35:36 [INFO]:    Vehículo     : DANR-43
+2026-03-08 23:35:36 [INFO]:    Conductor    : Diego López
+2026-03-08 23:35:36 [INFO]:    Duration     : 24.01s
+2026-03-08 23:35:36 [INFO]: ================================================================================

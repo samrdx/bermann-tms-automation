@@ -1,0 +1,42 @@
+2026-03-08 23:34:43 [INFO]: ================================================================================
+2026-03-08 23:34:43 [INFO]: Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: QA]
+2026-03-08 23:34:43 [INFO]: ================================================================================
+2026-03-08 23:34:43 [INFO]: PHASE 1: Loading worker-specific JSON data...
+2026-03-08 23:34:43 [INFO]: ✅ All prerequisites validated
+2026-03-08 23:34:43 [INFO]:    Transportista : TransSur 8511
+2026-03-08 23:34:43 [INFO]:    Vehículo      : GB-1569
+2026-03-08 23:34:43 [INFO]:    Conductor     : José Contreras
+2026-03-08 23:34:43 [INFO]:    Nro Viaje     : 60877
+2026-03-08 23:34:43 [INFO]:    Search ID     : 60877 (nroViaje)
+2026-03-08 23:34:43 [INFO]: PHASE 2: Navigating to /viajes/asignar... [isDemo=false]
+2026-03-08 23:34:43 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-08 23:34:47 [INFO]: 🔍 Searching for viaje "60877" and opening edit form...
+2026-03-08 23:34:47 [INFO]: [AsignarViajesPage] Selecting viaje row: 60877
+2026-03-08 23:34:47 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 60877 in Assignment grid...
+2026-03-08 23:34:49 [INFO]: [AsignarViajesPage] ✅ Found Trip 60877 by text match in row 1
+2026-03-08 23:34:52 [INFO]: [AsignarViajesPage] ✅ Assignment Form Loaded
+2026-03-08 23:34:52 [INFO]: ✅ Trip assignment form loaded — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/5467
+2026-03-08 23:34:52 [INFO]: PHASE 3: Selecting Transportista: TransSur 8511
+2026-03-08 23:34:52 [INFO]: 🛡️ Robust Selection: Transportista "TransSur 8511"
+2026-03-08 23:34:56 [WARN]: ⚠️ Mismatch. Got: "Transsur 8511 ". JS injection fallback for "TransSur 8511"...
+2026-03-08 23:34:56 [INFO]: PHASE 4: Waiting for cascading dropdowns to reload...
+2026-03-08 23:34:57 [INFO]: PHASE 5: Selecting Vehículo: GB-1569
+2026-03-08 23:34:59 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "GB-1569"
+2026-03-08 23:34:59 [INFO]: PHASE 6: Selecting Conductor: José Contreras
+2026-03-08 23:35:01 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "José Contreras"
+2026-03-08 23:35:01 [INFO]: PHASE 7: Final anti-reset check for Transportista...
+2026-03-08 23:35:01 [INFO]: ✅ Transportista confirmed: "Transsur 8511"
+2026-03-08 23:35:01 [INFO]: PHASE 8: Clicking Guardar...
+2026-03-08 23:35:02 [INFO]: 💾 Save completed
+2026-03-08 23:35:02 [INFO]: PHASE 9: Verifying assignment in /viajes/asignar grid...
+2026-03-08 23:35:06 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-08 23:35:08 [INFO]: ✅ Viaje [60877] confirmed in grid. Status Asignado: true
+2026-03-08 23:35:08 [INFO]: ✅ JSON updated: viaje.status = ASIGNADO
+2026-03-08 23:35:08 [INFO]: ================================================================================
+2026-03-08 23:35:08 [INFO]: STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!
+2026-03-08 23:35:08 [INFO]:    Nro Viaje    : 60877
+2026-03-08 23:35:08 [INFO]:    Transportista: TransSur 8511
+2026-03-08 23:35:08 [INFO]:    Vehículo     : GB-1569
+2026-03-08 23:35:08 [INFO]:    Conductor    : José Contreras
+2026-03-08 23:35:08 [INFO]:    Duration     : 24.55s
+2026-03-08 23:35:08 [INFO]: ================================================================================

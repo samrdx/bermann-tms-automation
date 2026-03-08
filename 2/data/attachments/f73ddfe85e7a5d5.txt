@@ -1,0 +1,41 @@
+2026-03-08 23:26:54 [INFO]: Compass PHASE 1: Navigate to Create Transportista
+2026-03-08 23:26:54 [INFO]: [TransportistaFormPage] Navigating to Transportista creation page
+2026-03-08 23:26:57 [INFO]: ✅ Navigation successful
+2026-03-08 23:26:57 [INFO]: 📝 PHASE 2: Fill Transportista Form
+2026-03-08 23:26:57 [INFO]: [TransportistaFormPage] Filling nombre: TransSur 8511
+2026-03-08 23:26:57 [INFO]: [TransportistaFormPage] Filling razón social: TransSur 8511 SpA
+2026-03-08 23:26:57 [INFO]: [TransportistaFormPage] Filling documento (RUT): 29510600-K
+2026-03-08 23:26:57 [INFO]: [BasePage] Entering RUT with verify: [29510600-K] on #transportistas-documento
+2026-03-08 23:26:58 [WARN]: [BasePage] RUT Mismatch! Expected: 29510600K, Got: 29510600. Using JS to force value...
+2026-03-08 23:26:59 [WARN]: [BasePage] Trying lowercase k for verification digit...
+2026-03-08 23:26:59 [WARN]: [BasePage] ⚠️ RUT body matches but DV may be missing - continuing test
+2026-03-08 23:26:59 [INFO]: [TransportistaFormPage] Selecting tipo transportista: Terceros Con Flota Si Genera Contrato
+2026-03-08 23:27:00 [INFO]: [TransportistaFormPage] ✅ Tipo transportista "Terceros Con Flota Si Genera Contrato" selected
+2026-03-08 23:27:00 [INFO]: [TransportistaFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-08 23:27:00 [INFO]: [TransportistaFormPage] 📍 Location attempt 1/5
+2026-03-08 23:27:01 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region de los Lagos
+2026-03-08 23:27:02 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Chonchi
+2026-03-08 23:27:04 [WARN]: [TransportistaFormPage] ⚠️ No comuna options available (count=1)
+2026-03-08 23:27:04 [WARN]: [TransportistaFormPage] ⚠️ No comuna options for ciudad "Chonchi" (región: "Region de los Lagos"), retrying...
+2026-03-08 23:27:04 [INFO]: [TransportistaFormPage] 📍 Location attempt 2/5
+2026-03-08 23:27:04 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region del Maule
+2026-03-08 23:27:06 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Talca
+2026-03-08 23:27:07 [INFO]: [TransportistaFormPage] ✅ Random comuna selected: Pelarco
+2026-03-08 23:27:07 [INFO]: [TransportistaFormPage] ✅ Location selected: Region del Maule → Talca → Pelarco
+2026-03-08 23:27:07 [INFO]: [TransportistaFormPage] Filling calle: Av. Matta
+2026-03-08 23:27:07 [INFO]: [TransportistaFormPage] Filling altura: 236
+2026-03-08 23:27:07 [INFO]: [TransportistaFormPage] Selecting forma de pago: Contado
+2026-03-08 23:27:08 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" selected
+2026-03-08 23:27:08 [INFO]: ✅ Form filled
+2026-03-08 23:27:08 [INFO]: 💾 PHASE 3: Save Transportista
+2026-03-08 23:27:08 [INFO]: [TransportistaFormPage] Clicking save button
+2026-03-08 23:27:13 [INFO]: ✅ Save initiated
+2026-03-08 23:27:13 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-08 23:27:15 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-08 23:27:15 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-08 23:27:15 [INFO]: 🔍 Searching by name: TransSur 8511
+2026-03-08 23:27:15 [INFO]: 🔎 Clicked Buscar button (link role)
+2026-03-08 23:27:17 [INFO]: ✅ Rescued ID via grid search (edit link): 1729
+2026-03-08 23:27:17 [INFO]: ✅ Successfully extracted Transportista [TransSur 8511] ID: 1729
+2026-03-08 23:27:17 [INFO]: ✅ Transportista data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-08 23:27:17 [INFO]: ✅ Test PASSED

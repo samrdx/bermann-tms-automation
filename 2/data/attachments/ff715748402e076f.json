@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 853648",
+  "cliente": "CliMon 853648",
+  "vehiculo": "EK-3151",
+  "conductor": "Francisco",
+  "nroViaje": "145577",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "173.69",
+  "ambiente": "DEMO"
+}
