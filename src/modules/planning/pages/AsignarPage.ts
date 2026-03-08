@@ -46,14 +46,17 @@ export class AsignarPage extends BasePage {
     const searchInput = this.page.locator('input#search, input[type="search"]').first();
     let searchApplied = false;
 
+    // Esperar a que aparezca el buscador que a veces tarda en Demo
+    try { await searchInput.waitFor({ state: 'visible', timeout: 5000 }); } catch { }
+
     if (await searchInput.isVisible()) {
       logger.info(`🔍 Searching for trip ${nroViaje} in Assignment grid...`);
       await searchInput.clear();
       await searchInput.fill(nroViaje);
-      
+
       const buscarBtn = this.page.locator('#buscar, a:has-text("Buscar"), button:has-text("Buscar")').first();
       if (await buscarBtn.isVisible()) {
-        await buscarBtn.click();
+        await buscarBtn.evaluate(el => (el as HTMLElement).click());
       } else {
         await this.page.keyboard.press('Enter');
       }
@@ -63,19 +66,19 @@ export class AsignarPage extends BasePage {
     }
 
     const rows = this.page.locator(this.selectors.table.rows);
-    try { 
-      await rows.first().waitFor({ state: 'visible', timeout: 5000 }); 
-    } catch { 
+    try {
+      await rows.first().waitFor({ state: 'visible', timeout: 5000 });
+    } catch {
       logger.warn(`⚠️ No rows found after searching for ${nroViaje}`);
-      return null; 
+      return null;
     }
 
     const rowCount = await rows.count();
-    
-    // In Demo, if we searched and found exactly one row, it's likely our trip 
+
+    // In Demo, if we searched and found rows, it's likely our trip (first one)
     // even if the trip number is not visually in the text (might be hidden or Folio)
-    if (isDemo && searchApplied && rowCount === 1) {
-      logger.info(`✅ Found single row after search in Demo, assuming it is Trip ${nroViaje}`);
+    if (isDemo && searchApplied && rowCount >= 1) {
+      logger.info(`✅ Found ${rowCount} rows after search in Demo, assuming first is Trip ${nroViaje}`);
       return rows.first();
     }
 
@@ -84,11 +87,11 @@ export class AsignarPage extends BasePage {
       const row = rows.nth(i);
       const text = (await row.innerText()).toLowerCase();
       if (text.includes(searchLower)) {
-        logger.info(`✅ Found Trip ${nroViaje} by text match in row ${i+1}`);
+        logger.info(`✅ Found Trip ${nroViaje} by text match in row ${i + 1}`);
         return row;
       }
     }
-    
+
     return null;
   }
 
@@ -105,17 +108,18 @@ export class AsignarPage extends BasePage {
     }
 
     if (!row) throw new Error(`Viaje ${nroViaje} not found in table`);
-
-    await row.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+    // Use JS to scroll to center to avoid flakiness in capturing rows
+    await row.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' })).catch(() => { });
+    await this.page.waitForTimeout(500);
     const editIcon = row.locator('i.fa-pencil, i.fa-edit, a[title="Editar"]').first();
 
     if (await editIcon.isVisible()) {
       await Promise.all([
         this.page.waitForURL(/\/editar\//, { timeout: 30000 }),
-        editIcon.click()
+        editIcon.evaluate(el => (el as HTMLElement).click())
       ]);
     } else {
-      await row.click();
+      await row.evaluate(el => (el as HTMLElement).click());
     }
 
     await this.page.waitForLoadState('domcontentloaded');

@@ -4,6 +4,7 @@ import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/Co
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { config } from '../../../../../src/config/environment.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 /**
  * Contract Creation - Tipo Venta (Uses Seeded Cliente)
@@ -20,11 +21,14 @@ import fs from 'fs';
  * - Verifies the contract appears in /contrato/index
  * - Stores contract info in JSON for downstream tests
  */
-test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
+test.describe('[C02] Contratos - Tipo Venta', () => {
     test.setTimeout(120000);
 
     test('Create Contract (Venta) using Seeded Cliente', async ({ page }, testInfo) => {
         const startTime = Date.now();
+        await allure.epic('TMS Legacy Flow');
+        await allure.feature('02-Contratos');
+        await allure.story('Contrato Tipo Venta');
         logger.info('='.repeat(80));
         logger.info('🚀 Starting Contract Creation - Tipo Venta (Seeded Cliente Mode)');
         logger.info('='.repeat(80));
@@ -47,6 +51,13 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
         const clienteNombre = cliente.nombreFantasia || cliente.nombre;
         logger.info(`📦 Using cliente: "${clienteNombre}" (ID: ${cliente.id})`);
 
+        await allure.parameter('Cliente', clienteNombre);
+        await allure.parameter('Cliente ID', String(cliente.id));
+        await allure.attachment('Datos Cargados (JSON)', JSON.stringify({
+            cliente: clienteNombre,
+            clienteId: cliente.id
+        }, null, 2), 'application/json');
+
         // =================================================================
         // PHASE 2: Navigate to Create Form
         // =================================================================
@@ -61,12 +72,13 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
         // =================================================================
         logger.info('📋 PHASE 3-4: Filling contract header and saving...');
         const nroContrato = String(Date.now()).slice(-6);
-        
+        await allure.parameter('Nro Contrato', nroContrato);
+
         // Use the centralized helper for Venta contracts
         const contractId = await contratosPage.fillBasicContractInfo(
-            nroContrato, 
-            clienteNombre, 
-            'Venta', 
+            nroContrato,
+            clienteNombre,
+            'Venta',
             '1'
         );
         logger.info(`✅ Contract header saved! ID: ${contractId}`);
@@ -87,20 +99,20 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
         logger.info(`✅ Full contract saved! ID: ${finalContractId}`);
 
         logger.info('📋 PHASE 7: Verifying contract in index...');
-        
+
         let found = false;
         const maxAttempts = 3;
         let contractRow = page.locator('table tbody tr').first(); // Placeholder
-        
+
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             logger.info(`🔍 Verification attempt ${attempt}/${maxAttempts}...`);
-            
+
             await page.goto('/contrato/index');
             await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
-            
+
             const searchInput = page.locator('input[type="search"]').first();
             await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-            
+
             logger.info(`⌨️ Searching by cliente: ${clienteNombre}`);
             await searchInput.clear();
             await searchInput.fill(clienteNombre);
@@ -108,7 +120,7 @@ test.describe('Contract Creation - Venta (Uses Seeded Cliente)', () => {
 
             contractRow = page.locator('table tbody tr').filter({ hasText: clienteNombre }).first();
             const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
-            
+
             if (isVisible) {
                 logger.info(`✅ Contract ${nroContrato} found in index!`);
                 found = true;

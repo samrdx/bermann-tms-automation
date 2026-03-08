@@ -228,7 +228,7 @@ last-run-data-firefox.json
      |
 contrato-crear.test.ts -> contrato2cliente-crear.test.ts
      |
-viajes-planificar.test.ts -> viajes-asignar.test.ts -> viajes-finalizar.test.ts
+viajes-planificar.test.ts -> viajes-asignar.test.ts -> viajes-monitoreo.test.ts
 ```
 
 **Note:** WebKit was removed due to instability in legacy form interactions. Only Chromium and Firefox are active.
@@ -242,16 +242,18 @@ viajes-planificar.test.ts -> viajes-asignar.test.ts -> viajes-finalizar.test.ts
 The test suite is organized into two categories:
 
 **Atomic Tests (New Generation):**
+
 - Self-contained, independent tests
 - Do NOT depend on base-entities setup or JSON data files
 - Handle their own authentication and data lookup via API
-- Examples: `viajes-asignar.test.ts`, `viajes-finalizar.test.ts`
+- Examples: `viajes-finalizar-e2e.test.ts` (in `tests/e2e/suites/`)
 
 **Legacy Tests (Dependent):**
+
 - Depend on `base-entities.setup.ts` for entity creation
 - Read data from `last-run-data-{browser}.json`
 - Must run sequentially in a specific order
-- Examples: `contrato-crear.test.ts`, `viajes-planificar.test.ts`
+- Examples: `contrato-crear.test.ts`, `viajes-planificar.test.ts`, `viajes-asignar.test.ts`, `viajes-monitoreo.test.ts`
 
 ## Naming Conventions
 
@@ -433,6 +435,7 @@ TMS_PASSWORD=your_password
 The credential system uses `TMS_USERNAME` and `TMS_PASSWORD` as the standard environment variables. Fallback to `arivas` if not set.
 
 **Available roles:**
+
 - `admin` - Admin user (TMS_USERNAME/TMS_PASSWORD)
 - `regular` - Regular user (same credentials in QA)
 - `viewer` - Read-only user (TEST_VIEWER_USER/TEST_VIEWER_PASS)
@@ -451,7 +454,6 @@ npm run test:auth:login        # Run login test only
 npm run test:auth:logout       # Run logout test only
 
 # === ATOMIC (Stable, Independent Tests) ===
-npm run test:qa:trip:asignar   # Assign trip (atomic, self-contained)
 npm run test:qa:trip:finalizar  # Finalize trip (atomic, self-contained)
 npm run test:qa:trip:all        # Run all atomic tests
 npm run test:qa:trip:all:headed # Run all atomic tests with visible browser
@@ -465,6 +467,8 @@ npm run test:qa:legacy:contratos       # Run contract tests
 npm run test:qa:legacy:contratos:headed
 npm run test:qa:legacy:planificar      # Run trip planning test
 npm run test:qa:legacy:planificar:headed
+npm run test:qa:legacy:asignar         # Run trip assigning test
+npm run test:qa:legacy:monitoreo       # Run trip monitoring test
 
 # === GRANULAR (Debugging Individual Tests) ===
 npm run test:qa:entity:transportista   # Create transportista entity
@@ -473,6 +477,7 @@ npm run test:qa:entity:vehiculo        # Create vehiculo entity
 npm run test:qa:entity:conductor       # Create conductor entity
 npm run test:qa:op:contrato            # Create contract (Costo type)
 npm run test:qa:op:contrato2cliente    # Create contract (Ingreso type)
+npm run test:qa:op:monitoreo           # Run monitoring test
 
 # === FULL FLOWS ===
 npm run test:full-flow         # Run complete E2E flow (setup -> contratos -> viajes -> monitoreo)
@@ -489,6 +494,11 @@ npm run show-report            # Open HTML test report
 npm run codegen                # Launch Playwright codegen for TMS QA environment
 npm run build                  # Compile TypeScript
 npm run clean                  # Clean reports and logs
+
+# === ALLURE REPORTS ===
+npm run allure:clean           # Clean Allure results
+npm run allure:generate        # Generate Allure report from results
+npm run allure:open            # Open Allure report in browser
 ```
 
 ## Modules Implemented
@@ -518,7 +528,7 @@ npm run clean                  # Clean reports and logs
 
 6. **monitoring** - `src/modules/monitoring/`
    - MonitoreoPage
-   - Tests: `02-operaciones/Monitoreo/viajes-finalizar.test.ts`
+   - Tests: `02-operaciones/Monitoreo/viajes-monitoreo.test.ts` (legacy) and `tests/e2e/suites/viajes-finalizar-e2e.test.ts` (atomic E2E)
 
 ### Test Organization
 
@@ -535,15 +545,16 @@ tests/e2e/
 │   │   ├── clientes/cliente-crear.test.ts
 │   │   ├── vehiculos/vehiculo-crear.test.ts
 │   │   └── conductor/conductor-crear.test.ts
-│   ├── 02-operaciones/             # Operation tests (5 tests)
+│   ├── 02-operaciones/             # Operation tests (legacy, sequential)
 │   │   ├── contratos/contrato-crear.test.ts
 │   │   ├── contratos/contrato2cliente-crear.test.ts
 │   │   ├── viajes/viajes-planificar.test.ts
 │   │   ├── viajes/viajes-asignar.test.ts
-│   │   └── Monitoreo/viajes-finalizar.test.ts
+│   │   └── Monitoreo/viajes-monitoreo.test.ts
 │   └── 03-finanzas/               # Reserved for future finance module
 ├── suites/
-│   └── base-entities.setup.ts     # Master suite (creates all base entities)
+│   ├── base-entities.setup.ts     # Master suite (creates all base entities)
+│   └── viajes-finalizar-e2e.test.ts  # Atomic E2E: full flow without JSON deps
 └── helpers/
     └── auth.setup.ts              # Global authentication
 ```
@@ -567,20 +578,24 @@ tests/api-helpers/
 Two parallel jobs that run on push to main/develop:
 
 **Job 1: Atomic Suite** (Independent tests)
+
 - Timeout: 20 minutes
-- Tests: `viajes-asignar.test.ts`, `viajes-finalizar.test.ts`
+- Tests: `tests/e2e/suites/viajes-finalizar-e2e.test.ts` (full E2E, no JSON deps)
 - Browser: Chromium only
-- Credentials: `TMS_USERNAME` / `TMS_PASSWORD` standard
-- Artifact: `report-atomic` (3 days retention)
+- Credentials: `TMS_USER` / `TMS_PASS` mapped to `TMS_USERNAME` / `TMS_PASSWORD`
+- Artifact: `report-atomic` (7 days retention)
 
 **Job 2: Legacy Suite** (Sequential dependent tests)
+
 - Timeout: 30 minutes
 - Stage 1: `base-entities-chromium` (entity setup)
 - Stage 2: Contratos tests
 - Stage 3: `viajes-planificar.test.ts`
 - Workers: 1 (sequential execution)
-- Credentials: Legacy variables (TEST_REGULAR_USER, USERNAME_DEV)
-- Artifact: `report-legacy` (3 days retention)
+- Credentials: `TMS_USER` / `TMS_PASS` mapped to all legacy variables
+- Artifact: `report-legacy` (7 days retention)
+
+> **Note:** `viajes-asignar.test.ts` and `viajes-monitoreo.test.ts` are **Legacy** tests that read from `last-run-data-{browser}.json`. They are NOT atomic.
 
 ### Legacy Workflow (playwright.yml)
 
@@ -605,6 +620,7 @@ Two parallel jobs that run on push to main/develop:
 | Headless | .env value | true |
 
 **Active Projects:**
+
 - `setup` - Auth setup
 - `auth-tests` - Auth test suite
 - `base-entities-chromium` - Entity setup (Chrome)

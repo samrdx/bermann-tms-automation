@@ -5,8 +5,11 @@ import { generatePatente } from '../../../../../src/utils/rutGenerator.js';
 import { isDemoMode } from '../../../../../src/utils/env-helper.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
+import { allure } from 'allure-playwright';
 
-test.describe('Integration - Vehiculo with Seeded Transportista', () => {
+test.describe('[E03] Entidades - Crear Vehículo', () => {
+    test.setTimeout(120000);
+
 
     let seededTransportista: Transportista;
 
@@ -28,6 +31,11 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
         page,
         vehiculoPage
     }, testInfo) => {
+        await allure.epic('TMS Legacy Flow');
+        await allure.feature('01-Entidades');
+        await allure.story('Crear Vehículo');
+        await allure.parameter('Transportista (Seeded)', seededTransportista.nombre);
+        await allure.parameter('Transportista ID', String(seededTransportista.id));
 
         await test.step('Navigate to Vehiculo Creation', async () => {
             await vehiculoPage.navigate();
@@ -74,6 +82,9 @@ test.describe('Integration - Vehiculo with Seeded Transportista', () => {
                 };
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
                 logger.info(`✅ seededVehiculo saved: ${data.seededVehiculo.patente}`);
+
+                await allure.parameter('Patente', expectedPatente);
+                await allure.parameter('Muestra', expectedMuestra);
             }
         });
     });

@@ -2,6 +2,7 @@ import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 /**
  * Step 6: Planificar Viaje (Trip Planning)
@@ -18,7 +19,7 @@ import fs from 'fs';
  * - Verifies trip appears in /viajes/asignar
  * - Stores viaje info in JSON for Step 7
  */
-test.describe('Viajes - Planificar (Create)', () => {
+test.describe('[V01] Viajes - Planificar', () => {
   test.setTimeout(120000);
 
   test('Should planificar a new Viaje using entities from JSON', async ({
@@ -27,6 +28,9 @@ test.describe('Viajes - Planificar (Create)', () => {
     page
   }, testInfo) => {
     const startTime = Date.now();
+    await allure.epic('TMS Legacy Flow');
+    await allure.feature('03-Viajes');
+    await allure.story('Planificar Viaje');
 
     logger.info('='.repeat(80));
     logger.info('Starting Step 6: Planificar Viaje');
@@ -68,6 +72,15 @@ test.describe('Viajes - Planificar (Create)', () => {
     const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
     // Use nombreFantasia if available, otherwise nombre
     const clienteNombre = clienteSource.nombreFantasia || clienteSource.nombre;
+
+    await allure.parameter('Cliente', clienteNombre);
+    await allure.parameter('Nro Viaje', nroViaje);
+    await allure.parameter('Ambiente', process.env.ENV || 'QA');
+    await allure.attachment('Entidades Cargadas (JSON)', JSON.stringify({
+      cliente: clienteNombre,
+      clienteId: clienteSource.id,
+      nroViaje
+    }, null, 2), 'application/json');
 
     // =================================================================
     // STEP 2: environment Configuration
@@ -135,7 +148,7 @@ test.describe('Viajes - Planificar (Create)', () => {
       // 7. Ruta (via Modal or Manual Fallback)
       logger.info(`Attempting to add Route: ${config.ruta}...`);
       const rutaAdded = await viajesPlanificarPage.agregarRuta(config.ruta);
-      
+
       if (!rutaAdded) {
         logger.warn('⚠️ Route addition failed or skipped, applying manual Origen/Destino fallback...');
         if (config.origenManual) await viajesPlanificarPage.selectOrigen(config.origenManual);
@@ -204,7 +217,7 @@ test.describe('Viajes - Planificar (Create)', () => {
       // In Demo, we redirect to /viajes/asignar on success, but NO internal ID in URL
       // We'll capture the ID from the first row of the grid instead
       await viajesAsignarPage.navigate();
-      
+
       let searchTerm = nroViaje;
       let internalGridId: string | null = null;
       if (isDemo) {
@@ -212,18 +225,18 @@ test.describe('Viajes - Planificar (Create)', () => {
         logger.info(`✅ Captured internal grid ID in Demo: ${internalGridId}`);
         searchTerm = internalGridId || nroViaje;
       }
-      
+
       logger.info(`Searching in Asignar grid using: ${searchTerm}`);
       const foundInAsignar = await viajesAsignarPage.findViajeRow(searchTerm).then(row => !!row);
- 
+
       if (foundInAsignar) {
         logger.info(`✅ Viaje found in /viajes/asignar using search: ${searchTerm}`);
       } else {
         logger.warn(`⚠️ Viaje NOT found in /viajes/asignar using search: ${searchTerm}`);
       }
- 
+
       expect(foundInAsignar, `Viaje ${searchTerm} should be visible in Asignar grid`).toBe(true);
-      
+
       // Save internal grid ID for subsequent tests (e.g., asignar)
       if (isDemo && internalGridId) {
         operationalData.viaje = {

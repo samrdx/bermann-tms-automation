@@ -110,7 +110,7 @@ export class ClienteFormPage extends BasePage {
         logger.warn('⚠️ Polígonos dropdown not visible — skipping');
         return;
       }
-      await button.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+      await button.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
       await this.page.waitForTimeout(300);
 
       // Use page.evaluate to interact with Bootstrap Select DOM directly

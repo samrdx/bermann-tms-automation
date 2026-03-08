@@ -4,6 +4,7 @@ import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
 import { DataPathHelper } from '../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
+import { allure } from 'allure-playwright';
 
 // Import Helpers for Seeding
 import { TransportistaHelper } from '../../api-helpers/TransportistaHelper.js';
@@ -179,5 +180,23 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         logger.info('✅ BASE OPERATIONAL SUITE COMPLETED SUCCESSFULLY!');
         logger.info('🎯 Data ready for Contract Creation and Trip Planning tests');
         logger.info('='.repeat(80));
+
+        // Allure parameters — resumen de entidades creadas
+        await allure.epic('TMS Legacy Flow');
+        await allure.feature('00-Setup');
+        await allure.story('Base Entities');
+        await allure.parameter('Transportista', operationalData.transportista.nombre);
+        await allure.parameter('Transportista ID', String(operationalData.transportista.id ?? 'N/A'));
+        await allure.parameter('Cliente', operationalData.cliente.nombreFantasia || operationalData.cliente.nombre);
+        await allure.parameter('Cliente ID', String(operationalData.cliente.id ?? 'N/A'));
+        await allure.parameter('Vehículo Patente', operationalData.vehiculo.patente);
+        await allure.parameter('Conductor', `${operationalData.conductor.nombre} ${operationalData.conductor.apellido}`.trim());
+        await allure.parameter('Browser', browserName);
+        await allure.attachment('Entidades Creadas (JSON)', JSON.stringify({
+            transportista: { nombre: operationalData.transportista.nombre, id: operationalData.transportista.id },
+            cliente: { nombre: operationalData.cliente.nombreFantasia || operationalData.cliente.nombre, id: operationalData.cliente.id },
+            vehiculo: { patente: operationalData.vehiculo.patente },
+            conductor: { nombre: `${operationalData.conductor.nombre} ${operationalData.conductor.apellido}`.trim() }
+        }, null, 2), 'application/json');
     });
 });

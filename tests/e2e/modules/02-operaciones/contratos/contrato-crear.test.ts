@@ -3,6 +3,7 @@ import { logger } from '../../../../../src/utils/logger.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 /**
  * Contract Creation - Tipo Costo (Seeded Transportista)
@@ -16,10 +17,13 @@ import fs from 'fs';
  *   3. Navigate to /contrato/index → search nroContrato → assert row visible
  *      (This is the DEFINITIVE ground-truth verification)
  */
-test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
+test.describe('[C01] Contratos - Tipo Costo', () => {
   test.setTimeout(90000);
 
   test('Create Contract (Costo) using Seeded Transportista', async ({ page }, testInfo) => {
+    await allure.epic('TMS Legacy Flow');
+    await allure.feature('02-Contratos');
+    await allure.story('Contrato Tipo Costo');
     logger.info('='.repeat(80));
     logger.info('🚀 Starting Contract Creation - Tipo Costo (Seeded Transportista)');
     logger.info('='.repeat(80));
@@ -42,6 +46,15 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
 
     const nroContrato = String(Date.now()).slice(-6);
     logger.info(`📝 Nro Contrato: ${nroContrato}`);
+
+    await allure.parameter('Transportista', transportistaNombre);
+    await allure.parameter('Transportista ID', String(transportista.id));
+    await allure.parameter('Nro Contrato', nroContrato);
+    await allure.attachment('Datos Cargados (JSON)', JSON.stringify({
+      transportista: transportistaNombre,
+      transportistaId: transportista.id,
+      nroContrato
+    }, null, 2), 'application/json');
 
     const contratosPage = new ContratosFormPage(page);
 
@@ -105,20 +118,20 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
     // ---------------------------------------------------------------
     await test.step('Phase 5: Verify contract exists in index (ground truth)', async () => {
       logger.info('PHASE 5: Navigating to /contrato/index to verify creation...');
-      
+
       let found = false;
       const maxAttempts = 3;
-      
+
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         logger.info(`🔍 Verification attempt ${attempt}/${maxAttempts}...`);
-        
+
         try {
           await page.goto('/contrato/index');
           await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
-          
+
           const searchInput = page.locator('input[type="search"]').first();
           await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-          
+
           logger.info(`⌨️ Searching by transportista: ${transportistaNombre}`);
           await searchInput.clear();
           await searchInput.fill(transportistaNombre);
@@ -126,11 +139,11 @@ test.describe('Contract Creation - Costo (Uses Seeded Transportista)', () => {
 
           const contractRow = page.locator('table tbody tr').filter({ hasText: transportistaNombre }).first();
           const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
-          
+
           if (isVisible) {
             logger.info(`✅ Contract ${nroContrato} found in index!`);
             found = true;
-            
+
             // Extract the real ID from the edit link if we didn't get it from URL
             if (!finalContractId) {
               const editLink = contractRow.locator('a[href*="/contrato/editar/"]').first();

@@ -7,13 +7,19 @@ import {
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { ClienteHelper, Cliente } from '../../../../api-helpers/ClienteHelper.js';
 import * as fs from 'fs';
+import { allure } from 'allure-playwright';
 
-test.describe('Cliente - Creación de Cliente', () => {
+test.describe('[E02] Entidades - Crear Cliente', () => {
+  test.setTimeout(120000);
+
 
   test('Debe crear un Cliente correctamente y guardar sus datos', async ({
     page,
     clientePage,
   }, testInfo) => {
+    await allure.epic('TMS Legacy Flow');
+    await allure.feature('01-Entidades');
+    await allure.story('Crear Cliente');
 
     // Test data
     const shortNames = ['Distribuidora', 'Comercial', 'Importadora', 'Logistica', 'Servicios', 'Industrial', 'Global', 'Central'];
@@ -86,6 +92,9 @@ test.describe('Cliente - Creación de Cliente', () => {
         testData.baseNombre,
         testData.nombreFantasia
       );
+
+      await allure.parameter('Nombre Cliente', createdCliente.nombre || testData.nombreFantasia);
+      await allure.parameter('Cliente ID', String(createdCliente.id ?? 'N/A'));
 
       // Save data to worker-specific JSON
       const dataPath = DataPathHelper.getWorkerDataPath(testInfo);

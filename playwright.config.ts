@@ -11,12 +11,14 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const ENV = process.env.ENV || 'QA';
+const envName = ENV.toLowerCase();
 const baseURL = ENV === 'DEMO'
   ? 'https://demo.bermanntms.cl'
   : 'https://moveontruckqa.bermanntms.cl';
 
 export default defineConfig({
   testDir: './tests',
+  outputDir: `test-results-${envName}`,
   testIgnore: ['**/examples/**'],
   fullyParallel: true,
 
@@ -35,11 +37,16 @@ export default defineConfig({
 
   reporter: [
     ['html', {
-      outputFolder: 'playwright-report',
+      outputFolder: `playwright-report-${ENV.toLowerCase()}`,
       open: 'never'
     }],
     ['json', {
-      outputFile: 'playwright-report/results.json'
+      outputFile: `playwright-report-${ENV.toLowerCase()}/results.json`
+    }],
+    ['allure-playwright', {
+      detail: true,
+      resultsDir: `allure-results-${ENV.toLowerCase()}`,
+      suiteTitle: false
     }],
     ['list']
   ],
@@ -95,7 +102,7 @@ export default defineConfig({
       testMatch: /tests\/e2e\/modules\/01-entidades\/transport\/transportistas-crear\.test\.ts/,
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/user.json', // Use the authentication state
+        storageState: `playwright/.auth/user-${envName}.json`, // Use the authentication state
       },
       dependencies: ['setup'],
     },
@@ -104,7 +111,7 @@ export default defineConfig({
       testMatch: /tests\/e2e\/modules\/01-entidades\/transport\/transportistas-crear\.test\.ts/,
       use: {
         ...devices['Desktop Firefox'],
-        storageState: 'playwright/.auth/user.json', // Use the authentication state
+        storageState: `playwright/.auth/user-${envName}.json`, // Use the authentication state
       },
       dependencies: ['setup'],
     },
@@ -140,14 +147,14 @@ export default defineConfig({
 
     // --- MAIN TEST PROJECTS ---
     {
-      name: 'chromium',
+      name: `chromium-${envName}`,
       testMatch: [
         /tests\/e2e\/modules\/(?!01-entidades\/transport\/transportistas-crear\.test\.ts).+\.test\.ts/, // Exclude transportistas-crear.test.ts
         /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: `playwright/.auth/user-${envName}.json`,
         // Chrome acepta estos args, pero Firefox no. Aquí sí están bien.
         launchOptions: {
           args: ['--disable-dev-shm-usage', '--no-sandbox']
@@ -156,14 +163,14 @@ export default defineConfig({
       dependencies: ['setup'],
     },
     {
-      name: 'firefox',
+      name: `firefox-${envName}`,
       testMatch: [
         /tests\/e2e\/modules\/(?!01-entidades\/transport\/transportistas-crear\.test\.ts).+\.test\.ts/, // Exclude transportistas-crear.test.ts
         /tests\/e2e\/suites\/.+\.test\.ts/,
       ],
       use: {
         ...devices['Desktop Firefox'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: `playwright/.auth/user-${envName}.json`,
         // IMPORTANTE: Sin launchOptions.args que rompan Firefox
       },
       dependencies: ['setup'],
@@ -179,7 +186,7 @@ export default defineConfig({
       ],
       use: {
         ...devices['Desktop Safari'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: playwright/.auth/user-.json,
       },
       dependencies: ['setup'],
     },

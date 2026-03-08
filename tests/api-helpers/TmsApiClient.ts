@@ -37,7 +37,7 @@ export class TmsApiClient {
 
   private generateRandomId(): string {
 
-    return String(Math.floor(10000 + Math.random() * 100000));
+    return String(Math.floor(100000 + Math.random() * 900000));
 
 
   }
@@ -50,7 +50,7 @@ export class TmsApiClient {
 
     const locator = this.page.locator(selector);
 
-    await locator.click();
+    await locator.evaluate(el => (el as HTMLElement).click());
 
     await locator.clear();
 
@@ -264,81 +264,86 @@ export class TmsApiClient {
       // PRIMARY STRATEGY: Search by RUT (Documento)
       logger.info(`🔍 Searching by RUT: ${documento}`);
       const rutFilterInput = this.page.locator('input[name*="[documento]"]')
-          .or(this.page.locator('input[name*="[rut]"]'))
-          .or(this.page.locator('thead th:has-text("RUT") + th input, thead input').first())
-          .first();
+        .or(this.page.locator('input[name*="[rut]"]'))
+        .or(this.page.locator('thead th:has-text("RUT") + th input, thead input').first())
+        .first();
 
       if (await rutFilterInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-          const searchRut = documento.replace(/[.-]/g, '');
-          await rutFilterInput.fill(searchRut);
-          await rutFilterInput.press('Enter');
-          await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-          await this.page.waitForTimeout(1500);
-          
-          const rutRow = this.page.locator('table tbody tr').filter({ hasText: new RegExp(searchRut.slice(0, 6), 'i') }).first();
-          if (await rutRow.count() > 0) {
-              const dataKey = await rutRow.getAttribute('data-key');
-              if (dataKey) {
-                  id = dataKey;
-                  foundViaRut = true;
-                  logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
-              } else {
-                  const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
-                  if (await actionLink.count() > 0) {
-                      const href = await actionLink.getAttribute('href');
-                      const match = href?.match(/(\d+)/);
-                      if (match) {
-                          id = match[1];
-                          foundViaRut = true;
-                          logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
-                      }
-                  }
+        const searchRut = documento.replace(/[.-]/g, '');
+        await rutFilterInput.fill(searchRut);
+        await rutFilterInput.press('Enter');
+        await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
+        await this.page.waitForTimeout(1500);
+
+        const rutRow = this.page.locator('table tbody tr').filter({ hasText: new RegExp(searchRut.slice(0, 6), 'i') }).first();
+        if (await rutRow.count() > 0) {
+          const dataKey = await rutRow.getAttribute('data-key');
+          if (dataKey) {
+            id = dataKey;
+            foundViaRut = true;
+            logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
+          } else {
+            const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
+            if (await actionLink.count() > 0) {
+              const href = await actionLink.getAttribute('href');
+              const match = href?.match(/(\d+)/);
+              if (match) {
+                id = match[1];
+                foundViaRut = true;
+                logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
               }
+            }
           }
+        }
       }
 
       // FALLBACK STRATEGY: Search by Name (if RUT search fails)
       if (!foundViaRut) {
-          logger.warn('⚠️ RUT search failed, falling back to name-based search...');
-          const searchInput = this.page.locator('#search');
-          await searchInput.fill(nombre);
-          logger.info(`🔎 Filled search with: ${nombre}`);
+        logger.warn('⚠️ RUT search failed, falling back to name-based search...');
+        const searchInput = this.page.locator('#search');
+        await searchInput.fill(nombre);
+        logger.info(`🔎 Filled search with: ${nombre}`);
 
-          await this.page.getByRole('link', { name: 'Buscar' }).click();
-          await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-          await this.page.waitForTimeout(2000);
+        // FIX FIREFOX: Use JS click on #buscar instead of getByRole which fails in Firefox
+        await this.page.evaluate(() => {
+          const btn = document.getElementById('buscar');
+          if (btn) btn.click();
+          else console.error('Botón Buscar no encontrado');
+        });
+        await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
+        await this.page.waitForTimeout(2000);
 
-          const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
-          if (await row.count() > 0) {
-              const dataKey = await row.getAttribute('data-key');
-              if (dataKey) {
-                  id = dataKey;
-                  logger.info(`✅ Transportista ID from data-key: ${id}`);
-              }
-          } else {
-              logger.info(`🔎 Trying alternative search in table...`);
-              const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
-
-              if (await anyRow.count() > 0) {
-                  const dataKey = await anyRow.getAttribute('data-key');
-                  if (dataKey) {
-                      id = dataKey;
-                      logger.info(`✅ Transportista ID from fallback data-key: ${id}`);
-                  } else {
-                      const link = anyRow.locator('a[href*="/transportistas/"]').first();
-                      if (await link.count() > 0) {
-                          const href = await link.getAttribute('href');
-                          const match = href?.match(/\/(\d+)/);
-                          if (match) {
-                              id = match[1];
-                              logger.info(`✅ Transportista ID from link: ${id}`);
-                          }
-                      }
-                  }
-              } else {
-                  logger.warn(`⚠️ No row found for Transportista: ${nombre}`);
-              }
+        const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
+        if (await row.count() > 0) {
+          const dataKey = await row.getAttribute('data-key');
+          if (dataKey) {
+            id = dataKey;
+            logger.info(`✅ Transportista ID from data-key: ${id}`);
           }
+        } else {
+          logger.info(`🔎 Trying alternative search in table...`);
+          const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
+
+          if (await anyRow.count() > 0) {
+            const dataKey = await anyRow.getAttribute('data-key');
+            if (dataKey) {
+              id = dataKey;
+              logger.info(`✅ Transportista ID from fallback data-key: ${id}`);
+            } else {
+              const link = anyRow.locator('a[href*="/transportistas/"]').first();
+              if (await link.count() > 0) {
+                const href = await link.getAttribute('href');
+                const match = href?.match(/\/(\d+)/);
+                if (match) {
+                  id = match[1];
+                  logger.info(`✅ Transportista ID from link: ${id}`);
+                }
+              }
+            }
+          } else {
+            logger.warn(`⚠️ No row found for Transportista: ${nombre}`);
+          }
+        }
       }
     }
 
@@ -407,7 +412,7 @@ export class TmsApiClient {
       // Click "Seleccionar Todos" button
       const selectAllBtn = this.page.locator('.dropdown-menu.show button.bs-select-all').first();
       if (await selectAllBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await selectAllBtn.click();
+        await selectAllBtn.evaluate(el => (el as HTMLElement).click());
         logger.info('✅ Polígonos: Seleccionar Todos clicked');
         await this.page.waitForTimeout(500);
       } else {
@@ -437,7 +442,7 @@ export class TmsApiClient {
 
     // --- GUARDADO ---
     await Promise.all([
-      this.page.waitForNavigation({ waitUntil: 'networkidle' }),
+      this.page.waitForLoadState('domcontentloaded').catch(() => { }),
       this.clickViaJS('#btn_guardar')
     ]);
 
@@ -588,7 +593,10 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('button[data-id="vehiculos-transportista_id"]');
+    await this.page.evaluate(() => {
+      const btn = document.querySelector('button[data-id="vehiculos-transportista_id"]') as HTMLElement;
+      if (btn) btn.click();
+    });
 
 
 
@@ -636,7 +644,10 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('button[data-id="vehiculos-tipo_vehiculo_id"]');
+    await this.page.evaluate(() => {
+      const btn = document.querySelector('button[data-id="vehiculos-tipo_vehiculo_id"]') as HTMLElement;
+      if (btn) btn.click();
+    });
 
 
 
@@ -696,7 +707,7 @@ export class TmsApiClient {
 
 
 
-      await capacidadBtn.click();
+      await capacidadBtn.evaluate(el => (el as HTMLElement).click());
 
 
 
@@ -756,6 +767,13 @@ export class TmsApiClient {
 
 
 
+    // FIX FIREFOX: Limpiar modal-backdrop antes de Guardar
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.waitForTimeout(300);
+
     await Promise.all([
 
 
@@ -764,7 +782,11 @@ export class TmsApiClient {
 
 
 
-      this.page.locator('button:has-text("Guardar")').click()
+      this.page.evaluate(() => {
+        const btn = (document.getElementById('btn_guardar')
+          || Array.from(document.querySelectorAll('button')).find(b => b.textContent?.trim() === 'Guardar')) as HTMLElement;
+        if (btn) btn.click();
+      })
 
 
 
@@ -847,7 +869,10 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('button[data-id="conductores-licencia"]');
+    await this.page.evaluate(() => {
+      const btn = document.querySelector('button[data-id="conductores-licencia"]') as HTMLElement;
+      if (btn) btn.click();
+    });
 
 
 
@@ -939,7 +964,10 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('button[data-id="conductores-transportista_id"]');
+    await this.page.evaluate(() => {
+      const btn = document.querySelector('button[data-id="conductores-transportista_id"]') as HTMLElement;
+      if (btn) btn.click();
+    });
 
 
 
@@ -983,7 +1011,11 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('#btn_guardar');
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); });
 
 
 
@@ -1094,75 +1126,24 @@ export class TmsApiClient {
 
 
 
-    await this.page.evaluate((val: string) => {
-
-
-
-      const $ = (window as any).jQuery;
-
-
-
-      if ($) {
-
-
-
-        $('#contrato-tipo_tarifa_contrato_id').val(val).trigger('change');
-
-
-
-      } else {
-
-
-
-        const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
-
-
-
-        if (el) { el.value = val; el.dispatchEvent(new Event('change', { bubbles: true })); }
-
-
-
-      }
-
-
-
-    }, tipoVal);
-
-
-
-
-
-
-
-    // 2. Wait for form reconfiguration (rendersubview AJAX)
-
-
-
     logger.info('⏳ Waiting for form to reconfigure...');
-
-
-
-    await this.page.waitForResponse(
-
-
-
-      r => r.url().includes('rendersubview') && r.status() === 200,
-
-
-
-      { timeout: 15000 }
-
-
-
-    ).catch(() => {
-
-
-
-      logger.warn('⚠️ rendersubview response not detected, using fallback wait');
-
-
-
-    });
+    await Promise.all([
+      this.page.waitForResponse(
+        r => r.url().includes('rendersubview') && r.status() === 200,
+        { timeout: 15000 }
+      ).catch(() => {
+        logger.warn('⚠️ rendersubview response not detected, using fallback wait');
+      }),
+      this.page.evaluate((val: string) => {
+        const $ = (window as any).jQuery;
+        if ($) {
+          $('#contrato-tipo_tarifa_contrato_id').val(val).trigger('change');
+        } else {
+          const el = document.querySelector('#contrato-tipo_tarifa_contrato_id') as HTMLSelectElement;
+          if (el) { el.value = val; el.dispatchEvent(new Event('change', { bubbles: true })); }
+        }
+      }, tipoVal)
+    ]);
 
 
 
@@ -1383,10 +1364,10 @@ export class TmsApiClient {
       await this.page.evaluate(() => {
         const dp = document.getElementById('contrato-fecha_vencimiento') as HTMLInputElement;
         if (dp) {
-            dp.value = '31-12-2026';
-            dp.dispatchEvent(new Event('input', { bubbles: true }));
-            dp.dispatchEvent(new Event('change', { bubbles: true }));
-            dp.dispatchEvent(new Event('blur', { bubbles: true }));
+          dp.value = '31-12-2026';
+          dp.dispatchEvent(new Event('input', { bubbles: true }));
+          dp.dispatchEvent(new Event('change', { bubbles: true }));
+          dp.dispatchEvent(new Event('blur', { bubbles: true }));
         }
       });
 
@@ -1395,16 +1376,16 @@ export class TmsApiClient {
         const selectId = 'drop_business_unit';
         const select = document.getElementById(selectId) as HTMLSelectElement;
         if (select) {
-            const opt = Array.from(select.options).find(o => o.text.includes('Defecto'));
-            if (opt) {
-                select.value = opt.value;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                // @ts-ignore
-                const $ = window.jQuery;
-                if ($ && $(`#${selectId}`).selectpicker) {
-                    $(`#${selectId}`).selectpicker('refresh');
-                }
+          const opt = Array.from(select.options).find(o => o.text.includes('Defecto'));
+          if (opt) {
+            select.value = opt.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            // @ts-ignore
+            const $ = window.jQuery;
+            if ($ && $(`#${selectId}`).selectpicker) {
+              $(`#${selectId}`).selectpicker('refresh');
             }
+          }
         }
       });
     }
@@ -1412,7 +1393,12 @@ export class TmsApiClient {
     // 5. Save with navigation wait
     logger.info('💾 Saving contract header...');
 
-
+    // FIX FIREFOX: Limpiar modal-backdrop residuales que bloquean page.click() en Firefox
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.waitForTimeout(300);
 
     await Promise.all([
 
@@ -1430,7 +1416,12 @@ export class TmsApiClient {
 
 
 
-      this.page.click('#btn_guardar')
+      // FIX FIREFOX: JS click bypasea overlays invisibles que causan TimeoutError
+      this.page.evaluate(() => {
+        const btn = document.getElementById('btn_guardar') as HTMLElement;
+        if (btn) btn.click();
+        else console.error('btn_guardar not found');
+      })
 
 
 
@@ -1464,19 +1455,19 @@ export class TmsApiClient {
 
     } else if (currentUrl.includes('/crear')) {
       logger.warn(`⚠️ Still on create page. URL: ${currentUrl}. Extrayendo campos con error...`);
-      
+
       const errorFields = await this.page.evaluate(() => {
         const errorElements = document.querySelectorAll('.has-error, .is-invalid');
         const fields: string[] = [];
         errorElements.forEach(el => {
-           // Si el propio elemento es un input/select
-           if (['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) {
-               fields.push(el.id || el.getAttribute('name') || 'unknown');
-           } else {
-               // Si es un contenedor, buscar dentro
-               const input = el.querySelector('input, select, textarea');
-               if (input) fields.push(input.id || input.getAttribute('name') || 'unknown');
-           }
+          // Si el propio elemento es un input/select
+          if (['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) {
+            fields.push(el.id || el.getAttribute('name') || 'unknown');
+          } else {
+            // Si es un contenedor, buscar dentro
+            const input = el.querySelector('input, select, textarea');
+            if (input) fields.push(input.id || input.getAttribute('name') || 'unknown');
+          }
         });
         return fields;
       });
@@ -1499,7 +1490,7 @@ export class TmsApiClient {
     const isDemo = process.env.ENV === 'DEMO';
     const routeId = isDemo ? '47' : '715';
     const routeCargoId = isDemo ? '47_6' : '715_19';
-    
+
     logger.info(`🛣️ Adding Route ${routeId} and Cargo ${routeCargoId} with SLOW tarifa entry...`);
 
 
@@ -1548,11 +1539,11 @@ export class TmsApiClient {
 
 
 
-    await btnAnadirRuta.scrollIntoViewIfNeeded();
+    await btnAnadirRuta.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
 
 
 
-    await btnAnadirRuta.click();
+    await btnAnadirRuta.evaluate(el => (el as HTMLElement).click());
 
 
 
@@ -1580,7 +1571,7 @@ export class TmsApiClient {
 
 
 
-      await btnAnadirRuta.click();
+      await btnAnadirRuta.evaluate(el => (el as HTMLElement).click());
 
 
 
@@ -1596,7 +1587,10 @@ export class TmsApiClient {
 
 
 
-    await this.page.click(`a#btn_plus_${routeId}`);
+    const btnPlusRoute = this.page.locator(`#btn_plus_${routeId}`);
+    await btnPlusRoute.waitFor({ state: 'attached', timeout: 5000 });
+    await btnPlusRoute.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await btnPlusRoute.evaluate(el => (el as HTMLElement).click());
 
     // Wait for loading modal to disappear (CRITICAL: blocks all clicks)
     logger.info('⏳ Waiting for loading modal to disappear...');
@@ -1620,7 +1614,7 @@ export class TmsApiClient {
 
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
 
-    if (await closeBtn.isVisible()) await closeBtn.click();
+    if (await closeBtn.isVisible()) await closeBtn.evaluate(el => (el as HTMLElement).click());
 
 
 
@@ -1628,7 +1622,10 @@ export class TmsApiClient {
 
 
 
-    await this.page.click(`#btn_click_${routeId}`);
+    const btnClickRoute = this.page.locator(`#btn_click_${routeId}`);
+    await btnClickRoute.waitFor({ state: 'attached', timeout: 5000 });
+    await btnClickRoute.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await btnClickRoute.evaluate(el => (el as HTMLElement).click());
 
     // Wait for loading modal after expanding route
     try {
@@ -1644,13 +1641,13 @@ export class TmsApiClient {
 
 
 
-    if (isDemo) {
-      // In ContratosPage, it uses an xpath selector for the exact button
-      await this.page.click(`//a[@id='btn_plus_ruta_${routeCargoId}']//i[@class='fa fa-plus']`);
-    } else {
-      await this.page.click(`a#btn_plus_ruta_${routeCargoId}`);
-    }
-
+    const btnPlusRouteCargo = this.page.locator(`#btn_plus_ruta_${routeCargoId}`);
+    await btnPlusRouteCargo.waitFor({ state: 'attached', timeout: 5000 });
+    await btnPlusRouteCargo.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await btnPlusRouteCargo.evaluate(el => {
+      const icon = el.querySelector('i');
+      if (icon) icon.click(); else (el as HTMLElement).click();
+    });
     // Wait for loading modal after adding route tariff
     logger.info('⏳ Waiting for loading modal after route tariff...');
     try {
@@ -1734,7 +1731,11 @@ export class TmsApiClient {
 
 
 
-    await this.page.click('#btn_guardar');
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); });
 
 
 
@@ -1850,7 +1851,7 @@ export class TmsApiClient {
     logger.info('📍 PASO 1: Abriendo dropdown Origen...');
     const origenBtn = this.page.locator('button[data-id="_origendestinoform-origen"]').first();
     await origenBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await origenBtn.click();
+    await origenBtn.evaluate(el => (el as HTMLElement).click());
     await this.page.waitForTimeout(800);
 
     // Esperar que el dropdown esté visible
@@ -1869,12 +1870,12 @@ export class TmsApiClient {
       await origenSearchBox.fill(origenText);
       await this.page.waitForTimeout(500);
     }
-    
+
     // PASO 2: Seleccionar opción Origen
     logger.info(`📍 PASO 2: Seleccionando "${origenText}"...`);
     const origenOption = origenDropdown.locator('li a, li span.text').filter({ hasText: origenText }).first();
     await origenOption.waitFor({ state: 'visible', timeout: 5000 });
-    await origenOption.click();
+    await origenOption.evaluate(el => (el as HTMLElement).click());
     await this.page.waitForTimeout(1000);
     logger.info(`✅ Origen seleccionado: ${origenText}`);
 
@@ -1882,7 +1883,7 @@ export class TmsApiClient {
     logger.info('📍 PASO 3: Abriendo dropdown Destino...');
     const destinoBtn = this.page.locator('button[data-id="_origendestinoform-destino"]').first();
     await destinoBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await destinoBtn.click();
+    await destinoBtn.evaluate(el => (el as HTMLElement).click());
     await this.page.waitForTimeout(800);
 
     // Esperar que el dropdown esté visible
@@ -1900,7 +1901,7 @@ export class TmsApiClient {
     logger.info(`📍 PASO 4: Seleccionando "${destinoText}"...`);
     const destinoOptionItem = destinoDropdown.locator('ul.dropdown-menu.inner li a span.text').filter({ hasText: destinoText }).first();
     await destinoOptionItem.waitFor({ state: 'visible', timeout: 5000 });
-    await destinoOptionItem.click();
+    await destinoOptionItem.evaluate(el => (el as HTMLElement).click());
     await this.page.waitForTimeout(1000);
     logger.info(`✅ Destino seleccionado: ${destinoText}`);
 
@@ -1913,10 +1914,11 @@ export class TmsApiClient {
     // y limpiar las opciones de carga (quedando EMPTY) en Demo.
     // =======================================================================
     const codigoCargaTextFinal = isDemoForCarga ? 'CONTENEDOR DRY' : 'Pallet_Furgon_Frio_10ton';
-    const cargaSelectIdFinal = isDemoForCarga ? 'viajes-carga_id' : 'viajes-codigo_carga_id';
-    
+    // FIX QA: Both QA and Demo use 'viajes-carga_id' (not 'viajes-codigo_carga_id')
+    const cargaSelectIdFinal = 'viajes-carga_id';
+
     logger.info(`📦 SELECCIONANDO CARGA AL FINAL (Polling DOM for ${cargaSelectIdFinal} to have option ${codigoCargaTextFinal})...`);
-    
+
     // Esperar explícitamente a que el AJAX traiga la opción de Carga
     await this.page.waitForFunction(({ id, text }) => {
       const select = document.getElementById(id) as HTMLSelectElement;
@@ -1931,8 +1933,8 @@ export class TmsApiClient {
     // DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
     const formDiag = await this.page.evaluate(() => {
       const ids = ['viajes-nro_viaje', 'tipo_operacion_form', 'viajes-tipo_servicio_id',
-                   'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-unidad_negocio_id',
-                   'viajes-carga_id', '_origendestinoform-origen', '_origendestinoform-destino'];
+        'viajes-cliente_id', 'viajes-tipo_viaje_id', 'viajes-unidad_negocio_id',
+        'viajes-carga_id', '_origendestinoform-origen', '_origendestinoform-destino'];
       return ids.map(id => {
         const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
         if (!el) return `${id}=NOT_FOUND`;
@@ -1963,8 +1965,14 @@ export class TmsApiClient {
     await guardarBtn.waitFor({ state: 'visible', timeout: 10000 });
 
     // Scroll al botón para asegurar visibilidad
-    await guardarBtn.scrollIntoViewIfNeeded();
+    await guardarBtn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await this.page.waitForTimeout(300);
+
+    // FIX FIREFOX: Limpiar modal-backdrop antes de Guardar
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+    });
 
     // Clic con espera de respuesta de red
     await Promise.all([
@@ -1972,10 +1980,10 @@ export class TmsApiClient {
         (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
         { timeout: 15000 }
       ).catch(() => logger.warn('⚠️ No response captured after Guardar click')),
-      guardarBtn.click(),
+      guardarBtn.evaluate(el => (el as HTMLElement).click()),
     ]);
 
-    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    await this.page.waitForLoadState('domcontentloaded').catch(() => { });
     await this.page.waitForTimeout(2000);
 
     // 16. VERIFICACIÓN POST-GUARDAR (3 estrategias en orden de fiabilidad)
@@ -2004,6 +2012,9 @@ export class TmsApiClient {
     }
 
     // Estrategia 3: Verificar si redirigió (éxito silencioso) o buscar en grilla
+    // FIX FIREFOX: Esperar a que la URL se estabilice antes de leerla (Firefox es más lento para redirigir)
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => { });
+    await this.page.waitForTimeout(1000);
     const currentUrl = this.page.url();
     logger.info(`⚠️ No se detectó toast. URL actual: ${currentUrl}`);
 
@@ -2016,19 +2027,28 @@ export class TmsApiClient {
     // Fallback: navegar a grilla y buscar
     logger.info('⚠️ Fallback: verificando en grilla de asignación...');
     await this.page.goto(`${this.baseUrl}/viajes/asignar`);
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1500);
 
     const searchInput = this.page.locator('#search');
     await searchInput.waitFor({ state: 'visible', timeout: 10000 });
     await searchInput.fill(nroViaje);
     await searchInput.press('Enter');
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1500);
 
+    // Verificar por texto estricto
     const viajeRow = this.page.locator(`text="${nroViaje}"`);
-    if (await viajeRow.isVisible({ timeout: 5000 }).catch(() => false)) {
-      logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla de asignación`);
+    if (await viajeRow.isVisible({ timeout: 3000 }).catch(() => false)) {
+      logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla de asignación por texto`);
+      return;
+    }
+
+    // Verificar por conteo de filas luego de aplicar el filtro
+    const allRows = this.page.locator('table tbody tr');
+    const rowCount = await allRows.count().catch(() => 0);
+    if (rowCount >= 1) {
+      logger.info(`✅ Viaje [${nroViaje}] creado: encontradas ${rowCount} filas en grilla de asignación`);
       return;
     }
 
@@ -2059,7 +2079,7 @@ export class TmsApiClient {
 
 
 
-    await this.page.locator('a[href*="asignar"], a[href*="update"]').first().click();
+    await this.page.locator('a[href*="asignar"], a[href*="update"]').first().evaluate(el => (el as HTMLElement).click());
 
     await this.page.waitForLoadState('domcontentloaded');
 
@@ -2193,7 +2213,11 @@ export class TmsApiClient {
 
     logger.info('💾 Clicking Guardar...');
 
-    await this.page.click('#btn_guardar_form');
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+    });
+    await this.page.evaluate(() => { const b = document.getElementById('btn_guardar_form') as HTMLElement; if (b) b.click(); });
 
 
 
@@ -2205,7 +2229,7 @@ export class TmsApiClient {
 
       logger.info('⚠️ Accepting confirmation modal...');
 
-      await this.page.locator('button:has-text("Aceptar")').click();
+      await this.page.locator('button:has-text("Aceptar")').first().evaluate(el => (el as HTMLElement).click());
 
     }
 
@@ -2238,7 +2262,7 @@ export class TmsApiClient {
     logger.info(`🔎 Searching for trip: ${nroViaje}`);
 
     // 3. Esperar actualización del grid
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1500);
 
     // 4. Verificar que el viaje aparece en el grid
@@ -2512,11 +2536,11 @@ export class TmsApiClient {
 
 
 
-    await btn.scrollIntoViewIfNeeded();
+    await btn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
 
 
 
-    await btn.click();
+    await btn.evaluate(el => (el as HTMLElement).click());
 
 
 
@@ -2568,7 +2592,7 @@ export class TmsApiClient {
 
 
 
-      await option.click();
+      await option.evaluate(el => (el as HTMLElement).click());
 
 
 

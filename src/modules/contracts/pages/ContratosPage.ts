@@ -62,21 +62,38 @@ export class ContratosFormPage extends BasePage {
   async selectTipoContrato(tipo: 'Costo' | 'Venta'): Promise<void> {
     logger.info(`🔽 Selecting Tipo Contrato = ${tipo}...`);
     // The dropdown itself is #contrato-tipo_tarifa_contrato_id, but the visible element is a button.
-    await this.selectBootstrapDropdown(this.selectors.tipoContratoButton, tipo);
-    await this.page.waitForTimeout(2500); // Wait for cascade (Transportista/Cliente dropdowns)
 
-    // If 'Venta' is selected, wait for rendersubview AJAX call to complete
+    // If 'Venta' is selected, we MUST setup the listener BEFORE clicking
+    let responsePromise: Promise<any> | null = null;
+    let urlLogger: ((response: any) => void) | null = null;
     if (tipo === 'Venta') {
-      logger.info('⏳ Waiting for rendersubview (AJAX)...');
-      await this.page.waitForResponse(
+      urlLogger = (r: any) => {
+        if (r.request().resourceType() === 'xhr' || r.request().resourceType() === 'fetch') {
+          logger.debug(`[NETWORK] XHR Response: ${r.url()} (Status: ${r.status()})`);
+        }
+      };
+      this.page.on('response', urlLogger);
+
+      responsePromise = this.page.waitForResponse(
         r => r.url().includes('rendersubview') && r.status() === 200,
-        { timeout: 15000 }
+        { timeout: 7000 } // Shortened to force it to show logs faster
       ).catch(() => {
-        logger.warn('⚠️ rendersubview response not detected for Tipo Venta, continuing with extra timeout...');
-        return this.page.waitForTimeout(3000);
+        logger.warn('⚠️ rendersubview expected response not detected, but logged all XHR');
+        return this.page.waitForTimeout(500);
       });
-      await this.page.waitForTimeout(1000); // Stability buffer
     }
+
+    await this.selectBootstrapDropdown(this.selectors.tipoContratoButton, tipo);
+
+    if (tipo === 'Venta' && responsePromise && urlLogger) {
+      logger.info('⏳ Waiting for AJAX...');
+      await responsePromise;
+      await this.page.waitForTimeout(1500); // Stability buffer after AJAX
+      this.page.off('response', urlLogger);
+    } else {
+      await this.page.waitForTimeout(2500); // Fallback wait for cascade
+    }
+
     logger.info(`✅ Tipo ${tipo} selected`);
   }
 
@@ -85,7 +102,15 @@ export class ContratosFormPage extends BasePage {
     await this.page.waitForSelector(this.selectors.subtipoDropdown, { state: 'attached', timeout: 10000 });
     await this.page.evaluate((value) => {
       const el = document.querySelector('select#tipo') as HTMLSelectElement; // select#tipo is the actual ID
-      if (el) { el.value = value; el.dispatchEvent(new Event('change', { bubbles: true })); }
+      if (el) {
+        const jq = (window as any).jQuery;
+        if (jq && typeof jq('select#tipo').selectpicker === 'function') {
+          jq('select#tipo').selectpicker('val', value);
+        } else {
+          el.value = value;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
     }, subtipoValue);
     await this.page.waitForTimeout(800); // Give time for any cascade
     logger.info(`✅ Subtipo ${subtipoValue} selected`);
@@ -105,8 +130,11 @@ export class ContratosFormPage extends BasePage {
       });
       if (opt.length > 0) {
         const val = opt.first().val();
-        $sel.val(val).trigger('change');
-        if ($sel.selectpicker) $sel.selectpicker('refresh');
+        if (typeof $sel.selectpicker === 'function') {
+          $sel.selectpicker('val', val);
+        } else {
+          $sel.val(val).trigger('change');
+        }
         return { found: true, text: opt.first().text(), val: String(val) };
       }
       return { found: false, text: '', val: '' };
@@ -247,8 +275,8 @@ export class ContratosFormPage extends BasePage {
       logger.info(`Selecting Route ${rc.routeId}`);
       const btnRoute = this.page.locator(rc.routeButtonSelector);
       if (await btnRoute.isVisible()) {
-        await btnRoute.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
-        await btnRoute.click();
+        await btnRoute.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
+        await this.click(rc.routeButtonSelector, true);
       }
       await this.page.waitForTimeout(1000);
 
@@ -257,7 +285,8 @@ export class ContratosFormPage extends BasePage {
       const btnCerrarRutas = this.page
         .locator('button.btn.btn-secondary.waves-effect.waves-light:visible')
         .first();
-      await btnCerrarRutas.click();
+      await btnCerrarRutas.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+      await btnCerrarRutas.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
       await this.page.waitForTimeout(1000);
 
       // Step C: Click "Añadir Carga" for the chosen route
@@ -279,8 +308,8 @@ export class ContratosFormPage extends BasePage {
       const btnCargo = this.page.locator(rc.cargoButtonSelector);
       await btnCargo.waitFor({ state: 'visible', timeout: 5000 });
       if (await btnCargo.isVisible()) {
-        await btnCargo.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
-        await btnCargo.click();
+        await btnCargo.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
+        await this.click(rc.cargoButtonSelector, true);
       }
       await this.page.waitForTimeout(500);
 
@@ -290,7 +319,8 @@ export class ContratosFormPage extends BasePage {
         .locator('button.btn.btn-secondary.waves-effect.waves-light:visible')
         .first();
       if (await btnCerrarCargas.isVisible()) {
-        await btnCerrarCargas.click();
+        await btnCerrarCargas.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
+        await btnCerrarCargas.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
         await this.page.waitForTimeout(1000);
       }
 
@@ -432,7 +462,7 @@ export class ContratosFormPage extends BasePage {
    */
   private async fillTariffField(selector: string, value: string): Promise<void> {
     const input = this.page.locator(selector);
-    await input.scrollIntoViewIfNeeded({ timeout: 1500 }).catch(() => { });
+    await input.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
     await input.click();
     await this.page.waitForTimeout(300);
 

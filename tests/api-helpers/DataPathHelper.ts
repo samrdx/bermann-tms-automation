@@ -52,8 +52,7 @@ export class DataPathHelper {
      * ```
      */
     static getWorkerDataPath(testInfo: TestInfo): string {
-        const projectName = testInfo.project.name;
-        const browserName = this.PROJECT_TO_BROWSER[projectName] || 'default';
+        const browserName = this.getBrowserName(testInfo);
         const env = (process.env.ENV || 'QA').toLowerCase();
         const filename = `last-run-data-${browserName}-${env}.json`;
         const dirPath = path.join(process.cwd(), 'playwright', '.data');
@@ -98,7 +97,10 @@ export class DataPathHelper {
      * @returns Browser name: 'chromium', 'firefox', 'webkit', or 'default'
      */
     static getBrowserName(testInfo: TestInfo): string {
-        const projectName = testInfo.project.name;
+        const projectName = testInfo.project.name.toLowerCase();
+        if (projectName.includes('chromium')) return 'chromium';
+        if (projectName.includes('firefox')) return 'firefox';
+        if (projectName.includes('webkit')) return 'webkit';
         return this.PROJECT_TO_BROWSER[projectName] || 'default';
     }
 }
