@@ -1,0 +1,98 @@
+name: 🌙 TMS QA + DEMO Nightly (Allure)
+
+on:
+  schedule:
+    # Corre a las 3 AM UTC todos los días
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  test-and-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      # ==========================================
+      # 1. QA TESTS
+      # ==========================================
+      - name: 🏃 Run Full QA Flow Envs
+        env:
+          ENV: 'QA'
+          CI: true
+          HEADLESS: true
+          # Usamos los mismos secrets para ambos ambientes a menos que difieran en Bermann
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+        # continue-on-error para no romper el workflow si los tests fallan; queremos ver el reporte de todos modos
+        continue-on-error: true
+        # Ejecuta flujo legacy completo + E2E atómico para QA
+        run: |
+          npm run clean:allure:qa
+          npm run test:qa:flow:entidades-to-viajes
+          npm run test:qa:trip:full-flow
+
+      # ==========================================
+      # 2. DEMO TESTS
+      # ==========================================
+      - name: 🏃 Run Full DEMO Flow Envs
+        env:
+          ENV: 'DEMO'
+          CI: true
+          HEADLESS: true
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+        continue-on-error: true
+        run: |
+          npm run clean:allure:demo
+          npm run test:demo:flow:entidades-to-viajes
+          npm run test:demo:trip:full-flow
+
+      # ==========================================
+      # 3. MERGE & ALLURE REPORT
+      # ==========================================
+      - name: 📂 Merge Allure Results
+        run: |
+          mkdir -p allure-results
+          cp -r allure-results-qa/* allure-results/ || true
+          cp -r allure-results-demo/* allure-results/ || true
+
+      - name: 📈 Get Allure history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: 🔨 Generate Allure Report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        id: allure-report
+        with:
+          allure_results: allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: 🚀 Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
