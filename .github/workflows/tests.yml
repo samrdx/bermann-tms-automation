@@ -105,7 +105,7 @@ jobs:
           npx playwright test \
             tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
             tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
-            --project=chromium \
+            --project=chromium-qa \
             --reporter=html,line
 
       - name: Upload Atomic Report
