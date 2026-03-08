@@ -5,7 +5,7 @@ dotenv.config();
 
 export interface EnvironmentConfig {
   baseUrl: string;
-  environment: 'dev' | 'staging' | 'prod';
+  environment: 'QA' | 'DEMO';
   headless: boolean;
   timeout: number;
   logLevel: 'error' | 'warn' | 'info' | 'debug';
@@ -20,7 +20,7 @@ class ConfigManager {
   }
 
   private loadConfig(): EnvironmentConfig {
-    const env = (process.env.ENVIRONMENT || 'dev') as 'dev' | 'staging' | 'prod';
+    const env = (process.env.ENV || 'QA').toUpperCase() as 'QA' | 'DEMO';
 
     return {
       baseUrl: this.getBaseUrl(env),
@@ -32,18 +32,18 @@ class ConfigManager {
   }
 
   private getBaseUrl(env: string): string {
-    // 1. Prioridad CI/CD: Si existe BASE_URL (inyectada por GitHub Actions), úsala.
+    // 1. Prioridad CI/CD: Si existe BASE_URL explícita, úsala.
     if (process.env.BASE_URL) {
       return process.env.BASE_URL;
     }
 
-    // 2. Fallback Local: Busca variables específicas por entorno (legacy)
-    const urls: Record<string, string> = {
-      dev: process.env.BASE_URL_DEV || '',
-      staging: process.env.BASE_URL_STAGING || '',
-      prod: process.env.BASE_URL_PROD || '',
-    };
-    return urls[env] || urls.dev;
+    // 2. Ambientes Nativos de la Aplicación
+    if (env === 'DEMO') {
+      return 'https://demo.bermanntms.cl';
+    }
+
+    // Por defecto es QA
+    return 'https://moveontruckqa.bermanntms.cl';
   }
 
   private validateConfig(): void {
