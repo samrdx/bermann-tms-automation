@@ -106,14 +106,22 @@ jobs:
             tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
             tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
             --project=chromium-qa \
-            --reporter=html,line
+            --reporter=html,line,allure-playwright
 
-      - name: Upload Atomic Report
+      - name: 📦 Install Allure Commandline
+        if: always()
+        run: npm install -g allure-commandline
+
+      - name: 🔨 Generate Allure Report (No History)
+        if: always()
+        run: allure generate allure-results -o allure-report --clean
+
+      - name: ☁️ Upload Allure HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: report-atomic-core
-          path: playwright-report/
+          name: allure-html-report-qa
+          path: allure-report/
           retention-days: 7
 
   # ------------------------------------------------------------------
