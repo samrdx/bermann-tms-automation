@@ -102,11 +102,7 @@ jobs:
         # o los flujos combinados que no asfixian los workers.
         run: |
           echo "Running Independent Core Business Flows..."
-          npx playwright test \
-            tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-            tests/e2e/modules/02-operaciones/Monitoreo/viajes-finalizar.test.ts \
-            --project=chromium-qa \
-            --reporter=html,line,allure-playwright
+          npm run test:qa:trip:full-flow
 
       - name: 📦 Install Allure Commandline
         if: always()
