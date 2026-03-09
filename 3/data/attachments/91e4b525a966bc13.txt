@@ -1,0 +1,13 @@
+2026-03-09 05:08:23 [INFO]: ✅ Loaded seededTransportista: Delta 3965 (ID: 192)
+2026-03-09 05:08:25 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 05:08:28 [INFO]: 📝 Filling form for Transportista: Delta 3965
+2026-03-09 05:08:28 [INFO]: [VehiculoFormPage] Filling patente: FQSM-31
+2026-03-09 05:08:28 [INFO]: [VehiculoFormPage] Filling muestra: FQSM-31
+2026-03-09 05:08:29 [INFO]: [VehiculoFormPage] Selecting transportista: Delta 3965
+2026-03-09 05:08:31 [INFO]: [VehiculoFormPage] ✅ Transportista "Delta 3965" selected
+2026-03-09 05:08:31 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 05:08:31 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 05:08:32 [INFO]: [VehiculoFormPage] Selecting capacidad: 28 TON
+2026-03-09 05:08:33 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" selected
+2026-03-09 05:08:33 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 05:08:37 [INFO]: ✅ seededVehiculo saved: FQSM-31

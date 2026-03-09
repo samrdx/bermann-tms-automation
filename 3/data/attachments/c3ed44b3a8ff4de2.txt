@@ -1,0 +1,42 @@
+2026-03-09 04:57:13 [INFO]: ================================================================================
+2026-03-09 04:57:13 [INFO]: Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: QA]
+2026-03-09 04:57:13 [INFO]: ================================================================================
+2026-03-09 04:57:13 [INFO]: PHASE 1: Loading worker-specific JSON data...
+2026-03-09 04:57:13 [INFO]: ✅ All prerequisites validated
+2026-03-09 04:57:13 [INFO]:    Transportista : Titanium 2663
+2026-03-09 04:57:13 [INFO]:    Vehículo      : OLUS-84
+2026-03-09 04:57:13 [INFO]:    Conductor     : Diego Fernández
+2026-03-09 04:57:13 [INFO]:    Nro Viaje     : 99160
+2026-03-09 04:57:13 [INFO]:    Search ID     : 99160 (nroViaje)
+2026-03-09 04:57:13 [INFO]: PHASE 2: Navigating to /viajes/asignar... [isDemo=false]
+2026-03-09 04:57:13 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-09 04:57:17 [INFO]: 🔍 Searching for viaje "99160" and opening edit form...
+2026-03-09 04:57:17 [INFO]: [AsignarViajesPage] Selecting viaje row: 99160
+2026-03-09 04:57:17 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 99160 in Assignment grid...
+2026-03-09 04:57:21 [INFO]: [AsignarViajesPage] ✅ Found Trip 99160 by text match in row 1
+2026-03-09 04:57:23 [INFO]: [AsignarViajesPage] ✅ Assignment Form Loaded
+2026-03-09 04:57:23 [INFO]: ✅ Trip assignment form loaded — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/5487
+2026-03-09 04:57:23 [INFO]: PHASE 3: Selecting Transportista: Titanium 2663
+2026-03-09 04:57:23 [INFO]: 🛡️ Robust Selection: Transportista "Titanium 2663"
+2026-03-09 04:57:28 [INFO]: ✅ Transportista verified: Titanium 2663
+2026-03-09 04:57:28 [INFO]: PHASE 4: Waiting for cascading dropdowns to reload...
+2026-03-09 04:57:28 [INFO]: PHASE 5: Selecting Vehículo: OLUS-84
+2026-03-09 04:57:30 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "OLUS-84"
+2026-03-09 04:57:30 [INFO]: PHASE 6: Selecting Conductor: Diego Fernández
+2026-03-09 04:57:32 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Diego Fernández"
+2026-03-09 04:57:32 [INFO]: PHASE 7: Final anti-reset check for Transportista...
+2026-03-09 04:57:32 [INFO]: ✅ Transportista confirmed: "Titanium 2663"
+2026-03-09 04:57:32 [INFO]: PHASE 8: Clicking Guardar...
+2026-03-09 04:57:33 [INFO]: 💾 Save completed
+2026-03-09 04:57:33 [INFO]: PHASE 9: Verifying assignment in /viajes/asignar grid...
+2026-03-09 04:57:38 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-09 04:57:40 [INFO]: ✅ Viaje [99160] confirmed in grid. Status Asignado: true
+2026-03-09 04:57:40 [INFO]: ✅ JSON updated: viaje.status = ASIGNADO
+2026-03-09 04:57:40 [INFO]: ================================================================================
+2026-03-09 04:57:40 [INFO]: STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!
+2026-03-09 04:57:40 [INFO]:    Nro Viaje    : 99160
+2026-03-09 04:57:40 [INFO]:    Transportista: Titanium 2663
+2026-03-09 04:57:40 [INFO]:    Vehículo     : OLUS-84
+2026-03-09 04:57:40 [INFO]:    Conductor    : Diego Fernández
+2026-03-09 04:57:40 [INFO]:    Duration     : 27.09s
+2026-03-09 04:57:40 [INFO]: ================================================================================

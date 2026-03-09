@@ -1,0 +1,34 @@
+2026-03-09 04:49:31 [INFO]: Compass PHASE 1: Navigate to Create Transportista
+2026-03-09 04:49:31 [INFO]: [TransportistaFormPage] Navigating to Transportista creation page
+2026-03-09 04:49:35 [INFO]: ✅ Navigation successful
+2026-03-09 04:49:35 [INFO]: 📝 PHASE 2: Fill Transportista Form
+2026-03-09 04:49:35 [INFO]: [TransportistaFormPage] Filling nombre: Cordillera 4845
+2026-03-09 04:49:35 [INFO]: [TransportistaFormPage] Filling razón social: Cordillera 4845 SpA
+2026-03-09 04:49:35 [INFO]: [TransportistaFormPage] Filling documento (RUT): 38415281-3
+2026-03-09 04:49:35 [INFO]: [BasePage] Entering RUT with verify: [38415281-3] on #transportistas-documento
+2026-03-09 04:49:36 [INFO]: [BasePage] ✅ RUT Entered and Verified: 38.415.281-3
+2026-03-09 04:49:36 [INFO]: [TransportistaFormPage] Selecting tipo transportista: Terceros Con Flota Si Genera Contrato
+2026-03-09 04:49:37 [INFO]: [TransportistaFormPage] ✅ Tipo transportista "Terceros Con Flota Si Genera Contrato" selected
+2026-03-09 04:49:37 [INFO]: [TransportistaFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 04:49:37 [INFO]: [TransportistaFormPage] 📍 Location attempt 1/5
+2026-03-09 04:49:38 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region de Magallanes
+2026-03-09 04:49:40 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Magallanes
+2026-03-09 04:49:41 [INFO]: [TransportistaFormPage] ✅ Random comuna selected: San Gregorio
+2026-03-09 04:49:41 [INFO]: [TransportistaFormPage] ✅ Location selected: Region de Magallanes → Magallanes → San Gregorio
+2026-03-09 04:49:41 [INFO]: [TransportistaFormPage] Filling calle: Av. Matta
+2026-03-09 04:49:41 [INFO]: [TransportistaFormPage] Filling altura: 151
+2026-03-09 04:49:41 [INFO]: [TransportistaFormPage] Selecting forma de pago: Contado
+2026-03-09 04:49:42 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" selected
+2026-03-09 04:49:42 [INFO]: ✅ Form filled
+2026-03-09 04:49:42 [INFO]: 💾 PHASE 3: Save Transportista
+2026-03-09 04:49:42 [INFO]: [TransportistaFormPage] Clicking save button
+2026-03-09 04:49:47 [INFO]: ✅ Save initiated
+2026-03-09 04:49:47 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 04:49:49 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-09 04:49:49 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 04:49:49 [INFO]: 🔍 Searching by name: Cordillera 4845
+2026-03-09 04:49:49 [INFO]: 🔎 Clicked Buscar button (link role)
+2026-03-09 04:49:51 [INFO]: ✅ Rescued ID via grid search (edit link): 1752
+2026-03-09 04:49:51 [INFO]: ✅ Successfully extracted Transportista [Cordillera 4845] ID: 1752
+2026-03-09 04:49:51 [INFO]: ✅ Transportista data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-09 04:49:51 [INFO]: ✅ Test PASSED

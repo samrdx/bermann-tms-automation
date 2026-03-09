@@ -1,0 +1,35 @@
+2026-03-09 05:07:37 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 05:07:37 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 05:07:40 [INFO]: ✅ Navigation successful
+2026-03-09 05:07:40 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 05:07:40 [INFO]: [ClienteFormPage] Filling nombre (razón social): Industrial 2106
+2026-03-09 05:07:40 [INFO]: [ClienteFormPage] Filling RUT: 40843129-8
+2026-03-09 05:07:40 [INFO]: [BasePage] Entering RUT with verify: [40843129-8] on #clientes-rut
+2026-03-09 05:07:42 [INFO]: [BasePage] ✅ RUT Entered and Verified: 40.843.129-8
+2026-03-09 05:07:42 [INFO]: [ClienteFormPage] Filling nombre fantasia: Industrial 2106 SpA
+2026-03-09 05:07:42 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 05:07:42 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 05:07:43 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 05:07:43 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 05:07:44 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de Antofagasta
+2026-03-09 05:07:45 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: El Loa
+2026-03-09 05:07:47 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Ollagüe
+2026-03-09 05:07:47 [INFO]: [ClienteFormPage] ✅ Location selected: Region de Antofagasta → El Loa → Ollagüe
+2026-03-09 05:07:47 [INFO]: [ClienteFormPage] Filling calle: Camino a Melipilla
+2026-03-09 05:07:47 [INFO]: [ClienteFormPage] Filling altura: 373
+2026-03-09 05:07:47 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 05:07:47 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 837/837
+2026-03-09 05:07:48 [INFO]: ✅ Form filled
+2026-03-09 05:07:48 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 05:07:48 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 05:07:53 [INFO]: ✅ Save initiated
+2026-03-09 05:07:53 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 05:07:55 [INFO]: 📍 Post-save URL for ID extraction: https://demo.bermanntms.cl/clientes/index
+2026-03-09 05:07:55 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 05:07:55 [INFO]: 🔍 Searching by RUT: 40843129-8 (clean: 408431298)
+2026-03-09 05:07:55 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 05:07:57 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 05:07:57 [INFO]: ✅ Rescued ID via name search (link): 179
+2026-03-09 05:07:57 [INFO]: ✅ Successfully identified Cliente [Industrial 2106] ID: 179
+2026-03-09 05:07:57 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-demo.json
+2026-03-09 05:07:57 [INFO]: ✅ Test PASSED

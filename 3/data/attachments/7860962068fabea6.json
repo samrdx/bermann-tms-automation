@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 558887",
+  "cliente": "CliMon 558887",
+  "vehiculo": "ZVCU-88",
+  "conductor": "Elena",
+  "nroViaje": "730012",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "198.95",
+  "ambiente": "QA"
+}

@@ -1,0 +1,2 @@
+2026-03-09 04:57:06 [INFO]: [LoginPage] Logueandose con usuario: arivas
+2026-03-09 04:57:06 [INFO]: [BasePage] Navegando hacia: /login

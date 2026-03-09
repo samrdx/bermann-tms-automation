@@ -1,0 +1,18 @@
+2026-03-09 05:09:00 [INFO]: ✅ Loaded seededTransportista: Delta 3965 (ID: 192)
+2026-03-09 05:09:02 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-09 05:09:05 [INFO]: 📝 Filling Conductor Form for: Luis González
+2026-03-09 05:09:05 [INFO]: [ConductorFormPage] Llenando usuario: evvgtc45
+2026-03-09 05:09:05 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-09 05:09:05 [INFO]: [ConductorFormPage] Llenando nombre: Luis
+2026-03-09 05:09:05 [INFO]: [ConductorFormPage] Llenando apellido: González
+2026-03-09 05:09:05 [INFO]: [ConductorFormPage] Llenando documento: 38.714.796-9
+2026-03-09 05:09:05 [INFO]: [BasePage] Entering RUT with verify: [38.714.796-9] on #conductores-documento
+2026-03-09 05:09:07 [INFO]: [BasePage] ✅ RUT Entered and Verified: 38.714.796-9
+2026-03-09 05:09:07 [INFO]: [ConductorFormPage] Llenando telefono: +56954815884
+2026-03-09 05:09:07 [INFO]: [ConductorFormPage] Llenando email: carlosfernandez@gmail.com
+2026-03-09 05:09:07 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-09 05:09:08 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-09 05:09:08 [INFO]: [ConductorFormPage] Seleccionando transportista: [Delta 3965]
+2026-03-09 05:09:10 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-09 05:09:12 [INFO]: ✅ seededConductor saved: Luis González
+2026-03-09 05:09:12 [INFO]: ✅ Conductor Created and Saved Successfully

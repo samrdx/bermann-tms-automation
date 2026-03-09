@@ -1,0 +1,39 @@
+2026-03-09 04:49:04 [INFO]: Compass PHASE 1: Navigate to Create Transportista
+2026-03-09 04:49:04 [INFO]: [TransportistaFormPage] Navigating to Transportista creation page
+2026-03-09 04:49:07 [INFO]: ✅ Navigation successful
+2026-03-09 04:49:07 [INFO]: 📝 PHASE 2: Fill Transportista Form
+2026-03-09 04:49:07 [INFO]: [TransportistaFormPage] Filling nombre: Titanium 2663
+2026-03-09 04:49:07 [INFO]: [TransportistaFormPage] Filling razón social: Titanium 2663 SpA
+2026-03-09 04:49:07 [INFO]: [TransportistaFormPage] Filling documento (RUT): 48526978-9
+2026-03-09 04:49:07 [INFO]: [BasePage] Entering RUT with verify: [48526978-9] on #transportistas-documento
+2026-03-09 04:49:09 [INFO]: [BasePage] ✅ RUT Entered and Verified: 48.526.978-9
+2026-03-09 04:49:09 [INFO]: [TransportistaFormPage] Selecting tipo transportista: Terceros Con Flota Si Genera Contrato
+2026-03-09 04:49:09 [INFO]: [TransportistaFormPage] ✅ Tipo transportista "Terceros Con Flota Si Genera Contrato" selected
+2026-03-09 04:49:10 [INFO]: [TransportistaFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 04:49:10 [INFO]: [TransportistaFormPage] 📍 Location attempt 1/5
+2026-03-09 04:49:11 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region del Biobio
+2026-03-09 04:49:12 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Talcahuano
+2026-03-09 04:49:14 [WARN]: [TransportistaFormPage] ⚠️ No comuna options available (count=1)
+2026-03-09 04:49:14 [WARN]: [TransportistaFormPage] ⚠️ No comuna options for ciudad "Talcahuano" (región: "Region del Biobio"), retrying...
+2026-03-09 04:49:14 [INFO]: [TransportistaFormPage] 📍 Location attempt 2/5
+2026-03-09 04:49:14 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region de Atacama
+2026-03-09 04:49:16 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Copiapó
+2026-03-09 04:49:17 [INFO]: [TransportistaFormPage] ✅ Random comuna selected: Copiapó
+2026-03-09 04:49:17 [INFO]: [TransportistaFormPage] ✅ Location selected: Region de Atacama → Copiapó → Copiapó
+2026-03-09 04:49:17 [INFO]: [TransportistaFormPage] Filling calle: Av. Libertador Bernardo O'Higgins
+2026-03-09 04:49:17 [INFO]: [TransportistaFormPage] Filling altura: 932
+2026-03-09 04:49:17 [INFO]: [TransportistaFormPage] Selecting forma de pago: Contado
+2026-03-09 04:49:18 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" selected
+2026-03-09 04:49:18 [INFO]: ✅ Form filled
+2026-03-09 04:49:18 [INFO]: 💾 PHASE 3: Save Transportista
+2026-03-09 04:49:18 [INFO]: [TransportistaFormPage] Clicking save button
+2026-03-09 04:49:23 [INFO]: ✅ Save initiated
+2026-03-09 04:49:23 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 04:49:25 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-09 04:49:25 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 04:49:25 [INFO]: 🔍 Searching by name: Titanium 2663
+2026-03-09 04:49:25 [INFO]: 🔎 Clicked Buscar button (link role)
+2026-03-09 04:49:27 [INFO]: ✅ Rescued ID via grid search (edit link): 1751
+2026-03-09 04:49:27 [INFO]: ✅ Successfully extracted Transportista [Titanium 2663] ID: 1751
+2026-03-09 04:49:27 [INFO]: ✅ Transportista data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-09 04:49:27 [INFO]: ✅ Test PASSED

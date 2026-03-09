@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 267977",
+  "cliente": "CliMon 267977",
+  "vehiculo": "KYBH-34",
+  "conductor": "María",
+  "nroViaje": "951650",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "188.19",
+  "ambiente": "DEMO"
+}

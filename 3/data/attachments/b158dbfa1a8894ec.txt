@@ -1,0 +1,66 @@
+2026-03-09 05:11:41 [INFO]: ================================================================================
+2026-03-09 05:11:41 [INFO]: 🚀 Starting Contract Creation - Tipo Venta (Seeded Cliente Mode)
+2026-03-09 05:11:41 [INFO]: ================================================================================
+2026-03-09 05:11:41 [INFO]: 📋 PHASE 1: Loading seeded client data...
+2026-03-09 05:11:41 [INFO]: 📦 Using cliente: "Industrial 2106 SpA" (ID: 179)
+2026-03-09 05:11:41 [INFO]: 📋 PHASE 2: Navigating to contract creation form...
+2026-03-09 05:11:41 [INFO]: [ContratosFormPage] Navigating to contract creation page: /contrato/crear
+2026-03-09 05:11:44 [INFO]: [ContratosFormPage] ✅ Contract creation page loaded and Nro Contrato input visible
+2026-03-09 05:11:44 [INFO]: ✅ Form loaded
+2026-03-09 05:11:44 [INFO]: 📋 PHASE 3-4: Filling contract header and saving...
+2026-03-09 05:11:44 [INFO]: [ContratosFormPage] 📝 Filling basic contract information (Phase 1) - Tipo: Venta
+2026-03-09 05:11:44 [INFO]: [ContratosFormPage] Filling Nro Contrato: 104359
+2026-03-09 05:11:44 [INFO]: [ContratosFormPage] 🔽 Selecting Tipo Contrato = Venta...
+2026-03-09 05:11:46 [INFO]: [ContratosFormPage] ⏳ Waiting for AJAX...
+2026-03-09 05:11:51 [WARN]: [ContratosFormPage] ⚠️ rendersubview expected response not detected, but logged all XHR
+2026-03-09 05:11:53 [INFO]: [ContratosFormPage] ✅ Tipo Venta selected
+2026-03-09 05:11:53 [INFO]: [ContratosFormPage] Selecting Subtipo: 1...
+2026-03-09 05:11:54 [INFO]: [ContratosFormPage] ✅ Subtipo 1 selected
+2026-03-09 05:11:54 [INFO]: [ContratosFormPage] 🔽 Selecting cliente: "Industrial 2106 SpA"...
+2026-03-09 05:11:54 [INFO]: [ContratosFormPage] Selecting Cliente: "Industrial 2106 SpA"...
+2026-03-09 05:11:54 [INFO]: [ContratosFormPage] ✅ Cliente selected: "INDUSTRIAL 2106 SPA" (val: 179)
+2026-03-09 05:11:55 [INFO]: [ContratosFormPage] 📅 [DEMO] Selecting Fecha vencimiento: 31/12/2026
+2026-03-09 05:11:57 [INFO]: [ContratosFormPage] ✅ Fecha vencimiento set to 31/12/2026 via daypicker
+2026-03-09 05:11:57 [INFO]: [ContratosFormPage] 🏢 [DEMO] Selecting Unidad de negocio: Defecto
+2026-03-09 05:11:57 [INFO]: [ContratosFormPage] ✅ Unidad de negocio set to "Defecto"
+2026-03-09 05:11:57 [INFO]: [ContratosFormPage] 🔧 Forcing cleanup of any modal backdrops...
+2026-03-09 05:11:58 [INFO]: [ContratosFormPage] 💾 Saving basic contract header...
+2026-03-09 05:12:02 [INFO]: [ContratosFormPage] ✅ Contract header created successfully with ID: 308
+2026-03-09 05:12:02 [INFO]: [ContratosFormPage] 📍 Redirected to: https://demo.bermanntms.cl/contrato/editar/308
+2026-03-09 05:12:02 [INFO]: ✅ Contract header saved! ID: 308
+2026-03-09 05:12:02 [INFO]: 📋 PHASE 5: Adding Route 715 + Cargo 715_19 with tarifas...
+2026-03-09 05:12:02 [INFO]: [ContratosFormPage] 🛣️ Adding Route 47 (DEMO environment)
+2026-03-09 05:12:02 [INFO]: [ContratosFormPage] Clicking "Añadir Ruta" button
+2026-03-09 05:12:04 [INFO]: [ContratosFormPage] Waiting for route modal to appear...
+2026-03-09 05:12:04 [INFO]: [ContratosFormPage] ✅ Route modal visible
+2026-03-09 05:12:05 [INFO]: [ContratosFormPage] Selecting Route 47
+2026-03-09 05:12:06 [INFO]: [ContratosFormPage] Closing routes modal
+2026-03-09 05:12:07 [INFO]: [ContratosFormPage] Clicking "Añadir Carga" for Route 47
+2026-03-09 05:12:08 [INFO]: [ContratosFormPage] ✅ Cargo modal visible
+2026-03-09 05:12:08 [INFO]: [ContratosFormPage] Selecting Cargo via: //a[@id='btn_plus_ruta_47_6']//i[@class='fa fa-plus']
+2026-03-09 05:12:09 [INFO]: [ContratosFormPage] Closing cargo modal
+2026-03-09 05:12:10 [INFO]: [ContratosFormPage] Filling tariffs: Conductor=20000, Viaje=50000
+2026-03-09 05:12:12 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_extra_47 set to "50000"
+2026-03-09 05:12:14 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_conductor_47 set to "20000"
+2026-03-09 05:12:15 [INFO]: [ContratosFormPage] 🔧 Forcing cleanup of any remaining modals
+2026-03-09 05:12:16 [INFO]: [ContratosFormPage] ✅ Route 47 and cargo added successfully
+2026-03-09 05:12:16 [INFO]: ✅ Route and tariffs added
+2026-03-09 05:12:16 [INFO]: 📋 PHASE 6: Saving full contract (with tarifas)...
+2026-03-09 05:12:16 [INFO]: [ContratosFormPage] 💾 Saving contract and extracting ID
+2026-03-09 05:12:21 [INFO]: [ContratosFormPage] Current URL after save: https://demo.bermanntms.cl/contrato/index
+2026-03-09 05:12:21 [WARN]: [ContratosFormPage] ⚠️ Failed to extract contract ID from URL: https://demo.bermanntms.cl/contrato/index, returning empty string to rely on index search
+2026-03-09 05:12:21 [INFO]: ✅ Full contract saved! ID: 
+2026-03-09 05:12:21 [INFO]: 📋 PHASE 7: Verifying contract in index...
+2026-03-09 05:12:21 [INFO]: 🔍 Verification attempt 1/3...
+2026-03-09 05:12:23 [INFO]: ⌨️ Searching by cliente: Industrial 2106 SpA
+2026-03-09 05:12:25 [INFO]: ✅ Contract 104359 found in index!
+2026-03-09 05:12:25 [INFO]: 📋 PHASE 8: Persisting contract data to JSON...
+2026-03-09 05:12:25 [INFO]: ✅ contratoCliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-demo.json
+2026-03-09 05:12:25 [INFO]: ================================================================================
+2026-03-09 05:12:25 [INFO]: ✅ VENTA CONTRACT CREATION COMPLETE!
+2026-03-09 05:12:25 [INFO]: ================================================================================
+2026-03-09 05:12:25 [INFO]:    Nro Contrato: 104359
+2026-03-09 05:12:25 [INFO]:    Contract ID: 308
+2026-03-09 05:12:25 [INFO]:    Cliente: Industrial 2106 SpA
+2026-03-09 05:12:25 [INFO]:    Execution Time: 44.49s
+2026-03-09 05:12:25 [INFO]: ================================================================================

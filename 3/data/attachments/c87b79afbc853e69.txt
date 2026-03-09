@@ -1,0 +1,35 @@
+2026-03-09 04:50:03 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 04:50:03 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 04:50:06 [INFO]: ✅ Navigation successful
+2026-03-09 04:50:06 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 04:50:06 [INFO]: [ClienteFormPage] Filling nombre (razón social): Importadora 7466
+2026-03-09 04:50:06 [INFO]: [ClienteFormPage] Filling RUT: 91026199-1
+2026-03-09 04:50:06 [INFO]: [BasePage] Entering RUT with verify: [91026199-1] on #clientes-rut
+2026-03-09 04:50:08 [INFO]: [BasePage] ✅ RUT Entered and Verified: 91.026.199-1
+2026-03-09 04:50:08 [INFO]: [ClienteFormPage] Filling nombre fantasia: Importadora 7466 SpA
+2026-03-09 04:50:08 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 04:50:09 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 04:50:09 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 04:50:09 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 04:50:10 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de los Rios
+2026-03-09 04:50:11 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Ranco
+2026-03-09 04:50:13 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Río Bueno
+2026-03-09 04:50:13 [INFO]: [ClienteFormPage] ✅ Location selected: Region de los Rios → Ranco → Río Bueno
+2026-03-09 04:50:13 [INFO]: [ClienteFormPage] Filling calle: Calle Estado
+2026-03-09 04:50:13 [INFO]: [ClienteFormPage] Filling altura: 456
+2026-03-09 04:50:13 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 04:50:14 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 570/570
+2026-03-09 04:50:14 [INFO]: ✅ Form filled
+2026-03-09 04:50:14 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 04:50:14 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 04:50:19 [INFO]: ✅ Save initiated
+2026-03-09 04:50:19 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 04:50:21 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-09 04:50:21 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 04:50:21 [INFO]: 🔍 Searching by RUT: 91026199-1 (clean: 910261991)
+2026-03-09 04:50:21 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 04:50:23 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 04:50:24 [INFO]: ✅ Rescued ID via name search (link): 1058
+2026-03-09 04:50:24 [INFO]: ✅ Successfully identified Cliente [Importadora 7466] ID: 1058
+2026-03-09 04:50:24 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-09 04:50:24 [INFO]: ✅ Test PASSED

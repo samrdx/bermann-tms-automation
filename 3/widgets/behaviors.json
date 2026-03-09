@@ -1,0 +1,1 @@
+{"total":3,"items":[{"uid":"5d1622876bad0ffbc1573ef6fb7541d2","name":"TMS Legacy Flow","statistic":{"failed":0,"broken":0,"skipped":0,"passed":3,"unknown":0,"total":3}},{"uid":"32161337b80641e94ccd512574ad9b70","name":"TMS E2E Flow","statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1}}]}

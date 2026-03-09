@@ -1,0 +1,42 @@
+2026-03-09 05:13:30 [INFO]: ================================================================================
+2026-03-09 05:13:30 [INFO]: Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: DEMO]
+2026-03-09 05:13:30 [INFO]: ================================================================================
+2026-03-09 05:13:30 [INFO]: PHASE 1: Loading worker-specific JSON data...
+2026-03-09 05:13:30 [INFO]: ✅ All prerequisites validated
+2026-03-09 05:13:30 [INFO]:    Transportista : Titanium 5708
+2026-03-09 05:13:30 [INFO]:    Vehículo      : NYJR-55
+2026-03-09 05:13:30 [INFO]:    Conductor     : Francisco González
+2026-03-09 05:13:30 [INFO]:    Nro Viaje     : 67945
+2026-03-09 05:13:30 [INFO]:    Search ID     : 6598 (internal grid ID)
+2026-03-09 05:13:30 [INFO]: PHASE 2: Navigating to /viajes/asignar... [isDemo=true]
+2026-03-09 05:13:30 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-09 05:13:34 [INFO]: 🔍 Searching for viaje "6598" and opening edit form...
+2026-03-09 05:13:34 [INFO]: [AsignarViajesPage] Selecting viaje row: 6598
+2026-03-09 05:13:34 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 6598 in Assignment grid...
+2026-03-09 05:13:37 [INFO]: [AsignarViajesPage] ✅ Found 1 rows after search in Demo, assuming first is Trip 6598
+2026-03-09 05:13:40 [INFO]: [AsignarViajesPage] ✅ Assignment Form Loaded
+2026-03-09 05:13:40 [INFO]: ✅ Trip assignment form loaded — URL: https://demo.bermanntms.cl/viajes/editar/6598
+2026-03-09 05:13:40 [INFO]: PHASE 3: Selecting Transportista: Titanium 5708
+2026-03-09 05:13:40 [INFO]: 🛡️ Robust Selection: Transportista "Titanium 5708"
+2026-03-09 05:13:43 [INFO]: ✅ Transportista verified: Titanium 5708
+2026-03-09 05:13:43 [INFO]: PHASE 4: Waiting for cascading dropdowns to reload...
+2026-03-09 05:13:44 [INFO]: PHASE 5: Selecting Vehículo: NYJR-55
+2026-03-09 05:13:45 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "NYJR-55"
+2026-03-09 05:13:45 [INFO]: PHASE 6: Selecting Conductor: Francisco González
+2026-03-09 05:13:47 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Francisco González"
+2026-03-09 05:13:47 [INFO]: PHASE 7: Final anti-reset check for Transportista...
+2026-03-09 05:13:47 [INFO]: ✅ Transportista confirmed: "Titanium 5708"
+2026-03-09 05:13:47 [INFO]: PHASE 8: Clicking Guardar...
+2026-03-09 05:13:47 [INFO]: 💾 Save completed
+2026-03-09 05:13:47 [INFO]: PHASE 9: Verifying assignment in /viajes/asignar grid...
+2026-03-09 05:13:51 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-09 05:13:53 [INFO]: ✅ Viaje [6598] confirmed in grid. Status Asignado: true
+2026-03-09 05:13:53 [INFO]: ✅ JSON updated: viaje.status = ASIGNADO
+2026-03-09 05:13:53 [INFO]: ================================================================================
+2026-03-09 05:13:53 [INFO]: STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!
+2026-03-09 05:13:53 [INFO]:    Nro Viaje    : 67945
+2026-03-09 05:13:53 [INFO]:    Transportista: Titanium 5708
+2026-03-09 05:13:53 [INFO]:    Vehículo     : NYJR-55
+2026-03-09 05:13:53 [INFO]:    Conductor    : Francisco González
+2026-03-09 05:13:53 [INFO]:    Duration     : 23.28s
+2026-03-09 05:13:53 [INFO]: ================================================================================

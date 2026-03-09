@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 464815",
+  "cliente": "CliMon 464815",
+  "vehiculo": "EPMV-14",
+  "conductor": "Diego",
+  "nroViaje": "660725",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "193.12",
+  "ambiente": "DEMO"
+}

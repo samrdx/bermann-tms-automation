@@ -1,0 +1,18 @@
+2026-03-09 05:08:48 [INFO]: ✅ Loaded seededTransportista: Titanium 5708 (ID: 191)
+2026-03-09 05:08:49 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-09 05:08:52 [INFO]: 📝 Filling Conductor Form for: Francisco González
+2026-03-09 05:08:52 [INFO]: [ConductorFormPage] Llenando usuario: ggdttf77
+2026-03-09 05:08:52 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-09 05:08:52 [INFO]: [ConductorFormPage] Llenando nombre: Francisco
+2026-03-09 05:08:52 [INFO]: [ConductorFormPage] Llenando apellido: González
+2026-03-09 05:08:52 [INFO]: [ConductorFormPage] Llenando documento: 12.754.430-1
+2026-03-09 05:08:52 [INFO]: [BasePage] Entering RUT with verify: [12.754.430-1] on #conductores-documento
+2026-03-09 05:08:53 [INFO]: [BasePage] ✅ RUT Entered and Verified: 12.754.430-1
+2026-03-09 05:08:53 [INFO]: [ConductorFormPage] Llenando telefono: +56910505038
+2026-03-09 05:08:53 [INFO]: [ConductorFormPage] Llenando email: juandiaz@hotmail.com
+2026-03-09 05:08:54 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-09 05:08:55 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-09 05:08:55 [INFO]: [ConductorFormPage] Seleccionando transportista: [Titanium 5708]
+2026-03-09 05:08:56 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-09 05:08:58 [INFO]: ✅ seededConductor saved: Francisco González
+2026-03-09 05:08:58 [INFO]: ✅ Conductor Created and Saved Successfully

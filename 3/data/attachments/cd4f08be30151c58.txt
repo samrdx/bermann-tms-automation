@@ -1,0 +1,13 @@
+2026-03-09 05:08:09 [INFO]: ✅ Loaded seededTransportista: Titanium 5708 (ID: 191)
+2026-03-09 05:08:09 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 05:08:12 [INFO]: 📝 Filling form for Transportista: Titanium 5708
+2026-03-09 05:08:12 [INFO]: [VehiculoFormPage] Filling patente: NYJR-55
+2026-03-09 05:08:12 [INFO]: [VehiculoFormPage] Filling muestra: NYJR-55
+2026-03-09 05:08:13 [INFO]: [VehiculoFormPage] Selecting transportista: Titanium 5708
+2026-03-09 05:08:15 [INFO]: [VehiculoFormPage] ✅ Transportista "Titanium 5708" selected
+2026-03-09 05:08:15 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 05:08:15 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 05:08:16 [INFO]: [VehiculoFormPage] Selecting capacidad: 28 TON
+2026-03-09 05:08:17 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" selected
+2026-03-09 05:08:17 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 05:08:21 [INFO]: ✅ seededVehiculo saved: NYJR-55

@@ -1,0 +1,35 @@
+2026-03-09 04:50:27 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 04:50:27 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 04:50:31 [INFO]: ✅ Navigation successful
+2026-03-09 04:50:31 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 04:50:31 [INFO]: [ClienteFormPage] Filling nombre (razón social): Central 7725
+2026-03-09 04:50:31 [INFO]: [ClienteFormPage] Filling RUT: 47185642-8
+2026-03-09 04:50:31 [INFO]: [BasePage] Entering RUT with verify: [47185642-8] on #clientes-rut
+2026-03-09 04:50:32 [INFO]: [BasePage] ✅ RUT Entered and Verified: 47.185.642-8
+2026-03-09 04:50:32 [INFO]: [ClienteFormPage] Filling nombre fantasia: Central 7725 SpA
+2026-03-09 04:50:32 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 04:50:33 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 04:50:34 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 04:50:34 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 04:50:35 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de Tarapaca
+2026-03-09 04:50:36 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Tamarugal
+2026-03-09 04:50:38 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Huara
+2026-03-09 04:50:38 [INFO]: [ClienteFormPage] ✅ Location selected: Region de Tarapaca → Tamarugal → Huara
+2026-03-09 04:50:38 [INFO]: [ClienteFormPage] Filling calle: Av. Vicuña Mackenna
+2026-03-09 04:50:38 [INFO]: [ClienteFormPage] Filling altura: 796
+2026-03-09 04:50:38 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 04:50:38 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 570/570
+2026-03-09 04:50:39 [INFO]: ✅ Form filled
+2026-03-09 04:50:39 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 04:50:39 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 04:50:44 [INFO]: ✅ Save initiated
+2026-03-09 04:50:44 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 04:50:46 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-09 04:50:46 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 04:50:46 [INFO]: 🔍 Searching by RUT: 47185642-8 (clean: 471856428)
+2026-03-09 04:50:46 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 04:50:48 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 04:50:48 [INFO]: ✅ Rescued ID via name search (link): 1059
+2026-03-09 04:50:48 [INFO]: ✅ Successfully identified Cliente [Central 7725] ID: 1059
+2026-03-09 04:50:48 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-09 04:50:48 [INFO]: ✅ Test PASSED
