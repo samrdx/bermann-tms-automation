@@ -475,17 +475,17 @@ export class TmsApiClient {
     await searchInput.fill(nombre);
     logger.info(`🔎 Filled search with: ${nombre}`);
 
-    // CORRECCIÓN FIREFOX: Clic vía JS directo al ID 'buscar'
-    // Reemplaza: await this.page.getByRole('link', { name: 'Buscar' }).click();
-    await this.page.evaluate(() => {
-      const btn = document.getElementById('buscar');
-      if (btn) btn.click();
-      else console.error('Botón Buscar no encontrado');
-    });
+    // CORRECCIÓN FIREFOX: Usar clickViaJS + Promise.all para esperar la carga del grid
+    logger.info(`🔎 Clicking Buscar link...`)
 
-    await this.page.waitForLoadState('networkidle');
-    logger.info(`🔎 Clicked Buscar link (JS)`)
-    await this.page.waitForTimeout(2000);
+    // Esperamos a que la red esté ociosa luego del clic, o al menos 2.5s para que renderice
+    await Promise.all([
+      this.page.waitForLoadState('domcontentloaded').catch(() => { }),
+      this.clickViaJS('#buscar')
+    ]);
+
+    // Timeout adicional para asegurar el renderizado de filas en Firefox (que a veces es perezoso)
+    await this.page.waitForTimeout(3000);
 
     // 3. Buscar en la tabla por data-key
     const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
