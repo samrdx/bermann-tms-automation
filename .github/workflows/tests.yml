@@ -110,14 +110,17 @@ jobs:
 
       - name: 🔨 Generate Allure Report (No History)
         if: always()
-        run: allure generate allure-results -o allure-report --clean
+        # Parse Environment to lowercase so it maps to allure-results-qa or allure-results-demo
+        run: |
+          ENV_LOWER=$(echo "${{ github.event.inputs.environment || 'QA' }}" | tr '[:upper:]' '[:lower:]')
+          allure generate allure-results-${ENV_LOWER} -o allure-report-${ENV_LOWER} --clean
 
       - name: ☁️ Upload Allure HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-html-report-qa
-          path: allure-report/
+          name: allure-html-report-${{ github.event.inputs.environment || 'QA' }}
+          path: allure-report-*/
           retention-days: 7
 
   # ------------------------------------------------------------------
