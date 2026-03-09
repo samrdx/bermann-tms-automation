@@ -15,6 +15,7 @@ import {
 } from '../../src/utils/rutGenerator.js';
 import { ConductorFormPage } from '../../src/modules/transport/pages/ConductorPage.js';
 import { config } from '../../src/config/environment.js';
+import { NamingHelper } from '../../src/utils/NamingHelper.js';
 
 export interface Conductor {
     nombre: string;
@@ -46,16 +47,21 @@ export class ConductorHelper {
         const conductorPage = new ConductorFormPage(page);
         
         // Data Generation
-        const nombre = generateRandomName();
-        const apellido = generateRandomLastName();
-        const usuario = generateGenericUser();
+        const nombresReales = { nombre: generateRandomName(), apellido: generateRandomLastName() };
+        const { nombre, apellido } = NamingHelper.getConductorNames(nombresReales);
+        
+        const cleanName = nombresReales.nombre.toLowerCase().replace(/\s+/g, '').substring(0, 5);
+        const cleanLast = nombresReales.apellido.toLowerCase().replace(/\s+/g, '').substring(0, 5);
+        const randNum = Math.floor(Math.random() * 90 + 10);
+        const usuario = `qa${cleanName}${cleanLast}${randNum}`.substring(0, 15);
+        
         const clave = generatePassword();
         
         // Decide Document Type (mostly RUT for now as per consistency, but helper allows expansion)
         const rut = generateDocument('RUT'); 
         
         const telefono = generatePhone();
-        const email = generateEmail(nombre + apellido);
+        const email = generateEmail(nombresReales.nombre + nombresReales.apellido);
         const licencia = generateLicenseType();
         
         // Vencimiento defaults to 31-12-2026 as per plan

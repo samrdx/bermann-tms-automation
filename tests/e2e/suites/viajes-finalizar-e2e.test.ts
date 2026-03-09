@@ -6,6 +6,7 @@ import { createLogger } from '../../../src/utils/logger.js';
 import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../../src/utils/NamingHelper.js';
 
 const logger = createLogger('ViajesFinalizarTest');
 
@@ -25,10 +26,9 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     const api = new TmsApiClient(page);
     await api.initialize();
 
-    // Nombres únicos por timestamp para evitar colisiones
-    const timestamp = Date.now() % 1000000;
-    const transName = `TransMon ${timestamp}`;
-    const cliName = `CliMon ${timestamp}`;
+    // Nombres usando el NamingHelper para mantener el estandar Qa_
+    const transName = NamingHelper.getTransportistaName().nombre;
+    const cliName = NamingHelper.getClienteName().nombre;
     const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
 
     logger.subpaso(`Configuración: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);

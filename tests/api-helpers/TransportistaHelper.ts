@@ -10,6 +10,7 @@ import { config } from '../../src/config/environment.js';
 import { TransportistaFormPage } from '../../src/modules/transport/pages/TransportistaPage.js';
 import { TmsApiClient } from './TmsApiClient.js';
 import { isDemoMode } from '../../src/utils/env-helper.js';
+import { NamingHelper } from '../../src/utils/NamingHelper.js';
 
 export interface Transportista {
     id: string;
@@ -188,16 +189,11 @@ export class TransportistaHelper {
         const baseUrl = config.get().baseUrl;
         const transportistaPage = new TransportistaFormPage(page);
 
-        // Data Generation - UNIQUE NAME with 6-digit Unix seconds to guarantee uniqueness
-        // Use % 1000000 to keep names short (TMS truncates long names in dropdowns)
-        const unixTs = Math.floor(Date.now() / 1000) % 1000000;
-        const rawBaseName = generateShortCompanyName();
-        const baseNombre = rawBaseName.split(' - ')[0].trim();
-        const nombre = `${baseNombre} ${unixTs}`;
+        // Data Generation using NamingHelper
+        const { nombre, razonSocial, baseNombre } = NamingHelper.getTransportistaName();
         const rawRut = generateValidChileanRUT();
         const documento = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
 
-        const razonSocial = nombre;
         const calle = generateChileanStreet();
         const altura = generateStreetNumber();
 

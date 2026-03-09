@@ -9,6 +9,7 @@ import { ClienteHelper, Cliente } from '../../../../api-helpers/ClienteHelper.js
 import * as fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../../../../src/utils/NamingHelper.js';
 
 test.describe('[E02] Entidades - Crear Cliente', () => {
   test.setTimeout(120000);
@@ -23,15 +24,13 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
     await allure.story('Crear Cliente');
 
     // Test data
-    const shortNames = ['Distribuidora', 'Comercial', 'Importadora', 'Logistica', 'Servicios', 'Industrial', 'Global', 'Central'];
-    const baseName = shortNames[Math.floor(Math.random() * shortNames.length)];
-    const fourDigits = Math.floor(Math.random() * 9000) + 1000;
+    const cliNameObj = NamingHelper.getClienteName();
     const randomStreetNumber = Math.floor(Math.random() * 900) + 100;
 
     const testData = {
-      nombre: `${baseName} ${fourDigits}`,
-      baseNombre: baseName,
-      nombreFantasia: `${baseName} ${fourDigits} SpA`,
+      nombre: cliNameObj.nombre,
+      baseNombre: cliNameObj.nombre,
+      nombreFantasia: cliNameObj.nombreFantasia,
       rut: generateValidChileanRUT(),
       calle: generateChileanStreet(),
       altura: randomStreetNumber.toString(),

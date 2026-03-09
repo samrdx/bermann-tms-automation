@@ -2,6 +2,7 @@ import { Page } from '@playwright/test';
 import { logger } from '../../src/utils/logger.js';
 import { generatePatente } from '../../src/utils/rutGenerator.js';
 import { VehiculoFormPage } from '../../src/modules/transport/pages/VehiculoPage.js';
+import { NamingHelper } from '../../src/utils/NamingHelper.js';
 
 export interface Vehiculo {
     patente: string;
@@ -24,8 +25,9 @@ export class VehiculoHelper {
         const vehiculoPage = new VehiculoFormPage(page);
 
         // Data Generation
-        const patente = generatePatente();
-        const muestra = `VEH-${Date.now()}`; // Unique identifier
+        const rawPatente = generatePatente();
+        const patente = NamingHelper.getVehiculoPatente(rawPatente);
+        const muestra = patente; // Usa la misma patente estandarizada como muestra
 
         logger.info(`🌱 Sembrado UI Vehículo: Patente [${patente}] para Transportista: ${transportistaName}`);
 

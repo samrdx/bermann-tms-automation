@@ -10,6 +10,7 @@ import { Transportista, TransportistaHelper } from '../../../../api-helpers/Tran
 import * as fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../../../../src/utils/NamingHelper.js';
 
 test.describe('[E01] Entidades - Crear Transportista', () => {
   test.setTimeout(120000);
@@ -24,15 +25,13 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
     await allure.story('Crear Transportista');
 
     // Test data
-    const shortNames = ['TransSur', 'Cordillera', 'Pacific', 'Austral', 'Delta', 'Titanium', 'Horizonte', 'EcoTrans'];
-    const baseName = shortNames[Math.floor(Math.random() * shortNames.length)];
-    const fourDigits = Math.floor(Math.random() * 9000) + 1000;
+    const transNameObj = NamingHelper.getTransportistaName();
     const randomStreetNumber = Math.floor(Math.random() * 900) + 100;
 
     const testData = {
-      nombre: `${baseName} ${fourDigits}`, // Short name + 4 digits (e.g. "TransSur 4821")
-      baseNombre: baseName,
-      razonSocial: `${baseName} ${fourDigits} SpA`, // Same short format
+      nombre: transNameObj.nombre,
+      baseNombre: transNameObj.baseNombre,
+      razonSocial: transNameObj.razonSocial,
       documento: generateValidChileanRUT(),
       calle: generateChileanStreet(),
       altura: randomStreetNumber.toString(),
