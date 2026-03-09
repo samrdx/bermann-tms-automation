@@ -1948,10 +1948,12 @@ export class TmsApiClient {
 
     const searchInput = this.page.locator('#search');
     await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-    await searchInput.fill(nroViaje);
+    // FIX FIREFOX: Limpiar y escribir lento para asegurar que el evento de filtrado se dispare
+    await searchInput.fill('');
+    await searchInput.pressSequentially(nroViaje, { delay: 100 });
     await searchInput.press('Enter');
     await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
-    await this.page.waitForTimeout(1500);
+    await this.page.waitForTimeout(2500); // Dar más tiempo a Firefox para renderizar
 
     // Verificar por texto estricto
     const viajeRow = this.page.locator(`text="${nroViaje}"`);
@@ -1966,18 +1968,31 @@ export class TmsApiClient {
       return nroViaje;
     }
 
-    // Verificar por conteo de filas luego de aplicar el filtro
+    // Verificar por conteo de filas y contenido estricto (no solo rowCount >= 1)
     const allRows = this.page.locator('table tbody tr');
     const rowCount = await allRows.count().catch(() => 0);
+    
     if (rowCount >= 1) {
-      logger.info(`✅ Viaje [${nroViaje}] creado: encontradas ${rowCount} filas en grilla de asignación`);
-      entityTracker.register({ 
-        type: 'Viaje', 
-        name: nroViaje, 
-        asociado: clienteNombre, 
-        estado: 'PLANIFICADO' 
-      });
-      return nroViaje;
+      // Validar que al menos una de las filas encontradas contenga realmente el nroViaje
+      let foundExact = false;
+      for (let i = 0; i < rowCount; i++) {
+        const text = await allRows.nth(i).innerText().catch(() => '');
+        if (text.includes(nroViaje)) {
+          foundExact = true;
+          break;
+        }
+      }
+
+      if (foundExact) {
+        logger.info(`✅ Viaje [${nroViaje}] confirmado en grilla de asignación (${rowCount} filas encontradas)`);
+        entityTracker.register({ 
+          type: 'Viaje', 
+          name: nroViaje, 
+          asociado: clienteNombre, 
+          estado: 'PLANIFICADO' 
+        });
+        return nroViaje;
+      }
     }
 
     throw new Error(`❌ Viaje [${nroViaje}] no encontrado. El botón Guardar puede no haber ejecutado el submit. URL final: ${this.page.url()}`);
