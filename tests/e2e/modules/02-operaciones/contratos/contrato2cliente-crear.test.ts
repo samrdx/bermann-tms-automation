@@ -25,19 +25,19 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 test.describe('[C02] Contratos - Tipo Venta', () => {
     test.setTimeout(120000);
 
-    test('Create Contract (Venta) using Seeded Cliente', async ({ page }, testInfo) => {
+    test('Crear Contrato (Venta) usando seeded Cliente', async ({ page }, testInfo) => {
         const startTime = Date.now();
         await allure.epic('TMS Legacy Flow');
         await allure.feature('02-Contratos');
         await allure.story('Contrato Tipo Venta');
         logger.info('='.repeat(80));
-        logger.info('🚀 Starting Contract Creation - Tipo Venta (Seeded Cliente Mode)');
+        logger.info('🚀 Iniciando creación de Contrato Tipo Venta (Seeded Cliente Mode)');
         logger.info('='.repeat(80));
 
         // =================================================================
         // PHASE 1: Load Data
         // =================================================================
-        logger.info('📋 PHASE 1: Loading seeded client data...');
+        logger.info('📋 Fase 1: Cargando datos del cliente sembrado...');
         const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
         if (!fs.existsSync(dataPath)) throw new Error(`Data file not found: ${dataPath}`);
         const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
@@ -50,7 +50,7 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
             );
         }
         const clienteNombre = cliente.nombreFantasia || cliente.nombre;
-        logger.info(`📦 Using cliente: "${clienteNombre}" (ID: ${cliente.id})`);
+        logger.info(`📦 Usando cliente: "${clienteNombre}" (ID: ${cliente.id})`);
 
         await allure.parameter('Cliente', clienteNombre);
         await allure.parameter('Cliente ID', String(cliente.id));
@@ -62,16 +62,16 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         // =================================================================
         // PHASE 2: Navigate to Create Form
         // =================================================================
-        logger.info('📋 PHASE 2: Navigating to contract creation form...');
+        logger.info('📋 Fase 2: Navegando al formulario de creación de contratos...');
         const contratosPage = new ContratosFormPage(page);
         await contratosPage.navigateToCreate();
         await page.waitForLoadState('domcontentloaded');
-        logger.info('✅ Form loaded');
+        logger.info('✅ Formulario cargado');
 
         // =================================================================
         // PHASE 3-4: Fill Contract Header and Save
         // =================================================================
-        logger.info('📋 PHASE 3-4: Filling contract header and saving...');
+        logger.info('📋 Fase 3-4: Completando el encabezado del contrato y guardando...');
         const nroContrato = String(Date.now()).slice(-6);
         await allure.parameter('Nro Contrato', nroContrato);
 
@@ -82,31 +82,31 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
             'Venta',
             '1'
         );
-        logger.info(`✅ Contract header saved! ID: ${contractId}`);
+        logger.info(`✅ Encabezado del contrato guardado! ID: ${contractId}`);
 
         // =================================================================
         // PHASE 5: Add Route + Cargo + Tarifas
         // =================================================================
-        logger.info('📋 PHASE 5: Adding Route 715 + Cargo 715_19 with tarifas...');
+        logger.info('📋 Fase 5: Agregando ruta 715 + carga 715_19 con tarifas...');
         // For Venta, we want to fill conductor(20000), viaje(50000) AND total(50000)
         await contratosPage.addSpecificRouteAndCargo('20000', '50000', '50000');
-        logger.info('✅ Route and tariffs added');
+        logger.info('✅ Ruta y tarifas agregadas');
 
         // =================================================================
         // PHASE 6: Save Full Contract (with tarifas)
         // =================================================================
-        logger.info('📋 PHASE 6: Saving full contract (with tarifas)...');
+        logger.info('📋 Fase 6: Guardando contrato completo (con tarifas)...');
         const finalContractId = await contratosPage.saveAndExtractId();
-        logger.info(`✅ Full contract saved! ID: ${finalContractId}`);
+        logger.info(`✅ Contrato completo guardado! ID: ${finalContractId}`);
 
-        logger.info('📋 PHASE 7: Verifying contract in index...');
+        logger.info('📋 Fase 7: Verificando contrato en el índice...');
 
         let found = false;
         const maxAttempts = 3;
         let contractRow = page.locator('table tbody tr').first(); // Placeholder
 
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            logger.info(`🔍 Verification attempt ${attempt}/${maxAttempts}...`);
+            logger.info(`🔍 Intentando verificar el contrato ${attempt}/${maxAttempts}...`);
 
             await page.goto('/contrato/index');
             await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
@@ -114,7 +114,7 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
             const searchInput = page.locator('input[type="search"]').first();
             await searchInput.waitFor({ state: 'visible', timeout: 10000 });
 
-            logger.info(`⌨️ Searching by cliente: ${clienteNombre}`);
+            logger.info(`⌨️ Buscando por cliente: ${clienteNombre}`);
             await searchInput.clear();
             await searchInput.fill(clienteNombre);
             await page.waitForTimeout(2000); // DataTables filter
@@ -123,11 +123,11 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
             const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
 
             if (isVisible) {
-                logger.info(`✅ Contract ${nroContrato} found in index!`);
+                logger.info(`✅ Contrato ${nroContrato} encontrado en el índice!`);
                 found = true;
                 break;
             } else {
-                logger.warn(`⚠️ Contract ${nroContrato} not found in this attempt.`);
+                logger.warn(`⚠️ Contrato ${nroContrato} no encontrado en este intento.`);
                 if (attempt < maxAttempts) {
                     await page.waitForTimeout(3000); // Wait before reload
                 }
@@ -135,9 +135,9 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         }
 
         if (!found) {
-            logger.error(`❌ Contract ${nroContrato} not found in index table after ${maxAttempts} attempts`);
+            logger.error(`❌ Contrato ${nroContrato} no encontrado en la tabla del índice después de ${maxAttempts} intentos`);
             await page.screenshot({ path: `./reports/screenshots/contract-not-found-${nroContrato}.png`, fullPage: true });
-            throw new Error(`Contract ${nroContrato} not found in index table after search`);
+            throw new Error(`Contrato ${nroContrato} no encontrado en la tabla del índice después de la búsqueda`);
         }
 
         // Extract final ID from grid row if not already captured
@@ -148,7 +148,7 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
             const idFromGrid = href?.match(/\/editar\/(\d+)/)?.[1];
             if (idFromGrid) {
                 finalId = idFromGrid;
-                logger.info(`✅ Contract ID from grid: ${finalId}`);
+                logger.info(`✅ ID del contrato desde la grilla: ${finalId}`);
             }
         }
 
@@ -162,22 +162,22 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         // =================================================================
         // PHASE 8: Persist to JSON
         // =================================================================
-        logger.info('📋 PHASE 8: Persisting contract data to JSON...');
+        logger.info('📋 Fase 8: Persistiendo datos del contrato en JSON...');
         operationalData.contratoCliente = { id: finalId, nroContrato: nroContrato };
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
-        logger.info(`✅ contratoCliente data saved to ${dataPath}`);
+        logger.info(`✅ Datos de contratoCliente guardados en ${dataPath}`);
 
         // =================================================================
         // SUMMARY
         // =================================================================
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info('='.repeat(80));
-        logger.info('✅ VENTA CONTRACT CREATION COMPLETE!');
+        logger.info('✅ CREACIÓN DE CONTRATO TIPO VENTA COMPLETADA!');
         logger.info('='.repeat(80));
         logger.info(`   Nro Contrato: ${nroContrato}`);
         logger.info(`   Contract ID: ${finalId}`);
         logger.info(`   Cliente: ${clienteNombre}`);
-        logger.info(`   Execution Time: ${executionTime}s`);
+        logger.info(`   Tiempo de ejecución: ${executionTime}s`);
         logger.info('='.repeat(80));
     });
 });

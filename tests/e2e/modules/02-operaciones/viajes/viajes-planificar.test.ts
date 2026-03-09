@@ -23,7 +23,7 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 test.describe('[V01] Viajes - Planificar', () => {
   test.setTimeout(120000);
 
-  test('Should planificar a new Viaje using entities from JSON', async ({
+  test('Debe planificar un nuevo Viaje usando entidades del JSON', async ({
     viajesPlanificarPage,
     viajesAsignarPage,
     page
@@ -34,18 +34,18 @@ test.describe('[V01] Viajes - Planificar', () => {
     await allure.story('Planificar Viaje');
 
     logger.info('='.repeat(80));
-    logger.info('Starting Step 6: Planificar Viaje');
+    logger.info('Iniciando Step 6: Planificar Viaje');
     logger.info('='.repeat(80));
 
     // =================================================================
     // STEP 1: Load JSON Data
     // =================================================================
-    logger.info('Loading existing entity data from worker-specific JSON...');
+    logger.info('Cargando datos de entidades existentes del JSON específico del worker...');
     const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
     if (!fs.existsSync(dataPath)) {
       throw new Error(
-        'Worker-specific data file not found!\n' +
+        'Archivo de datos específico del worker no encontrado!\n' +
         `Expected: ${dataPath}\n` +
         'Please run base entities setup first: npm run test:base'
       );
@@ -58,13 +58,13 @@ test.describe('[V01] Viajes - Planificar', () => {
     const clienteSource = operationalData.seededCliente || operationalData.cliente;
     if (!clienteSource?.nombre) {
       throw new Error(
-        '❌ Missing required entity: Cliente.\n' +
+        '❌ Entidad no encontrada: Cliente.\n' +
         'Run base entities setup OR run: npm run test:qa:entity:cliente'
       );
     }
 
-    logger.info('✅ All prerequisites validated');
-    logger.info('Loaded entities:');
+    logger.info('✅ Todos los prerrequisitos validados');
+    logger.info('Entidades cargadas:');
     logger.info(`   Cliente source: ${operationalData.seededCliente ? 'seededCliente ✅' : 'cliente (fallback) ⚠️'}`);
     logger.info(`   Cliente: ${clienteSource.nombre}`);
     logger.info('');
@@ -104,10 +104,10 @@ test.describe('[V01] Viajes - Planificar', () => {
     // =================================================================
     // PHASE 1: Navigate to Planificar Viajes
     // =================================================================
-    await test.step('Phase 1: Navigate', async () => {
-      logger.info('PHASE 1: Navigate to Planificar Viajes');
+    await test.step('Fase 1: Navegar', async () => {
+      logger.info('Fase 1: Navegar a Planificar Viajes');
       await viajesPlanificarPage.navigate();
-      logger.info('Navigation successful');
+      logger.info('Navegación exitosa');
     });
 
     // =================================================================
@@ -121,8 +121,8 @@ test.describe('[V01] Viajes - Planificar', () => {
     // 6. Código Carga
     // 7. Ruta (via Modal or Manual Fallback)
     // =================================================================
-    await test.step('Phase 2: Fill Form', async () => {
-      logger.info('PHASE 2: Fill Complete Viaje Form');
+    await test.step('Fase 2: Completar formulario', async () => {
+      logger.info('Fase 2: Completar formulario de viaje');
 
       // Header Nro Viaje (though not in user numbered list, it's essential)
       await viajesPlanificarPage.fillNroViaje(nroViaje);
@@ -134,7 +134,7 @@ test.describe('[V01] Viajes - Planificar', () => {
       await viajesPlanificarPage.selectTipoServicio(config.tipoServicio);
 
       // 3. Cliente - from seededCliente JSON
-      logger.info(`Selecting Cliente: ${clienteNombre}`);
+      logger.info(`Seleccionando Cliente: ${clienteNombre}`);
       await viajesPlanificarPage.selectCliente(clienteNombre);
 
       // 4. Tipo Viaje
@@ -147,16 +147,16 @@ test.describe('[V01] Viajes - Planificar', () => {
       await viajesPlanificarPage.selectCodigoCarga(config.codigoCarga);
 
       // 7. Ruta (via Modal or Manual Fallback)
-      logger.info(`Attempting to add Route: ${config.ruta}...`);
+      logger.info(`Intentando agregar Ruta: ${config.ruta}...`);
       const rutaAdded = await viajesPlanificarPage.agregarRuta(config.ruta);
 
       if (!rutaAdded) {
-        logger.warn('⚠️ Route addition failed or skipped, applying manual Origen/Destino fallback...');
+        logger.warn('⚠️ La adición de la ruta falló o se omitió, aplicando el fallback manual de Origen/Destino...');
         if (config.origenManual) await viajesPlanificarPage.selectOrigen(config.origenManual);
         if (config.destinoManual) await viajesPlanificarPage.selectDestino(config.destinoManual);
       }
 
-      logger.info('Form filled completely');
+      logger.info('Formulario completado');
     });
 
     // =================================================================
@@ -164,8 +164,8 @@ test.describe('[V01] Viajes - Planificar', () => {
     // =================================================================
     let viajeId: string | null = null;
 
-    await test.step('Phase 3: Save and capture Viaje ID', async () => {
-      logger.info('PHASE 3: Save Viaje');
+    await test.step('Fase 3: Guardar y capturar ID del Viaje', async () => {
+      logger.info('Fase 3: Guardar Viaje');
 
       // Wait for navigation triggered by Guardar — the TMS redirects to:
       //   /viajes/editar/{id}  or  /viajes/ver/{id}  after a successful save
@@ -179,12 +179,12 @@ test.describe('[V01] Viajes - Planificar', () => {
 
       // Extract the ID from the final URL
       const finalUrl = page.url();
-      logger.info(`Post-save URL: ${finalUrl}`);
+      logger.info(`URL post-guardado: ${finalUrl}`);
 
       const urlMatch = finalUrl.match(/\/viajes\/(?:editar|ver)\/(\d+)/);
       if (urlMatch) {
         viajeId = urlMatch[1];
-        logger.info(`✅ Viaje ID captured from URL: ${viajeId}`);
+        logger.info(`✅ ID del viaje capturado de la URL: ${viajeId}`);
       } else {
         // Fallback: look for a hidden input or data attribute holding the ID
         viajeId = await page.evaluate(() => {
@@ -200,20 +200,20 @@ test.describe('[V01] Viajes - Planificar', () => {
           return null;
         });
         if (viajeId) {
-          logger.info(`✅ Viaje ID captured from DOM: ${viajeId}`);
+          logger.info(`✅ ID del viaje capturado del DOM: ${viajeId}`);
         } else {
-          logger.warn('⚠️ Could not capture Viaje ID. The assignment test will search by nroViaje instead.');
+          logger.warn('⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.');
         }
       }
 
-      logger.info('Save clicked and navigation completed');
+      logger.info('Boton guardar clickeado y navegacion completada');
     });
 
     // =================================================================
     // PHASE 4: Verification
     // =================================================================
-    await test.step('Phase 4: Verify', async () => {
-      logger.info('PHASE 4: Verification');
+    await test.step('Fase 4: Verificación', async () => {
+      logger.info('Fase 4: Verificación');
 
       // In Demo, we redirect to /viajes/asignar on success, but NO internal ID in URL
       // We'll capture the ID from the first row of the grid instead
@@ -223,20 +223,20 @@ test.describe('[V01] Viajes - Planificar', () => {
       let internalGridId: string | null = null;
       if (isDemo) {
         internalGridId = await viajesAsignarPage.getFirstRowId();
-        logger.info(`✅ Captured internal grid ID in Demo: ${internalGridId}`);
+        logger.info(`✅ ID interno de la grilla capturado en Demo: ${internalGridId}`);
         searchTerm = internalGridId || nroViaje;
       }
 
-      logger.info(`Searching in Asignar grid using: ${searchTerm}`);
+      logger.info(`Buscando en la grilla de Asignar usando: ${searchTerm}`);
       const foundInAsignar = await viajesAsignarPage.findViajeRow(searchTerm).then(row => !!row);
 
       if (foundInAsignar) {
-        logger.info(`✅ Viaje found in /viajes/asignar using search: ${searchTerm}`);
+        logger.info(`✅ Viaje encontrado en /viajes/asignar usando búsqueda: ${searchTerm}`);
       } else {
-        logger.warn(`⚠️ Viaje NOT found in /viajes/asignar using search: ${searchTerm}`);
+        logger.warn(`⚠️ Viaje NO encontrado en /viajes/asignar usando búsqueda: ${searchTerm}`);
       }
 
-      expect(foundInAsignar, `Viaje ${searchTerm} should be visible in Asignar grid`).toBe(true);
+      expect(foundInAsignar, `Viaje ${searchTerm} debería ser visible en la grilla de Asignar`).toBe(true);
 
       // Save internal grid ID for subsequent tests (e.g., asignar)
       if (isDemo && internalGridId) {
@@ -245,7 +245,7 @@ test.describe('[V01] Viajes - Planificar', () => {
           id: internalGridId,
         };
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
-        logger.info(`✅ Saved internal grid ID to JSON: viaje.id = ${internalGridId}`);
+        logger.info(`✅ ID interno de la grilla guardado en JSON: viaje.id = ${internalGridId}`);
       }
 
       entityTracker.register({
@@ -260,7 +260,7 @@ test.describe('[V01] Viajes - Planificar', () => {
     // =================================================================
     // STEP 6: Update JSON with Viaje Info
     // =================================================================
-    logger.info('Updating worker-specific JSON with viaje...');
+    logger.info('Actualizando JSON del worker con la información del viaje...');
 
     operationalData.viaje = {
       ...operationalData.viaje,
@@ -279,11 +279,11 @@ test.describe('[V01] Viajes - Planificar', () => {
     const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
 
     logger.info('='.repeat(80));
-    logger.info('STEP 6: PLANIFICAR VIAJE COMPLETE!');
+    logger.info('PASO 6: PLANIFICAR VIAJE COMPLETE!');
     logger.info('='.repeat(80));
-    logger.info(`Execution Time: ${executionTime}s`);
+    logger.info(`Tiempo de ejecución: ${executionTime}s`);
     logger.info('');
-    logger.info('Viaje Details:');
+    logger.info('Detalles del viaje:');
     logger.info(`   Nro Viaje: ${nroViaje}`);
     logger.info(`   Cliente: ${clienteNombre}`);
     logger.info(`   Ruta: 05082025-1`);
