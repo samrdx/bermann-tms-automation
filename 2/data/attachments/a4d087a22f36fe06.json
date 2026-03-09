@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 83568",
+  "cliente": "CliMon 83568",
+  "vehiculo": "HAII-55",
+  "conductor": "Carmen",
+  "nroViaje": "575379",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "173.75",
+  "ambiente": "DEMO"
+}

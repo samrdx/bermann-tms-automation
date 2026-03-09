@@ -1,0 +1,13 @@
+2026-03-09 01:25:36 [INFO]: ✅ Loaded seededTransportista: Pacific 5030 (ID: 187)
+2026-03-09 01:25:37 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 01:25:39 [INFO]: 📝 Filling form for Transportista: Pacific 5030
+2026-03-09 01:25:39 [INFO]: [VehiculoFormPage] Filling patente: ZITT-34
+2026-03-09 01:25:39 [INFO]: [VehiculoFormPage] Filling muestra: ZITT-34
+2026-03-09 01:25:40 [INFO]: [VehiculoFormPage] Selecting transportista: Pacific 5030
+2026-03-09 01:25:42 [INFO]: [VehiculoFormPage] ✅ Transportista "Pacific 5030" selected
+2026-03-09 01:25:42 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 01:25:42 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 01:25:43 [INFO]: [VehiculoFormPage] Selecting capacidad: 28 TON
+2026-03-09 01:25:44 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" selected
+2026-03-09 01:25:44 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 01:25:48 [INFO]: ✅ seededVehiculo saved: ZITT-34

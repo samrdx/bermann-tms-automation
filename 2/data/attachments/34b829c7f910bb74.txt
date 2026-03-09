@@ -1,0 +1,63 @@
+2026-03-09 01:14:21 [INFO]: ================================================================================
+2026-03-09 01:14:21 [INFO]: Starting Step 6: Planificar Viaje
+2026-03-09 01:14:21 [INFO]: ================================================================================
+2026-03-09 01:14:21 [INFO]: Loading existing entity data from worker-specific JSON...
+2026-03-09 01:14:21 [INFO]: ✅ All prerequisites validated
+2026-03-09 01:14:21 [INFO]: Loaded entities:
+2026-03-09 01:14:21 [INFO]:    Cliente source: seededCliente ✅
+2026-03-09 01:14:21 [INFO]:    Cliente: Comercial 2757
+2026-03-09 01:14:21 [INFO]: 
+2026-03-09 01:14:21 [INFO]: Environment: QA
+2026-03-09 01:14:21 [INFO]: Configuration: {
+  "tipoOperacion": "tclp2210",
+  "tipoServicio": "tclp2210",
+  "tipoViaje": "Normal",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "Pallet_Furgon_Frio_10ton",
+  "ruta": "05082025-1",
+  "origenManual": "",
+  "destinoManual": ""
+}
+2026-03-09 01:14:21 [INFO]: PHASE 1: Navigate to Planificar Viajes
+2026-03-09 01:14:21 [INFO]: [PlanificarViajesPage] Navigating to Planificar Viajes page
+2026-03-09 01:14:26 [INFO]: Navigation successful
+2026-03-09 01:14:26 [INFO]: PHASE 2: Fill Complete Viaje Form
+2026-03-09 01:14:26 [INFO]: [PlanificarViajesPage] Filling Nro Viaje: 54462
+2026-03-09 01:14:26 [INFO]: [PlanificarViajesPage] Selecting Tipo Operacion: [tclp2210]
+2026-03-09 01:14:29 [INFO]: [PlanificarViajesPage] Selecting Tipo Servicio: [tclp2210]
+2026-03-09 01:14:32 [INFO]: Selecting Cliente: Comercial 2757 SpA
+2026-03-09 01:14:32 [INFO]: [PlanificarViajesPage] Selecting Cliente: [Comercial 2757 SpA]
+2026-03-09 01:14:36 [INFO]: [PlanificarViajesPage] Selecting Tipo Viaje: [Normal]
+2026-03-09 01:14:37 [INFO]: [PlanificarViajesPage] 🛡️ Modal backdrop detected, forcefully removing it to unblock UI...
+2026-03-09 01:14:41 [INFO]: [PlanificarViajesPage] Selecting Unidad Negocio: [Defecto]
+2026-03-09 01:14:45 [INFO]: [PlanificarViajesPage] Selecting Codigo Carga: [Pallet_Furgon_Frio_10ton]
+2026-03-09 01:14:49 [INFO]: Attempting to add Route: 05082025-1...
+2026-03-09 01:14:49 [INFO]: [PlanificarViajesPage] Adding ruta: 05082025-1
+2026-03-09 01:14:53 [INFO]: [PlanificarViajesPage] Found ruta [05082025-1] in row 1
+2026-03-09 01:14:53 [INFO]: [PlanificarViajesPage] Waiting for Origen/Destino to populate...
+2026-03-09 01:14:53 [INFO]: Form filled completely
+2026-03-09 01:14:53 [INFO]: PHASE 3: Save Viaje
+2026-03-09 01:14:53 [INFO]: [PlanificarViajesPage] Clicking Guardar...
+2026-03-09 01:14:53 [INFO]: [PlanificarViajesPage] 🛡️ Modal backdrop detected, forcefully removing it to unblock UI...
+2026-03-09 01:14:56 [INFO]: Post-save URL: https://moveontruckqa.bermanntms.cl/viajes/crear
+2026-03-09 01:14:56 [WARN]: ⚠️ Could not capture Viaje ID. The assignment test will search by nroViaje instead.
+2026-03-09 01:14:56 [INFO]: Save clicked and navigation completed
+2026-03-09 01:14:56 [INFO]: PHASE 4: Verification
+2026-03-09 01:14:56 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-09 01:14:59 [INFO]: Searching in Asignar grid using: 54462
+2026-03-09 01:14:59 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 54462 in Assignment grid...
+2026-03-09 01:15:01 [INFO]: [AsignarViajesPage] ✅ Found Trip 54462 by text match in row 1
+2026-03-09 01:15:01 [INFO]: ✅ Viaje found in /viajes/asignar using search: 54462
+2026-03-09 01:15:01 [INFO]: Updating worker-specific JSON with viaje...
+2026-03-09 01:15:01 [INFO]: Saved viaje.nroViaje: 54462
+2026-03-09 01:15:01 [INFO]: ================================================================================
+2026-03-09 01:15:01 [INFO]: STEP 6: PLANIFICAR VIAJE COMPLETE!
+2026-03-09 01:15:01 [INFO]: ================================================================================
+2026-03-09 01:15:01 [INFO]: Execution Time: 39.96s
+2026-03-09 01:15:01 [INFO]: 
+2026-03-09 01:15:01 [INFO]: Viaje Details:
+2026-03-09 01:15:01 [INFO]:    Nro Viaje: 54462
+2026-03-09 01:15:01 [INFO]:    Cliente: Comercial 2757 SpA
+2026-03-09 01:15:01 [INFO]:    Ruta: 05082025-1
+2026-03-09 01:15:01 [INFO]:    Status: PLANIFICADO
+2026-03-09 01:15:01 [INFO]: ================================================================================

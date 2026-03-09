@@ -1,0 +1,13 @@
+2026-03-09 01:25:50 [INFO]: ✅ Loaded seededTransportista: TransSur 8739 (ID: 188)
+2026-03-09 01:25:52 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 01:25:54 [INFO]: 📝 Filling form for Transportista: TransSur 8739
+2026-03-09 01:25:54 [INFO]: [VehiculoFormPage] Filling patente: ALDW-58
+2026-03-09 01:25:54 [INFO]: [VehiculoFormPage] Filling muestra: ALDW-58
+2026-03-09 01:25:55 [INFO]: [VehiculoFormPage] Selecting transportista: TransSur 8739
+2026-03-09 01:25:57 [INFO]: [VehiculoFormPage] ✅ Transportista "TransSur 8739" selected
+2026-03-09 01:25:57 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 01:25:58 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 01:25:59 [INFO]: [VehiculoFormPage] Selecting capacidad: 28 TON
+2026-03-09 01:25:59 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" selected
+2026-03-09 01:25:59 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 01:26:03 [INFO]: ✅ seededVehiculo saved: ALDW-58

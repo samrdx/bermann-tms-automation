@@ -1,0 +1,35 @@
+2026-03-09 01:08:41 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 01:08:41 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 01:08:44 [INFO]: ✅ Navigation successful
+2026-03-09 01:08:44 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 01:08:44 [INFO]: [ClienteFormPage] Filling nombre (razón social): Comercial 2757
+2026-03-09 01:08:44 [INFO]: [ClienteFormPage] Filling RUT: 97080723-3
+2026-03-09 01:08:44 [INFO]: [BasePage] Entering RUT with verify: [97080723-3] on #clientes-rut
+2026-03-09 01:08:45 [INFO]: [BasePage] ✅ RUT Entered and Verified: 97.080.723-3
+2026-03-09 01:08:45 [INFO]: [ClienteFormPage] Filling nombre fantasia: Comercial 2757 SpA
+2026-03-09 01:08:45 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 01:08:46 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 01:08:47 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 01:08:47 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 01:08:48 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de Valparaiso
+2026-03-09 01:08:49 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: San Felipe de Aconcagua
+2026-03-09 01:08:51 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Putaendo
+2026-03-09 01:08:51 [INFO]: [ClienteFormPage] ✅ Location selected: Region de Valparaiso → San Felipe de Aconcagua → Putaendo
+2026-03-09 01:08:51 [INFO]: [ClienteFormPage] Filling calle: Av. Apoquindo
+2026-03-09 01:08:51 [INFO]: [ClienteFormPage] Filling altura: 471
+2026-03-09 01:08:51 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 01:08:51 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 570/570
+2026-03-09 01:08:52 [INFO]: ✅ Form filled
+2026-03-09 01:08:52 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 01:08:52 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 01:08:57 [INFO]: ✅ Save initiated
+2026-03-09 01:08:57 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 01:08:59 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-09 01:08:59 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 01:08:59 [INFO]: 🔍 Searching by RUT: 97080723-3 (clean: 970807233)
+2026-03-09 01:08:59 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 01:09:01 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 01:09:01 [INFO]: ✅ Rescued ID via name search (link): 1055
+2026-03-09 01:09:01 [INFO]: ✅ Successfully identified Cliente [Comercial 2757] ID: 1055
+2026-03-09 01:09:01 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-09 01:09:01 [INFO]: ✅ Test PASSED

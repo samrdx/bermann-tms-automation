@@ -1,0 +1,35 @@
+2026-03-09 01:24:41 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 01:24:41 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 01:24:44 [INFO]: ✅ Navigation successful
+2026-03-09 01:24:44 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 01:24:44 [INFO]: [ClienteFormPage] Filling nombre (razón social): Importadora 1192
+2026-03-09 01:24:44 [INFO]: [ClienteFormPage] Filling RUT: 76491276-4
+2026-03-09 01:24:44 [INFO]: [BasePage] Entering RUT with verify: [76491276-4] on #clientes-rut
+2026-03-09 01:24:45 [INFO]: [BasePage] ✅ RUT Entered and Verified: 76.491.276-4
+2026-03-09 01:24:45 [INFO]: [ClienteFormPage] Filling nombre fantasia: Importadora 1192 SpA
+2026-03-09 01:24:45 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 01:24:46 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 01:24:47 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 01:24:47 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 01:24:47 [INFO]: [ClienteFormPage] ✅ Random región selected: Region del Libertador B. O'Higgins
+2026-03-09 01:24:49 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Colchagua
+2026-03-09 01:24:50 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Palmilla
+2026-03-09 01:24:50 [INFO]: [ClienteFormPage] ✅ Location selected: Region del Libertador B. O'Higgins → Colchagua → Palmilla
+2026-03-09 01:24:50 [INFO]: [ClienteFormPage] Filling calle: Calle Ahumada
+2026-03-09 01:24:50 [INFO]: [ClienteFormPage] Filling altura: 675
+2026-03-09 01:24:50 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 01:24:51 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 837/837
+2026-03-09 01:24:51 [INFO]: ✅ Form filled
+2026-03-09 01:24:51 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 01:24:51 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 01:24:56 [INFO]: ✅ Save initiated
+2026-03-09 01:24:56 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 01:24:58 [INFO]: 📍 Post-save URL for ID extraction: https://demo.bermanntms.cl/clientes/index
+2026-03-09 01:24:58 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 01:24:58 [INFO]: 🔍 Searching by RUT: 76491276-4 (clean: 764912764)
+2026-03-09 01:24:58 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 01:25:00 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 01:25:00 [INFO]: ✅ Rescued ID via name search (link): 174
+2026-03-09 01:25:00 [INFO]: ✅ Successfully identified Cliente [Importadora 1192] ID: 174
+2026-03-09 01:25:00 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-demo.json
+2026-03-09 01:25:00 [INFO]: ✅ Test PASSED

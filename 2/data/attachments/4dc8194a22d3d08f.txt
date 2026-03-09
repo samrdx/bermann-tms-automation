@@ -1,0 +1,13 @@
+2026-03-09 01:09:26 [INFO]: ✅ Loaded seededTransportista: Delta 7553 (ID: 1748)
+2026-03-09 01:09:28 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 01:09:31 [INFO]: 📝 Filling form for Transportista: Delta 7553
+2026-03-09 01:09:31 [INFO]: [VehiculoFormPage] Filling patente: ZK-3188
+2026-03-09 01:09:31 [INFO]: [VehiculoFormPage] Filling muestra: ZK-3188
+2026-03-09 01:09:32 [INFO]: [VehiculoFormPage] Selecting transportista: Delta 7553
+2026-03-09 01:09:34 [INFO]: [VehiculoFormPage] ✅ Transportista "Delta 7553" selected
+2026-03-09 01:09:34 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 01:09:34 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 01:09:35 [INFO]: [VehiculoFormPage] Selecting capacidad: 3 KG
+2026-03-09 01:09:36 [INFO]: [VehiculoFormPage] ✅ Capacidad "3 KG" selected
+2026-03-09 01:09:36 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 01:09:40 [INFO]: ✅ seededVehiculo saved: ZK-3188

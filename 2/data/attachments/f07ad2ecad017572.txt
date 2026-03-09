@@ -1,0 +1,42 @@
+2026-03-09 01:30:46 [INFO]: ================================================================================
+2026-03-09 01:30:46 [INFO]: Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: DEMO]
+2026-03-09 01:30:46 [INFO]: ================================================================================
+2026-03-09 01:30:46 [INFO]: PHASE 1: Loading worker-specific JSON data...
+2026-03-09 01:30:46 [INFO]: ✅ All prerequisites validated
+2026-03-09 01:30:46 [INFO]:    Transportista : Pacific 5030
+2026-03-09 01:30:46 [INFO]:    Vehículo      : ZITT-34
+2026-03-09 01:30:46 [INFO]:    Conductor     : María Araya
+2026-03-09 01:30:46 [INFO]:    Nro Viaje     : 98970
+2026-03-09 01:30:46 [INFO]:    Search ID     : 6595 (internal grid ID)
+2026-03-09 01:30:46 [INFO]: PHASE 2: Navigating to /viajes/asignar... [isDemo=true]
+2026-03-09 01:30:46 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-09 01:30:49 [INFO]: 🔍 Searching for viaje "6595" and opening edit form...
+2026-03-09 01:30:49 [INFO]: [AsignarViajesPage] Selecting viaje row: 6595
+2026-03-09 01:30:49 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 6595 in Assignment grid...
+2026-03-09 01:30:51 [INFO]: [AsignarViajesPage] ✅ Found 1 rows after search in Demo, assuming first is Trip 6595
+2026-03-09 01:30:54 [INFO]: [AsignarViajesPage] ✅ Assignment Form Loaded
+2026-03-09 01:30:54 [INFO]: ✅ Trip assignment form loaded — URL: https://demo.bermanntms.cl/viajes/editar/6595
+2026-03-09 01:30:54 [INFO]: PHASE 3: Selecting Transportista: Pacific 5030
+2026-03-09 01:30:54 [INFO]: 🛡️ Robust Selection: Transportista "Pacific 5030"
+2026-03-09 01:30:57 [INFO]: ✅ Transportista verified: Pacific 5030
+2026-03-09 01:30:57 [INFO]: PHASE 4: Waiting for cascading dropdowns to reload...
+2026-03-09 01:30:58 [INFO]: PHASE 5: Selecting Vehículo: ZITT-34
+2026-03-09 01:30:59 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "ZITT-34"
+2026-03-09 01:30:59 [INFO]: PHASE 6: Selecting Conductor: María Araya
+2026-03-09 01:31:01 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "María Araya"
+2026-03-09 01:31:01 [INFO]: PHASE 7: Final anti-reset check for Transportista...
+2026-03-09 01:31:01 [INFO]: ✅ Transportista confirmed: "Pacific 5030"
+2026-03-09 01:31:01 [INFO]: PHASE 8: Clicking Guardar...
+2026-03-09 01:31:01 [INFO]: 💾 Save completed
+2026-03-09 01:31:01 [INFO]: PHASE 9: Verifying assignment in /viajes/asignar grid...
+2026-03-09 01:31:05 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-09 01:31:07 [INFO]: ✅ Viaje [6595] confirmed in grid. Status Asignado: true
+2026-03-09 01:31:07 [INFO]: ✅ JSON updated: viaje.status = ASIGNADO
+2026-03-09 01:31:07 [INFO]: ================================================================================
+2026-03-09 01:31:07 [INFO]: STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!
+2026-03-09 01:31:07 [INFO]:    Nro Viaje    : 98970
+2026-03-09 01:31:07 [INFO]:    Transportista: Pacific 5030
+2026-03-09 01:31:07 [INFO]:    Vehículo     : ZITT-34
+2026-03-09 01:31:07 [INFO]:    Conductor    : María Araya
+2026-03-09 01:31:07 [INFO]:    Duration     : 21.23s
+2026-03-09 01:31:07 [INFO]: ================================================================================

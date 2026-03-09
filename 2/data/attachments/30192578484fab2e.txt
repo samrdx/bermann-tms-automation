@@ -1,0 +1,18 @@
+2026-03-09 01:09:51 [INFO]: ✅ Loaded seededTransportista: EcoTrans 3070 (ID: 1747)
+2026-03-09 01:09:51 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-09 01:09:54 [INFO]: 📝 Filling Conductor Form for: Valentina López
+2026-03-09 01:09:54 [INFO]: [ConductorFormPage] Llenando usuario: qecfni22
+2026-03-09 01:09:54 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-09 01:09:54 [INFO]: [ConductorFormPage] Llenando nombre: Valentina
+2026-03-09 01:09:54 [INFO]: [ConductorFormPage] Llenando apellido: López
+2026-03-09 01:09:54 [INFO]: [ConductorFormPage] Llenando documento: 42.961.816-9
+2026-03-09 01:09:54 [INFO]: [BasePage] Entering RUT with verify: [42.961.816-9] on #conductores-documento
+2026-03-09 01:09:55 [INFO]: [BasePage] ✅ RUT Entered and Verified: 42.961.816-9
+2026-03-09 01:09:55 [INFO]: [ConductorFormPage] Llenando telefono: +56985864939
+2026-03-09 01:09:56 [INFO]: [ConductorFormPage] Llenando email: mariagonzalez@gmail.com
+2026-03-09 01:09:56 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-09 01:09:57 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-09 01:09:57 [INFO]: [ConductorFormPage] Seleccionando transportista: [EcoTrans 3070]
+2026-03-09 01:09:58 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-09 01:10:01 [INFO]: ✅ seededConductor saved: Valentina López
+2026-03-09 01:10:01 [INFO]: ✅ Conductor Created and Saved Successfully

@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 15985",
+  "cliente": "CliMon 15985",
+  "vehiculo": "ROET-16",
+  "conductor": "Valentina",
+  "nroViaje": "140476",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "189.20",
+  "ambiente": "QA"
+}

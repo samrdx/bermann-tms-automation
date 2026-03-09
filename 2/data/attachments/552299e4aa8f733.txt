@@ -1,0 +1,34 @@
+2026-03-09 01:23:47 [INFO]: Compass PHASE 1: Navigate to Create Transportista
+2026-03-09 01:23:47 [INFO]: [TransportistaFormPage] Navigating to Transportista creation page
+2026-03-09 01:23:50 [INFO]: ✅ Navigation successful
+2026-03-09 01:23:50 [INFO]: 📝 PHASE 2: Fill Transportista Form
+2026-03-09 01:23:50 [INFO]: [TransportistaFormPage] Filling nombre: Pacific 5030
+2026-03-09 01:23:50 [INFO]: [TransportistaFormPage] Filling razón social: Pacific 5030 SpA
+2026-03-09 01:23:50 [INFO]: [TransportistaFormPage] Filling documento (RUT): 95909552-3
+2026-03-09 01:23:50 [INFO]: [BasePage] Entering RUT with verify: [95909552-3] on #transportistas-documento
+2026-03-09 01:23:51 [INFO]: [BasePage] ✅ RUT Entered and Verified: 95.909.552-3
+2026-03-09 01:23:51 [INFO]: [TransportistaFormPage] Selecting tipo transportista: Terceros
+2026-03-09 01:23:52 [INFO]: [TransportistaFormPage] ✅ Tipo transportista "Terceros" selected
+2026-03-09 01:23:52 [INFO]: [TransportistaFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 01:23:52 [INFO]: [TransportistaFormPage] 📍 Location attempt 1/5
+2026-03-09 01:23:53 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region de Magallanes
+2026-03-09 01:23:54 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Magallanes
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] ✅ Random comuna selected: Río Verde
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] ✅ Location selected: Region de Magallanes → Magallanes → Río Verde
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] Filling calle: Av. Apoquindo
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] Filling altura: 252
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] Selecting forma de pago: Contado
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" selected
+2026-03-09 01:23:56 [INFO]: ✅ Form filled
+2026-03-09 01:23:56 [INFO]: 💾 PHASE 3: Save Transportista
+2026-03-09 01:23:56 [INFO]: [TransportistaFormPage] Clicking save button
+2026-03-09 01:24:02 [INFO]: ✅ Save initiated
+2026-03-09 01:24:02 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 01:24:04 [INFO]: 📍 Post-save URL for ID extraction: https://demo.bermanntms.cl/transportistas/index
+2026-03-09 01:24:04 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 01:24:04 [INFO]: 🔍 Searching by name: Pacific 5030
+2026-03-09 01:24:04 [INFO]: 🔎 Clicked Buscar button (link role)
+2026-03-09 01:24:06 [INFO]: ✅ Rescued ID via grid search (edit link): 187
+2026-03-09 01:24:06 [INFO]: ✅ Successfully extracted Transportista [Pacific 5030] ID: 187
+2026-03-09 01:24:06 [INFO]: ✅ Transportista data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-demo.json
+2026-03-09 01:24:06 [INFO]: ✅ Test PASSED

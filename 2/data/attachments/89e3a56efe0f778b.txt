@@ -1,0 +1,61 @@
+2026-03-09 01:26:49 [INFO]: ================================================================================
+2026-03-09 01:26:49 [INFO]: 🚀 Starting Contract Creation - Tipo Costo (Seeded Transportista)
+2026-03-09 01:26:49 [INFO]: ================================================================================
+2026-03-09 01:26:49 [INFO]: 📦 Transportista: "Pacific 5030" (ID: 187)
+2026-03-09 01:26:49 [INFO]: 📝 Nro Contrato: 609305
+2026-03-09 01:26:49 [INFO]: PHASE 2: Filling contract header...
+2026-03-09 01:26:49 [INFO]: [ContratosFormPage] 📝 Filling basic contract information (Phase 1) - Tipo: Costo
+2026-03-09 01:26:49 [INFO]: [ContratosFormPage] Navigating to contract creation page: /contrato/crear
+2026-03-09 01:26:51 [INFO]: [ContratosFormPage] ✅ Contract creation page loaded and Nro Contrato input visible
+2026-03-09 01:26:51 [INFO]: [ContratosFormPage] Filling Nro Contrato: 609305
+2026-03-09 01:26:52 [INFO]: [ContratosFormPage] 🔽 Selecting Tipo Contrato = Costo...
+2026-03-09 01:26:56 [INFO]: [ContratosFormPage] ✅ Tipo Costo selected
+2026-03-09 01:26:56 [INFO]: [ContratosFormPage] 🔽 Selecting transportista: "Pacific 5030"...
+2026-03-09 01:26:57 [INFO]: [ContratosFormPage] 🔍 Transportista dropdown has search box — using search
+2026-03-09 01:26:58 [INFO]: [ContratosFormPage] ✅ Transportista selected
+2026-03-09 01:26:58 [INFO]: [ContratosFormPage] 📅 [DEMO] Selecting Fecha vencimiento: 31/12/2026
+2026-03-09 01:26:59 [INFO]: [ContratosFormPage] ✅ Fecha vencimiento set to 31/12/2026 via daypicker
+2026-03-09 01:26:59 [INFO]: [ContratosFormPage] 🏢 [DEMO] Selecting Unidad de negocio: Defecto
+2026-03-09 01:27:00 [INFO]: [ContratosFormPage] ✅ Unidad de negocio set to "Defecto"
+2026-03-09 01:27:00 [INFO]: [ContratosFormPage] 🔧 Forcing cleanup of any modal backdrops...
+2026-03-09 01:27:01 [INFO]: [ContratosFormPage] 💾 Saving basic contract header...
+2026-03-09 01:27:05 [INFO]: [ContratosFormPage] ✅ Contract header created successfully with ID: 297
+2026-03-09 01:27:05 [INFO]: [ContratosFormPage] 📍 Redirected to: https://demo.bermanntms.cl/contrato/editar/297
+2026-03-09 01:27:05 [INFO]: ✅ Header saved — Contract ID: 297
+2026-03-09 01:27:05 [INFO]: ✅ URL after header save: https://demo.bermanntms.cl/contrato/editar/297
+2026-03-09 01:27:05 [INFO]: PHASE 3: Adding route 715 with tariffs 20000 / 50000...
+2026-03-09 01:27:05 [INFO]: [ContratosFormPage] 🛣️ Adding Route 47 (DEMO environment)
+2026-03-09 01:27:05 [INFO]: [ContratosFormPage] Clicking "Añadir Ruta" button
+2026-03-09 01:27:06 [INFO]: [ContratosFormPage] Waiting for route modal to appear...
+2026-03-09 01:27:06 [INFO]: [ContratosFormPage] ✅ Route modal visible
+2026-03-09 01:27:07 [INFO]: [ContratosFormPage] Selecting Route 47
+2026-03-09 01:27:08 [INFO]: [ContratosFormPage] Closing routes modal
+2026-03-09 01:27:10 [INFO]: [ContratosFormPage] Clicking "Añadir Carga" for Route 47
+2026-03-09 01:27:11 [INFO]: [ContratosFormPage] ✅ Cargo modal visible
+2026-03-09 01:27:11 [INFO]: [ContratosFormPage] Selecting Cargo via: //a[@id='btn_plus_ruta_47_6']//i[@class='fa fa-plus']
+2026-03-09 01:27:11 [INFO]: [ContratosFormPage] Closing cargo modal
+2026-03-09 01:27:13 [INFO]: [ContratosFormPage] Filling tariffs: Conductor=20000, Viaje=50000
+2026-03-09 01:27:15 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_extra_47 set to "50000"
+2026-03-09 01:27:17 [INFO]: [ContratosFormPage] ✅ Tariff field #txt_tarifa_conductor_47 set to "20000"
+2026-03-09 01:27:18 [INFO]: [ContratosFormPage] 🔧 Forcing cleanup of any remaining modals
+2026-03-09 01:27:18 [INFO]: [ContratosFormPage] ✅ Route 47 and cargo added successfully
+2026-03-09 01:27:18 [INFO]: ✅ Route and tariffs added
+2026-03-09 01:27:18 [INFO]: PHASE 4: Saving final contract...
+2026-03-09 01:27:18 [INFO]: [ContratosFormPage] 💾 Saving contract and extracting ID
+2026-03-09 01:27:25 [INFO]: [ContratosFormPage] Current URL after save: https://demo.bermanntms.cl/contrato/index
+2026-03-09 01:27:25 [WARN]: [ContratosFormPage] ⚠️ Failed to extract contract ID from URL: https://demo.bermanntms.cl/contrato/index, returning empty string to rely on index search
+2026-03-09 01:27:25 [INFO]:    URL after final save: https://demo.bermanntms.cl/contrato/index
+2026-03-09 01:27:25 [INFO]:    Extracted contract ID: ""
+2026-03-09 01:27:25 [WARN]: ⚠️ Could not extract ID from URL — will verify via index search
+2026-03-09 01:27:25 [INFO]: PHASE 5: Navigating to /contrato/index to verify creation...
+2026-03-09 01:27:25 [INFO]: 🔍 Verification attempt 1/3...
+2026-03-09 01:27:27 [INFO]: ⌨️ Searching by transportista: Pacific 5030
+2026-03-09 01:27:29 [INFO]: ✅ Contract 609305 found in index!
+2026-03-09 01:27:29 [INFO]: ✅ Contract ID extracted from index: 297
+2026-03-09 01:27:29 [INFO]: ✅ CONTRACT VERIFIED IN INDEX — Nro: 609305 | ID: 297
+2026-03-09 01:27:29 [INFO]: ================================================================================
+2026-03-09 01:27:29 [INFO]: ✅ Contract Creation - Costo COMPLETE
+2026-03-09 01:27:29 [INFO]:    Nro Contrato : 609305
+2026-03-09 01:27:29 [INFO]:    Contract ID  : 297
+2026-03-09 01:27:29 [INFO]:    Transportista: Pacific 5030
+2026-03-09 01:27:29 [INFO]: ================================================================================

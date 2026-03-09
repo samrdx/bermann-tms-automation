@@ -1,0 +1,34 @@
+2026-03-09 01:07:19 [INFO]: Compass PHASE 1: Navigate to Create Transportista
+2026-03-09 01:07:19 [INFO]: [TransportistaFormPage] Navigating to Transportista creation page
+2026-03-09 01:07:22 [INFO]: ✅ Navigation successful
+2026-03-09 01:07:22 [INFO]: 📝 PHASE 2: Fill Transportista Form
+2026-03-09 01:07:22 [INFO]: [TransportistaFormPage] Filling nombre: EcoTrans 3070
+2026-03-09 01:07:22 [INFO]: [TransportistaFormPage] Filling razón social: EcoTrans 3070 SpA
+2026-03-09 01:07:22 [INFO]: [TransportistaFormPage] Filling documento (RUT): 54671752-6
+2026-03-09 01:07:22 [INFO]: [BasePage] Entering RUT with verify: [54671752-6] on #transportistas-documento
+2026-03-09 01:07:23 [INFO]: [BasePage] ✅ RUT Entered and Verified: 54.671.752-6
+2026-03-09 01:07:23 [INFO]: [TransportistaFormPage] Selecting tipo transportista: Terceros Con Flota Si Genera Contrato
+2026-03-09 01:07:24 [INFO]: [TransportistaFormPage] ✅ Tipo transportista "Terceros Con Flota Si Genera Contrato" selected
+2026-03-09 01:07:24 [INFO]: [TransportistaFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 01:07:24 [INFO]: [TransportistaFormPage] 📍 Location attempt 1/5
+2026-03-09 01:07:25 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region de Magallanes
+2026-03-09 01:07:26 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Tierra del Fuego
+2026-03-09 01:07:28 [INFO]: [TransportistaFormPage] ✅ Random comuna selected: Timaukel
+2026-03-09 01:07:28 [INFO]: [TransportistaFormPage] ✅ Location selected: Region de Magallanes → Tierra del Fuego → Timaukel
+2026-03-09 01:07:28 [INFO]: [TransportistaFormPage] Filling calle: Av. Apoquindo
+2026-03-09 01:07:28 [INFO]: [TransportistaFormPage] Filling altura: 446
+2026-03-09 01:07:28 [INFO]: [TransportistaFormPage] Selecting forma de pago: Contado
+2026-03-09 01:07:29 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" selected
+2026-03-09 01:07:29 [INFO]: ✅ Form filled
+2026-03-09 01:07:29 [INFO]: 💾 PHASE 3: Save Transportista
+2026-03-09 01:07:29 [INFO]: [TransportistaFormPage] Clicking save button
+2026-03-09 01:07:34 [INFO]: ✅ Save initiated
+2026-03-09 01:07:34 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 01:07:36 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-09 01:07:36 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 01:07:36 [INFO]: 🔍 Searching by name: EcoTrans 3070
+2026-03-09 01:07:36 [INFO]: 🔎 Clicked Buscar button (link role)
+2026-03-09 01:07:38 [INFO]: ✅ Rescued ID via grid search (edit link): 1747
+2026-03-09 01:07:38 [INFO]: ✅ Successfully extracted Transportista [EcoTrans 3070] ID: 1747
+2026-03-09 01:07:38 [INFO]: ✅ Transportista data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-09 01:07:38 [INFO]: ✅ Test PASSED

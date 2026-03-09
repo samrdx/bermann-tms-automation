@@ -1,0 +1,13 @@
+2026-03-09 01:09:12 [INFO]: ✅ Loaded seededTransportista: EcoTrans 3070 (ID: 1747)
+2026-03-09 01:09:12 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 01:09:15 [INFO]: 📝 Filling form for Transportista: EcoTrans 3070
+2026-03-09 01:09:15 [INFO]: [VehiculoFormPage] Filling patente: UE-2637
+2026-03-09 01:09:15 [INFO]: [VehiculoFormPage] Filling muestra: UE-2637
+2026-03-09 01:09:16 [INFO]: [VehiculoFormPage] Selecting transportista: EcoTrans 3070
+2026-03-09 01:09:18 [INFO]: [VehiculoFormPage] ✅ Transportista "EcoTrans 3070" selected
+2026-03-09 01:09:18 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 01:09:18 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 01:09:20 [INFO]: [VehiculoFormPage] Selecting capacidad: 3 KG
+2026-03-09 01:09:20 [INFO]: [VehiculoFormPage] ✅ Capacidad "3 KG" selected
+2026-03-09 01:09:20 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 01:09:24 [INFO]: ✅ seededVehiculo saved: UE-2637
