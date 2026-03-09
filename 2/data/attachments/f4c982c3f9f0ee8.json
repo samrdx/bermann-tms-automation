@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 152702",
+  "cliente": "CliMon 152702",
+  "vehiculo": "GKNK-17",
+  "conductor": "Carmen",
+  "nroViaje": "583862",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "196.54",
+  "ambiente": "QA"
+}

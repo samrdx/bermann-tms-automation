@@ -1,0 +1,42 @@
+2026-03-09 00:21:12 [INFO]: ================================================================================
+2026-03-09 00:21:12 [INFO]: Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: QA]
+2026-03-09 00:21:12 [INFO]: ================================================================================
+2026-03-09 00:21:12 [INFO]: PHASE 1: Loading worker-specific JSON data...
+2026-03-09 00:21:12 [INFO]: ✅ All prerequisites validated
+2026-03-09 00:21:12 [INFO]:    Transportista : Cordillera 1761
+2026-03-09 00:21:12 [INFO]:    Vehículo      : WP-4647
+2026-03-09 00:21:12 [INFO]:    Conductor     : Carlos Contreras
+2026-03-09 00:21:12 [INFO]:    Nro Viaje     : 90326
+2026-03-09 00:21:12 [INFO]:    Search ID     : 90326 (nroViaje)
+2026-03-09 00:21:12 [INFO]: PHASE 2: Navigating to /viajes/asignar... [isDemo=false]
+2026-03-09 00:21:12 [INFO]: [AsignarViajesPage] Navigating to Asignar Viajes page
+2026-03-09 00:21:16 [INFO]: 🔍 Searching for viaje "90326" and opening edit form...
+2026-03-09 00:21:16 [INFO]: [AsignarViajesPage] Selecting viaje row: 90326
+2026-03-09 00:21:16 [INFO]: [AsignarViajesPage] 🔍 Searching for trip 90326 in Assignment grid...
+2026-03-09 00:21:19 [INFO]: [AsignarViajesPage] ✅ Found Trip 90326 by text match in row 1
+2026-03-09 00:21:21 [INFO]: [AsignarViajesPage] ✅ Assignment Form Loaded
+2026-03-09 00:21:21 [INFO]: ✅ Trip assignment form loaded — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/5476
+2026-03-09 00:21:21 [INFO]: PHASE 3: Selecting Transportista: Cordillera 1761
+2026-03-09 00:21:21 [INFO]: 🛡️ Robust Selection: Transportista "Cordillera 1761"
+2026-03-09 00:21:25 [INFO]: ✅ Transportista verified: Cordillera 1761
+2026-03-09 00:21:25 [INFO]: PHASE 4: Waiting for cascading dropdowns to reload...
+2026-03-09 00:21:26 [INFO]: PHASE 5: Selecting Vehículo: WP-4647
+2026-03-09 00:21:28 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "WP-4647"
+2026-03-09 00:21:28 [INFO]: PHASE 6: Selecting Conductor: Carlos Contreras
+2026-03-09 00:21:30 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Carlos Contreras"
+2026-03-09 00:21:30 [INFO]: PHASE 7: Final anti-reset check for Transportista...
+2026-03-09 00:21:30 [INFO]: ✅ Transportista confirmed: "Cordillera 1761"
+2026-03-09 00:21:30 [INFO]: PHASE 8: Clicking Guardar...
+2026-03-09 00:21:31 [INFO]: 💾 Save completed
+2026-03-09 00:21:31 [INFO]: PHASE 9: Verifying assignment in /viajes/asignar grid...
+2026-03-09 00:21:35 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-09 00:21:37 [INFO]: ✅ Viaje [90326] confirmed in grid. Status Asignado: true
+2026-03-09 00:21:37 [INFO]: ✅ JSON updated: viaje.status = ASIGNADO
+2026-03-09 00:21:37 [INFO]: ================================================================================
+2026-03-09 00:21:37 [INFO]: STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!
+2026-03-09 00:21:37 [INFO]:    Nro Viaje    : 90326
+2026-03-09 00:21:37 [INFO]:    Transportista: Cordillera 1761
+2026-03-09 00:21:37 [INFO]:    Vehículo     : WP-4647
+2026-03-09 00:21:37 [INFO]:    Conductor    : Carlos Contreras
+2026-03-09 00:21:37 [INFO]:    Duration     : 24.65s
+2026-03-09 00:21:37 [INFO]: ================================================================================

@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 24261",
+  "cliente": "CliMon 24261",
+  "vehiculo": "MF-1358",
+  "conductor": "Ana",
+  "nroViaje": "861977",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "178.25",
+  "ambiente": "DEMO"
+}

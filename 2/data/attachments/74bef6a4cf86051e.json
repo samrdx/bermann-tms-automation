@@ -1,0 +1,14 @@
+{
+  "transportista": "TransMon 840742",
+  "cliente": "CliMon 840742",
+  "vehiculo": "BG-1488",
+  "conductor": "Juan",
+  "nroViaje": "811477",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "175.72",
+  "ambiente": "DEMO"
+}

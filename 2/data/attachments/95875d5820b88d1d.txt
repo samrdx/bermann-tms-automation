@@ -1,0 +1,13 @@
+2026-03-09 00:34:35 [INFO]: ✅ Loaded seededTransportista: Cordillera 4868 (ID: 183)
+2026-03-09 00:34:35 [INFO]: [VehiculoFormPage] Navigating to Vehiculo creation page
+2026-03-09 00:34:38 [INFO]: 📝 Filling form for Transportista: Cordillera 4868
+2026-03-09 00:34:38 [INFO]: [VehiculoFormPage] Filling patente: VJ-4345
+2026-03-09 00:34:38 [INFO]: [VehiculoFormPage] Filling muestra: VJ-4345
+2026-03-09 00:34:39 [INFO]: [VehiculoFormPage] Selecting transportista: Cordillera 4868
+2026-03-09 00:34:41 [INFO]: [VehiculoFormPage] ✅ Transportista "Cordillera 4868" selected
+2026-03-09 00:34:41 [INFO]: [VehiculoFormPage] Selecting tipo vehículo: TRACTO
+2026-03-09 00:34:41 [INFO]: [VehiculoFormPage] ✅ Tipo vehículo "TRACTO" selected
+2026-03-09 00:34:42 [INFO]: [VehiculoFormPage] Selecting capacidad: 28 TON
+2026-03-09 00:34:43 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" selected
+2026-03-09 00:34:43 [INFO]: [VehiculoFormPage] Clicking save button
+2026-03-09 00:34:47 [INFO]: ✅ seededVehiculo saved: VJ-4345

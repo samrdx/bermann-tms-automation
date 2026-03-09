@@ -1,0 +1,34 @@
+2026-03-09 00:32:47 [INFO]: Compass PHASE 1: Navigate to Create Transportista
+2026-03-09 00:32:47 [INFO]: [TransportistaFormPage] Navigating to Transportista creation page
+2026-03-09 00:32:51 [INFO]: ✅ Navigation successful
+2026-03-09 00:32:51 [INFO]: 📝 PHASE 2: Fill Transportista Form
+2026-03-09 00:32:51 [INFO]: [TransportistaFormPage] Filling nombre: Cordillera 4868
+2026-03-09 00:32:51 [INFO]: [TransportistaFormPage] Filling razón social: Cordillera 4868 SpA
+2026-03-09 00:32:51 [INFO]: [TransportistaFormPage] Filling documento (RUT): 44915190-9
+2026-03-09 00:32:51 [INFO]: [BasePage] Entering RUT with verify: [44915190-9] on #transportistas-documento
+2026-03-09 00:32:52 [INFO]: [BasePage] ✅ RUT Entered and Verified: 44.915.190-9
+2026-03-09 00:32:52 [INFO]: [TransportistaFormPage] Selecting tipo transportista: Terceros
+2026-03-09 00:32:53 [INFO]: [TransportistaFormPage] ✅ Tipo transportista "Terceros" selected
+2026-03-09 00:32:53 [INFO]: [TransportistaFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 00:32:53 [INFO]: [TransportistaFormPage] 📍 Location attempt 1/5
+2026-03-09 00:32:54 [INFO]: [TransportistaFormPage] ✅ Random región selected: Region de la Araucania
+2026-03-09 00:32:55 [INFO]: [TransportistaFormPage] ✅ Random ciudad selected: Malleco
+2026-03-09 00:32:57 [INFO]: [TransportistaFormPage] ✅ Random comuna selected: Victoria
+2026-03-09 00:32:57 [INFO]: [TransportistaFormPage] ✅ Location selected: Region de la Araucania → Malleco → Victoria
+2026-03-09 00:32:57 [INFO]: [TransportistaFormPage] Filling calle: Av. Libertador Bernardo O'Higgins
+2026-03-09 00:32:57 [INFO]: [TransportistaFormPage] Filling altura: 682
+2026-03-09 00:32:57 [INFO]: [TransportistaFormPage] Selecting forma de pago: Contado
+2026-03-09 00:32:58 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" selected
+2026-03-09 00:32:58 [INFO]: ✅ Form filled
+2026-03-09 00:32:58 [INFO]: 💾 PHASE 3: Save Transportista
+2026-03-09 00:32:58 [INFO]: [TransportistaFormPage] Clicking save button
+2026-03-09 00:33:03 [INFO]: ✅ Save initiated
+2026-03-09 00:33:03 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 00:33:05 [INFO]: 📍 Post-save URL for ID extraction: https://demo.bermanntms.cl/transportistas/index
+2026-03-09 00:33:05 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 00:33:05 [INFO]: 🔍 Searching by name: Cordillera 4868
+2026-03-09 00:33:05 [INFO]: 🔎 Clicked Buscar button (link role)
+2026-03-09 00:33:07 [INFO]: ✅ Rescued ID via grid search (edit link): 183
+2026-03-09 00:33:07 [INFO]: ✅ Successfully extracted Transportista [Cordillera 4868] ID: 183
+2026-03-09 00:33:07 [INFO]: ✅ Transportista data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-demo.json
+2026-03-09 00:33:07 [INFO]: ✅ Test PASSED

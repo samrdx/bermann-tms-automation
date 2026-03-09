@@ -1,0 +1,35 @@
+2026-03-09 00:13:45 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 00:13:45 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 00:13:48 [INFO]: ✅ Navigation successful
+2026-03-09 00:13:48 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 00:13:48 [INFO]: [ClienteFormPage] Filling nombre (razón social): Global 2123
+2026-03-09 00:13:48 [INFO]: [ClienteFormPage] Filling RUT: 99663853-7
+2026-03-09 00:13:48 [INFO]: [BasePage] Entering RUT with verify: [99663853-7] on #clientes-rut
+2026-03-09 00:13:49 [INFO]: [BasePage] ✅ RUT Entered and Verified: 99.663.853-7
+2026-03-09 00:13:49 [INFO]: [ClienteFormPage] Filling nombre fantasia: Global 2123 SpA
+2026-03-09 00:13:49 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 00:13:50 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 00:13:51 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 00:13:51 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 00:13:51 [INFO]: [ClienteFormPage] ✅ Random región selected: Region de Tarapaca
+2026-03-09 00:13:53 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Tamarugal
+2026-03-09 00:13:54 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Huara
+2026-03-09 00:13:54 [INFO]: [ClienteFormPage] ✅ Location selected: Region de Tarapaca → Tamarugal → Huara
+2026-03-09 00:13:54 [INFO]: [ClienteFormPage] Filling calle: Av. Apoquindo
+2026-03-09 00:13:54 [INFO]: [ClienteFormPage] Filling altura: 141
+2026-03-09 00:13:54 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 00:13:55 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 570/570
+2026-03-09 00:13:55 [INFO]: ✅ Form filled
+2026-03-09 00:13:55 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 00:13:55 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 00:14:00 [INFO]: ✅ Save initiated
+2026-03-09 00:14:00 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 00:14:02 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-09 00:14:02 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 00:14:02 [INFO]: 🔍 Searching by RUT: 99663853-7 (clean: 996638537)
+2026-03-09 00:14:03 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 00:14:05 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 00:14:05 [INFO]: ✅ Rescued ID via name search (link): 1045
+2026-03-09 00:14:05 [INFO]: ✅ Successfully identified Cliente [Global 2123] ID: 1045
+2026-03-09 00:14:05 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-09 00:14:05 [INFO]: ✅ Test PASSED

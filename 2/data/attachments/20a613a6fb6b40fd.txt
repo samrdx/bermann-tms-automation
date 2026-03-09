@@ -1,0 +1,40 @@
+2026-03-09 00:14:08 [INFO]: 🧭 PHASE 1: Navigate to Create Cliente
+2026-03-09 00:14:08 [INFO]: [ClienteFormPage] Navigating to Cliente creation page
+2026-03-09 00:14:11 [INFO]: ✅ Navigation successful
+2026-03-09 00:14:11 [INFO]: 📝 PHASE 2: Fill Cliente Form
+2026-03-09 00:14:11 [INFO]: [ClienteFormPage] Filling nombre (razón social): Industrial 9899
+2026-03-09 00:14:11 [INFO]: [ClienteFormPage] Filling RUT: 71585388-4
+2026-03-09 00:14:11 [INFO]: [BasePage] Entering RUT with verify: [71585388-4] on #clientes-rut
+2026-03-09 00:14:13 [INFO]: [BasePage] ✅ RUT Entered and Verified: 71.585.388-4
+2026-03-09 00:14:13 [INFO]: [ClienteFormPage] Filling nombre fantasia: Industrial 9899 SpA
+2026-03-09 00:14:13 [INFO]: [ClienteFormPage] Selecting tipo cliente: Distribución
+2026-03-09 00:14:14 [INFO]: [ClienteFormPage] ✅ Tipo cliente "Distribución" selected
+2026-03-09 00:14:14 [INFO]: [ClienteFormPage] 🌍 Selecting random location (Región → Ciudad → Comuna), max 5 attempts
+2026-03-09 00:14:14 [INFO]: [ClienteFormPage] 📍 Location attempt 1/5
+2026-03-09 00:14:15 [INFO]: [ClienteFormPage] ✅ Random región selected: Region del Libertador B. O'Higgins
+2026-03-09 00:14:17 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: San Felipe
+2026-03-09 00:14:19 [WARN]: [ClienteFormPage] ⚠️ No comuna options available (count=0)
+2026-03-09 00:14:19 [WARN]: [ClienteFormPage] ⚠️ No comuna options for ciudad "San Felipe" (región: "Region del Libertador B. O'Higgins"), retrying...
+2026-03-09 00:14:19 [INFO]: [ClienteFormPage] 📍 Location attempt 2/5
+2026-03-09 00:14:19 [INFO]: [ClienteFormPage] ✅ Random región selected: Region del Biobio
+2026-03-09 00:14:21 [INFO]: [ClienteFormPage] ✅ Random ciudad selected: Arauco
+2026-03-09 00:14:22 [INFO]: [ClienteFormPage] ✅ Random comuna selected: Tirúa
+2026-03-09 00:14:22 [INFO]: [ClienteFormPage] ✅ Location selected: Region del Biobio → Arauco → Tirúa
+2026-03-09 00:14:22 [INFO]: [ClienteFormPage] Filling calle: Av. Pajaritos
+2026-03-09 00:14:22 [INFO]: [ClienteFormPage] Filling altura: 174
+2026-03-09 00:14:22 [INFO]: [ClienteFormPage] Selecting all Polígonos
+2026-03-09 00:14:23 [INFO]: [ClienteFormPage] ✅ All Polígonos selected: 570/570
+2026-03-09 00:14:23 [INFO]: ✅ Form filled
+2026-03-09 00:14:23 [INFO]: 💾 PHASE 3: Save Cliente
+2026-03-09 00:14:23 [INFO]: [ClienteFormPage] Clicking save button
+2026-03-09 00:14:28 [INFO]: ✅ Save initiated
+2026-03-09 00:14:28 [INFO]: ✅ PHASE 4: Verification and Data Storage
+2026-03-09 00:14:30 [INFO]: 📍 Post-save URL for ID extraction: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-09 00:14:30 [INFO]: ⚠️ Not on view/edit page. Executing Grid Rescue...
+2026-03-09 00:14:30 [INFO]: 🔍 Searching by RUT: 71585388-4 (clean: 715853884)
+2026-03-09 00:14:30 [WARN]: ⚠️ RUT filter input not visible, trying global search...
+2026-03-09 00:14:33 [WARN]: ⚠️ RUT search failed, falling back to name-based search...
+2026-03-09 00:14:33 [INFO]: ✅ Rescued ID via name search (link): 1046
+2026-03-09 00:14:33 [INFO]: ✅ Successfully identified Cliente [Industrial 9899] ID: 1046
+2026-03-09 00:14:33 [INFO]: ✅ Cliente data saved to /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-09 00:14:33 [INFO]: ✅ Test PASSED

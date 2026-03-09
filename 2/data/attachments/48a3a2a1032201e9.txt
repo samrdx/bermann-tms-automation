@@ -1,0 +1,18 @@
+2026-03-09 00:15:22 [INFO]: ✅ Loaded seededTransportista: Pacific 5519 (ID: 1738)
+2026-03-09 00:15:22 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-09 00:15:25 [INFO]: 📝 Filling Conductor Form for: Luis Díaz
+2026-03-09 00:15:25 [INFO]: [ConductorFormPage] Llenando usuario: dhxbtr60
+2026-03-09 00:15:25 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-09 00:15:25 [INFO]: [ConductorFormPage] Llenando nombre: Luis
+2026-03-09 00:15:25 [INFO]: [ConductorFormPage] Llenando apellido: Díaz
+2026-03-09 00:15:25 [INFO]: [ConductorFormPage] Llenando documento: 50.162.979-0
+2026-03-09 00:15:25 [INFO]: [BasePage] Entering RUT with verify: [50.162.979-0] on #conductores-documento
+2026-03-09 00:15:27 [INFO]: [BasePage] ✅ RUT Entered and Verified: 50.162.979-0
+2026-03-09 00:15:27 [INFO]: [ConductorFormPage] Llenando telefono: +56915347172
+2026-03-09 00:15:27 [INFO]: [ConductorFormPage] Llenando email: mariasilva@hotmail.com
+2026-03-09 00:15:27 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-09 00:15:28 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-09 00:15:28 [INFO]: [ConductorFormPage] Seleccionando transportista: [Pacific 5519]
+2026-03-09 00:15:30 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-09 00:15:32 [INFO]: ✅ seededConductor saved: Luis Díaz
+2026-03-09 00:15:32 [INFO]: ✅ Conductor Created and Saved Successfully

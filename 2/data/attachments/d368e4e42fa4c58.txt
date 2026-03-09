@@ -1,0 +1,18 @@
+2026-03-09 00:15:34 [INFO]: ✅ Loaded seededTransportista: Cordillera 1761 (ID: 1739)
+2026-03-09 00:15:35 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-09 00:15:38 [INFO]: 📝 Filling Conductor Form for: Carlos Contreras
+2026-03-09 00:15:38 [INFO]: [ConductorFormPage] Llenando usuario: wizzcm44
+2026-03-09 00:15:39 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-09 00:15:39 [INFO]: [ConductorFormPage] Llenando nombre: Carlos
+2026-03-09 00:15:39 [INFO]: [ConductorFormPage] Llenando apellido: Contreras
+2026-03-09 00:15:39 [INFO]: [ConductorFormPage] Llenando documento: 96.534.200-1
+2026-03-09 00:15:39 [INFO]: [BasePage] Entering RUT with verify: [96.534.200-1] on #conductores-documento
+2026-03-09 00:15:40 [INFO]: [BasePage] ✅ RUT Entered and Verified: 96.534.200-1
+2026-03-09 00:15:40 [INFO]: [ConductorFormPage] Llenando telefono: +56976609088
+2026-03-09 00:15:40 [INFO]: [ConductorFormPage] Llenando email: sofiagarcia@gmail.com
+2026-03-09 00:15:40 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-09 00:15:42 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-09 00:15:42 [INFO]: [ConductorFormPage] Seleccionando transportista: [Cordillera 1761]
+2026-03-09 00:15:43 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-09 00:15:46 [INFO]: ✅ seededConductor saved: Carlos Contreras
+2026-03-09 00:15:46 [INFO]: ✅ Conductor Created and Saved Successfully
