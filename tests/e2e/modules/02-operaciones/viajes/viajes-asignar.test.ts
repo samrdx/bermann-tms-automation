@@ -23,7 +23,7 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 test.describe('[V02] Viajes - Asignar', () => {
     test.setTimeout(120000);
 
-    test('Should assign Viaje using entities from worker JSON', async ({ page }, testInfo) => {
+    test('Debe asignar un viaje usando entidades del JSON', async ({ page }, testInfo) => {
         await allure.epic('TMS Legacy Flow');
         await allure.feature('03-Viajes');
         await allure.story('Asignar Viaje');
@@ -32,18 +32,18 @@ test.describe('[V02] Viajes - Asignar', () => {
         const isDemo = process.env.ENV?.toUpperCase() === 'DEMO';
 
         logger.info('='.repeat(80));
-        logger.info(`Starting Step 6.5: Asignar Viaje (Legacy from JSON) [ENV: ${isDemo ? 'DEMO' : 'QA'}]`);
+        logger.info(`Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: ${isDemo ? 'DEMO' : 'QA'}]`);
         logger.info('='.repeat(80));
 
         // =================================================================
         // PHASE 1: Load JSON Data
         // =================================================================
-        logger.info('PHASE 1: Loading worker-specific JSON data...');
+        logger.info('Fase 1: Cargando datos del JSON...');
         const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(
-                `Worker-specific data file not found!\nExpected: ${dataPath}\n` +
+                `Archivo de datos no encontrado!\nExpected: ${dataPath}\n` +
                 'Please run: npm run test:legacy:setup'
             );
         }
@@ -80,7 +80,7 @@ test.describe('[V02] Viajes - Asignar', () => {
         // viaje.id is saved by viajes-planificar.test.ts when running in Demo.
         const searchId = (isDemo && viaje.id) ? String(viaje.id) : nroViaje;
 
-        logger.info('✅ All prerequisites validated');
+        logger.info('✅ Todos los prerrequisitos validados');
         logger.info(`   Transportista : ${transNombre}`);
         logger.info(`   Vehículo      : ${patente}`);
         logger.info(`   Conductor     : ${conductorFull}`);
@@ -112,19 +112,19 @@ test.describe('[V02] Viajes - Asignar', () => {
         // =================================================================
         // PHASE 2: Search by nroViaje in /viajes/asignar → click Editar
         // =================================================================
-        await test.step('Phase 2: Search and open trip form', async () => {
-            logger.info(`PHASE 2: Navigating to /viajes/asignar... [isDemo=${isDemo}]`);
+        await test.step('Fase 2: Buscar y abrir formulario de viaje', async () => {
+            logger.info(`Fase 2: Navegando a /viajes/asignar... [isDemo=${isDemo}]`);
             const asignarPage = new AsignarPage(page);
             await asignarPage.navigate();
 
-            logger.info(`🔍 Searching for viaje "${searchId}" and opening edit form...`);
+            logger.info(`🔍 Buscando viaje "${searchId}" y abriendo formulario de edición...`);
             // AsignarPage.selectViajeRow uses:
             //   Demo: #search input + a#buscar click, then scans rows
             //   QA  : input[type="search"] DataTables, then scans rows
             // Both environments are handled transparently by AsignarPage.findViajeRow()
             await asignarPage.selectViajeRow(searchId);
 
-            logger.info(`✅ Trip assignment form loaded — URL: ${page.url()}`);
+            logger.info(`✅ Formulario de asignación de viaje cargado — URL: ${page.url()}`);
 
             // Confirm we are on the edit page
             expect(page.url()).toContain('/viajes/editar/');
@@ -133,16 +133,16 @@ test.describe('[V02] Viajes - Asignar', () => {
         // =================================================================
         // PHASE 3: Select Transportista
         // =================================================================
-        await test.step('Phase 3: Select Transportista', async () => {
-            logger.info(`PHASE 3: Selecting Transportista: ${transNombre}`);
+        await test.step('Fase 3: Seleccionar Transportista', async () => {
+            logger.info(`Fase 3: Seleccionando Transportista: ${transNombre}`);
             await selectTransportistaRobust(page, transNombre);
         });
 
         // =================================================================
         // PHASE 4: Wait for AJAX cascade (vehicle/conductor reload)
         // =================================================================
-        await test.step('Phase 4: Wait for cascade', async () => {
-            logger.info('PHASE 4: Waiting for cascading dropdowns to reload...');
+        await test.step('Fase 4: Esperar recarga de cascada', async () => {
+            logger.info('Fase 4: Esperando recarga de cascada...');
             await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
                 logger.warn('⚠️ networkidle timeout on cascade, continuing...');
             });
@@ -152,24 +152,24 @@ test.describe('[V02] Viajes - Asignar', () => {
         // =================================================================
         // PHASE 5: Select Vehículo
         // =================================================================
-        await test.step('Phase 5: Select Vehículo', async () => {
-            logger.info(`PHASE 5: Selecting Vehículo: ${patente}`);
+        await test.step('Fase 5: Seleccionar Vehículo', async () => {
+            logger.info(`Fase 5: Seleccionando Vehículo: ${patente}`);
             await selectBootstrapDropdownByDataId(page, 'viajes-vehiculo_uno_id', patente);
         });
 
         // =================================================================
         // PHASE 6: Select Conductor
         // =================================================================
-        await test.step('Phase 6: Select Conductor', async () => {
-            logger.info(`PHASE 6: Selecting Conductor: ${conductorFull}`);
+        await test.step('Fase 6: Seleccionar Conductor', async () => {
+            logger.info(`Fase 6: Seleccionando Conductor: ${conductorFull}`);
             await selectBootstrapDropdownByDataId(page, 'viajes-conductor_id', conductorFull);
         });
 
         // =================================================================
         // PHASE 7: Anti-reset guard for Transportista
         // =================================================================
-        await test.step('Phase 7: Verify Transportista not reset by cascade', async () => {
-            logger.info('PHASE 7: Final anti-reset check for Transportista...');
+        await test.step('Fase 7: Verificar que el Transportista no se reinicie por cascada', async () => {
+            logger.info('Fase 7: Verificación final anti-reset para Transportista...');
 
             const finalCheck = await page.evaluate((expected: string) => {
                 const sel = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
@@ -179,7 +179,7 @@ test.describe('[V02] Viajes - Asignar', () => {
             }, transNombre);
 
             if (!finalCheck.correct) {
-                logger.warn(`⚠️ Transportista reset detected. Got: "${finalCheck.current}". Applying silent fix...`);
+                logger.warn(`⚠️ Reinicio de Transportista detectado. Got: "${finalCheck.current}". Aplicando fix...`);
                 await page.evaluate((target: string) => {
                     const sel = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
                     if (!sel) return;
@@ -200,9 +200,9 @@ test.describe('[V02] Viajes - Asignar', () => {
                     const s = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
                     return s?.options[s.selectedIndex]?.text || 'UNKNOWN';
                 });
-                logger.info(`✅ Transportista corrected to: "${recheck}"`);
+                logger.info(`✅ Transportista corregido a: "${recheck}"`);
             } else {
-                logger.info(`✅ Transportista confirmed: "${finalCheck.current}"`);
+                logger.info(`✅ Transportista confirmado: "${finalCheck.current}"`);
             }
 
             await page.waitForTimeout(300);
@@ -211,8 +211,8 @@ test.describe('[V02] Viajes - Asignar', () => {
         // =================================================================
         // PHASE 8: Save and handle confirmation modals
         // =================================================================
-        await test.step('Phase 8: Save assignment', async () => {
-            logger.info('PHASE 8: Clicking Guardar...');
+        await test.step('Fase 8: Guardar asignación', async () => {
+            logger.info('Fase 8: Guardar asignación...');
             const btnGuardar = page.locator('#btn_guardar_form');
             await btnGuardar.evaluate((el: HTMLElement | SVGElement | any) => el.scrollIntoView({ block: 'center' })).catch(() => { });
             await btnGuardar.evaluate((el: HTMLElement | SVGElement | any) => (el as HTMLElement).click());
@@ -223,31 +223,31 @@ test.describe('[V02] Viajes - Asignar', () => {
                     '.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")'
                 ).first();
                 if (await btnConfirmar.isVisible({ timeout: 5000 })) {
-                    logger.info('⚠️ Confirmation modal detected — accepting...');
+                    logger.info('⚠️ Modal de confirmación detectado — aceptando...');
                     await btnConfirmar.click();
                 }
             } catch {
-                logger.info('ℹ️ No confirmation modal appeared.');
+                logger.info('ℹ️ No apareció modal de confirmación.');
             }
 
             // Guard: "Transportista sin contrato" means wrong transportista was saved
             const errorContrato = page.locator('text="Transportista sin contrato"');
             if (await errorContrato.isVisible({ timeout: 2000 })) {
                 throw new Error(
-                    `❌ "Transportista sin contrato" error for ${transNombre}. ` +
-                    'Check that a Costo contract exists for this transportista.'
+                    `❌ "Transportista sin contrato" error para ${transNombre}. ` +
+                    'Verificar que exista un contrato de Costo para este transportista.'
                 );
             }
 
             await page.waitForLoadState('networkidle');
-            logger.info('💾 Save completed');
+            logger.info('💾 Guardado completado');
         });
 
         // =================================================================
         // PHASE 9: Verify trip appears in /viajes/asignar grid
         // =================================================================
-        await test.step('Phase 9: Verify in grid', async () => {
-            logger.info('PHASE 9: Verifying assignment in /viajes/asignar grid...');
+        await test.step('Fase 9: Verificar en grilla', async () => {
+            logger.info('Fase 9: Verificando asignación en grilla /viajes/asignar...');
 
             // After save, TMS redirects back to /viajes/asignar
             await page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
@@ -292,13 +292,13 @@ test.describe('[V02] Viajes - Asignar', () => {
                     .catch(() => [] as string[]);
                 const errorMsg = errors.filter(e => e.trim()).join(' | ');
                 throw new Error(
-                    `❌ Viaje [${searchId}] not found in /viajes/asignar after save. Errors: ${errorMsg || 'none'}`
+                    `❌ Viaje [${searchId}] no encontrado en /viajes/asignar después de guardar. Errores: ${errorMsg || 'none'}`
                 );
             }
 
             const rowText = await viajeRow.innerText();
             const isAsignado = rowText.toLowerCase().includes('asignado');
-            logger.info(`✅ Viaje [${searchId}] confirmed in grid. Status Asignado: ${isAsignado}`);
+            logger.info(`✅ Viaje [${searchId}] confirmado en grilla. Estado Asignado: ${isAsignado}`);
 
             entityTracker.register({
                 type: 'Viaje',
@@ -320,7 +320,7 @@ test.describe('[V02] Viajes - Asignar', () => {
             conductor: conductorFull,
         };
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
-        logger.info('✅ JSON updated: viaje.status = ASIGNADO');
+        logger.info('✅ JSON actualizado: viaje.status = ASIGNADO');
 
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info('='.repeat(80));
