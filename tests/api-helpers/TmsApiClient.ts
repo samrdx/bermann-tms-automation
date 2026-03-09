@@ -475,17 +475,17 @@ export class TmsApiClient {
     await searchInput.fill(nombre);
     logger.info(`🔎 Filled search with: ${nombre}`);
 
-    // CORRECCIÓN FIREFOX: Usar clickViaJS + Promise.all para esperar la carga del grid
-    logger.info(`🔎 Clicking Buscar link...`)
+    // CORRECCIÓN FIREFOX: Usar Enter en el input + clickViaJS + Promise.all
+    logger.info(`🔎 Triggering search with Enter and Buscar click...`)
 
-    // Esperamos a que la red esté ociosa luego del clic, o al menos 2.5s para que renderice
     await Promise.all([
       this.page.waitForLoadState('domcontentloaded').catch(() => { }),
-      this.clickViaJS('#buscar')
+      searchInput.press('Enter').catch(() => { }),
+      this.clickViaJS('#buscar').catch(() => { })
     ]);
 
     // Timeout adicional para asegurar el renderizado de filas en Firefox (que a veces es perezoso)
-    await this.page.waitForTimeout(3000);
+    await this.page.waitForTimeout(4000);
 
     // 3. Buscar en la tabla por data-key
     const row = this.page.locator('table tbody tr[data-key]').filter({ hasText: nombre }).first();
@@ -520,6 +520,46 @@ export class TmsApiClient {
           id = match[1];
           logger.info(`✅ ${entityLabel} ID from link: ${id}`);
           return id;
+        }
+      }
+    }
+
+    if (id === '0') {
+      logger.warn(`⚠️ Could not extract ${entityLabel} ID initially for: ${nombre}. Attempting Grid Rescue...`);
+      // Grid Rescue: navigate to index page
+      const indexUrl = `${this.baseUrl}/${entityLabel.toLowerCase()}s`; // Assumes plural standard (e.g /clientes, /vehiculos)
+      await this.page.goto(indexUrl);
+      await this.page.waitForLoadState('networkidle');
+
+      const rescueInput = this.page.locator('#search');
+      if (await rescueInput.isVisible().catch(() => false)) {
+        await rescueInput.fill(nombre);
+        await Promise.all([
+          this.page.waitForLoadState('domcontentloaded').catch(() => { }),
+          rescueInput.press('Enter').catch(() => { }),
+          this.clickViaJS('#buscar').catch(() => { })
+        ]);
+        await this.page.waitForTimeout(4000);
+
+        const rescueRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
+        if (await rescueRow.count() > 0) {
+          const dataKey = await rescueRow.getAttribute('data-key');
+          if (dataKey) {
+            id = dataKey;
+            logger.info(`✅ ${entityLabel} ID from Grid Rescue data-key: ${id}`);
+            return id;
+          }
+          // Try links
+          const link = rescueRow.locator('a[href*="/ver/"], a[href*="/editar/"]').first();
+          if (await link.count() > 0) {
+            const href = await link.getAttribute('href');
+            const match = href?.match(/\/(\d+)/);
+            if (match) {
+              id = match[1];
+              logger.info(`✅ ${entityLabel} ID from Grid Rescue link: ${id}`);
+              return id;
+            }
+          }
         }
       }
     }
