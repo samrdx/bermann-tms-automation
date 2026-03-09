@@ -230,7 +230,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     const monitoreo = new MonitoreoPage(page);
     await monitoreo.navegar();
 
-    logger.info('FASE 2 COMPLETA: Página de Monitoreo cargada');
+    logger.info('FASE 2 COMPLETADA: Página de Monitoreo cargada');
 
     // ============================================================
     // FASE 3: BUSCAR + EDITAR + FINALIZAR VIAJE
@@ -240,7 +240,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
 
     await monitoreo.finalizarViaje(nroViaje);
 
-    logger.info('FASE 3 COMPLETA: Viaje finalizado');
+    logger.info('FASE 3 COMPLETADA: Viaje finalizado');
 
     entityTracker.register({ 
         type: 'Viaje', 
@@ -306,7 +306,7 @@ async function selectTransportistaRobust(page: any, nombre: string): Promise<voi
   const textoBoton = await btnDropdown.textContent();
 
   if (!textoBoton?.includes(nombre)) {
-    logger.error(`Mismatch! Esperado: "${nombre}", Obtenido: "${textoBoton}". Reintentando con JS...`);
+    logger.error(`¡Discrepancia! Esperado: "${nombre}", Obtenido: "${textoBoton}". Reintentando con JS...`);
     await selectOptionByTextJS(page, nombre);
   } else {
     logger.info(`Transportista verificado: ${textoBoton?.trim()}`);
@@ -430,7 +430,7 @@ async function verifyAssignmentInGrid(page: any, log: any, nroViaje: string): Pr
 
   await searchInput.fill(nroViaje);
   await searchInput.press('Enter');
-  log.info(`Searching for trip: ${nroViaje}`);
+  log.info(`Buscando viaje: ${nroViaje}`);
 
   // 3. Esperar actualización del grid
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });

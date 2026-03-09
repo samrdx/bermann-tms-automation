@@ -61,7 +61,7 @@ export class ConductorHelper {
         // Vencimiento defaults to 31-12-2026 as per plan
         const vencimiento = '2026-12-31';
 
-        logger.info(`🌱 UI Seeding Conductor: [${nombre} ${apellido}] RUT: ${rut} linked to: ${transportistaName}`);
+        logger.info(`🌱 Sembrado UI Conductor: [${nombre} ${apellido}] RUT: ${rut} vinculado a: ${transportistaName}`);
 
         // 1. Navigate
         await conductorPage.navigate();
@@ -89,9 +89,9 @@ export class ConductorHelper {
         // Verify success via URL redirection or success message
         await page.waitForTimeout(2000);
         if (!await conductorPage.isFormSaved()) {
-             logger.warn('⚠️ Conductor save might have failed or redirection is slow.');
+             logger.warn('⚠️ Es posible que el guardado del conductor haya fallado o la redirección sea lenta.');
         } else {
-             logger.info('✅ Conductor created successfully');
+             logger.info('✅ Conductor creado exitosamente');
         }
 
         return {

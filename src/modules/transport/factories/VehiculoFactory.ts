@@ -31,7 +31,7 @@ export class VehiculoFactory {
     const vehiculoPage = new VehiculoFormPage(this.page);
 
     try {
-      logger.info(`Creating vehículo: ${vehiculoData.patente} for ${vehiculoData.transportistaNombre}`);
+      logger.info(`Creando vehículo: ${vehiculoData.patente} para ${vehiculoData.transportistaNombre}`);
       await vehiculoPage.navigate();
       await this.page.waitForTimeout(1000);
 
@@ -58,7 +58,7 @@ export class VehiculoFactory {
           await vehiculoPage.selectCapacidad(vehiculoData.capacidad);
           await this.page.waitForTimeout(300);
         } catch (error) {
-          logger.warn('Capacidad field not available or already set');
+          logger.warn('El campo de capacidad no está disponible o ya está configurado');
         }
       }
 
@@ -69,11 +69,11 @@ export class VehiculoFactory {
       await this.page.goto('https://moveontruckqa.bermanntms.cl/vehiculos/index');
       await this.page.waitForTimeout(2000);
 
-      logger.info(`✅ Vehículo created: ${vehiculoData.patente}`);
+      logger.info(`✅ Vehículo creado: ${vehiculoData.patente}`);
       return vehiculoData;
 
     } catch (error) {
-      logger.error('Failed to create vehículo', error);
+      logger.error('Fallo al crear vehículo', error);
       await this.page.screenshot({ 
         path: `./reports/screenshots/create-vehiculo-error-${Date.now()}.png`,
         fullPage: true 

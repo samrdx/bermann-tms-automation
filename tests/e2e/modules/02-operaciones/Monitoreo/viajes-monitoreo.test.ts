@@ -24,7 +24,7 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
         const startTime = Date.now();
 
         logger.info('='.repeat(80));
-        logger.info('Iniciando Prueba de Monitoreo: Finalizar Viaje (Legacy from JSON)');
+        logger.info('Iniciando Paso 7: Monitoreo/Finalización de Viaje (LEGACY)');
         logger.info('='.repeat(80));
 
         // PHASE 1: Load Data
@@ -73,7 +73,7 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
 
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info('='.repeat(80));
-        logger.info(`MONITOREO COMPLETADO! Duración: ${executionTime}s`);
+        logger.info('PASO 7: ¡MONITOREO/FINALIZACIÓN DE VIAJE (LEGACY) COMPLETADO!');
         logger.info('='.repeat(80));
     });
 });

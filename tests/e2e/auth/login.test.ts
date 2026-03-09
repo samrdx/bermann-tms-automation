@@ -10,20 +10,20 @@ test.describe('Auth - Login', () => {
     
     // Test data
     const user = getTestUser('regular');
-    logger.info(`Using credentials: ${user.username}`);
+    logger.info(`Usando credenciales: ${user.username}`);
 
-    await test.step('Phase 1: Login', async () => {
-        logger.info('🔐 PHASE 1: Login');
+    await test.step('Fase 1: Login', async () => {
+        logger.info('🔐 FASE 1: Login');
         await loginPage.loginAndWaitForDashboard(user.username, user.password);
         
         const isSuccess = await loginPage.isLoginSuccessful();
         expect(isSuccess).toBe(true);
         if (isSuccess) {
             await loginPage.takeScreenshot('login-success');
-            logger.info('✅ Login successful');
+            logger.info('✅ Login exitoso');
         } else {
             await loginPage.takeScreenshot('login-failure');
-            logger.error('❌ Login unsuccessful');
+            logger.error('❌ Login no exitoso');
         }
     });
   });

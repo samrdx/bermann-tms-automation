@@ -148,7 +148,7 @@ export const test = base.extend<MyFixtures>({
 // Hook para loggear resumen después de cada test
 test.afterEach(async ({ }, testInfo) => {
   if (testInfo.status === 'passed' || testInfo.status === 'failed') {
-    entityTracker.logSummary();
+    entityTracker.logSummary(testInfo.project.name);
   }
 });
 

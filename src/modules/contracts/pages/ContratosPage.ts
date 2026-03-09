@@ -46,13 +46,13 @@ export class ContratosFormPage extends BasePage {
 
   async navigateToCreate(): Promise<void> {
     // Use relative path — Playwright's baseURL (set in playwright.config.ts) handles ENV=QA/DEMO
-    logger.info('Navigating to contract creation page: /contrato/crear');
+    logger.info('Navegando a la página de creación de contrato: /contrato/crear');
     await this.page.goto('/contrato/crear');
     await this.page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {
-      logger.warn('⚠️ navigateToCreate: domcontentloaded timeout — continuing anyway');
+      logger.warn('⚠️ navigateToCreate: tiempo de espera de domcontentloaded agotado — continuando de todas formas');
     });
     await this.page.waitForSelector(this.selectors.nroContrato, { state: 'visible', timeout: 10000 });
-    logger.info('✅ Contract creation page loaded and Nro Contrato input visible');
+    logger.info('✅ Página de creación de contrato cargada y campo Nro Contrato visible');
   }
 
   // ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ export class ContratosFormPage extends BasePage {
   // ---------------------------------------------------------------------------
 
   async selectTipoContrato(tipo: 'Costo' | 'Venta'): Promise<void> {
-    logger.info(`🔽 Selecting Tipo Contrato = ${tipo}...`);
+    logger.info(`🔽 Seleccionando Tipo Contrato = ${tipo}...`);
     // The dropdown itself is #contrato-tipo_tarifa_contrato_id, but the visible element is a button.
 
     // If 'Venta' is selected, we MUST setup the listener BEFORE clicking
@@ -69,7 +69,7 @@ export class ContratosFormPage extends BasePage {
     if (tipo === 'Venta') {
       urlLogger = (r: any) => {
         if (r.request().resourceType() === 'xhr' || r.request().resourceType() === 'fetch') {
-          logger.debug(`[NETWORK] XHR Response: ${r.url()} (Status: ${r.status()})`);
+          logger.debug(`[RED] Respuesta XHR: ${r.url()} (Estado: ${r.status()})`);
         }
       };
       this.page.on('response', urlLogger);
@@ -78,7 +78,7 @@ export class ContratosFormPage extends BasePage {
         r => r.url().includes('rendersubview') && r.status() === 200,
         { timeout: 7000 } // Shortened to force it to show logs faster
       ).catch(() => {
-        logger.warn('⚠️ rendersubview expected response not detected, but logged all XHR');
+        logger.warn('⚠️ No se detectó la respuesta esperada de rendersubview, pero se registraron todos los XHR');
         return this.page.waitForTimeout(500);
       });
     }
@@ -86,7 +86,7 @@ export class ContratosFormPage extends BasePage {
     await this.selectBootstrapDropdown(this.selectors.tipoContratoButton, tipo);
 
     if (tipo === 'Venta' && responsePromise && urlLogger) {
-      logger.info('⏳ Waiting for AJAX...');
+      logger.info('⏳ Esperando AJAX...');
       await responsePromise;
       await this.page.waitForTimeout(1500); // Stability buffer after AJAX
       this.page.off('response', urlLogger);
@@ -94,11 +94,11 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(2500); // Fallback wait for cascade
     }
 
-    logger.info(`✅ Tipo ${tipo} selected`);
+    logger.info(`✅ Tipo ${tipo} seleccionado`);
   }
 
   async selectSubtipo(subtipoValue: string): Promise<void> {
-    logger.info(`Selecting Subtipo: ${subtipoValue}...`);
+    logger.info(`Seleccionando Subtipo: ${subtipoValue}...`);
     await this.page.waitForSelector(this.selectors.subtipoDropdown, { state: 'attached', timeout: 10000 });
     await this.page.evaluate((value) => {
       const el = document.querySelector('select#tipo') as HTMLSelectElement; // select#tipo is the actual ID
@@ -113,7 +113,7 @@ export class ContratosFormPage extends BasePage {
       }
     }, subtipoValue);
     await this.page.waitForTimeout(800); // Give time for any cascade
-    logger.info(`✅ Subtipo ${subtipoValue} selected`);
+    logger.info(`✅ Subtipo ${subtipoValue} seleccionado`);
   }
 
   // ---------------------------------------------------------------------------
@@ -121,7 +121,7 @@ export class ContratosFormPage extends BasePage {
   // ---------------------------------------------------------------------------
 
   async selectCliente(clienteNombre: string): Promise<void> {
-    logger.info(`Selecting Cliente: "${clienteNombre}"...`);
+    logger.info(`Seleccionando Cliente: "${clienteNombre}"...`);
     const clienteSelected = await this.page.evaluate(({ nombre, selectorId }) => {
       const $ = (window as any).jQuery;
       const $sel = $(selectorId);
@@ -141,7 +141,7 @@ export class ContratosFormPage extends BasePage {
     }, { nombre: clienteNombre, selectorId: this.selectors.clienteDropdown });
 
     if (!clienteSelected.found) {
-      logger.warn(`⚠️ Cliente "${clienteNombre}" not found in dropdown. Available options:`);
+      logger.warn(`⚠️ Cliente "${clienteNombre}" no encontrado en el dropdown. Opciones disponibles:`);
       const options = await this.page.evaluate((selectorId) => {
         const $ = (window as any).jQuery;
         return $(selectorId + ' option').map(function (this: any) {
@@ -151,7 +151,7 @@ export class ContratosFormPage extends BasePage {
       logger.warn(`  Options: ${options.slice(0, 10).join(', ')}`);
       throw new Error(`Cliente "${clienteNombre}" not found in contract form dropdown.`);
     }
-    logger.info(`✅ Cliente selected: "${clienteSelected.text}" (val: ${clienteSelected.val})`);
+    logger.info(`✅ Cliente seleccionado: "${clienteSelected.text}" (val: ${clienteSelected.val})`);
     await this.page.waitForTimeout(500);
   }
 
@@ -165,7 +165,7 @@ export class ContratosFormPage extends BasePage {
     tipo: 'Costo' | 'Venta' = 'Costo',
     subtipoValue: string = '1'
   ): Promise<string> {
-    logger.info(`📝 Filling basic contract information (Phase 1) - Tipo: ${tipo}`);
+    logger.info(`📝 Completando información básica del contrato (Fase 1) - Tipo: ${tipo}`);
 
     try {
       if (!this.page.url().includes('/contrato/crear')) {
@@ -173,7 +173,7 @@ export class ContratosFormPage extends BasePage {
       }
 
       // 1. Fill Nro Contrato
-      logger.info(`Filling Nro Contrato: ${nroContrato}`);
+      logger.info(`Completando Nro Contrato: ${nroContrato}`);
       await this.page.fill(this.selectors.nroContrato, nroContrato);
       await this.page.waitForTimeout(300);
 
@@ -187,32 +187,32 @@ export class ContratosFormPage extends BasePage {
 
       // 4. Select Entity (Transportista or Cliente)
       if (tipo === 'Costo') {
-        logger.info(`🔽 Selecting transportista: "${entityNombre}"...`);
+        logger.info(`🔽 Seleccionando transportista: "${entityNombre}"...`);
         await this.selectTransportista(entityNombre);
       } else {
-        logger.info(`🔽 Selecting cliente: "${entityNombre}"...`);
+        logger.info(`🔽 Seleccionando cliente: "${entityNombre}"...`);
         await this.selectCliente(entityNombre);
       }
 
       // 5. [DEMO ONLY] Set Fecha vencimiento via daypicker
       if (isDemoMode()) {
-        logger.info('📅 [DEMO] Selecting Fecha vencimiento: 31/12/2026');
+        logger.info('📅 [DEMO] Seleccionando Fecha de vencimiento: 31/12/2026');
         await this.selectFechaVencimiento();
       }
 
       // 6. [DEMO ONLY] Select Unidad de negocio = "Defecto"
       if (isDemoMode()) {
-        logger.info('🏢 [DEMO] Selecting Unidad de negocio: Defecto');
+        logger.info('🏢 [DEMO] Seleccionando Unidad de negocio: Defecto');
         await this.selectUnidadNegocio('Defecto');
       }
 
       // 6. Force close any phantom modals before saving
-      logger.info('🔧 Forcing cleanup of any modal backdrops...');
+      logger.info('🔧 Forzando la limpieza de cualquier fondo de modal...');
       await this.forceCloseModal();
       await this.page.waitForTimeout(500);
 
       // 7. Save the contract header
-      logger.info('💾 Saving basic contract header...');
+      logger.info('💾 Guardando encabezado básico del contrato...');
       await this.click(this.selectors.btnGuardar);
 
       // Wait for navigation to edit/view page - broadened regex and increased timeout
@@ -227,13 +227,13 @@ export class ContratosFormPage extends BasePage {
       }
 
       const contractId = contractIdMatch[1];
-      logger.info(`✅ Contract header created successfully with ID: ${contractId}`);
-      logger.info(`📍 Redirected to: ${currentUrl}`);
+      logger.info(`✅ Encabezado del contrato creado exitosamente con ID: ${contractId}`);
+      logger.info(`📍 Redirigido a: ${currentUrl}`);
 
       return contractId;
 
     } catch (error) {
-      logger.error('CRITICAL FAILURE in fillBasicContractInfo', error);
+      logger.error('FALLO CRÍTICO en fillBasicContractInfo', error);
       await this.takeScreenshot('fill-basic-contract-error');
       throw error;
     }
@@ -254,25 +254,25 @@ export class ContratosFormPage extends BasePage {
     tarifaTotal?: string
   ): Promise<void> {
     const rc = this.getRouteConfig();
-    logger.info(`🛣️ Adding Route ${rc.routeId} (${isDemoMode() ? 'DEMO' : 'QA'} environment)`);
+    logger.info(`🛣️ Añadiendo Ruta ${rc.routeId} (ambiente ${isDemoMode() ? 'DEMO' : 'QA'})`);
 
     try {
       // Step A: Click "Añadir Ruta" button
-      logger.info('Clicking "Añadir Ruta" button');
+      logger.info('Haciendo clic en el botón "Añadir Ruta"');
       await this.click(this.selectors.btnAddRuta);
       await this.page.waitForTimeout(1500);
 
       // Wait for route modal (QA uses #modal_rutas, Demo uses #modalRutas)
-      logger.info('Waiting for route modal to appear...');
+      logger.info('Esperando a que aparezca el modal de rutas...');
       await this.page.waitForSelector('#modal_rutas, #modalRutas, .modal.show', {
         state: 'visible',
         timeout: 5000,
       });
-      logger.info('✅ Route modal visible');
+      logger.info('✅ Modal de rutas visible');
       await this.page.waitForTimeout(1000);
 
       // Step B: Select the route
-      logger.info(`Selecting Route ${rc.routeId}`);
+      logger.info(`Seleccionando Ruta ${rc.routeId}`);
       const btnRoute = this.page.locator(rc.routeButtonSelector);
       if (await btnRoute.isVisible()) {
         await btnRoute.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
@@ -281,7 +281,7 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(1000);
 
       // Step B.5: Close the routes modal via "Cerrar" button
-      logger.info('Closing routes modal');
+      logger.info('Cerrando modal de rutas');
       const btnCerrarRutas = this.page
         .locator('button.btn.btn-secondary.waves-effect.waves-light:visible')
         .first();
@@ -290,7 +290,7 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(1000);
 
       // Step C: Click "Añadir Carga" for the chosen route
-      logger.info(`Clicking "Añadir Carga" for Route ${rc.routeId}`);
+      logger.info(`Haciendo clic en "Añadir Carga" para la Ruta ${rc.routeId}`);
       const btnAddCarga = this.page.locator(rc.addCargoButtonSelector);
       await btnAddCarga.waitFor({ state: 'visible', timeout: 5000 });
       await btnAddCarga.click();
@@ -301,10 +301,10 @@ export class ContratosFormPage extends BasePage {
         state: 'visible',
         timeout: 5000,
       });
-      logger.info('✅ Cargo modal visible');
+      logger.info('✅ Modal de carga visible');
 
       // Step C.5: Select the specific cargo
-      logger.info(`Selecting Cargo via: ${rc.cargoButtonSelector}`);
+      logger.info(`Seleccionando Carga vía: ${rc.cargoButtonSelector}`);
       const btnCargo = this.page.locator(rc.cargoButtonSelector);
       await btnCargo.waitFor({ state: 'visible', timeout: 5000 });
       if (await btnCargo.isVisible()) {
@@ -314,7 +314,7 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(500);
 
       // Step C.6: Close the cargo modal via "Cerrar" button
-      logger.info('Closing cargo modal');
+      logger.info('Cerrando modal de carga');
       const btnCerrarCargas = this.page
         .locator('button.btn.btn-secondary.waves-effect.waves-light:visible')
         .first();
@@ -326,7 +326,7 @@ export class ContratosFormPage extends BasePage {
 
       // Step D: Fill Tariffs (tariff inputs use InputMask + onkeyup calculation)
       // MUST type slowly — InputMask needs time to process each keystroke
-      logger.info(`Filling tariffs: Conductor=${tarifaConductor}, Viaje=${tarifaViaje}`);
+      logger.info(`Completando tarifas: Conductor=${tarifaConductor}, Viaje=${tarifaViaje}`);
       try {
         // Fill the viaje/extra tariff
         await this.fillTariffField(rc.tarifaViajeSelector, tarifaViaje);
@@ -341,18 +341,18 @@ export class ContratosFormPage extends BasePage {
           await this.fillTariffField(rc.tarifaClienteSelector, tarifaTotal);
         }
       } catch (e) {
-        logger.warn('⚠️ Some tariff fields may not be available, continuing...');
+        logger.warn('⚠️ Algunos campos de tarifa pueden no estar disponibles, continuando...');
       }
 
       await this.page.waitForTimeout(1000);
 
       // Force close any remaining modals (safety net)
-      logger.info('🔧 Forcing cleanup of any remaining modals');
+      logger.info('🔧 Forzando la limpieza de cualquier modal restante');
       await this.forceCloseModal();
 
-      logger.info(`✅ Route ${rc.routeId} and cargo added successfully`);
+      logger.info(`✅ Ruta ${rc.routeId} y carga añadidas exitosamente`);
     } catch (error) {
-      logger.error('Failed to add route and cargo', error);
+      logger.error('Fallo al añadir ruta y carga', error);
       await this.takeScreenshot('add-route-cargo-error');
       throw error;
     }
@@ -363,7 +363,7 @@ export class ContratosFormPage extends BasePage {
   // ---------------------------------------------------------------------------
 
   async saveAndExtractId(): Promise<string> {
-    logger.info('💾 Saving contract and extracting ID');
+    logger.info('💾 Guardando contrato y extrayendo ID');
 
     try {
       const saveBtn = this.page
@@ -374,7 +374,7 @@ export class ContratosFormPage extends BasePage {
       // Wait for navigation after save (Bermann TMS typically reloads the edit/view page)
       await Promise.all([
         this.page.waitForNavigation({ waitUntil: 'load', timeout: 30000 }).catch(() => {
-          logger.warn('⚠️ No navigation detected after save — continuing anyway');
+          logger.warn('⚠️ No se detectó navegación después de guardar — continuando de todas formas');
         }),
         this.click(`${this.selectors.btnGuardarContrato}, ${this.selectors.btnGuardar}`)
       ]);
@@ -383,20 +383,20 @@ export class ContratosFormPage extends BasePage {
       await this.page.waitForTimeout(2000);
 
       const url = this.page.url();
-      logger.info(`Current URL after save: ${url}`);
+      logger.info(`URL actual después de guardar: ${url}`);
 
       const match = url.match(/\/contrato\/(?:ver|view|editar|update)\/(\d+)/);
 
       if (match && match[1]) {
         const contractId = match[1];
-        logger.info(`✅ Contract ID extracted: ${contractId}`);
+        logger.info(`✅ ID de contrato extraído: ${contractId}`);
         return contractId;
       } else {
-        logger.warn(`⚠️ Failed to extract contract ID from URL: ${url}, returning empty string to rely on index search`);
+        logger.warn(`⚠️ Fallo al extraer el ID del contrato de la URL: ${url}, devolviendo cadena vacía para confiar en la búsqueda de índice`);
         return '';
       }
     } catch (error) {
-      logger.error('Failed to save and extract ID', error);
+      logger.error('Fallo al guardar y extraer ID', error);
       await this.takeScreenshot('save-extract-id-error');
       throw error;
     }
@@ -419,7 +419,7 @@ export class ContratosFormPage extends BasePage {
     });
 
     if (!(await container.isVisible().catch(() => false))) {
-      logger.warn(`⚠️ selectBootstrapDropdown: Button container ${buttonSelector} not found`);
+      logger.warn(`⚠️ selectBootstrapDropdown: Contenedor del botón ${buttonSelector} no encontrado`);
       return;
     }
 
@@ -445,7 +445,7 @@ export class ContratosFormPage extends BasePage {
 
       await this.page.waitForTimeout(800);
     } catch (error) {
-      logger.warn(`⚠️ Error in selectBootstrapDropdown for "${optionText}": ${error}`);
+      logger.warn(`⚠️ Error en selectBootstrapDropdown para "${optionText}": ${error}`);
     }
   }
 
@@ -480,7 +480,7 @@ export class ContratosFormPage extends BasePage {
     await this.page.keyboard.press('Tab');
     await this.page.waitForTimeout(300);
 
-    logger.info(`✅ Tariff field ${selector} set to "${value}"`);
+    logger.info(`✅ Campo de tarifa ${selector} establecido en "${value}"`);
   }
 
   // ---------------------------------------------------------------------------
@@ -490,7 +490,7 @@ export class ContratosFormPage extends BasePage {
   private async selectTransportista(nombre: string): Promise<void> {
     const transBtn = this.page.locator(this.selectors.transportistaButton);
     if (!(await transBtn.isVisible())) {
-      logger.warn('⚠️ Transportista button not visible');
+      logger.warn('⚠️ Botón de transportista no visible');
       return;
     }
 
@@ -501,7 +501,7 @@ export class ContratosFormPage extends BasePage {
     const searchBox = this.page.locator('.bootstrap-select.show .bs-searchbox input');
     if (await searchBox.isVisible()) {
       // Demo path: type into search box
-      logger.info('🔍 Transportista dropdown has search box — using search');
+      logger.info('🔍 El dropdown de transportista tiene caja de búsqueda — usando búsqueda');
       await searchBox.fill(nombre);
       await this.page.waitForTimeout(800);
       const firstItem = this.page
@@ -511,7 +511,7 @@ export class ContratosFormPage extends BasePage {
       await firstItem.click();
     } else {
       // QA path: direct option matching
-      logger.info('📋 Transportista dropdown without search — clicking matching option');
+      logger.info('📋 Dropdown de transportista sin búsqueda — haciendo clic en la opción coincidente');
       const option = this.page.locator(
         `.bootstrap-select.show .dropdown-menu .dropdown-item:has-text("${nombre}")`
       );
@@ -519,14 +519,14 @@ export class ContratosFormPage extends BasePage {
         await option.first().click();
       } else {
         // Fallback: select first non-hidden option
-        logger.warn('⚠️ No exact match found, selecting first visible option');
+        logger.warn('⚠️ No se encontró coincidencia exacta, seleccionando la primera opción visible');
         await this.page
           .locator('.bootstrap-select.show .dropdown-menu .dropdown-item:not(.hidden)')
           .first()
           .click();
       }
     }
-    logger.info('✅ Transportista selected');
+    logger.info('✅ Transportista seleccionado');
   }
 
   // ---------------------------------------------------------------------------
@@ -562,9 +562,9 @@ export class ContratosFormPage extends BasePage {
       await day31.click();
       await this.page.waitForTimeout(300);
 
-      logger.info('✅ Fecha vencimiento set to 31/12/2026 via daypicker');
+      logger.info('✅ Fecha de vencimiento establecida en 31/12/2026 vía daypicker');
     } catch (error) {
-      logger.error('Failed to select fecha vencimiento via daypicker', error);
+      logger.error('Fallo al seleccionar la fecha de vencimiento vía daypicker', error);
       await this.takeScreenshot('fecha-vencimiento-daypicker-error');
       throw error;
     }
@@ -582,7 +582,7 @@ export class ContratosFormPage extends BasePage {
     try {
       const btn = this.page.locator(this.selectors.unidadNegocioButton);
       if (!(await btn.isVisible({ timeout: 2000 }).catch(() => false))) {
-        logger.warn('⚠️ Unidad de negocio button not visible — skipping');
+        logger.warn('⚠️ Botón de Unidad de negocio no visible — saltando');
         return;
       }
       await btn.click();
@@ -591,9 +591,9 @@ export class ContratosFormPage extends BasePage {
         `.bootstrap-select.show .dropdown-menu .dropdown-item:has-text("${value}")`
       );
       await this.page.waitForTimeout(300);
-      logger.info(`✅ Unidad de negocio set to "${value}"`);
+      logger.info(`✅ Unidad de negocio establecida en "${value}"`);
     } catch (error) {
-      logger.error('Failed to select Unidad de negocio', error);
+      logger.error('Fallo al seleccionar Unidad de negocio', error);
       await this.takeScreenshot('unidad-negocio-error');
       throw error;
     }
@@ -667,7 +667,7 @@ export class ContratosFormPage extends BasePage {
   // ---------------------------------------------------------------------------
 
   private async clickGuardar(): Promise<void> {
-    logger.info('💾 Clicking Guardar...');
+    logger.info('💾 Haciendo clic en Guardar...');
     await this.click(this.selectors.btnGuardar);
     await this.page.waitForTimeout(5000);
   }

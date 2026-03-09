@@ -23,7 +23,7 @@ export class BrowserManager {
   }
 
   async initialize(): Promise<void> {
-    logger.info('Initializing browser...');
+    logger.info('Inicializando navegador...');
     
     this.browser = await chromium.launch({
       headless: this.options.headless,
@@ -43,7 +43,7 @@ export class BrowserManager {
     const timeout = this.options.timeout ?? 30000;
     this.page.setDefaultTimeout(timeout);
     
-    logger.info('Browser initialized successfully');
+    logger.info('Navegador inicializado exitosamente');
   }
 
   getPage(): Page {
@@ -68,7 +68,7 @@ export class BrowserManager {
   }
 
   async close(): Promise<void> {
-    logger.info('Closing browser...');
+    logger.info('Cerrando navegador...');
     
     if (this.page) {
       await this.page.close();
@@ -85,12 +85,12 @@ export class BrowserManager {
       this.browser = null;
     }
 
-    logger.info('Browser closed successfully');
+    logger.info('Navegador cerrado exitosamente');
   }
 
   async takeScreenshot(name: string): Promise<void> {
     if (!this.page) {
-      logger.warn('Cannot take screenshot: page not initialized');
+      logger.warn('No se puede tomar captura de pantalla: página no inicializada');
       return;
     }
 
@@ -102,6 +102,6 @@ export class BrowserManager {
       fullPage: true,
     });
 
-    logger.info(`Screenshot saved: ${filename}`);
+    logger.info(`Captura de pantalla guardada: ${filename}`);
   }
 }

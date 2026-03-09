@@ -42,7 +42,7 @@ export class TransportistaHelper {
         const baseUrl = config.get().baseUrl;
         let id = '0';
         let currentUrl = page.url();
-        logger.info(`📍 Post-save URL for ID extraction: ${currentUrl}`);
+        logger.info(`📍 URL posterior al guardado para extracción de ID: ${currentUrl}`);
 
         let savedId = ''; // Variable to hold ID from response if intercepted
 
@@ -51,18 +51,18 @@ export class TransportistaHelper {
         // So, we'll focus on URL and grid search.
 
         // 1. Attempt to extract from URL (e.g., /view/123)
-        let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
+        const idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
         if (idMatch) {
             id = idMatch[1];
-            logger.info(`✅ Transportista ID extracted from URL: ${id}`);
+            logger.info(`✅ ID de Transportista extraído de la URL: ${id}`);
         } else {
             // Redirected to Index or other page - Execute Grid Rescue
-            logger.info('⚠️ Not on view/edit page. Executing Grid Rescue...');
+            logger.info('⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...');
 
             // Ensure we are on the index page for grid search
             if (!currentUrl.includes('/transportistas/index')) {
                 await page.goto(`${baseUrl}/transportistas/index`);
-                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Network idle timeout during navigation to index.'));
+                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Tiempo de espera de red agotado durante la navegación al índice.'));
                 await page.waitForTimeout(2000);
             }
 
@@ -71,7 +71,7 @@ export class TransportistaHelper {
             // only a global #search input and a #buscar link button.
             // TMS also lowercases names (e.g. "EcoTrans" → "Ecotrans"),
             // so we must use case-insensitive matching.
-            logger.info(`🔍 Searching by name: ${nombre}`);
+            logger.info(`🔍 Buscando por nombre: ${nombre}`);
             const searchInput = page.locator('#search');
 
             if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -82,7 +82,7 @@ export class TransportistaHelper {
                 await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
                 await page.waitForTimeout(2000);
             } else {
-                logger.warn('⚠️ #search input not found on index page');
+                logger.warn('⚠️ El campo de búsqueda #search no se encontró en la página de índice');
             }
 
             // TMS grid rows have NO data-key attributes.
@@ -100,7 +100,7 @@ export class TransportistaHelper {
                     const match = href?.match(/\/editar\/(\d+)/);
                     if (match) {
                         id = match[1];
-                        logger.info(`✅ Rescued ID via grid search (edit link): ${id}`);
+                        logger.info(`✅ ID rescatado via busqueda en grilla (editar link): ${id}`);
                     }
                 }
 
@@ -117,22 +117,22 @@ export class TransportistaHelper {
                     }
                 }
             } else {
-                logger.warn(`⚠️ No row found matching: ${nombre}`);
+                logger.warn(`⚠️ No se encontró fila que coincida con: ${nombre}`);
                 await page.screenshot({ path: `./reports/screenshots/transportista-grid-no-match-${Date.now()}.png` });
             }
 
             if (id === '0') {
-                logger.warn(`⚠️ Grid Rescue: Could not determine ID of created Transportista.`);
+                logger.warn(`⚠️ Rescate de Grilla: No se pudo determinar el ID del Transportista creado.`);
                 await page.screenshot({ path: `./reports/screenshots/transportista-id-rescue-failed-${Date.now()}.png` });
             }
         }
 
         if (id === '0') {
-            logger.error(`❌ Could not extract Transportista ID for: ${nombre}`);
+            logger.error(`❌ No se pudo extraer el ID del Transportista para: ${nombre}`);
             throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
         }
 
-        logger.info(`✅ Successfully extracted Transportista [${nombre}] ID: ${id}`);
+        logger.info(`✅ ID del Transportista [${nombre}] extraído exitosamente: ${id}`);
         return {
             id,
             nombre,
@@ -151,7 +151,7 @@ export class TransportistaHelper {
             const buscarLink = page.getByRole('link', { name: 'Buscar' });
             if (await buscarLink.isVisible({ timeout: 3000 }).catch(() => false)) {
                 await buscarLink.click({ force: true, timeout: 1500 });
-                logger.info('🔎 Clicked Buscar button (link role)');
+                logger.info('🔎 Se hizo clic en el botón Buscar (rol link)');
                 return;
             }
         } catch {
@@ -159,7 +159,7 @@ export class TransportistaHelper {
         }
 
         // JS fallback (Firefox-safe): click #buscar element directly
-        logger.info('🔎 Using JS fallback to click Buscar button...');
+        logger.info('🔎 Usando fallback de JS para hacer clic en el botón Buscar...');
         await page.evaluate(() => {
             const btn = document.getElementById('buscar');
             if (btn) btn.click();
@@ -171,7 +171,7 @@ export class TransportistaHelper {
                 else console.error('Botón Buscar no encontrado');
             }
         });
-        logger.info('🔎 Clicked Buscar button (JS fallback)');
+        logger.info('🔎 Se hizo clic en el botón Buscar (fallback de JS)');
     }
 
     /**
@@ -228,7 +228,7 @@ export class TransportistaHelper {
         await transportistaPage.selectTercerizar('No');
 
         // 3. Save & Intercept Response
-        logger.info('💾 Saving Transportista via UI...');
+        logger.info('💾 Guardando Transportista vía UI...');
 
         let savedId = '';
 
@@ -250,19 +250,19 @@ export class TransportistaHelper {
                     if (match) savedId = match[1];
                 }
             }
-            if (savedId) logger.info(`✅ ID Rescued from Save Response: ${savedId}`);
+            if (savedId) logger.info(`✅ ID rescatado de la respuesta de guardado: ${savedId}`);
 
         } catch (e) {
-            logger.warn('⚠️ Failed to intercept save response or extract ID', e);
+            logger.warn('⚠️ Falló la intercepción de la respuesta de guardado o la extracción del ID', e);
         }
 
         // 4. Verify & Rescue ID (Fallback)
-        logger.info('⏳ Waiting for save completion/redirection...');
+        logger.info('⏳ Esperando que finalice el guardado/redirección...');
         await page.waitForURL(url => url.toString().includes('/index') || !!url.toString().match(/\/(ver|view|editar|edit|update)\//), { timeout: 30000 });
 
         let id = '';
         const currentUrl = page.url();
-        logger.info(`📍 Post-save URL: ${currentUrl}`);
+        logger.info(`📍 URL posterior al guardado: ${currentUrl}`);
 
         if (savedId) {
             id = savedId;
@@ -270,20 +270,20 @@ export class TransportistaHelper {
             const match = currentUrl.match(/\/(?:ver|view|editar|edit|update)\/(\d+)/);
             if (match) {
                 id = match[1];
-                logger.info(`✅ ID Rescued from URL: ${id}`);
+                logger.info(`✅ ID rescatado de la URL: ${id}`);
             }
         } else {
             // Redirected to Index - Execute #search-based Grid Rescue
-            logger.info('⚠️ Redirected to Index. Executing Grid Rescue...');
+            logger.info('⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla basado en #search...');
 
             if (!currentUrl.includes('/transportistas/index')) {
                 await page.goto(`${baseUrl}/transportistas/index`);
-                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Network idle timeout during navigation to index.'));
+                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Tiempo de espera de red agotado durante la navegación al índice.'));
                 await page.waitForTimeout(2000);
             }
 
             // PRIMARY STRATEGY: Search using global #search + #buscar
-            logger.info(`🔍 Searching via global #search: ${nombre}`);
+            logger.info(`🔍 Buscando vía #search global: ${nombre}`);
             const searchInput = page.locator('#search');
 
             if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -292,7 +292,7 @@ export class TransportistaHelper {
                 await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
                 await page.waitForTimeout(2000);
             } else {
-                logger.warn('⚠️ #search input not found on index page');
+                logger.warn('⚠️ Input #search no encontrado en la página de índice');
             }
 
             // Extract ID from the matching row
@@ -326,20 +326,20 @@ export class TransportistaHelper {
                     }
                 }
             } else {
-                logger.warn(`⚠️ No row found matching: ${nombre}`);
+                logger.warn(`⚠️ No se encontró fila que coincida con: ${nombre}`);
                 await page.screenshot({ path: `./reports/screenshots/transportista-grid-no-match-${Date.now()}.png` });
             }
 
             if (!id) {
-                logger.warn('⚠️ Grid Rescue: Could not determine ID of created Transportista.');
+                logger.warn('⚠️ Rescate de Grilla: No se pudo determinar el ID del Transportista creado.');
                 await page.screenshot({ path: `./reports/screenshots/transportista-id-rescue-failed-${Date.now()}.png` });
             }
         }
 
         if (!id) {
-            logger.warn('⚠️ UI Seeding: Could not determine ID of created Transportista. Returning Name only.');
+            logger.warn('⚠️ Sembrado UI: No se pudo determinar el ID del Transportista creado. Devolviendo solo los datos básicos.');
         } else {
-            logger.info(`✅ Successfully seeded Transportista [${nombre}] ID: ${id}`);
+            logger.info(`✅ Transportista [${nombre}] ID: ${id} sembrado exitosamente`);
         }
 
         return {

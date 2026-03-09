@@ -24,7 +24,7 @@ export abstract class BasePage {
   }
 
   async waitForElement(selector: string, timeout: number = 10000): Promise<void> {
-    logger.debug(`Waiting for element: ${selector}`);
+    logger.debug(`Esperando elemento: ${selector}`);
     await this.page.waitForSelector(selector, {
       state: 'visible',
       timeout
@@ -76,23 +76,23 @@ export abstract class BasePage {
   async fillSequentially(selector: string, value: string, delay: number = 100): Promise<void> {
     const locator = this.page.locator(selector);
     if (await locator.isVisible()) {
-      logger.debug(`Filling ${selector} sequentially with delay ${delay}`);
+      logger.debug(`Completando ${selector} secuencialmente con retraso ${delay}`);
       await locator.click();
       await locator.clear();
       await locator.pressSequentially(value, { delay });
     } else {
-      logger.warn(`⚠️ Field ${selector} not visible for sequential fill, skipping.`);
+      logger.warn(`⚠️ Campo ${selector} no visible para llenado secuencial, saltando.`);
     }
   }
 
   async fillRutWithVerify(selector: string, rutValue: string): Promise<void> {
     const locator = this.page.locator(selector);
     if (!(await locator.isVisible())) {
-      logger.warn(`⚠️ RUT field ${selector} not visible, skipping.`);
+      logger.warn(`⚠️ Campo RUT ${selector} no visible, saltando.`);
       return;
     }
 
-    logger.info(`Entering RUT with verify: [${rutValue}] on ${selector}`);
+    logger.info(`Ingresando RUT con verificación: [${rutValue}] en ${selector}`);
 
     // Normalize the expected RUT
     const cleanRut = rutValue.toUpperCase().trim();
@@ -107,7 +107,7 @@ export abstract class BasePage {
     try {
       await locator.click({ clickCount: 3, force: true, timeout: 5000 });
     } catch (e) {
-      logger.warn(`⚠️ Standard click blocked on ${selector}, forcing focus via JS`);
+      logger.warn(`⚠️ Click estándar bloqueado en ${selector}, forzando foco vía JS`);
       await locator.evaluate((el) => (el as HTMLInputElement).focus());
     }
     await this.page.keyboard.press('Backspace');
@@ -123,12 +123,12 @@ export abstract class BasePage {
     let normalizedCurrent = normalize(currentValue);
 
     if (normalizedCurrent === normalizedExpected) {
-      logger.info(`✅ RUT Entered and Verified: ${currentValue}`);
+      logger.info(`✅ RUT Ingresado y Verificado: ${currentValue}`);
       return;
     }
 
     // Strategy 2: Force DV using JavaScript - disable input mask first
-    logger.warn(`RUT Mismatch! Expected: ${normalizedExpected}, Got: ${normalizedCurrent}. Using JS to force value...`);
+    logger.warn(`¡Discrepancia de RUT! Esperado: ${normalizedExpected}, Obtenido: ${normalizedCurrent}. Usando JS para forzar valor...`);
 
     // Format RUT like TMS does: XX.XXX.XXX-V
     const formatTmsRut = (body: string, dv: string) => {
@@ -182,13 +182,13 @@ export abstract class BasePage {
     normalizedCurrent = normalize(currentValue);
 
     if (normalizedCurrent === normalizedExpected) {
-      logger.info(`✅ RUT Entered via JS: ${currentValue}`);
+      logger.info(`✅ RUT Ingresado vía JS: ${currentValue}`);
       return;
     }
 
     // Strategy 3: If DV is 'K' and still missing, try with lowercase k
     if (verificationDigit === 'K' && !normalizedCurrent.endsWith('K')) {
-      logger.warn('Trying lowercase k for verification digit...');
+      logger.warn('Probando k minúscula para el dígito verificador...');
       const tmsFormattedRutLower = formatTmsRut(rutWithoutDv, 'k');
 
       await this.page.evaluate(
@@ -219,7 +219,7 @@ export abstract class BasePage {
 
     // Soft assertion - log but don't fail test if RUT body matches
     if (normalizedCurrent.slice(0, -1) === rutWithoutDv) {
-      logger.warn(`⚠️ RUT body matches but DV may be missing - continuing test`);
+      logger.warn(`⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba`);
       return;
     }
 
@@ -227,7 +227,7 @@ export abstract class BasePage {
   }
 
   async getText(selector: string): Promise<string> {
-    logger.debug(`Getting text from: ${selector}`);
+    logger.debug(`Obteniendo texto de: ${selector}`);
     const locator = this.page.locator(selector);
     if (await locator.isVisible()) {
       return await locator.textContent() || '';

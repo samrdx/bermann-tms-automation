@@ -41,15 +41,17 @@ export class EntityTracker {
   /**
    * Genera un resumen visual de las entidades creadas
    */
-  getSummaryTable(): string {
+  getSummaryTable(browser?: string): string {
     if (this.entities.length === 0) {
       return '';
     }
 
     const lines: string[] = [];
+    const headerTitle = browser ? `📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: ${browser.toUpperCase()}` : '📊 RESUMEN DE ENTIDADES CREADAS';
+    
     lines.push('');
     lines.push('='.repeat(100));
-    lines.push('📊 RESUMEN DE ENTIDADES CREADAS');
+    lines.push(headerTitle);
     lines.push('='.repeat(100));
 
     // Mapeo de tipos a emojis
@@ -90,8 +92,8 @@ export class EntityTracker {
   /**
    * Imprime el resumen en el log
    */
-  logSummary() {
-    const summary = this.getSummaryTable();
+  logSummary(browser?: string) {
+    const summary = this.getSummaryTable(browser);
     if (summary) {
       // Usamos el logger base para evitar el prefijo del contexto en cada línea del bloque
       console.log(summary);

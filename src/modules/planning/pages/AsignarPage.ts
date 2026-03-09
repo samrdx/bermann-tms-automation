@@ -34,7 +34,7 @@ export class AsignarPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    logger.info('Navigating to Asignar Viajes page');
+    logger.info('Navegando a la página de Asignar Viajes');
     await this.page.goto('/viajes/asignar');
     await this.page.waitForLoadState('networkidle');
   }
@@ -50,7 +50,7 @@ export class AsignarPage extends BasePage {
     try { await searchInput.waitFor({ state: 'visible', timeout: 5000 }); } catch { }
 
     if (await searchInput.isVisible()) {
-      logger.info(`🔍 Searching for trip ${nroViaje} in Assignment grid...`);
+      logger.info(`🔍 Buscando viaje ${nroViaje} en la grilla de Asignación...`);
       await searchInput.clear();
       await searchInput.fill(nroViaje);
 
@@ -76,7 +76,7 @@ export class AsignarPage extends BasePage {
     try {
       await rows.first().waitFor({ state: 'visible', timeout: 5000 });
     } catch {
-      logger.warn(`⚠️ No rows found after searching for ${nroViaje}`);
+      logger.warn(`⚠️ No se encontraron filas después de buscar ${nroViaje}`);
       return null;
     }
 
@@ -85,7 +85,7 @@ export class AsignarPage extends BasePage {
     // In Demo, if we searched and found rows, it's likely our trip (first one)
     // even if the trip number is not visually in the text (might be hidden or Folio)
     if (isDemo && searchApplied && rowCount >= 1) {
-      logger.info(`✅ Found ${rowCount} rows after search in Demo, assuming first is Trip ${nroViaje}`);
+      logger.info(`✅ Se encontraron ${rowCount} filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje ${nroViaje}`);
       return rows.first();
     }
 
@@ -94,7 +94,7 @@ export class AsignarPage extends BasePage {
       const row = rows.nth(i);
       const text = (await row.innerText()).toLowerCase();
       if (text.includes(searchLower)) {
-        logger.info(`✅ Found Trip ${nroViaje} by text match in row ${i + 1}`);
+        logger.info(`✅ Viaje ${nroViaje} encontrado por coincidencia de texto en la fila ${i + 1}`);
         return row;
       }
     }
@@ -103,12 +103,12 @@ export class AsignarPage extends BasePage {
   }
 
   async selectViajeRow(nroViaje: string): Promise<boolean> {
-    logger.info(`Selecting viaje row: ${nroViaje}`);
+    logger.info(`Seleccionando fila de viaje: ${nroViaje}`);
     let row = await this.findViajeRow(nroViaje);
 
     // Reintento si no aparece (común en CI secuencial)
     if (!row) {
-      logger.warn('Row not found, reloading...');
+      logger.warn('Fila no encontrada, recargando...');
       await this.page.reload();
       await this.page.waitForLoadState('networkidle');
       row = await this.findViajeRow(nroViaje);
@@ -132,13 +132,13 @@ export class AsignarPage extends BasePage {
     await this.page.waitForLoadState('domcontentloaded');
     try { await this.page.waitForSelector('.bootstrap-select', { timeout: 30000 }); } catch { }
 
-    logger.info('✅ Assignment Form Loaded');
+    logger.info('✅ Formulario de Asignación Cargado');
     return true;
   }
 
   // --- ARMA SECRETA: INYECCIÓN DIRECTA ---
   private async injectValueByText(textToFind: string, label: string): Promise<void> {
-    logger.info(`💉 Injecting ${label}: "${textToFind}"`);
+    logger.info(`💉 Inyectando ${label}: "${textToFind}"`);
 
     const success = await this.page.evaluate((text) => {
       // Buscar en todos los selects del documento
@@ -157,7 +157,7 @@ export class AsignarPage extends BasePage {
       return false;
     }, textToFind);
 
-    if (!success) logger.warn(`⚠️ Could not inject "${textToFind}". Will try standard click as fallback.`);
+    if (!success) logger.warn(`⚠️ No se pudo inyectar "${textToFind}". Se intentará clic estándar como respaldo.`);
     await this.page.waitForTimeout(1000);
   }
 
@@ -171,13 +171,13 @@ export class AsignarPage extends BasePage {
   }
 
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {
-    logger.info(`=== Starting Assignment for ${nroViaje} (Injection Mode) ===`);
+    logger.info(`=== Iniciando Asignación para ${nroViaje} (Modo Inyección) ===`);
     await this.selectViajeRow(nroViaje);
 
     // 1. Inyectar Transportista
     await this.injectValueByText(data.transportista, 'Transportista');
 
-    logger.info('Waiting for cascade (loading vehicles)...');
+    logger.info('Esperando cascada (cargando vehículos)...');
     await this.page.waitForTimeout(6000); // Espera pasiva para que el backend cargue los vehículos
 
     // 2. Inyectar Vehículo (Funciona aunque el botón parezca disabled)
@@ -188,7 +188,7 @@ export class AsignarPage extends BasePage {
 
     // 4. Guardar
     await this.clickGuardar();
-    logger.info('✅ Assignment flow complete');
+    logger.info('✅ Flujo de asignación completo');
     return true;
   }
 

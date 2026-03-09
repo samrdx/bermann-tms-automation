@@ -43,7 +43,7 @@ export class ClienteHelper {
         const calle = generateChileanStreet();
         const email = `${baseName.toLowerCase().replace(/\s/g, '')}@test.cl`;
 
-        logger.info(`🌱 UI Seeding Cliente: [${nombre}] RUT: ${rut}...`);
+        logger.info(`🌱 Sembrado UI Cliente: [${nombre}] RUT: ${rut}...`);
 
         // 1. Navigate
         await clientePage.navigate();
@@ -69,7 +69,7 @@ export class ClienteHelper {
         // Note: Email and Telefono fields do NOT exist in the form
 
         // 3. Save & Intercept Response
-        logger.info('💾 Saving Cliente via UI...');
+        logger.info('💾 Guardando Cliente vía UI...');
 
         let savedId = '';
 
@@ -91,21 +91,21 @@ export class ClienteHelper {
                     if (match) savedId = match[1];
                 }
             }
-            if (savedId) logger.info(`✅ ID Rescued from Save Response: ${savedId}`);
+            if (savedId) logger.info(`✅ ID Rescatado de la Respuesta de Guardado: ${savedId}`);
 
         } catch (e) {
-            logger.warn('⚠️ Failed to intercept save response or extract ID', e);
+            logger.warn('⚠️ Falló la intercepción de la respuesta de guardado o la extracción del ID', e);
         }
 
         // 4. Verify & Rescue ID (Fallback)
-        logger.info('⏳ Waiting for save completion/redirection...');
+        logger.info('⏳ Esperando la finalización del guardado/redirección...');
 
         // Wait for save to process (don't use strict waitForURL as it may timeout)
         await page.waitForTimeout(3000);
 
         let id = '';
         const currentUrl = page.url();
-        logger.info(`📍 Post-save URL: ${currentUrl}`);
+        logger.info(`📍 URL Post-guardado: ${currentUrl}`);
 
         if (savedId) {
             id = savedId;
@@ -113,19 +113,19 @@ export class ClienteHelper {
             const match = currentUrl.match(/\/(?:ver|view|editar|edit|update)\/(\d+)/);
             if (match) {
                 id = match[1];
-                logger.info(`✅ ID Rescued from URL: ${id}`);
+                logger.info(`✅ ID Rescatado de la URL: ${id}`);
             }
         } else {
             // Only goto if we are NOT already there or in a detail page
             const current = page.url();
             if (!current.includes('/clientes/index') && !current.includes('/ver/') && !current.includes('/view/')) {
-                logger.info(`🚀 Navigating to index for rescue: ${baseUrl}/clientes/index`);
+                logger.info(`🚀 Navegando al índice para rescate: ${baseUrl}/clientes/index`);
                 await page.goto(`${baseUrl}/clientes/index`, { waitUntil: 'load', timeout: 30000 });
             }
             await page.waitForTimeout(2000);
 
             // PRIMARY STRATEGY: Search by RUT - immutable and reliable
-            logger.info(`🔍 Searching by RUT: ${rut}`);
+            logger.info(`🔍 Buscando por RUT: ${rut}`);
 
             const rutFilterInput = page.locator('input[name*="[rut]"]')
                 .or(page.locator('input[name*="ClienteSearch[rut]"]'))
@@ -148,7 +148,7 @@ export class ClienteHelper {
                     if (dataKey) {
                         id = dataKey;
                         foundViaRut = true;
-                        logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
+                        logger.info(`✅ ID Rescatado vía búsqueda por RUT (data-key): ${id}`);
                     } else {
                         const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
                         if (await actionLink.count() > 0) {
@@ -157,7 +157,7 @@ export class ClienteHelper {
                             if (match) {
                                 id = match[1];
                                 foundViaRut = true;
-                                logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
+                                logger.info(`✅ ID Rescatado vía búsqueda por RUT (enlace): ${id}`);
                             }
                         }
                     }
@@ -166,14 +166,14 @@ export class ClienteHelper {
 
             // FALLBACK STRATEGY: Search by Name
             if (!foundViaRut) {
-                logger.warn('⚠️ RUT search failed, falling back to name-based search...');
+                logger.warn('⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...');
 
                 const nameFilterInput = page.locator('input[name*="[nombre]"]')
                     .or(page.locator('.dataTables_filter input'))
                     .first();
 
                 if (await nameFilterInput.isVisible()) {
-                    logger.info(`🔍 Searching by name: ${nombre}`);
+                    logger.info(`🔍 Buscando por nombre: ${nombre}`);
                     await nameFilterInput.fill(nombre);
                     await nameFilterInput.press('Enter');
                     await page.waitForTimeout(1500);
@@ -185,7 +185,7 @@ export class ClienteHelper {
                         const dataKey = await row.getAttribute('data-key');
                         if (dataKey) {
                             id = dataKey;
-                            logger.info(`✅ Rescued ID via name search: ${id}`);
+                            logger.info(`✅ ID Rescatado vía búsqueda por nombre: ${id}`);
                         } else {
                             const actionLink = row.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
                             if (await actionLink.count() > 0) {
@@ -193,13 +193,13 @@ export class ClienteHelper {
                                 const match = href?.match(/(\d+)/);
                                 if (match) {
                                     id = match[1];
-                                    logger.info(`✅ Rescued ID via name search (link): ${id}`);
+                                    logger.info(`✅ ID Rescatado vía búsqueda por nombre (enlace): ${id}`);
                                 }
                             }
                         }
                     }
                 } catch (e) {
-                    logger.error(`❌ FAILED to find record in grid by name: ${nombre}`, e);
+                    logger.error(`❌ FALLÓ la búsqueda del registro en la grilla por nombre: ${nombre}`, e);
                 }
             }
 
@@ -209,9 +209,9 @@ export class ClienteHelper {
         }
 
         if (!id) {
-            logger.warn('⚠️ UI Seeding: Could not determine ID of created Cliente. Returning data only.');
+            logger.warn('⚠️ Sembrado UI: No se pudo determinar el ID del Cliente creado. Devolviendo solo los datos básicos.');
         } else {
-            logger.info(`✅ Successfully seeded Cliente [${nombre}] ID: ${id}`);
+            logger.info(`✅ Cliente [${nombre}] ID: ${id} sembrado exitosamente`);
         }
 
         return {
@@ -244,16 +244,16 @@ export class ClienteHelper {
         const baseUrl = config.get().baseUrl;
         let id = '0';
         const currentUrl = page.url();
-        logger.info(`📍 Post-save URL for ID extraction: ${currentUrl}`);
+        logger.info(`📍 URL Post-guardado para extracción de ID: ${currentUrl}`);
 
         // 1. Attempt to extract from URL (e.g., /ver/123 or /view/123)
         const idMatch = currentUrl.match(/\/(?:ver|view|editar|edit|update)\/(\d+)/);
         if (idMatch) {
             id = idMatch[1];
-            logger.info(`✅ Cliente ID extracted from URL: ${id}`);
+            logger.info(`✅ ID del Cliente extraído de la URL: ${id}`);
         } else {
             // Redirected to Index or other page - Execute Grid Rescue
-            logger.info('⚠️ Not on view/edit page. Executing Grid Rescue...');
+            logger.info('⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...');
 
             // Ensure we are on the index page
             if (!currentUrl.includes('/clientes/index')) {
@@ -263,7 +263,7 @@ export class ClienteHelper {
 
             // PRIMARY STRATEGY: Search by RUT
             const cleanRut = rut.replace(/[.-]/g, '');
-            logger.info(`🔍 Searching by RUT: ${rut} (clean: ${cleanRut})`);
+            logger.info(`🔍 Buscando por RUT: ${rut} (limpio: ${cleanRut})`);
 
             const rutFilterInput = page.locator('input[name*="[rut]"]')
                 .or(page.locator('input[name*="ClienteSearch[rut]"]'))
@@ -285,7 +285,7 @@ export class ClienteHelper {
                     if (dataKey) {
                         id = dataKey;
                         foundViaRut = true;
-                        logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
+                        logger.info(`✅ ID Rescatado vía búsqueda por RUT (data-key): ${id}`);
                     } else {
                         const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
                         if (await actionLink.count() > 0) {
@@ -294,13 +294,13 @@ export class ClienteHelper {
                             if (match) {
                                 id = match[1];
                                 foundViaRut = true;
-                                logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
+                                logger.info(`✅ ID Rescatado vía búsqueda por RUT (enlace): ${id}`);
                             }
                         }
                     }
                 }
             } else {
-                logger.warn('⚠️ RUT filter input not visible, trying global search...');
+                logger.warn('⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...');
 
                 // Try global search input (#search + #buscar) - same as TransportistaHelper
                 const searchInput = page.locator('#search');
@@ -311,7 +311,7 @@ export class ClienteHelper {
                         try {
                             await buscarButton.click({ timeout: 2000 });
                         } catch (e) {
-                            logger.info('🔎 Using JS fallback to click Buscar button...');
+                            logger.info('🔎 Usando escape JS para hacer clic en el botón Buscar...');
                             await buscarButton.evaluate((btn) => (btn as HTMLElement).click());
                         }
                     } else {
@@ -323,14 +323,14 @@ export class ClienteHelper {
 
             // FALLBACK STRATEGY: Search by Name
             if (!foundViaRut && id === '0') {
-                logger.warn('⚠️ RUT search failed, falling back to name-based search...');
+                logger.warn('⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...');
 
                 const nameFilterInput = page.locator('input[name*="[nombre]"]')
                     .or(page.locator('.dataTables_filter input'))
                     .first();
 
                 if (await nameFilterInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-                    logger.info(`🔍 Searching by name: ${nombre}`);
+                    logger.info(`🔍 Buscando por nombre: ${nombre}`);
                     await nameFilterInput.fill(nombre);
                     await nameFilterInput.press('Enter');
                     await page.waitForTimeout(1500);
@@ -346,7 +346,7 @@ export class ClienteHelper {
                         const dataKey = await row.getAttribute('data-key');
                         if (dataKey) {
                             id = dataKey;
-                            logger.info(`✅ Rescued ID via name search (data-key): ${id}`);
+                            logger.info(`✅ ID Rescatado vía búsqueda por nombre (data-key): ${id}`);
                         } else {
                             const actionLink = row.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
                             if (await actionLink.count() > 0) {
@@ -354,13 +354,13 @@ export class ClienteHelper {
                                 const match = href?.match(/(\d+)/);
                                 if (match) {
                                     id = match[1];
-                                    logger.info(`✅ Rescued ID via name search (link): ${id}`);
+                                    logger.info(`✅ ID Rescatado vía búsqueda por nombre (enlace): ${id}`);
                                 }
                             }
                         }
                     }
                 } catch (e) {
-                    logger.error(`❌ FAILED to find record in grid by name: ${nombre}`, e);
+                    logger.error(`❌ FALLÓ la búsqueda del registro en la grilla por nombre: ${nombre}`, e);
                 }
             }
 
@@ -370,9 +370,9 @@ export class ClienteHelper {
         }
 
         if (id !== '0') {
-            logger.info(`✅ Successfully identified Cliente [${nombre}] ID: ${id}`);
+            logger.info(`✅ Cliente [${nombre}] ID: ${id} identificado exitosamente`);
         } else {
-            logger.warn(`⚠️ Could not determine ID of created Cliente.`);
+            logger.warn(`⚠️ No se pudo determinar el ID del Cliente creado.`);
         }
 
         return {

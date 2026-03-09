@@ -34,18 +34,18 @@ export class VehiculoFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    logger.info('Navigating to Vehiculo creation page');
+    logger.info('Navegando a la página de creación de Vehículo');
     await this.page.goto('/vehiculos/crear');
     await this.page.waitForLoadState('domcontentloaded');
   }
 
   async fillPatente(patente: string): Promise<void> {
-    logger.info(`Filling patente: ${patente}`);
+    logger.info(`Completando patente: ${patente}`);
     await this.fill(this.selectors.patente, patente);
   }
 
   async fillMuestra(muestra: string): Promise<void> {
-    logger.info(`Filling muestra: ${muestra}`);
+    logger.info(`Completando muestra: ${muestra}`);
     await this.fill(this.selectors.muestra, muestra);
   }
 
@@ -111,17 +111,17 @@ export class VehiculoFormPage extends BasePage {
    * Selects a transportista from the Bootstrap Select dropdown using search.
    */
   async selectTransportista(nombre: string): Promise<void> {
-    logger.info(`Selecting transportista: ${nombre}`);
+    logger.info(`Seleccionando transportista: ${nombre}`);
     try {
       const btn = this.page.locator(this.selectors.transportistaButton);
       if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) {
-        logger.warn('⚠️ Transportista dropdown not visible — skipping');
+        logger.warn('⚠️ Dropdown de transportista no visible — saltando');
         return;
       }
       await this.selectFromBootstrapDropdown(this.selectors.transportistaSelect, nombre, true);
-      logger.info(`✅ Transportista "${nombre}" selected`);
+      logger.info(`✅ Transportista "${nombre}" seleccionado`);
     } catch (error) {
-      logger.error(`Failed to select transportista: ${nombre}`, error);
+      logger.error(`Fallo al seleccionar transportista: ${nombre}`, error);
       throw error;
     }
   }
@@ -130,14 +130,14 @@ export class VehiculoFormPage extends BasePage {
    * Selects a tipo vehiculo from the Bootstrap Select dropdown.
    */
   async selectTipoVehiculo(tipo: string): Promise<void> {
-    logger.info(`Selecting tipo vehículo: ${tipo}`);
+    logger.info(`Seleccionando tipo de vehículo: ${tipo}`);
     try {
       const btn = this.page.locator(this.selectors.tipoVehiculoButton);
       if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) return;
       await this.selectFromBootstrapDropdown(this.selectors.tipoVehiculoSelect, tipo, false);
-      logger.info(`✅ Tipo vehículo "${tipo}" selected`);
+      logger.info(`✅ Tipo de vehículo "${tipo}" seleccionado`);
     } catch (error) {
-      logger.error(`Failed to select tipo vehículo: ${tipo}`, error);
+      logger.error(`Fallo al seleccionar tipo de vehículo: ${tipo}`, error);
       throw error;
     }
   }
@@ -146,14 +146,14 @@ export class VehiculoFormPage extends BasePage {
    * Selects a capacidad from the Bootstrap Select dropdown.
    */
   async selectCapacidad(capacidad: string): Promise<void> {
-    logger.info(`Selecting capacidad: ${capacidad}`);
+    logger.info(`Seleccionando capacidad: ${capacidad}`);
     try {
       const btn = this.page.locator(this.selectors.capacidadButton);
       if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) return;
       await this.selectFromBootstrapDropdown(this.selectors.capacidadSelect, capacidad, false);
-      logger.info(`✅ Capacidad "${capacidad}" selected`);
+      logger.info(`✅ Capacidad "${capacidad}" seleccionada`);
     } catch (error) {
-      logger.error(`Failed to select capacidad: ${capacidad}`, error);
+      logger.error(`Fallo al seleccionar capacidad: ${capacidad}`, error);
       throw error;
     }
   }
@@ -164,11 +164,11 @@ export class VehiculoFormPage extends BasePage {
   }
 
   async selectTipoRampla(tipo: string): Promise<void> {
-    logger.info(`Selecting tipo rampla: ${tipo}`);
+    logger.info(`Seleccionando tipo de rampla: ${tipo}`);
     try {
       const btn = this.page.locator(this.selectors.tipoRamplaButton);
       if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) {
-        logger.warn('⚠️ Tipo Rampla dropdown not visible — skipping');
+        logger.warn('⚠️ Dropdown de Tipo Rampla no visible — saltando');
         return;
       }
       await btn.click();
@@ -177,15 +177,15 @@ export class VehiculoFormPage extends BasePage {
         .filter({ hasText: tipo }).first();
       await option.waitFor({ state: 'visible', timeout: 5000 });
       await option.evaluate((node: HTMLElement) => node.click());
-      logger.info(`✅ Tipo rampla "${tipo}" selected`);
+      logger.info(`✅ Tipo de rampla "${tipo}" seleccionado`);
     } catch (error) {
-      logger.error(`Failed to select tipo rampla: ${tipo}`, error);
+      logger.error(`Fallo al seleccionar tipo de rampla: ${tipo}`, error);
       throw error;
     }
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info('Clicking save button');
+    logger.info('Haciendo clic en el botón guardar');
     await this.click(this.selectors.btnGuardar);
   }
 

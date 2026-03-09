@@ -42,7 +42,7 @@ export class TransportistaFactory {
     const transportistaPage = new TransportistaFormPage(this.page);
 
     try {
-      logger.info(`Creating transportista: ${transportistaData.nombre}`);
+      logger.info(`Creando transportista: ${transportistaData.nombre}`);
       await transportistaPage.navigate();
       await this.page.waitForTimeout(1000);
 
@@ -70,7 +70,7 @@ export class TransportistaFactory {
           await transportistaPage.selectFormaPago(transportistaData.formaPago);
           await this.page.waitForTimeout(300);
         } catch (error) {
-          logger.warn('Forma de pago field not available or already set');
+          logger.warn('El campo de forma de pago no está disponible o ya está configurado');
         }
       }
 
@@ -79,7 +79,7 @@ export class TransportistaFactory {
           await transportistaPage.selectTercerizar(transportistaData.tercerizar);
           await this.page.waitForTimeout(300);
         } catch (error) {
-          logger.warn('Tercerizar field not available or already set');
+          logger.warn('El campo de tercerizar no está disponible o ya está configurado');
         }
       }
 
@@ -91,16 +91,16 @@ export class TransportistaFactory {
       await this.page.goto('https://moveontruckqa.bermanntms.cl/transportistas/index');
       await this.page.waitForTimeout(2000);
 
-      logger.info(`✅ Transportista created: ${transportistaData.nombre}`);
+      logger.info(`✅ Transportista creado: ${transportistaData.nombre}`);
       
       // Wait for cache refresh
-      logger.info('⏳ Waiting 5 seconds for cache refresh...');
+      logger.info('⏳ Esperando 5 segundos para la actualización de la caché...');
       await this.page.waitForTimeout(5000);
 
       return transportistaData;
 
     } catch (error) {
-      logger.error('Failed to create transportista', error);
+      logger.error('Fallo al crear transportista', error);
       await this.page.screenshot({ 
         path: `./reports/screenshots/create-transportista-error-${Date.now()}.png`, 
         fullPage: true 
