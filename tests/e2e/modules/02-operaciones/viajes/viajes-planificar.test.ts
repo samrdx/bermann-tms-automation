@@ -3,6 +3,7 @@ import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
 /**
  * Step 6: Planificar Viaje (Trip Planning)
@@ -246,6 +247,14 @@ test.describe('[V01] Viajes - Planificar', () => {
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
         logger.info(`✅ Saved internal grid ID to JSON: viaje.id = ${internalGridId}`);
       }
+
+      entityTracker.register({
+        type: 'Viaje',
+        name: nroViaje,
+        id: viajeId || internalGridId || 'N/A',
+        asociado: clienteNombre,
+        estado: 'PLANIFICADO'
+      });
     });
 
     // =================================================================

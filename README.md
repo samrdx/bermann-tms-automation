@@ -3,51 +3,68 @@
 Framework de automatizacion E2E para el sistema TMS (Transport Management System) de Bermann, utilizando Playwright y TypeScript.
 
 **QA Environment:** <https://moveontruckqa.bermanntms.cl>
+**Demo Environment:** <https://demo.bermanntms.cl/>
 
 ## Overview
 
 | Metric | Value |
 | --- | --- |
-| Automated Tests | 12 |
-| Modules | 5 (auth, transport, commercial, contracts, planning) |
-| Pass Rate | 100% |
-| Parallel Execution | 3 browsers (Chromium, Firefox, WebKit) |
+| Automated Tests | 13 |
+| Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) |
+| Pass Rate | 100% (Chromium & Firefox) |
+| Parallel Execution | 2 browsers (Chromium, Firefox) |
 | Architecture | Page Object Model + Domain-Driven Modules |
-| Skills System | 5 TMS-specific skills (anti-hallucination) |
+| Skills System | 16 AI-ready skills (TMS + SDD) |
+
+---
+
+## Project Status Dashboard (Updated: 2026-03-09)
+
+| Category | Value | Last Updated |
+| --- | --- | --- |
+| Active Branch | main | 2026-03-09 |
+| Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-03-09 |
+| Completed Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) | 2026-03-09 |
+| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-03-09 |
+| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-03-07 |
+| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring (complete) | 2026-03-07 |
+
+---
 
 ## Tech Stack
 
 - **Playwright** v1.58.0 - Browser automation
 - **TypeScript** v5.9.3 - Strict mode
 - **Winston** - Structured logging
+- **Allure Reports** - Professional test reporting
 - **Page Object Model** - Test architecture
-- **GitHub Actions** - CI/CD
+- **GitHub Actions** - CI/CD (Hybrid Workflow)
 
 ## Prerequisites
 
 - Node.js v20+
 - npm
-- Access to TMS QA environment (credentials)
+- Access to TMS environments (QA/Demo credentials)
 
 ## Quick Start
 
 ```bash
 # 1. Clone
-git clone https://github.com/samrdx/qa-automation-framework.git
-cd qa-automation-framework
+git clone https://github.com/samrdx/bermann-tms-automation.git
+cd bermann-tms-automation
 
 # 2. Install dependencies
 npm install
 
 # 3. Configure environment
 cp .env.example .env
-# Edit .env with your TMS credentials
+# Edit .env with your TMS credentials (TMS_USERNAME / TMS_PASSWORD)
 
 # 4. Install browsers
 npx playwright install
 
-# 5. Run tests
-npm run test:all
+# 5. Run a smoke test
+npm run test:auth:login
 ```
 
 ## Project Structure
@@ -55,40 +72,30 @@ npm run test:all
 ```text
 qa-automation-framework/
 ├── AGENTS.md                    # AI skills system index
-├── CLAUDE.md                    # Claude agent context
-├── GEMINI.md                    # Agent assistance prompts
+├── GEMINI.md                    # Agent assistance prompts (Full reference)
 ├── CLOUD.md                     # CI/CD architecture decisions
-├── .github/workflows/           # GitHub Actions pipelines
+├── .github/workflows/           # GitHub Actions (Hybrid: Atomic + Legacy)
 ├── skills/                      # AI agent skills (anti-hallucination)
 │   ├── tms-selectors/           # Selector priority & Confluence
 │   ├── tms-dropdowns/           # Bootstrap Select patterns
-│   ├── tms-page-objects/        # POM template
-│   ├── tms-tests/               # Test structure & phases
-│   └── tms-data/                # Data generation strategies
+│   └── ...                      # See AGENTS.md for full list
 ├── src/
 │   ├── modules/                 # Domain-Driven Architecture
-│   │   ├── auth/                # Login, Dashboard, AuthActions
-│   │   ├── transport/           # Transportista, Conductor, Vehiculo + Factories
-│   │   ├── commercial/          # Cliente + Factory
-│   │   ├── contracts/           # Contratos + Factory
-│   │   └── planning/            # Planificar/Asignar Viajes
+│   │   ├── auth/                # Login, Dashboard
+│   │   ├── transport/           # Transportista, Conductor, Vehiculo
+│   │   ├── commercial/          # Cliente
+│   │   ├── contracts/           # Contratos
+│   │   ├── planning/            # Planificar/Asignar Viajes
+│   │   └── monitoring/          # Monitoreo (Finalizar Viajes)
 │   ├── core/                    # BasePage, BrowserManager
-│   ├── fixtures/                # Playwright Fixtures (DI)
-│   ├── utils/                   # Logger, RUT generator, utilities
-│   └── config/                  # Environment, credentials
+│   └── ...
 ├── tests/
 │   ├── e2e/
-│   │   ├── modules/
-│   │   │   ├── 01-entidades/    # Entity creation (4 tests)
-│   │   │   └── 02-operaciones/  # Operations (4 tests)
-│   │   ├── suites/
-│   │   │   └── base-entities.setup.ts  # Master entity setup
-│   │   └── helpers/
-│   │       └── auth.setup.ts    # Global authentication
+│   │   ├── suites/              # Setup and Atomic E2E flows
+│   │   └── modules/             # Individual module tests
 │   └── api-helpers/             # API helpers for entity creation
-├── last-run-data-chromium.json  # Worker-specific data (per browser)
-├── last-run-data-firefox.json
-├── last-run-data-webkit.json
+├── last-run-data-chromium.json  # Worker-specific data (Chromium)
+├── last-run-data-firefox.json   # Worker-specific data (Firefox)
 ├── docs/                        # Architecture, CI/CD, selectors
 ├── reports/                     # Screenshots, videos
 └── logs/                        # Execution logs
@@ -98,62 +105,46 @@ qa-automation-framework/
 
 ### Multi-Environment Support
 
-The framework supports multiple environments using the `ENV` variable:
+Control the target environment using the `ENV` variable:
 
-- **QA (Default):** `ENV=QA npx playwright test`
-- **Demo:** `ENV=DEMO npx playwright test`
+- **QA (Default):** `npm run [script]` or `ENV=QA [script]`
+- **Demo:** `ENV=DEMO [script]`
 
-### Local Development
+### Common Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run test:all` | Run all module tests |
-| `npm run test:e2e:suites:full-flow` | Complete sequential flow (entities -> contracts -> trips) |
-| `npm run test:base` | Base entities setup only (Steps 1-4) |
-| `npm run test:transportista` | Create transportista entity |
-| `npm run test:cliente` | Create cliente entity |
-| `npm run test:vehiculo` | Create vehiculo entity |
-| `npm run test:conductor` | Create conductor entity |
-| `npm run test:contrato` | Create contract (Costo type) |
-| `npm run test:contrato2cliente` | Create contract (Ingreso type) |
-| `npm run test:viajes:planificar` | Plan trip |
-| `npm run test:viajes:asignar` | Assign trip |
-| `npm run test:headed` | Run with visible browser |
-| `npm run test:debug` | Run with Playwright debugger |
-| `npm run test:ui` | Run with Playwright UI mode |
-| `npm run show-report` | Open HTML test report |
-| `npm run codegen` | Launch Playwright codegen |
+| Category | Command | Description |
+| --- | --- | --- |
+| **Smoke / Auth** | `npm run test:auth` | Run all authentication tests |
+| **Atomic E2E** | `npm run test:qa:trip:full-flow` | Complete flow without state dependencies (QA) |
+| | `npm run test:demo:trip:full-flow` | Complete flow without state dependencies (Demo) |
+| **Legacy QA** | `npm run test:qa:legacy:setup` | Run base entities setup (Steps 1-4) |
+| | `npm run test:qa:flow:setup-to-viajes` | Setup -> Contratos -> Viajes |
+| **Reports** | `npm run allure:serve:qa` | Serve Allure report for QA |
+| | `npm run allure:serve:demo` | Serve Allure report for Demo |
+| | `npm run show-report` | Open standard Playwright HTML report |
+| **Debug** | `npm run test:ui` | Run with Playwright UI mode |
+| | `npm run test:debug` | Run with Playwright debugger |
 
-### Docker (CI Simulation)
+### Allure Reporting
 
-Run tests inside the same Linux container used by CI:
+The framework uses Allure for professional result visualization.
 
 ```bash
-# From Git Bash on Windows (MSYS_NO_PATHCONV prevents path mangling)
-MSYS_NO_PATHCONV=1 docker run --rm -it \
-  -v "/$(pwd)":/work -w /work \
-  --ipc=host \
-  mcr.microsoft.com/playwright:v1.58.0-jammy /bin/bash
+# Generate and open report (QA)
+npm run allure:generate:qa
+npm run allure:open:qa
 
-# Inside the container:
-npm ci
-npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --project=chromium
+# Direct serve (QA)
+npm run allure:serve:qa
+
+# Full run: Clean + Test + Serve (Demo)
+npm run run:demo:e2e
 ```
 
-### CI/CD (GitHub Actions)
+### Test Classification
 
-Tests run automatically on push to `main` and on pull requests. See [CLOUD.md](CLOUD.md) for architecture decisions and [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md) for operational setup.
-
-## GitHub Actions Secrets
-
-Add these in **Settings > Secrets and variables > Actions**:
-
-| Secret | Description | Example |
-| --- | --- | --- |
-| `USERNAME_DEV` | TMS QA username | `arivas` |
-| `PASSWORD_DEV` | TMS QA password | `arivas` |
-
-The codebase maps `USERNAME_DEV`/`PASSWORD_DEV` to `TEST_REGULAR_USER`/`TEST_REGULAR_PASS` automatically via [src/config/credentials.ts](src/config/credentials.ts).
+1. **Atomic Tests (Modern)**: Self-contained, handle their own auth/data, can run in parallel.
+2. **Legacy Tests (Sequential)**: Dependent on `base-entities.setup.ts`, read state from `last-run-data-{worker}.json`.
 
 ## Environment Variables
 
@@ -169,14 +160,19 @@ BASE_URL_PROD=https://moveontruck.bermanntms.cl
 ENVIRONMENT=dev
 HEADLESS=false
 TIMEOUT=30000
-LOG_LEVEL=info
 
-# Test Users
-TEST_ADMIN_USER=your_admin_username
-TEST_ADMIN_PASS=your_admin_password
-TEST_REGULAR_USER=your_regular_username
-TEST_REGULAR_PASS=your_regular_password
+# Test Credentials (Standard)
+TMS_USERNAME=your_username
+TMS_PASSWORD=your_password
 ```
+
+## CI/CD (GitHub Actions)
+
+The framework uses a **Hybrid Workflow** (`tests.yml`) that runs on every push:
+- **Atomic Job**: Runs Chromium independently.
+- **Legacy Job**: Runs sequential suites with strictly 1 worker.
+
+Artifacts (traces, videos) are retained for 7 days on failure.
 
 ## Architecture
 

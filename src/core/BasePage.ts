@@ -16,7 +16,7 @@ export abstract class BasePage {
     if (!this.url) {
       throw new Error('URL not set for this page');
     }
-    logger.info(`Navegando hacia: ${this.url}`);
+    logger.paso(`Navegando hacia: ${this.url} 🌐`);
     await this.page.goto(this.url, {
       waitUntil: 'domcontentloaded',
       timeout: 30000
@@ -38,10 +38,10 @@ export abstract class BasePage {
   async fill(selector: string, value: string): Promise<void> {
     const locator = this.page.locator(selector);
     if (await locator.isVisible()) {
-      logger.debug(`Filling ${selector} with value`);
+      logger.debug(`Escribiendo en ${selector} 📝`);
       await locator.fill(value);
     } else {
-      logger.warn(`⚠️ Field ${selector} not visible, skipping interaction.`);
+      logger.warn(`Campo ${selector} no visible, saltando interacción ⚠️`);
     }
   }
 
@@ -53,23 +53,23 @@ export abstract class BasePage {
   async click(selector: string, force: boolean = false): Promise<void> {
     const locator = this.page.locator(selector);
     if (await locator.isVisible()) {
-      logger.debug(`Clicking on: ${selector}`);
+      logger.debug(`Haciendo click en: ${selector} 🖱️`);
       try {
         // Standard click with a reasonable timeout.
         await locator.click({ force, timeout: 5000 });
       } catch (error) {
-        logger.warn(`⚠️ Standard click blocked or timed out for ${selector}. Attempting JS fallback...`);
+        logger.warn(`Click estándar bloqueado o timeout para ${selector}. Reintentando con JS fallback... ⚠️`);
         try {
           // JS evaluation click bypasses Playwright's strict actionability checks (flaky in Firefox)
           await locator.evaluate((el) => (el as HTMLElement).click());
-          logger.debug(`✅ Successfully clicked ${selector} via JS fallback`);
+          logger.debug(`Click exitoso en ${selector} vía JS fallback ✅`);
         } catch (fallbackError) {
-          logger.error(`❌ Both standard and JS clicks failed for ${selector}`);
+          logger.error(`Ambos clicks (estándar y JS) fallaron para ${selector} ❌`);
           throw error; // Throw original error to retain the stack trace and timeout context
         }
       }
     } else {
-      logger.warn(`⚠️ Element ${selector} not visible, skipping click.`);
+      logger.warn(`Elemento ${selector} no visible, saltando click ⚠️`);
     }
   }
 
@@ -251,7 +251,7 @@ export abstract class BasePage {
       path: screenshotPath,
       fullPage: true
     });
-    logger.info(`Captura de Pantalla: ${screenshotPath}`);
+    logger.info(`Captura de Pantalla: ${screenshotPath} 📸`);
     return screenshotPath;
   }
 
