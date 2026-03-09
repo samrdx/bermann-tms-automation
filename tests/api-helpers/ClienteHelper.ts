@@ -8,6 +8,7 @@ import {
 } from '../../src/utils/rutGenerator.js';
 import { config } from '../../src/config/environment.js';
 import { ClienteFormPage } from '../../src/modules/commercial/pages/ClientePage.js';
+import { NamingHelper } from '../../src/utils/NamingHelper.js';
 
 export interface Cliente {
     id: string;
@@ -31,17 +32,12 @@ export class ClienteHelper {
         const baseUrl = config.get().baseUrl;
         const clientePage = new ClienteFormPage(page);
 
-        // Data Generation - Short name + 4 digits (same pattern as Transportista)
-        const shortNames = ['Distribuidora', 'Comercial', 'Importadora', 'Logistica', 'Servicios', 'Industrial', 'Global', 'Central'];
-        const baseName = shortNames[Math.floor(Math.random() * shortNames.length)];
-        const fourDigits = Math.floor(Math.random() * 9000) + 1000;
-
-        const nombre = `${baseName} ${fourDigits}`;
-        const nombreFantasia = `${baseName} ${fourDigits} SpA`;
+        // Data Generation using NamingHelper
+        const { nombre, nombreFantasia } = NamingHelper.getClienteName();
         const rawRut = generateValidChileanRUT();
         const rut = rawRut.replace(/^(\d{7,8})(\d|k|K)$/, '$1-$2').toUpperCase();
         const calle = generateChileanStreet();
-        const email = `${baseName.toLowerCase().replace(/\s/g, '')}@test.cl`;
+        const email = `${nombre.toLowerCase().replace(/[^a-z0-9]/g, '')}@test.cl`;
 
         logger.info(`🌱 Sembrado UI Cliente: [${nombre}] RUT: ${rut}...`);
 

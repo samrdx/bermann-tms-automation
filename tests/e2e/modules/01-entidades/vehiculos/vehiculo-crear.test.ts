@@ -7,6 +7,7 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../../../../src/utils/NamingHelper.js';
 
 test.describe('[E03] Entidades - Crear Vehículo', () => {
     test.setTimeout(120000);
@@ -45,7 +46,8 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
         await test.step('Completar formulario', async () => {
             logger.info(`📝 Completando formulario para Transportista: ${seededTransportista.nombre}`);
 
-            const patente = generatePatente();
+            const patenteReal = generatePatente();
+            const patente = NamingHelper.getVehiculoPatente(patenteReal);
             await vehiculoPage.fillPatente(patente);
             await vehiculoPage.fillMuestra(patente);
 

@@ -6,9 +6,11 @@ import {
   generatePatente,
   generateRandomName,
   generateRandomLastName,
-  generateValidChileanRUT
+  generateValidChileanRUT,
+  generateEmail
 } from '../../src/utils/rutGenerator.js';
 import { entityTracker } from '../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../src/utils/NamingHelper.js';
 
 
 export class TmsApiClient {
@@ -603,8 +605,8 @@ export class TmsApiClient {
   async createVehiculo(transportistaNombre: string): Promise<string> {
 
 
-
-    const patente = generatePatente();
+    const patenteReal = generatePatente();
+    const patente = NamingHelper.getVehiculoPatente(patenteReal);
 
 
 
@@ -847,10 +849,11 @@ export class TmsApiClient {
 
   // --- 4. CONDUCTOR ---
   async createConductor(transportistaNombre: string): Promise<any> {
-
-    const nombre = generateRandomName();
-    const apellido = generateRandomLastName(); // Added for new register call
-    const email = `test${Math.floor(Math.random() * 100000)}@example.com`; // Added for new register call
+    const rawNames = { nombre: generateRandomName(), apellido: generateRandomLastName() };
+    const conductorNames = NamingHelper.getConductorNames(rawNames);
+    const nombre = conductorNames.nombre;
+    const apellido = conductorNames.apellido; // Added for new register call
+    const email = generateEmail(conductorNames.nombre + conductorNames.apellido); // Added for new register call
 
     const rut = generateValidChileanRUT();
 

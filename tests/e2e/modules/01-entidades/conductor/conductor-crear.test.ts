@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import { Transportista } from '../../../../api-helpers/TransportistaHelper.js';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../../../../src/utils/NamingHelper.js';
 
 test.describe('[E04] Entidades - Crear Conductor', () => {
     test.setTimeout(120000);
@@ -48,14 +49,17 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
         await allure.parameter('Transportista (Seeded)', transportistaName);
         await allure.parameter('Transportista ID', String(seededTransportista.id));
 
+        const rawNames = { nombre: generateRandomName(), apellido: generateRandomLastName() };
+        const conductorNames = NamingHelper.getConductorNames(rawNames);
+
         const testData = {
             usuario: generateGenericUser(),
             clave: generatePassword(),
-            nombre: generateRandomName(),
-            apellido: generateRandomLastName(),
+            nombre: conductorNames.nombre,
+            apellido: conductorNames.apellido,
             rut: generateDocument('RUT'),
             telefono: generatePhone(),
-            email: generateEmail(generateRandomName() + generateRandomLastName()),
+            email: generateEmail(conductorNames.nombre + conductorNames.apellido),
             licencia: generateLicenseType(),
             vencimiento: '2026-12-31'
         };
@@ -96,6 +100,15 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
             await conductorPage.clickGuardar();
             await page.waitForTimeout(2000);
             const isSaved = await conductorPage.isFormSaved();
+            
+            if (!isSaved) {
+                const hasErrors = await conductorPage.hasValidationErrors();
+                if (hasErrors) {
+                    logger.error('❌ Error de validación detectado en Conductor');
+                    await page.screenshot({ path: './reports/screenshots/conductor-validation-error.png', fullPage: true });
+                }
+            }
+            
             expect(isSaved).toBeTruthy();
 
             if (isSaved) {

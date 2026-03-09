@@ -178,6 +178,16 @@ export class ConductorFormPage extends BasePage {
     await btn.evaluate((el: HTMLElement) => el.click());
   }
 
+  async hasValidationErrors(): Promise<boolean> {
+    const errorMsg = this.page.locator('.help-block-error, .invalid-feedback, .alert-danger').filter({ hasText: /./ }).first();
+    const isVisible = await errorMsg.isVisible({ timeout: 2000 }).catch(() => false);
+    if (isVisible) {
+       const text = await errorMsg.innerText();
+       logger.error(`Mensaje de error encontrado: ${text}`);
+    }
+    return isVisible;
+  }
+
   async isFormSaved(): Promise<boolean> {
     try {
       // Check for validation errors that might be blocking the save
