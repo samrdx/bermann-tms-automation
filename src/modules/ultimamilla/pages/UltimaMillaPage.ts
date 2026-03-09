@@ -127,7 +127,7 @@ export class UltimaMillaFormPage extends BasePage {
             }
             await this.page.waitForTimeout(500); // Esperar que cierre/aplique para evitar "Empty option" flag
         } catch (e) {
-            logger.warn(`⚠️ selectBootstrapDropdown failed for "${buttonSelector}": ${e}. Usando JS Fallback...`);
+            logger.warn(`⚠️ selectBootstrapDropdown falló para "${buttonSelector}": ${e}. Usando JS Fallback...`);
             if (dataId && textToSelect) {
                 await this.page.evaluate(({ selectId, text }: { selectId: string; text: string }) => {
                     const select = document.getElementById(selectId) as HTMLSelectElement;
@@ -184,7 +184,7 @@ export class UltimaMillaFormPage extends BasePage {
     // --- Google Places Helper ---
 
     async fillFechaEntrega(fecha: string): Promise<void> {
-        logger.info(`Validando completado: llenando fecha entrega: ${fecha}`);
+        logger.info(`Validando completado: completando fecha de entrega: ${fecha}`);
         await this.fill(this.selectors.fechaEntrega, fecha);
         await this.page.locator('h4:has-text("Pedido")').first().click(); // Click out to trigger validation/blur
         await this.page.keyboard.press('Escape'); // Cerrar explícitamente el datepicker
@@ -202,7 +202,7 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async fillDimensiones(ancho: string, largo: string, alto: string): Promise<void> {
-        logger.info('Refilling dimensions to trigger m3 Javascript recalculation');
+        logger.info('Volviendo a completar dimensiones para activar el recálculo de m3 vía Javascript');
 
         // Esperar explícitamente a que JS y Bootstrap retiren el 'display: none' tras seleccionar Volumen->Dimensiones
         await this.page.waitForSelector(this.selectors.ancho, { state: 'visible', timeout: 5000 }).catch(() => {
@@ -252,11 +252,11 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async clickGuardar(): Promise<void> {
-        logger.info('Clicking save button');
+        logger.info('Haciendo clic en el botón guardar');
         try {
             await this.click(this.selectors.btnGuardar);
         } catch (error) {
-            logger.error('Failed to save', error);
+            logger.error('Fallo al guardar', error);
             await this.takeScreenshot('save-error');
             throw error;
         }

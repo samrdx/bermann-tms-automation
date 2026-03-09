@@ -38,7 +38,7 @@ export class ContratoFactory {
     const contratoPage = new ContratosFormPage(this.page);
 
     try {
-      logger.info(`Creating contrato: ${contratoData.nroContrato} for ${contratoData.transportistaNombre}`);
+      logger.info(`Creando contrato: ${contratoData.nroContrato} para ${contratoData.transportistaNombre}`);
 
       // Navigate to create page
       await contratoPage.navigateToCreate();
@@ -54,17 +54,17 @@ export class ContratoFactory {
         contratoData.transportistaNombre
       );
 
-      logger.info(`✅ Contrato created with ID: ${contractId}`);
+      logger.info(`✅ Contrato creado con ID: ${contractId}`);
 
       // Navigate to index to confirm
       await this.page.goto(`${config.get().baseUrl}/contrato/index`);
       await this.page.waitForTimeout(2000);
 
-      logger.info(`✅ Verified contrato: ${contratoData.nroContrato}`);
+      logger.info(`✅ Contrato verificado: ${contratoData.nroContrato}`);
       return contratoData;
 
     } catch (error) {
-      logger.error('Failed to create contrato', error);
+      logger.error('Fallo al crear contrato', error);
       await this.page.screenshot({
         path: `./reports/screenshots/create-contrato-error-${Date.now()}.png`,
         fullPage: true

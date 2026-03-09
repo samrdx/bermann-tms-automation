@@ -11,36 +11,36 @@ test.describe('Auth - Full Flow', () => {
     const user = getTestUser('regular');
 
     await test.step('Phase 1: Login', async () => {
-      logger.info('🔐 PHASE 1: Login');
+      logger.info('🔐 FASE 1: Login');
       await loginPage.loginAndWaitForDashboard(user.username, user.password);
 
       const isSuccess = await loginPage.isLoginSuccessful();
       expect(isSuccess).toBe(true);
-      logger.info('✅ Login successful');
+      logger.info('✅ Login exitoso');
     });
 
     await test.step('Phase 2: Navigate Dashboard', async () => {
-      logger.info('🧭 PHASE 2: Navigate Dashboard');
+      logger.info('🧭 FASE 2: Navegar al Dashboard');
 
       const isOnDashboard = await dashboardPage.isOnDashboard();
       expect(isOnDashboard).toBe(true);
 
-      logger.info('✅ Dashboard verified');
+      logger.info('✅ Dashboard verificado');
     });
 
-    await test.step('Phase 3: Logout', async () => {
-      logger.info('🚪 PHASE 3: Logout');
+    await test.step('Fase 3: Cierre de Sesión', async () => {
+      logger.info('🚪 FASE 3: Logout');
       await dashboardPage.logout();  // Now with proper navigation wait from Fix 2
-      logger.info('✅ Logout action completed');
+      logger.info('✅ Acción de Logout completada');
     });
 
-    await test.step('Phase 4: Verify', async () => {
-      logger.info('✅ PHASE 4: Final Verification');
+    await test.step('Fase 4: Verificación', async () => {
+      logger.info('✅ FASE 4: Verificación Final');
 
       const isOnLoginPage = await loginPage.isOnLoginPage();
       expect(isOnLoginPage).toBe(true);
 
-      logger.info('✅ Full flow completed: Login → Dashboard → Logout');
+      logger.info('✅ Flujo completo finalizado: Login → Dashboard → Logout');
     });
   });
 });

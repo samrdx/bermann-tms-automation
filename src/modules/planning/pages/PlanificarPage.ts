@@ -41,30 +41,30 @@ export class PlanificarPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    logger.info('Navigating to Planificar Viajes page');
+    logger.info('Navegando a la página de Planificar Viajes');
     await this.page.goto('/viajes/crear');
     await this.page.waitForLoadState('domcontentloaded');
     await this.page.waitForTimeout(1500); // Allow BS to initialize
   }
 
   async planificarViaje(nroViaje: string, operation: string, service: string, cliente: string): Promise<void> {
-    logger.info(`Starting Step 6.4: Planificar Viaje (Robust Flow)`);
+    logger.info(`Iniciando Paso 6.4: Planificar Viaje (Flujo Robusto)`);
     logger.info('='.repeat(80));
 
     await this.navigate();
     await this.fillNroViaje(nroViaje);
 
-    // Step 2: Select Operation
+    // Paso 2: Select Operation
     await this.selectTipoOperacion(operation);
     await this.waitForLoading(20000);
     await this.page.waitForTimeout(1500);
 
-    // Step 3: Select Service
+    // Paso 3: Select Service
     await this.selectTipoServicio(service);
     await this.waitForLoading(20000);
     await this.page.waitForTimeout(1500);
 
-    // Step 4: Select Cliente
+    // Paso 4: Select Cliente
     await this.selectCliente(cliente);
     await this.waitForLoading(20000);
 
@@ -73,7 +73,7 @@ export class PlanificarPage extends BasePage {
 
   async fillNroViaje(nro?: string): Promise<void> {
     const nroViaje = nro || String(Math.floor(10000 + Math.random() * 90000));
-    logger.info(`Filling Nro Viaje: ${nroViaje}`);
+    logger.info(`Completando Nro Viaje: ${nroViaje}`);
     await this.fill(this.selectors.nroViaje, nroViaje);
   }
 
@@ -83,13 +83,13 @@ export class PlanificarPage extends BasePage {
       // Small buffer to let spinner appear
       await this.page.waitForTimeout(500);
       if (await spinner.isVisible()) {
-        logger.debug('Waiting for loading modal to disappear...');
+        logger.debug('Esperando a que el modal de carga desaparezca...');
         await spinner.waitFor({ state: 'hidden', timeout });
-        logger.debug('Loading modal disappeared');
+        logger.debug('El modal de carga desapareció');
         await this.page.waitForTimeout(500); // Settle time
       }
     } catch (e) {
-      logger.warn('Timeout waiting for loading modal - continuing anyway');
+      logger.warn('Tiempo de espera agotado esperando el modal de carga - continuando de todas formas');
     }
   }
 
@@ -99,7 +99,7 @@ export class PlanificarPage extends BasePage {
   private async handleModalBackdrop(): Promise<void> {
     const backdrop = this.page.locator('.modal-backdrop');
     if (await backdrop.isVisible().catch(() => false)) {
-      logger.info('🛡️ Modal backdrop detected, forcefully removing it to unblock UI...');
+      logger.info('🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...');
       await this.page.evaluate(() => {
         document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
         document.body.classList.remove('modal-open');
@@ -113,7 +113,7 @@ export class PlanificarPage extends BasePage {
    * Private helper for Bootstrap Select dropdowns (Hybrid Pattern)
    */
   private async selectBootstrapDropdown(btnSelector: string, optionText: string, fieldName: string = 'Dropdown'): Promise<void> {
-    logger.info(`Selecting ${fieldName}: [${optionText}]`);
+    logger.info(`Seleccionando ${fieldName}: [${optionText}]`);
 
     try {
       await this.waitForLoading();
@@ -138,7 +138,7 @@ export class PlanificarPage extends BasePage {
 
       // 3. Search and select
       if (await searchInput.isVisible({ timeout: 1500 }).catch(() => false)) {
-        logger.debug(`Searching for "${optionText}" in ${fieldName}`);
+        logger.debug(`Buscando "${optionText}" en ${fieldName}`);
         await searchInput.clear();
         await searchInput.fill(optionText);
         await this.page.waitForTimeout(1000); // Wait for filter
@@ -153,7 +153,7 @@ export class PlanificarPage extends BasePage {
       await this.page.waitForTimeout(800);
       const selectedText = await button.innerText();
       if (!selectedText.toLowerCase().includes(optionText.toLowerCase())) {
-        logger.warn(`⚠️ Dropdown UI [${fieldName}] didn't update to [${optionText}]. Current: [${selectedText}]. Forcing value via JS...`);
+        logger.warn(`⚠️ La UI del dropdown [${fieldName}] no se actualizó a [${optionText}]. Actual: [${selectedText}]. Forzando valor vía JS...`);
       }
 
       // ALWAYS force sync the underlying <select> to prevent validation errors 
@@ -180,7 +180,7 @@ export class PlanificarPage extends BasePage {
 
       await this.page.waitForTimeout(1000); // Stabilization
     } catch (error) {
-      logger.error(`Dropdown failure [${fieldName}]:`, error);
+      logger.error(`Fallo en el dropdown [${fieldName}]:`, error);
       await this.takeScreenshot(`fail-${fieldName}`);
       throw error;
     }
@@ -212,7 +212,7 @@ export class PlanificarPage extends BasePage {
   }
 
   async agregarRuta(numeroRuta: string): Promise<boolean> {
-    logger.info(`Adding ruta: ${numeroRuta}`);
+    logger.info(`Añadiendo ruta: ${numeroRuta}`);
     await this.handleModalBackdrop();
     const btnAgregar = this.page.locator(this.selectors.btnAgregarRuta).first();
 
@@ -240,7 +240,7 @@ export class PlanificarPage extends BasePage {
         const text = await row.innerText();
         // Exact match for the ID column or includes
         if (text.includes(numeroRuta)) {
-          logger.info(`Found ruta [${numeroRuta}] in row ${i + 1}`);
+          logger.info(`Ruta [${numeroRuta}] encontrada en la fila ${i + 1}`);
           const selectBtn = row.locator('.btn-success, .btn-primary').first();
           await selectBtn.evaluate(el => el.scrollIntoView({ block: 'center' })).catch(() => { });
           await selectBtn.waitFor({ state: 'visible', timeout: 3000 }).catch(() => { });
@@ -251,24 +251,24 @@ export class PlanificarPage extends BasePage {
       }
 
       if (!found) {
-        logger.warn(`Ruta ${numeroRuta} not found in the list`);
+        logger.warn(`Ruta ${numeroRuta} no encontrada en la lista`);
         await this.page.keyboard.press('Escape').catch(() => { });
         return false;
       }
 
       // CRITICAL: Wait for Origen/Destino to populate after modal selection
-      logger.info('Waiting for Origen/Destino to populate...');
+      logger.info('Esperando a que Origen/Destino se completen...');
       await this.page.waitForFunction(() => {
         const o = document.querySelector('button[data-id="_origendestinoform-origen"]') as HTMLElement;
         const d = document.querySelector('button[data-id="_origendestinoform-destino"]') as HTMLElement;
         return o && o.innerText.trim() !== 'Seleccione' && d && d.innerText.trim() !== 'Seleccione';
       }, { timeout: 10000 }).catch(() => {
-        logger.warn('⚠️ Origen/Destino did not populate after 10s');
+        logger.warn('⚠️ Origen/Destino no se completaron después de 10s');
       });
 
       return true;
     } catch (e) {
-      logger.error('Failed in agregarRuta', e);
+      logger.error('Fallo en agregarRuta', e);
       await this.page.keyboard.press('Escape').catch(() => { });
       return false;
     }
@@ -283,7 +283,7 @@ export class PlanificarPage extends BasePage {
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info('Clicking Guardar...');
+    logger.info('Haciendo clic en Guardar...');
     await this.handleModalBackdrop();
     await this.click(this.selectors.btnGuardar);
     await this.page.waitForLoadState('networkidle');

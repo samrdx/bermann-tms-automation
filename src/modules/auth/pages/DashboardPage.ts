@@ -41,10 +41,10 @@ export class DashboardPage extends BasePage {
       const isRightUrl = currentUrl.includes('/site') || currentUrl.includes('/inicio');
       const logoVisible = await this.isVisible(this.selectors.logoMin);
       
-      logger.info(`Dashboard check - URL: ${isRightUrl}, Logo: ${logoVisible}`);
+      logger.info(`Verificación de Dashboard - URL: ${isRightUrl}, Logo: ${logoVisible}`);
       return isRightUrl && logoVisible;
     } catch (error) {
-      logger.error('Error checking dashboard', error);
+      logger.error('Error al verificar el dashboard', error);
       return false;
     }
   }
@@ -61,7 +61,7 @@ async getLoggedUserName(): Promise<string> {
     const userName = await userElement.textContent();
     return userName?.trim() || '';
   } catch (error) {
-    logger.warn('Could not get logged user name', error);
+    logger.warn('No se pudo obtener el nombre del usuario logueado', error);
     
     // Método alternativo: buscar por contenido "user"
     try {
@@ -77,20 +77,20 @@ async getLoggedUserName(): Promise<string> {
    * Abrir dropdown de usuario
    */
   async openUserDropdown(): Promise<void> {
-    logger.info('Opening user dropdown');
+    logger.info('Abriendo dropdown de usuario');
     await this.waitForElement(this.selectors.userDropdown);
     await this.click(this.selectors.userDropdown);
     
     // Esperar que el dropdown se abra
     await this.waitForElement(this.selectors.userDropdownOpen, 3000);
-    logger.info('User dropdown opened');
+    logger.info('Dropdown de usuario abierto');
   }
 
   /**
    * Hacer logout
    */
   async logout(): Promise<void> {
-    logger.info('Attempting logout');
+    logger.info('Intentando cerrar sesión');
 
     try {
       // Abrir dropdown de usuario
@@ -110,9 +110,9 @@ async getLoggedUserName(): Promise<string> {
       // Wait for actual navigation to /login
       await navigationPromise;
 
-      logger.info('✅ Logout successful - navigated to login page');
+      logger.info('✅ Cierre de sesión exitoso - navegado a la página de login');
     } catch (error) {
-      logger.error('Logout failed', error);
+      logger.error('Fallo al cerrar sesión', error);
       await this.takeScreenshot('logout-error');
       throw error;
     }
@@ -126,7 +126,7 @@ async getLoggedUserName(): Promise<string> {
     const currentUrl = this.getCurrentUrl();
     const isLoginPage = currentUrl.includes('/login');
     
-    logger.info(`Logout check - On login page: ${isLoginPage}`);
+    logger.info(`Verificación de cierre de sesión - En página de login: ${isLoginPage}`);
     return isLoginPage;
   }
 
@@ -134,7 +134,7 @@ async getLoggedUserName(): Promise<string> {
    * Click en el ícono de inicio
    */
   async clickHome(): Promise<void> {
-    logger.info('Navigating to home');
+    logger.info('Navegando al inicio');
     await this.click(this.selectors.menuHome);
     await this.waitForNavigation();
   }
@@ -143,7 +143,7 @@ async getLoggedUserName(): Promise<string> {
    * Navegar a módulo de Viajes
    */
   async navigateToViajes(): Promise<void> {
-    logger.info('Navigating to Viajes module');
+    logger.info('Navegando al módulo de Viajes');
     await this.click(this.selectors.menuViajes);
     await this.page.waitForTimeout(1000);
   }
@@ -152,7 +152,7 @@ async getLoggedUserName(): Promise<string> {
    * Navegar a Planificar Viajes
    */
   async navigateToPlanificarViajes(): Promise<void> {
-    logger.info('Navigating to Planificar Viajes');
+    logger.info('Navegando a Planificar Viajes');
     
     // Primero hover sobre Viajes para que aparezca el submenu
     await this.page.hover(this.selectors.menuViajes);
@@ -163,14 +163,14 @@ async getLoggedUserName(): Promise<string> {
     await this.click(this.selectors.planificarViajes);
     await this.waitForNavigation();
     
-    logger.info('✅ Navigated to Planificar Viajes');
+    logger.info('✅ Navegado a Planificar Viajes');
   }
 
   /**
    * Click en notificaciones
    */
   async openNotifications(): Promise<void> {
-    logger.info('Opening notifications');
+    logger.info('Abriendo notificaciones');
     await this.click(this.selectors.menuNotificaciones);
     await this.page.waitForTimeout(1000);
   }
@@ -179,7 +179,7 @@ async getLoggedUserName(): Promise<string> {
    * Toggle menú hamburger (mobile/responsive)
    */
   async toggleHamburgerMenu(): Promise<void> {
-    logger.info('Toggling hamburger menu');
+    logger.info('Cambiando estado del menú hamburguesa');
     await this.click(this.selectors.menuHamburger);
     await this.page.waitForTimeout(500);
   }
@@ -195,12 +195,12 @@ async getLoggedUserName(): Promise<string> {
    * Esperar que el dashboard cargue completamente
    */
   async waitForDashboardLoad(): Promise<void> {
-    logger.info('Waiting for dashboard to load');
+    logger.info('Esperando a que el dashboard cargue');
     
     await this.waitForElement(this.selectors.logoMin);
     await this.waitForElement(this.selectors.userDropdown);
     await this.waitForElement(this.selectors.menuHome);
     
-    logger.info('✅ Dashboard loaded');
+    logger.info('✅ Dashboard cargado');
   }
 }

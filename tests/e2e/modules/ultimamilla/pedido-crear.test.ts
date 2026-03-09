@@ -18,7 +18,7 @@ test.describe('Última Milla - Creación de Pedido', () => {
 
     test('Validación de formulario, dimensionamiento y geolocalización', async ({ page, ultimaMillaPage, ultimaMillaFactory }, testInfo) => {
         const startTime = Date.now();
-        logger.info('Starting Test: Créacion de Pedido Última Milla');
+        logger.info('Iniciando Test: Creación de Pedido Última Milla');
         logger.info('='.repeat(80));
 
         // EXTRAER DATOS SEEDED DESDE JSON ANTES DE NAVEGAR
@@ -39,7 +39,7 @@ test.describe('Última Milla - Creación de Pedido', () => {
         // Por lo tanto, empezamos directamente desde la navegación.
 
         // PHASE 2: Navegación
-        logger.info('PHASE 2: Navegación a Creación de Pedido (/order/crear)...');
+        logger.info('FASE 2: Navegación a Creación de Pedido (/order/crear)...');
         await ultimaMillaPage.navigate();
         await expect(page).toHaveURL(/.*\/order\/crear/);
         logger.info('Navegación completada');
@@ -51,7 +51,7 @@ test.describe('Última Milla - Creación de Pedido', () => {
         }
 
         // PHASE 3: Llenado del Formulario Completo
-        logger.info('PHASE 3: Llenando formulario de pedido completo...');
+        logger.info('FASE 3: Llenando formulario de pedido completo...');
         // Fill the entire form from the start, we no longer trigger intentional validation errors
         // that reload the page and break the JS selectors.
         await ultimaMillaPage.fillCompleteForm(orderData as any);
@@ -77,7 +77,7 @@ test.describe('Última Milla - Creación de Pedido', () => {
         logger.info('Cálculo de volumen operando correctamente');
 
         // PHASE 5: Guardado exitoso
-        logger.info('PHASE 5: Envío final de formulario...');
+        logger.info('FASE 5: Envío final de formulario...');
         await ultimaMillaPage.clickGuardar();
         // Dar holgura a la redirección backend o validaciones
         await page.waitForTimeout(2000);
@@ -97,7 +97,7 @@ test.describe('Última Milla - Creación de Pedido', () => {
         logger.info('Pedido guardado exitosamente');
 
         // PHASE 6: Verificación en la grilla (/order)
-        logger.info('PHASE 6: Verificando pedido en grilla (/order)...');
+        logger.info('FASE 6: Verificando pedido en grilla (/order)...');
         // Redirigimos manualmente al main grid
         await page.goto(page.url().replace('/order/crear', '/order'));
         await page.waitForLoadState('networkidle');

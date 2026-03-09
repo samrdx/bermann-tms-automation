@@ -34,7 +34,7 @@ test.describe('[V01] Viajes - Planificar', () => {
     await allure.story('Planificar Viaje');
 
     logger.info('='.repeat(80));
-    logger.info('Iniciando Step 6: Planificar Viaje');
+    logger.info('Iniciando Paso 6: Planificar Viaje');
     logger.info('='.repeat(80));
 
     // =================================================================
@@ -279,7 +279,7 @@ test.describe('[V01] Viajes - Planificar', () => {
     const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
 
     logger.info('='.repeat(80));
-    logger.info('PASO 6: PLANIFICAR VIAJE COMPLETE!');
+    logger.info('PASO 6: ¡PLANIFICAR VIAJE COMPLETADO!');
     logger.info('='.repeat(80));
     logger.info(`Tiempo de ejecución: ${executionTime}s`);
     logger.info('');

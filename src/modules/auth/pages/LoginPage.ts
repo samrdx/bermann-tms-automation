@@ -54,13 +54,13 @@ export class LoginPage extends BasePage {
         this.page.waitForSelector(this.selectors.errorMessage, { state: 'visible', timeout: 10000 })
       ]);
     } catch (error) {
-      logger.warn('Login wait timed out (neither dashboard nor error appeared quickly)', error);
+      logger.warn('Tiempo de espera de login agotado (ni dashboard ni error aparecieron rápidamente)', error);
     }
 
     // Check specific failure first
     if (await this.hasErrorMessage()) {
       const errorMsg = await this.getErrorMessage();
-      logger.error(`Login failed with error: ${errorMsg}`);
+      logger.error(`Login fallido con error: ${errorMsg}`);
       await this.takeScreenshot('login-failed-error');
       throw new Error(`Login failed: ${errorMsg}`);
     }
@@ -89,7 +89,7 @@ export class LoginPage extends BasePage {
       });
       return this.page.url().includes('/site');
     } catch (error) {
-      logger.warn('Logo not visible after 10s, login may have failed');
+      logger.warn('Logo no visible después de 10s, es posible que el login haya fallado');
       return false;
     }
   }

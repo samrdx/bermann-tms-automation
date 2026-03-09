@@ -27,24 +27,24 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         const projectName = DataPathHelper.getProjectIdentifier(testInfo);
         const browserName = DataPathHelper.getBrowserName(testInfo);
 
-        logger.info('🚀 Starting Base Operational Suite - Steps 1-4');
-        logger.info(`🔧 Worker ${workerIndex} | Browser: ${browserName} | Project: ${projectName}`);
+        logger.info('🚀 Iniciando Suite Operacional Base - Pasos 1-4');
+        logger.info(`🔧 Worker ${workerIndex} | Navegador: ${browserName} | Proyecto: ${projectName}`);
         logger.info('='.repeat(80));
 
         // Clean stale data file for this worker to ensure fresh state
         const staleDataPath = DataPathHelper.getWorkerDataPath(testInfo);
         if (fs.existsSync(staleDataPath)) {
             fs.unlinkSync(staleDataPath);
-            logger.info(`🗑️ Deleted stale data file: ${staleDataPath}`);
+            logger.info(`🗑️ Archivo de datos antiguo eliminado: ${staleDataPath}`);
         }
 
         // =================================================================
-        // STEP 0: Login
+        // PASO 0: Login
         // =================================================================
-        logger.info('🔐 STEP 0: Authenticating...');
+        logger.info('🔐 PASO 0: Autenticando...');
         const loginPage = new LoginPage(page);
         await loginPage.loginAndWaitForDashboard('arivas', 'arivas');
-        logger.info('✅ Step 0 Complete - Authenticated as arivas');
+        logger.info('✅ Paso 0 Completado - Autenticado como arivas');
         logger.info('');
 
         // Data structure for export
@@ -62,9 +62,9 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         };
 
         // =================================================================
-        // STEP 1: Create Transportista (Foundation)
+        // PASO 1: Crear Transportista (Fundación)
         // =================================================================
-        logger.info('📦 STEP 1/4: Creating Transportista...');
+        logger.info('📦 PASO 1/4: Creando Transportista...');
         const transportista = await TransportistaHelper.createTransportistaViaUI(page, 'Propio');
 
         operationalData.transportista = {
@@ -88,7 +88,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         logger.info('');
 
         // =================================================================
-        // STEP 2: Create Cliente (Client)
+        // PASO 2: Crear Cliente (Cliente)
         // =================================================================
         logger.info('👤 Paso 2/4: Creando Cliente...');
 
@@ -112,12 +112,12 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             email: cliente.email,
         };
 
-        logger.info(`✅ Paso 2/4 Complete - Cliente: ${cliente.nombre}`);
+        logger.info(`✅ Paso 2/4 Completado - Cliente: ${cliente.nombre}`);
         logger.info(`   RUT: ${cliente.rut}`);
         logger.info('');
 
         // =================================================================
-        // STEP 3: Create Vehiculo (Vehicle with 3 KG capacity)
+        // PASO 3: Crear Vehiculo (Vehículo con capacidad de 3 KG)
         // =================================================================
         logger.info('🚛 Paso 3/4: Creando Vehiculo...');
         const vehiculo = await VehiculoHelper.createVehiculoViaUI(page, transportista.nombre);
@@ -134,7 +134,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         logger.info('');
 
         // =================================================================
-        // STEP 4: Create Conductor (Driver)
+        // PASO 4: Crear Conductor (Conductor)
         // =================================================================
         logger.info('👨‍✈️ Paso 4/4: Creando Conductor...');
         const conductor = await ConductorHelper.createConductorViaUI(page, transportista.nombre);

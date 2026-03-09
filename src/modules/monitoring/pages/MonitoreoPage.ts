@@ -48,19 +48,19 @@ export class MonitoreoPage extends BasePage {
     // ================================================================
 
     async navigate(): Promise<void> {
-        logger.info(`📍 Navigating to: /viajes/monitoreo`);
+        logger.info(`📍 Navegando a: /viajes/monitoreo`);
         // Use relative path so Playwright resolves against configured baseURL
         // (same pattern as PlanificarPage, avoids absolute URL + domcontentloaded race)
         await this.page.goto('/viajes/monitoreo');
         await this.page.waitForLoadState('networkidle').catch(() => {
-            logger.warn('⚠️ networkidle timeout on monitoreo, continuing...');
+            logger.warn('⚠️ tiempo de espera networkidle agotado en monitoreo, continuando...');
         });
         const currentUrl = this.page.url();
-        logger.info(`📍 Current URL: ${currentUrl}`);
+        logger.info(`📍 URL Actual: ${currentUrl}`);
         if (currentUrl.includes('/login')) {
             throw new Error('❌ Redirected to /login — storageState auth may be expired or missing');
         }
-        logger.info('✅ Monitoreo page loaded successfully');
+        logger.info('✅ Página de Monitoreo cargada exitosamente');
     }
 
     /** @deprecated Use navigate() instead */
@@ -87,17 +87,17 @@ export class MonitoreoPage extends BasePage {
      * 4. Scroll al texto encontrado
      */
     async buscarViaje(nroViaje: string): Promise<void> {
-        logger.info(`🔎 UI: Searching for Viaje [${nroViaje}]...`);
+        logger.info(`🔎 UI: Buscando Viaje [${nroViaje}]...`);
 
         try {
             // 1. Llenar filtro de ID del viaje
-            logger.info('⏳ UI: Waiting for input #id...');
+            logger.info('⏳ UI: Esperando input #id...');
             const inputId = this.page.locator(this.selectors.filtroIdViaje);
             await inputId.waitFor({ state: 'visible', timeout: 10000 });
             logger.info('👁️ UI: Input #id visible');
             await inputId.clear();
             await inputId.fill(nroViaje);
-            logger.info(`📝 UI: Filter ID filled with: "${nroViaje}"`);
+            logger.info(`📝 UI: Filtro de ID completado con: "${nroViaje}"`);
 
             // 2. Disparar búsqueda (estrategia robusta multi-entorno)
             await this.clickBuscar(inputId);
@@ -106,7 +106,7 @@ export class MonitoreoPage extends BasePage {
             // En QA aparece el texto del nroViaje. En Demo (bug visual) la celda del ID de viaje 
             // a veces sale vacía, pero los botones de acción (.manito) sí se renderizan.
             // Esperamos a que la tabla se pueble con el texto del viaje o con botones de acción.
-            logger.info(`⏳ UI: Waiting for trip row to appear inside #registros...`);
+            logger.info(`⏳ UI: Esperando a que la fila del viaje aparezca dentro de #registros...`);
             const contenedor = this.page.locator(this.selectors.contenedor);
 
             // Wait for either the text or at least one action button (manito) to appear in the container
@@ -117,20 +117,20 @@ export class MonitoreoPage extends BasePage {
 
             try {
                 await rowLoadedPromise;
-                logger.info(`✅ UI: Trip row recognized inside #registros`);
+                logger.info(`✅ UI: Fila de viaje reconocida dentro de #registros`);
             } catch {
-                logger.warn(`⚠️ UI: Trip row NOT found in 30s. Retrying...`);
+                logger.warn(`⚠️ UI: Fila de viaje NO encontrada en 30s. Reintentando...`);
                 await this.takeScreenshot('buscar-viaje-primer-intento-fallido');
 
                 await this.page.reload();
                 await this.page.waitForLoadState('networkidle');
-                logger.info('🔄 UI: Page reloaded, re-filtering...');
+                logger.info('🔄 UI: Página recargada, re-filtrando...');
 
                 await inputId.waitFor({ state: 'visible', timeout: 10000 });
                 await inputId.clear();
                 await inputId.fill(nroViaje);
                 await this.clickBuscar(inputId);
-                logger.info('🔄 UI: Re-filter executed, waiting for trip row...');
+                logger.info('🔄 UI: Re-filtro ejecutado, esperando fila del viaje...');
 
                 try {
                     const rowLoadedRetry = Promise.any([
@@ -138,14 +138,14 @@ export class MonitoreoPage extends BasePage {
                         contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error(); })
                     ]);
                     await rowLoadedRetry;
-                    logger.info(`✅ UI: Trip row found on retry`);
+                    logger.info(`✅ UI: Fila de viaje encontrada en el reintento`);
                 } catch {
                     throw new Error(`Text "${nroViaje}" or action buttons did not appear after retry`);
                 }
             }
 
             // 4. Scroll a la fila (buscamos cualquier elemento dentro para scrollear)
-            logger.info('📜 UI: Scrolling to trip row...');
+            logger.info('📜 UI: Scrolleando a la fila del viaje...');
             await this.page.waitForTimeout(1000);
 
             try {
@@ -154,14 +154,14 @@ export class MonitoreoPage extends BasePage {
                 // Ensure element is somewhat into view
                 await scrollTarget.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
                 await this.page.waitForTimeout(300);
-                logger.info(`✅ UI: Viaje row confirmed & visible`);
+                logger.info('✅ UI: Fila de Viaje confirmada y visible');
             } catch (e: any) {
-                logger.warn(`⚠️ UI: Scroll failed (${e.message}), continuing anyway...`);
+                logger.warn(`⚠️ UI: Fallo en el scroll (${e.message}), continuando de todas formas...`);
                 await this.page.waitForTimeout(500);
             }
 
         } catch (error) {
-            logger.error(`❌ UI: Error searching for Viaje [${nroViaje}]`, error);
+            logger.error(`❌ UI: Error buscando Viaje [${nroViaje}]`, error);
             await this.takeScreenshot('buscar-viaje-error');
             throw error;
         }
@@ -177,7 +177,7 @@ export class MonitoreoPage extends BasePage {
      * Estrategia 2: Enter en el input #id (fallback universal — funciona en cualquier form).
      */
     private async clickBuscar(inputId: any): Promise<void> {
-        logger.info('🔎 UI: Triggering search (multi-strategy)...');
+        logger.info('🔎 UI: Disparando búsqueda (multi-estrategia)...');
 
         // Strategy 1: JS click on #buscar element (same as TmsApiClient pattern)
         const clickedViaId = await this.page.evaluate(() => {
@@ -187,20 +187,20 @@ export class MonitoreoPage extends BasePage {
         });
 
         if (clickedViaId) {
-            logger.info('✅ UI: Buscar triggered via JS (#buscar element)');
+            logger.info('✅ UI: Buscar disparado vía JS (elemento #buscar)');
         } else {
             // Strategy 2: Enter on the filter input (universal fallback)
-            logger.info('⚠️ UI: #buscar not found — pressing Enter on #id input...');
+            logger.info('⚠️ UI: #buscar no encontrado — presionando Enter en el campo #id...');
             await inputId.press('Enter');
-            logger.info('✅ UI: Buscar triggered via Enter key');
+            logger.info('✅ UI: Buscar disparado vía tecla Enter');
         }
 
         // Wait for AJAX to complete before checking #registros
         await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
-            logger.warn('⚠️ UI: networkidle timeout after Buscar, continuing...');
+            logger.warn('⚠️ UI: tiempo de espera networkidle agotado después de Buscar, continuando...');
         });
         await this.page.waitForTimeout(500);
-        logger.info('✅ UI: Post-search stabilization complete');
+        logger.info('✅ UI: Estabilización post-búsqueda completa');
     }
 
     // ================================================================
@@ -224,12 +224,12 @@ export class MonitoreoPage extends BasePage {
      * - page.locator('span').filter({ hasText: 'Agregar' }).first()
      */
     async clickAgregarHorarioGPS(): Promise<void> {
-        logger.info('🕰️ UI: Accessing "Horario GPS" (Agregar)...');
+        logger.info('🕰️ UI: Accediendo a "Horario GPS" (Agregar)...');
 
         // 1. Encontrar y hacer clic en el span de "Agregar Horario GPS"
         // Filtramos por onclick="showModalEditTripWithoutGPSManually" para evitar
         // hacer clic en otros spans de "Agregar" (observaciones, POD, etc.)
-        logger.info('🔎 UI: Clicking Agregar (showModalEditTripWithoutGPSManually) via JS...');
+        logger.info('🔎 UI: Haciendo clic en Agregar (showModalEditTripWithoutGPSManually) vía JS...');
         const clicked = await this.page.evaluate(() => {
             const spans = Array.from(document.querySelectorAll('span.manito'));
             const agregar = spans.find(s =>
@@ -241,17 +241,17 @@ export class MonitoreoPage extends BasePage {
         });
 
         if (!clicked) {
-            logger.warn('⚠️ UI: span.manito[showModalEditTripWithoutGPSManually] not found. Taking screenshot...');
+            logger.warn('⚠️ UI: span.manito[showModalEditTripWithoutGPSManually] no encontrado. Tomando captura de pantalla...');
             await this.takeScreenshot('agregar-not-found');
             throw new Error('❌ UI: No "Agregar" span with showModalEditTripWithoutGPSManually found in page');
         }
-        logger.info('✅ UI: Clicked Agregar via JS (showModalEditTripWithoutGPSManually)');
+        logger.info('✅ UI: Clic en Agregar vía JS (showModalEditTripWithoutGPSManually)');
 
         // 2. Esperar que el modal #modalCambioEstadoSinGps se abra (display: block)
         // En Demo, body.modal-open no se activa, por lo que Playwright's waitFor({ state: 'visible' })
         // puede fallar (usa offsetParent que depende de body.modal-open).
         // Usamos waitForFunction chequeando display:block directamente.
-        logger.info('⏳ UI: Waiting for modal #modalCambioEstadoSinGps (display: block)...');
+        logger.info('⏳ UI: Esperando modal #modalCambioEstadoSinGps (display: block)...');
         try {
             await this.page.waitForFunction(() => {
                 const modal = document.getElementById('modalCambioEstadoSinGps');
@@ -262,9 +262,9 @@ export class MonitoreoPage extends BasePage {
             await this.page.evaluate(() => {
                 document.body.classList.add('modal-open');
             });
-            logger.info('✅ UI: Modal #modalCambioEstadoSinGps open');
+            logger.info('✅ UI: Modal #modalCambioEstadoSinGps abierto');
         } catch {
-            logger.warn('⚠️ UI: Modal not detected via waitForFunction, taking screenshot...');
+            logger.warn('⚠️ UI: Modal no detectado vía waitForFunction, tomando captura de pantalla...');
             await this.takeScreenshot('modal-post-agregar');
         }
     }
@@ -281,15 +281,15 @@ export class MonitoreoPage extends BasePage {
      * 4. Maneja confirmación bootbox si aparece
      */
     async confirmarFinalizacion(): Promise<void> {
-        logger.info('📝 UI: Processing modal #modalCambioEstadoSinGps...');
+        logger.info('📝 UI: Procesando modal #modalCambioEstadoSinGps...');
         await this.takeScreenshot('modal-horario-gps-contenido');
 
         // --- PASO 1: Select "Finalizado" via verified ID #drop_state_without_gps ---
-        logger.info('🔎 UI: Selecting "Finalizado" in #drop_state_without_gps...');
+        logger.info('🔎 UI: Seleccionando "Finalizado" en #drop_state_without_gps...');
         const selectEstado = this.page.locator(this.selectors.selectEstado);
         await selectEstado.waitFor({ state: 'visible', timeout: 10000 });
         await selectEstado.selectOption({ label: 'Finalizado' });
-        logger.info('✅ UI: Finalizado selected');
+        logger.info('✅ UI: Finalizado seleccionado');
 
         // Trigger jQuery change for selectpicker
         await this.page.evaluate(() => {
@@ -304,11 +304,11 @@ export class MonitoreoPage extends BasePage {
         await this.page.waitForTimeout(500);
 
         // --- PASO 2: Guardar via verified ID #modificarEstadoViaje_sinGps ---
-        logger.info('💾 UI: Clicking Guardar (#modificarEstadoViaje_sinGps)...');
+        logger.info('💾 UI: Haciendo clic en Guardar (#modificarEstadoViaje_sinGps)...');
         const btnGuardar = this.page.locator(this.selectors.btnGuardarModal);
         await btnGuardar.waitFor({ state: 'visible', timeout: 5000 });
         await btnGuardar.evaluate(el => (el as HTMLElement).click());
-        logger.info('✅ UI: Guardar clicked');
+        logger.info('✅ UI: Guardar clicado');
 
         await this.page.waitForTimeout(2000);
 
@@ -316,18 +316,18 @@ export class MonitoreoPage extends BasePage {
         try {
             const btnConfirmar = this.page.locator(this.selectors.btnConfirmar).first();
             if (await btnConfirmar.isVisible({ timeout: 5000 })) {
-                logger.info('⚠️ UI: Confirmation modal detected, accepting...');
+                logger.info('⚠️ UI: Modal de confirmación detectado, aceptando...');
                 await btnConfirmar.evaluate(el => (el as HTMLElement).click());
                 await this.page.waitForTimeout(1000);
-                logger.info('✅ UI: Confirmation accepted');
+                logger.info('✅ UI: Confirmación aceptada');
             }
         } catch {
-            logger.info('ℹ️ UI: No confirmation modal appeared');
+            logger.info('ℹ️ UI: No apareció modal de confirmación');
         }
 
         await this.page.waitForLoadState('networkidle').catch(() => { });
         await this.forceCloseModal();
-        logger.info('🏁 UI: Finalization confirmed successfully');
+        logger.info('🏁 UI: Finalización confirmada exitosamente');
     }
 
     // ================================================================
@@ -341,24 +341,24 @@ export class MonitoreoPage extends BasePage {
      * 3. confirmarFinalizacion  → cambiar estado a FINALIZADO + guardar
      */
     async finalizarViaje(nroViaje: string): Promise<void> {
-        logger.info(`🚀 UI: === Starting Finalization for Viaje [${nroViaje}] ===`);
+        logger.info(`🚀 UI: === Iniciando Finalización para el Viaje [${nroViaje}] ===`);
 
         try {
             // Paso 1: Filtrar y confirmar que el viaje aparece en la tabla
-            logger.info('🔎 UI: Step 1: Searching Viaje...');
+            logger.info('🔎 UI: Paso 1: Buscando Viaje...');
             await this.buscarViaje(nroViaje);
 
             // Paso 2: Click en "Agregar" (Horario GPS) — busca globalmente tras filtrar
-            logger.info('🕰️ UI: Step 2: Clicking Horario GPS (Agregar)...');
+            logger.info('🕰️ UI: Paso 2: Haciendo clic en Horario GPS (Agregar)...');
             await this.clickAgregarHorarioGPS();
 
             // Paso 3: Dentro del modal, cambiar estado a FINALIZADO y guardar
-            logger.info('📝 UI: Step 3: Confirming Finalization...');
+            logger.info('📝 UI: Paso 3: Confirmando Finalización...');
             await this.confirmarFinalizacion();
 
-            logger.info(`🏁 UI: === Viaje [${nroViaje}] Finalized Successfully ===`);
+            logger.info(`🏁 UI: === Viaje [${nroViaje}] Finalizado Exitosamente ===`);
         } catch (error) {
-            logger.error(`❌ UI: Finalization failed for Viaje [${nroViaje}]`, error);
+            logger.error(`❌ UI: Finalización fallida para el Viaje [${nroViaje}]`, error);
             await this.takeScreenshot('finalizar-viaje-error');
             throw error;
         }
@@ -372,7 +372,7 @@ export class MonitoreoPage extends BasePage {
      * Fuerza cierre de modales Bootstrap abiertos.
      */
     async forceCloseModal(): Promise<void> {
-        logger.info('🧹 UI: Closing Bootstrap modals...');
+        logger.info('🧹 UI: Cerrando modales Bootstrap...');
         await this.page.evaluate(() => {
             const $ = (window as any).jQuery;
             if ($) {
@@ -383,6 +383,6 @@ export class MonitoreoPage extends BasePage {
             document.body.classList.remove('modal-open');
         });
         await this.page.waitForTimeout(500);
-        logger.info('✅ UI: Modals closed');
+        logger.info('✅ UI: Modales cerrados');
     }
 }

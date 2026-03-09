@@ -39,10 +39,10 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
         // ── FIX ERROR 1: Estabilización de red entre contratos y viaje ──
         // El backend puede estar aún procesando la petición de guardar contrato.
         // Si navegamos inmediatamente, el navegador aborta con net::ERR_ABORTED
-        logger.info('⏳ Stabilizing browser before viaje creation...');
+        logger.info('⏳ Estabilizando el navegador antes de la creación del viaje...');
         await page.waitForLoadState('domcontentloaded');
         await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
-            logger.warn('⚠️ networkidle timeout post-contrato, continuing...');
+            logger.warn('⚠️ Tiempo de espera networkidle agotado post-contrato, continuando...');
         });
         await page.waitForTimeout(2000); // Safety buffer for backend processing
 
@@ -67,10 +67,10 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
         // 8. Esperar Cascada (AJAX) - usar networkidle en lugar de timeout fijo
 
-        logger.info('⏳ Waiting for cascade (vehicle/conductor loading)...');
+        logger.info('⏳ Esperando cascada (carga de vehículo/conductor)...');
 
         await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-            logger.warn('⚠️ networkidle timeout, continuing...');
+            logger.warn('⚠️ Tiempo de espera networkidle agotado, continuando...');
 
         });
 
@@ -78,19 +78,19 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
         // 9. SELECCIONAR VEHÍCULO (Bootstrap Select - con búsqueda)
 
-        logger.info(`🚛 Selecting Vehículo: ${patenteVehiculo}`);
+        logger.info(`🚛 Seleccionando Vehículo: ${patenteVehiculo}`);
         await selectBootstrapDropdownByDataId(page, 'viajes-vehiculo_uno_id', patenteVehiculo);
 
         // 10. SELECCIONAR CONDUCTOR (Bootstrap Select - usando data-id específico para evitar "Conductor Dos")
 
-        logger.info(`👨‍✈️ Selecting Conductor: ${nombreConductor}`);
+        logger.info(`👨‍✈️ Seleccionando Conductor: ${nombreConductor}`);
         await selectBootstrapDropdownByDataId(page, 'viajes-conductor_id', nombreConductor);
 
 
 
         // 11. VERIFICACIÓN FINAL DEL TRANSPORTISTA (CRÍTICO - evita falso positivo)
 
-        logger.info('🔒 FINAL VERIFICATION: Checking Transportista before save...');
+        logger.info('🔒 VERIFICACIÓN FINAL: Comprobando Transportista antes de guardar...');
         const finalCheck = await page.evaluate((expectedName: string) => {
 
             const select = document.querySelector('select[id*="transportista"]') as HTMLSelectElement;
@@ -109,9 +109,9 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
         if (!finalCheck.correct) {
 
-            logger.warn(`⚠️ TRANSPORTISTA RESET DETECTED! Current: "${finalCheck.current}", Expected: "${transName}"`);
+            logger.warn(`⚠️ ¡RESETEO DE TRANSPORTISTA DETECTADO! Actual: "${finalCheck.current}", Esperado: "${transName}"`);
 
-            logger.info('🔧 Applying SILENT fix (no events to avoid cascade)...');
+            logger.info('🔧 Aplicando corrección SILENCIOSA (sin eventos para evitar cascada)...');
 
 
             // Fix silencioso - solo cambiar valor sin disparar eventos
@@ -200,7 +200,7 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
         // 12. GUARDAR (Y MANEJAR MODALES)
 
-        logger.info('💾 Clicking Guardar...');
+        logger.info('💾 Clickeando Guardar...');
 
         await page.click('#btn_guardar_form');
 
@@ -224,7 +224,7 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
         } catch (e) {
 
-            logger.info('ℹ️ No confirmation modal appeared.');
+            logger.info('ℹ️ No apareció el modal de confirmación.');
 
         }
 
@@ -247,9 +247,9 @@ test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy fo
 
 
         // ── FIX: Verificación por búsqueda en grid de /viajes/asignar ──
-        logger.info('🔍 Verifying assignment: waiting for redirect to /viajes/asignar...');
+        logger.info('🔍 Verificando asignación: esperando redirección a /viajes/asignar...');
         await verifyAssignmentInGrid(page, nroViaje);
-        logger.info(`✅ SUCCESS: Trip ${nroViaje} assigned to ${transName}`);
+        logger.info(`✅ ÉXITO: Viaje ${nroViaje} asignado a ${transName}`);
 
     });
 
@@ -268,14 +268,14 @@ async function verifyAssignmentInGrid(page: any, nroViaje: string): Promise<void
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
         logger.warn('⚠️ networkidle timeout post-redirect, continuando...');
     });
-    logger.info(`📍 Redirected to: ${page.url()}`);
+    logger.info(`📍 Redirigido a: ${page.url()}`);
 
     // 2. Buscar el viaje en el filtro de búsqueda
     const searchInput = page.locator('#search');
     await searchInput.waitFor({ state: 'visible', timeout: 10000 });
     await searchInput.fill(nroViaje);
     await searchInput.press('Enter');
-    logger.info(`🔎 Searching for trip: ${nroViaje}`);
+    logger.info(`🔎 Buscando viaje: ${nroViaje}`);
 
     // 3. Esperar a que el grid se actualice
     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});

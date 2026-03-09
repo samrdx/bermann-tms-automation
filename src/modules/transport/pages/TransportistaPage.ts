@@ -37,7 +37,7 @@ export class TransportistaFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    logger.info('Navigating to Transportista creation page');
+    logger.info('Navegando a la página de creación de Transportista');
     await this.page.goto('/transportistas/crear');
     await this.page.waitForLoadState('networkidle');
     const coreElement = this.page.locator(this.selectors.nombre);
@@ -45,42 +45,42 @@ export class TransportistaFormPage extends BasePage {
   }
 
   async fillNombre(nombre: string): Promise<void> {
-    logger.info(`Filling nombre: ${nombre}`);
+    logger.info(`Completando nombre: ${nombre}`);
     await this.fill(this.selectors.nombre, nombre);
   }
 
   async fillRazonSocial(razonSocial: string): Promise<void> {
-    logger.info(`Filling razón social: ${razonSocial}`);
+    logger.info(`Completando razón social: ${razonSocial}`);
     await this.fill(this.selectors.razonSocial, razonSocial);
   }
 
   async fillDocumento(documento: string): Promise<void> {
-    logger.info(`Filling documento (RUT): ${documento}`);
+    logger.info(`Completando documento (RUT): ${documento}`);
     await this.fillRutWithVerify(this.selectors.documento, documento);
   }
 
   async fillCalle(calle: string): Promise<void> {
-    logger.info(`Filling calle: ${calle}`);
+    logger.info(`Completando calle: ${calle}`);
     await this.fill(this.selectors.calle, calle);
   }
 
   async fillAltura(altura: string): Promise<void> {
-    logger.info(`Filling altura: ${altura}`);
+    logger.info(`Completando altura: ${altura}`);
     await this.fill(this.selectors.altura, altura);
   }
 
   async fillOtros(otros: string): Promise<void> {
-    logger.info(`Filling otros: ${otros}`);
+    logger.info(`Completando otros: ${otros}`);
     await this.fill(this.selectors.otros, otros);
   }
 
   async fillDescuento(descuento: string): Promise<void> {
-    logger.info(`Filling descuento: ${descuento}`);
+    logger.info(`Completando descuento: ${descuento}`);
     await this.fill(this.selectors.descuento, descuento);
   }
 
   async selectTipoTransportista(tipo: string): Promise<void> {
-    logger.info(`Selecting tipo transportista: ${tipo}`);
+    logger.info(`Seleccionando tipo de transportista: ${tipo}`);
     try {
       if (!(await this.isVisible(this.selectors.tipoTransportistaButton))) return;
       await this.click(this.selectors.tipoTransportistaButton, true);
@@ -92,16 +92,16 @@ export class TransportistaFormPage extends BasePage {
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: tipo });
       await option.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Tipo transportista "${tipo}" selected`);
+      logger.info(`✅ Tipo de transportista "${tipo}" seleccionado`);
     } catch (error) {
-      logger.error(`Failed to select tipo transportista: ${tipo}`, error);
+      logger.error(`Fallo al seleccionar tipo de transportista: ${tipo}`, error);
       await this.takeScreenshot('select-tipo-transportista-error');
       throw error;
     }
   }
 
   async selectRegion(region: string): Promise<void> {
-    logger.info(`Selecting región: ${region}`);
+    logger.info(`Seleccionando región: ${region}`);
     try {
       if (!(await this.isVisible(this.selectors.regionButton))) return;
       await this.click(this.selectors.regionButton, true);
@@ -113,17 +113,17 @@ export class TransportistaFormPage extends BasePage {
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: region }).first();
       await option.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Región "${region}" selected`);
+      logger.info(`✅ Región "${region}" seleccionada`);
       await this.page.waitForTimeout(800); // Wait for ciudad cascade
     } catch (error) {
-      logger.error(`Failed to select región: ${region}`, error);
+      logger.error(`Fallo al seleccionar región: ${region}`, error);
       await this.takeScreenshot('select-region-error');
       throw error;
     }
   }
 
   async selectCiudad(ciudad: string): Promise<void> {
-    logger.info(`Selecting ciudad: ${ciudad}`);
+    logger.info(`Seleccionando ciudad: ${ciudad}`);
     try {
       if (!(await this.isVisible(this.selectors.ciudadButton))) return;
       await this.click(this.selectors.ciudadButton, true);
@@ -135,17 +135,17 @@ export class TransportistaFormPage extends BasePage {
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: ciudad }).first();
       await option.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Ciudad "${ciudad}" selected`);
+      logger.info(`✅ Ciudad "${ciudad}" seleccionada`);
       await this.page.waitForTimeout(800); // Wait for comuna cascade
     } catch (error) {
-      logger.error(`Failed to select ciudad: ${ciudad}`, error);
+      logger.error(`Fallo al seleccionar ciudad: ${ciudad}`, error);
       await this.takeScreenshot('select-ciudad-error');
       throw error;
     }
   }
 
   async selectComuna(comuna: string): Promise<void> {
-    logger.info(`Selecting comuna: ${comuna}`);
+    logger.info(`Seleccionando comuna: ${comuna}`);
     try {
       if (!(await this.isVisible(this.selectors.comunaButton))) return;
       await this.click(this.selectors.comunaButton, true);
@@ -157,16 +157,16 @@ export class TransportistaFormPage extends BasePage {
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: comuna }).first();
       await option.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Comuna "${comuna}" selected`);
+      logger.info(`✅ Comuna "${comuna}" seleccionada`);
     } catch (error) {
-      logger.error(`Failed to select comuna: ${comuna}`, error);
+      logger.error(`Fallo al seleccionar comuna: ${comuna}`, error);
       await this.takeScreenshot('select-comuna-error');
       throw error;
     }
   }
 
   async selectFormaPago(formaPago: string): Promise<void> {
-    logger.info(`Selecting forma de pago: ${formaPago}`);
+    logger.info(`Seleccionando forma de pago: ${formaPago}`);
     try {
       if (!(await this.isVisible(this.selectors.formaPagoButton))) return;
       await this.click(this.selectors.formaPagoButton, true);
@@ -178,14 +178,14 @@ export class TransportistaFormPage extends BasePage {
       const option = dropdownMenu.locator('.dropdown-item').filter({ hasText: formaPago });
       await option.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Forma de pago "${formaPago}" selected`);
+      logger.info(`✅ Forma de pago "${formaPago}" seleccionada`);
     } catch (error) {
-      logger.warn(`⚠️ Failed to select forma de pago: ${formaPago} - skipping (may be conditional)`, error);
+      logger.warn(`⚠️ Fallo al seleccionar forma de pago: ${formaPago} - saltando (puede ser condicional)`, error);
     }
   }
 
   async selectTercerizar(value: string): Promise<void> {
-    logger.info(`Selecting tercerizar viajes: ${value}`);
+    logger.info(`Seleccionando tercerizar viajes: ${value}`);
     try {
       if (!(await this.isVisible(this.selectors.tercerizarButton))) return;
       await this.click(this.selectors.tercerizarButton, true);
@@ -197,16 +197,16 @@ export class TransportistaFormPage extends BasePage {
       const option = dropdownMenu.locator('.dropdown-item').getByText(value, { exact: true });
       await option.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Tercerizar viajes "${value}" selected`);
+      logger.info(`✅ Tercerizar viajes "${value}" seleccionado`);
     } catch (error) {
-      logger.error(`Failed to select tercerizar: ${value}`, error);
+      logger.error(`Fallo al seleccionar tercerizar: ${value}`, error);
       await this.takeScreenshot('select-tercerizar-error');
       throw error;
     }
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info('Clicking save button');
+    logger.info('Haciendo clic en el botón guardar');
     await this.click(this.selectors.btnGuardar);
   }
 
@@ -216,7 +216,7 @@ export class TransportistaFormPage extends BasePage {
       const url = this.page.url();
       return url.includes('/transportistas/index') || url.includes('/transportistas/ver') || url.includes('/transportistas/view');
     } catch (error) {
-      logger.error('Failed to check if form saved', error);
+      logger.error('Fallo al verificar si el formulario se guardó', error);
       return false;
     }
   }
@@ -243,7 +243,7 @@ export class TransportistaFormPage extends BasePage {
         // Close the dropdown before returning so the page state is clean
         await this.page.keyboard.press('Escape');
         await this.page.waitForTimeout(300);
-        logger.warn(`⚠️ No ${label} options available (count=${count})`);
+        logger.warn(`⚠️ No hay opciones de ${label} disponibles (count=${count})`);
         return { success: false };
       }
 
@@ -252,14 +252,14 @@ export class TransportistaFormPage extends BasePage {
       const text = await selected.textContent();
       await selected.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Random ${label} selected: ${text?.trim()}`);
+      logger.info(`✅ ${label} aleatorio seleccionado: ${text?.trim()}`);
       if (cascadeWaitMs > 0) await this.page.waitForTimeout(cascadeWaitMs);
       return { success: true, selectedText: text?.trim() ?? '' };
     } catch (error) {
       // Close dropdown if still open
       await this.page.keyboard.press('Escape').catch(() => { });
       await this.page.waitForTimeout(300);
-      logger.warn(`⚠️ Failed to select random ${label}`, error);
+      logger.warn(`⚠️ Fallo al seleccionar ${label} aleatorio`, error);
       return { success: false };
     }
   }
@@ -273,17 +273,17 @@ export class TransportistaFormPage extends BasePage {
    * with a different Región. Up to `maxRetries` total attempts.
    */
   async selectRandomLocationCascade(maxRetries = 5): Promise<void> {
-    logger.info(`🌍 Selecting random location (Región → Ciudad → Comuna), max ${maxRetries} attempts`);
+    logger.info(`🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx ${maxRetries} intentos`);
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      logger.info(`📍 Location attempt ${attempt}/${maxRetries}`);
+      logger.info(`📍 Intento de ubicación ${attempt}/${maxRetries}`);
 
       // Step 1: Select Región
       const region = await this.trySelectRandomFromDropdown(
         this.selectors.regionButton, 'región', 800,
       );
       if (!region.success) {
-        logger.error('❌ No region options available at all');
+        logger.error('❌ No hay opciones de región disponibles');
         await this.takeScreenshot('select-location-no-regions');
         throw new Error('No region options available');
       }
@@ -293,7 +293,7 @@ export class TransportistaFormPage extends BasePage {
         this.selectors.ciudadButton, 'ciudad', 800,
       );
       if (!ciudad.success) {
-        logger.warn(`⚠️ No ciudad options for región "${region.selectedText}", retrying with another región...`);
+        logger.warn(`⚠️ No hay opciones de ciudad para la región "${region.selectedText}", reintentando con otra región...`);
         continue;
       }
 
@@ -302,12 +302,12 @@ export class TransportistaFormPage extends BasePage {
         this.selectors.comunaButton, 'comuna',
       );
       if (!comuna.success) {
-        logger.warn(`⚠️ No comuna options for ciudad "${ciudad.selectedText}" (región: "${region.selectedText}"), retrying...`);
+        logger.warn(`⚠️ No hay opciones de comuna para la ciudad "${ciudad.selectedText}" (región: "${region.selectedText}"), reintentando...`);
         continue;
       }
 
       // Success!
-      logger.info(`✅ Location selected: ${region.selectedText} → ${ciudad.selectedText} → ${comuna.selectedText}`);
+      logger.info(`✅ Ubicación seleccionada: ${region.selectedText} → ${ciudad.selectedText} → ${comuna.selectedText}`);
       return;
     }
 
@@ -352,7 +352,7 @@ export class TransportistaFormPage extends BasePage {
     const invalidFields = this.page.locator(this.selectors.invalidField);
     const count = await invalidFields.count();
     if (count > 0) {
-      logger.warn(`⚠️ Found ${count} validation error(s) on form`);
+      logger.warn(`⚠️ Se encontraron ${count} error(es) de validación en el formulario`);
     }
     return count > 0;
   }

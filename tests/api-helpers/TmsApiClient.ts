@@ -32,7 +32,7 @@ export class TmsApiClient {
 
   async initialize(): Promise<void> {
 
-    logger.info(`✅ TmsApiClient initialized`);
+    logger.info(`✅ TmsApiClient inicializado`);
 
   }
 
@@ -76,7 +76,7 @@ export class TmsApiClient {
 
     if (normalizedCurrent !== normalizedExpected) {
 
-      logger.warn(`⚠️ RUT value mismatch - trying to fix. Got: ${currentValue}, Expected: ${value}`);
+      logger.warn(`⚠️ Diferencia en valor de RUT - intentando corregir. Obtenido: ${currentValue}, Esperado: ${value}`);
 
       // Intentar agregar el último caracter si falta
 
@@ -88,7 +88,7 @@ export class TmsApiClient {
 
         await this.page.waitForTimeout(200);
 
-        logger.info(`✅ Added missing character: ${lastChar}`);
+        logger.info(`✅ Carácter faltante agregado: ${lastChar}`);
 
       }
 
@@ -104,7 +104,7 @@ export class TmsApiClient {
     * FIX FIREFOX: Usa .fill('') en lugar de triple clic para limpiar.
     */
   private async typeRutSlowly(selector: string, rutValue: string): Promise<void> {
-    logger.info(`🔑 typeRutSlowly: Writing RUT [${rutValue}] on ${selector}`);
+    logger.info(`🔑 typeRutSlowly: Escribiendo RUT [${rutValue}] en ${selector}`);
     const locator = this.page.locator(selector);
 
     const normalize = (val: string) => val.toUpperCase().replace(/[^0-9K]/g, '');
@@ -136,12 +136,12 @@ export class TmsApiClient {
     let normalizedCurrent = normalize(currentValue);
 
     if (normalizedCurrent === normalizedExpected) {
-      logger.info(`✅ RUT verified (attempt 1): ${currentValue}`);
+      logger.info(`✅ RUT verificado (intento 1): ${currentValue}`);
       return;
     }
 
     // --- Intento 2: Retry más lento ---
-    logger.warn(`⚠️ RUT mismatch (attempt 1). Got: [${currentValue}], Expected: [${normalizedExpected}]. Retrying slower...`);
+    logger.warn(`⚠️ Diferencia en RUT (intento 1). Obtenido: [${currentValue}], Esperado: [${normalizedExpected}]. Reintentando más lento...`);
 
     await locator.fill(''); // FIX: Limpieza segura nuevamente
     await this.page.waitForTimeout(200);
@@ -154,12 +154,12 @@ export class TmsApiClient {
     normalizedCurrent = normalize(currentValue);
 
     if (normalizedCurrent === normalizedExpected) {
-      logger.info(`✅ RUT verified (attempt 2): ${currentValue}`);
+      logger.info(`✅ RUT verificado (intento 2): ${currentValue}`);
       return;
     }
 
     // --- Intento 3: Fallback JavaScript (Inyección Directa) ---
-    logger.warn(`⚠️ RUT mismatch (attempt 2). Using JS fallback...`);
+    logger.warn(`⚠️ Diferencia en RUT (intento 2). Usando fallback de JS...`);
     const tmsFormatted = formatTmsRut(rutBody, verificationDigit);
 
     await this.page.evaluate(
@@ -186,18 +186,18 @@ export class TmsApiClient {
     normalizedCurrent = normalize(currentValue);
 
     if (normalizedCurrent === normalizedExpected) {
-      logger.info(`✅ RUT verified (JS fallback): ${currentValue}`);
+      logger.info(`✅ RUT verificado (JS fallback): ${currentValue}`);
       return;
     }
 
-    logger.error(`❌ RUT validation FAILED. Final: [${currentValue}], Expected: [${rutValue}]`);
+    logger.error(`❌ Validación de RUT FALLIDA. Final: [${currentValue}], Esperado: [${rutValue}]`);
   }
 
   // --- 1. TRANSPORTISTA ---
   async createTransportista(nombre: string, documento: string): Promise<string> {
     const rut = documento; // Use the provided documento for form filling and later search
 
-    logger.info(`🚀 UI: Creating Transportista [${nombre}] RUT: [${rut}]`);
+    logger.info(`🚀 UI: Creando Transportista [${nombre}] RUT: [${rut}]`);
 
     await this.page.goto(`${this.baseUrl}/transportistas/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -222,7 +222,7 @@ export class TmsApiClient {
     await this.page.waitForTimeout(500);
 
     // --- GUARDADO ROBUSTO (JS INJECTION) ---
-    logger.info('💾 Saving Transportista via JS Injection...');
+    logger.info('💾 Guardando Transportista vía Inyección JS...');
 
     await Promise.all([
       this.page.waitForNavigation({ waitUntil: 'networkidle' }),
@@ -241,21 +241,21 @@ export class TmsApiClient {
       })
     ]);
 
-    logger.info(`✅ Transportista [${nombre}] created successfully`);
+    logger.info(`✅ Transportista [${nombre}] creado exitosamente`);
 
     // --- EXTRACCIÓN DE ID ---
     let id = '0';
     let currentUrl = this.page.url();
-    logger.info(`📍 URL after save: ${currentUrl}`);
+    logger.info(`📍 URL después de guardar: ${currentUrl}`);
 
     // 1. Intentar extraer de la URL directa (ej: /view/123)
     let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
 
     if (idMatch) {
       id = idMatch[1];
-      logger.info(`✅ Transportista ID extracted from URL: ${id}`);
+      logger.info(`✅ ID de Transportista extraído de la URL: ${id}`);
     } else {
-      logger.info('⚠️ Redirected to Index. Executing Grid Rescue...');
+      logger.info('⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla...');
       let foundViaRut = false;
 
       // Navigate to index to ensure we are on the grid page
@@ -263,7 +263,7 @@ export class TmsApiClient {
       await this.page.waitForTimeout(2000); // Give time for grid to load
 
       // PRIMARY STRATEGY: Search by RUT (Documento)
-      logger.info(`🔍 Searching by RUT: ${documento}`);
+      logger.info(`🔍 Buscando por RUT: ${documento}`);
       const rutFilterInput = this.page.locator('input[name*="[documento]"]')
         .or(this.page.locator('input[name*="[rut]"]'))
         .or(this.page.locator('thead th:has-text("RUT") + th input, thead input').first())
@@ -282,7 +282,7 @@ export class TmsApiClient {
           if (dataKey) {
             id = dataKey;
             foundViaRut = true;
-            logger.info(`✅ Rescued ID via RUT search (data-key): ${id}`);
+            logger.info(`✅ ID rescatado vía búsqueda por RUT (data-key): ${id}`);
           } else {
             const actionLink = rutRow.locator('a[href*="/ver/"], a[href*="/view/"], a[href*="/editar/"]').first();
             if (await actionLink.count() > 0) {
@@ -291,7 +291,7 @@ export class TmsApiClient {
               if (match) {
                 id = match[1];
                 foundViaRut = true;
-                logger.info(`✅ Rescued ID via RUT search (link): ${id}`);
+                logger.info(`✅ ID rescatado vía búsqueda por RUT (link): ${id}`);
               }
             }
           }
@@ -300,10 +300,10 @@ export class TmsApiClient {
 
       // FALLBACK STRATEGY: Search by Name (if RUT search fails)
       if (!foundViaRut) {
-        logger.warn('⚠️ RUT search failed, falling back to name-based search...');
+        logger.warn('⚠️ La búsqueda por RUT falló, recurriendo a la búsqueda por nombre...');
         const searchInput = this.page.locator('#search');
         await searchInput.fill(nombre);
-        logger.info(`🔎 Filled search with: ${nombre}`);
+        logger.info(`🔎 Búsqueda completada con: ${nombre}`);
 
         // FIX FIREFOX: Use JS click on #buscar instead of getByRole which fails in Firefox
         await this.page.evaluate(() => {
@@ -319,17 +319,17 @@ export class TmsApiClient {
           const dataKey = await row.getAttribute('data-key');
           if (dataKey) {
             id = dataKey;
-            logger.info(`✅ Transportista ID from data-key: ${id}`);
+            logger.info(`✅ ID de Transportista desde data-key: ${id}`);
           }
         } else {
-          logger.info(`🔎 Trying alternative search in table...`);
+          logger.info(`🔎 Probando búsqueda alternativa en la tabla...`);
           const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
 
           if (await anyRow.count() > 0) {
             const dataKey = await anyRow.getAttribute('data-key');
             if (dataKey) {
               id = dataKey;
-              logger.info(`✅ Transportista ID from fallback data-key: ${id}`);
+              logger.info(`✅ ID de Transportista desde data-key alternativo: ${id}`);
             } else {
               const link = anyRow.locator('a[href*="/transportistas/"]').first();
               if (await link.count() > 0) {
@@ -337,19 +337,19 @@ export class TmsApiClient {
                 const match = href?.match(/\/(\d+)/);
                 if (match) {
                   id = match[1];
-                  logger.info(`✅ Transportista ID from link: ${id}`);
+                  logger.info(`✅ ID de Transportista desde el link: ${id}`);
                 }
               }
             }
           } else {
-            logger.warn(`⚠️ No row found for Transportista: ${nombre}`);
+            logger.warn(`⚠️ No se encontró fila para el Transportista: ${nombre}`);
           }
         }
       }
     }
 
     if (id === '0') {
-      logger.error(`❌ Could not extract Transportista ID for: ${nombre}`);
+      logger.error(`❌ No se pudo extraer el ID del Transportista para: ${nombre}`);
       throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
     }
 
@@ -361,7 +361,7 @@ export class TmsApiClient {
   // --- 2. CLIENTE ---
   async createCliente(nombre: string): Promise<string> {
     const rut = generateValidChileanRUT();
-    logger.info(`🚀 UI: Creating Cliente [${nombre}] RUT: [${rut}]`);
+    logger.info(`🚀 UI: Creando Cliente [${nombre}] RUT: [${rut}]`);
 
     await this.page.goto(`${this.baseUrl}/clientes/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -402,7 +402,7 @@ export class TmsApiClient {
 
     // --- Gestión de Polígonos (CRITICAL for Origen/Destino in Viajes) ---
     // CORRECTED: data-id is "drop_zones" NOT "poligono"
-    logger.info('📍 Selecting Polígonos (drop_zones)...');
+    logger.info('📍 Seleccionando Polígonos (drop_zones)...');
     const poligonosBtn = this.page.locator('button[data-id="drop_zones"]').first();
 
     if (await poligonosBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -414,11 +414,11 @@ export class TmsApiClient {
       const selectAllBtn = this.page.locator('.dropdown-menu.show button.bs-select-all').first();
       if (await selectAllBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
         await selectAllBtn.evaluate(el => (el as HTMLElement).click());
-        logger.info('✅ Polígonos: Seleccionar Todos clicked');
+        logger.info('✅ Polígonos: Seleccionar Todos clickeado');
         await this.page.waitForTimeout(500);
       } else {
         // Fallback: use JS to select all options
-        logger.warn('⚠️ Seleccionar Todos button not found, using JS fallback...');
+        logger.warn('⚠️ Botón Seleccionar Todos no encontrado, usando fallback de JS...');
         await this.page.evaluate(() => {
           const select = document.getElementById('drop_zones') as HTMLSelectElement;
           if (select) {
@@ -431,14 +431,14 @@ export class TmsApiClient {
             }
           }
         });
-        logger.info('✅ Polígonos: All selected via JS');
+        logger.info('✅ Polígonos: Todos seleccionados vía JS');
       }
 
       // Close dropdown
       await this.page.keyboard.press('Escape');
       await this.page.waitForTimeout(300);
     } else {
-      logger.warn('⚠️ Polígonos dropdown button not visible');
+      logger.warn('⚠️ Dropdown de polígonos no visible');
     }
 
     // --- GUARDADO ---
@@ -460,26 +460,26 @@ export class TmsApiClient {
   private async extractIdAfterSave(nombre: string, entityLabel: string): Promise<string> {
     let id = '0';
     let currentUrl = this.page.url();
-    logger.info(`📍 URL after save (${entityLabel}): ${currentUrl}`);
+    logger.info(`📍 URL después de guardar (${entityLabel}): ${currentUrl}`);
 
     // 1. Intentar extraer de la URL directa (ej: /view/123)
     let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
     if (idMatch) {
       id = idMatch[1];
-      logger.info(`✅ ${entityLabel} ID extracted from URL: ${id}`);
+      logger.info(`✅ ${entityLabel} ID extraído de la URL: ${id}`);
       return id;
     }
 
     // 2. Si no redirigió, usar el buscador de la grilla
-    logger.info(`🔍 Using search filter to find ${entityLabel}: ${nombre}`);
+    logger.info(`🔍 Usando filtro de búsqueda para encontrar ${entityLabel}: ${nombre}`);
     await this.page.waitForTimeout(1000);
 
     const searchInput = this.page.locator('#search');
     await searchInput.fill(nombre);
-    logger.info(`🔎 Filled search with: ${nombre}`);
+    logger.info(`🔎 Búsqueda completada con: ${nombre}`);
 
     // CORRECCIÓN FIREFOX: Usar Enter en el input + clickViaJS + Promise.all
-    logger.info(`🔎 Triggering search with Enter and Buscar click...`)
+    logger.info(`🔎 Activando búsqueda con Enter y clic en Buscar...`)
 
     await Promise.all([
       this.page.waitForLoadState('domcontentloaded').catch(() => { }),
@@ -497,20 +497,20 @@ export class TmsApiClient {
       const dataKey = await row.getAttribute('data-key');
       if (dataKey) {
         id = dataKey;
-        logger.info(`✅ ${entityLabel} ID from data-key: ${id}`);
+        logger.info(`✅ ${entityLabel} ID desde data-key: ${id}`);
         return id;
       }
     }
 
     // 4. Fallback: Buscar cualquier fila que tenga el texto
-    logger.info(`🔎 Trying alternative search in table...`);
+    logger.info(`🔎 Probando búsqueda alternativa en la tabla...`);
     const anyRow = this.page.locator('table tbody tr').filter({ hasText: nombre }).first();
 
     if (await anyRow.count() > 0) {
       const dataKey = await anyRow.getAttribute('data-key');
       if (dataKey) {
         id = dataKey;
-        logger.info(`✅ ${entityLabel} ID from fallback data-key: ${id}`);
+        logger.info(`✅ ${entityLabel} ID desde el data-key alternativo: ${id}`);
         return id;
       }
 
@@ -521,14 +521,14 @@ export class TmsApiClient {
         const match = href?.match(/\/(\d+)/);
         if (match) {
           id = match[1];
-          logger.info(`✅ ${entityLabel} ID from link: ${id}`);
+          logger.info(`✅ ${entityLabel} ID desde el link: ${id}`);
           return id;
         }
       }
     }
 
     if (id === '0') {
-      logger.warn(`⚠️ Could not extract ${entityLabel} ID initially for: ${nombre}. Attempting Grid Rescue...`);
+      logger.warn(`⚠️ No se pudo extraer el ID de ${entityLabel} inicialmente para: ${nombre}. Intentando Rescate de Grilla...`);
       // Grid Rescue: navigate to index page
       const indexUrl = `${this.baseUrl}/${entityLabel.toLowerCase()}s`; // Assumes plural standard (e.g /clientes, /vehiculos)
       await this.page.goto(indexUrl);
@@ -549,7 +549,7 @@ export class TmsApiClient {
           const dataKey = await rescueRow.getAttribute('data-key');
           if (dataKey) {
             id = dataKey;
-            logger.info(`✅ ${entityLabel} ID from Grid Rescue data-key: ${id}`);
+            logger.info(`✅ ${entityLabel} ID desde data-key de Rescate de Grilla: ${id}`);
             return id;
           }
           // Try links
@@ -559,7 +559,7 @@ export class TmsApiClient {
             const match = href?.match(/\/(\d+)/);
             if (match) {
               id = match[1];
-              logger.info(`✅ ${entityLabel} ID from Grid Rescue link: ${id}`);
+              logger.info(`✅ ${entityLabel} ID desde link de Rescate de Grilla: ${id}`);
               return id;
             }
           }
@@ -568,7 +568,7 @@ export class TmsApiClient {
     }
 
     if (id === '0') {
-      logger.error(`❌ Could not extract ${entityLabel} ID for: ${nombre}`);
+      logger.error(`❌ No se pudo extraer el ID de ${entityLabel} para: ${nombre}`);
       throw new Error(`Failed to extract ${entityLabel} ID for: ${nombre}`);
     }
 
@@ -608,7 +608,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`🚛 UI: Creating Vehículo [${patente}] for Transportista: ${transportistaNombre}`);
+    logger.info(`🚛 UI: Creando Vehículo [${patente}] para Transportista: ${transportistaNombre}`);
 
 
 
@@ -683,7 +683,7 @@ export class TmsApiClient {
 
 
 
-    logger.info('🚛 Selecting Tipo Vehículo: TRACTO');
+    logger.info('🚛 Seleccionando Tipo Vehículo: TRACTO');
 
 
 
@@ -738,7 +738,7 @@ export class TmsApiClient {
 
 
 
-    logger.info('📦 Selecting Capacidad: 3 KG');
+    logger.info('📦 Seleccionando Capacidad: 3 KG');
 
 
 
@@ -798,7 +798,7 @@ export class TmsApiClient {
 
 
 
-      logger.warn('⚠️ Capacidad dropdown not visible - skipping');
+      logger.warn('⚠️ Dropdown de capacidad no visible - omitiendo');
 
 
 
@@ -858,7 +858,7 @@ export class TmsApiClient {
 
     const clave = `pass${Math.floor(Math.random() * 100000)}`;
 
-    logger.info(`👨‍✈️ UI: Creating Conductor [${nombre}] for Transportista: ${transportistaNombre}`);
+    logger.info(`👨‍✈️ UI: Creando Conductor [${nombre}] para Transportista: ${transportistaNombre}`);
 
     await this.page.goto(`${this.baseUrl}/conductores/crear`);
 
@@ -904,7 +904,7 @@ export class TmsApiClient {
 
     const fechaStr = `${dia}-${mes}-${anio}`;
 
-    logger.info(`📅 Setting fecha vencimiento licencia: ${fechaStr}`);
+    logger.info(`📅 Estableciendo fecha vencimiento licencia: ${fechaStr}`);
 
 
     const fechaInput = this.page.locator('#conductores-fecha_vencimiento_licencia, input[name="Conductores[fecha_vencimiento_licencia]"]').first();
@@ -961,16 +961,16 @@ export class TmsApiClient {
 
     if (res[0].ok()) {
       logger.info(`✅ Conductor creado: ${nombre} ${apellido}`);
-      entityTracker.register({ 
-        type: 'Conductor', 
-        name: nombre, 
-        apellido: apellido, 
-        asociado: transportistaNombre 
+      entityTracker.register({
+        type: 'Conductor',
+        name: nombre,
+        apellido: apellido,
+        asociado: transportistaNombre
       });
       return nombre;
     } else {
       const currentUrl = this.page.url();
-      logger.info(`⚠️ Conductor form submitted (URL: ${currentUrl})`);
+      logger.info(`⚠️ Formulario de Conductor enviado (URL: ${currentUrl})`);
       throw new Error(`Failed to create Conductor. Status: ${res[0].status()}`);
     }
   }
@@ -1016,7 +1016,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`📝 Creating contract [${nro}] tipo=${tipoVal === '1' ? 'COSTO' : 'VENTA'} for: ${entityName}`);
+    logger.info(`📝 Creando contrato [${nro}] tipo=${tipoVal === '1' ? 'COSTO' : 'VENTA'} para: ${entityName}`);
 
 
 
@@ -1040,17 +1040,17 @@ export class TmsApiClient {
 
 
 
-    logger.info(`📋 Setting contract type to: ${tipoVal === '1' ? 'COSTO' : 'VENTA'}`);
+    logger.info(`📋 Estableciendo tipo de contrato a: ${tipoVal === '1' ? 'COSTO' : 'VENTA'}`);
 
 
 
-    logger.info('⏳ Waiting for form to reconfigure...');
+    logger.info('⏳ Esperando que el formulario se reconfigure...');
     await Promise.all([
       this.page.waitForResponse(
         r => r.url().includes('rendersubview') && r.status() === 200,
         { timeout: 15000 }
       ).catch(() => {
-        logger.warn('⚠️ rendersubview response not detected, using fallback wait');
+        logger.warn('⚠️ Respuesta rendersubview no detectada, usando espera de respaldo');
       }),
       this.page.evaluate((val: string) => {
         const $ = (window as any).jQuery;
@@ -1081,7 +1081,7 @@ export class TmsApiClient {
 
 
 
-      logger.info('📋 Setting subtipo for VENTA contract...');
+      logger.info('📋 Estableciendo subtipo para contrato de VENTA...');
 
 
 
@@ -1089,7 +1089,7 @@ export class TmsApiClient {
 
 
 
-        logger.warn('⚠️ select#tipo not found, skipping subtipo');
+        logger.warn('⚠️ select#tipo no encontrado, omitiendo subtipo');
 
 
 
@@ -1145,7 +1145,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`📋 Selecting ${tipoVal === '1' ? 'Transportista' : 'Cliente'}: "${entityName}"`);
+    logger.info(`📋 Seleccionando ${tipoVal === '1' ? 'Transportista' : 'Cliente'}: "${entityName}"`);
 
 
 
@@ -1253,7 +1253,7 @@ export class TmsApiClient {
 
 
 
-      logger.error(`❌ Entity selection failed: ${selectionResult.msg}`);
+      logger.error(`❌ Selección de entidad fallida: ${selectionResult.msg}`);
 
 
 
@@ -1265,7 +1265,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`✅ Selected: ${selectionResult.text} (value: ${selectionResult.value})`);
+    logger.info(`✅ Seleccionado: ${selectionResult.text} (valor: ${selectionResult.value})`);
 
 
 
@@ -1278,7 +1278,7 @@ export class TmsApiClient {
     // 4.5 [DEMO ONLY] Set Fecha vencimiento + Unidad de negocio
     const isDemo = process.env.ENV === 'DEMO';
     if (isDemo) {
-      logger.info('📅 [DEMO] Setting Fecha vencimiento via JS con Eventos...');
+      logger.info('📅 [DEMO] Estableciendo Fecha vencimiento vía JS con Eventos...');
       await this.page.evaluate(() => {
         const dp = document.getElementById('contrato-fecha_vencimiento') as HTMLInputElement;
         if (dp) {
@@ -1289,7 +1289,7 @@ export class TmsApiClient {
         }
       });
 
-      logger.info('🏢 [DEMO] Selecting Unidad de negocio: Defecto...');
+      logger.info('🏢 [DEMO] Seleccionando Unidad de negocio: Defecto...');
       await this.page.evaluate(() => {
         const selectId = 'drop_business_unit';
         const select = document.getElementById(selectId) as HTMLSelectElement;
@@ -1309,7 +1309,7 @@ export class TmsApiClient {
     }
 
     // 5. Save with navigation wait
-    logger.info('💾 Saving contract header...');
+    logger.info('💾 Guardando encabezado del contrato...');
 
     // FIX FIREFOX: Limpiar modal-backdrop residuales que bloquean page.click() en Firefox
     await this.page.evaluate(() => {
@@ -1326,7 +1326,7 @@ export class TmsApiClient {
 
 
 
-        logger.warn('⚠️ Navigation timeout, checking URL...');
+        logger.warn('⚠️ Tiempo de espera de navegación agotado, verificando URL...');
 
 
 
@@ -1361,7 +1361,7 @@ export class TmsApiClient {
 
     if (currentUrl.includes('/editar/')) {
 
-      logger.info(`✅ Contract header saved! Adding routes...`);
+      logger.info(`✅ ¡Encabezado del contrato guardado! Añadiendo rutas...`);
       entityTracker.register({
         type: tipoVal === '1' ? 'Contrato Costo' : 'Contrato Venta',
         name: nro
@@ -1369,7 +1369,7 @@ export class TmsApiClient {
       await this.addRouteAndTarifas('20000', '50000');
 
     } else if (currentUrl.includes('/crear')) {
-      logger.warn(`⚠️ Still on create page. URL: ${currentUrl}. Extrayendo campos con error...`);
+      logger.warn(`⚠️ Aún en la página de creación. URL: ${currentUrl}. Extrayendo campos con error...`);
 
       const errorFields = await this.page.evaluate(() => {
         const errorElements = document.querySelectorAll('.has-error, .is-invalid');
@@ -1387,14 +1387,14 @@ export class TmsApiClient {
         return fields;
       });
 
-      logger.error(`❌ Validation error fields: ${errorFields.join(', ')}`);
+      logger.error(`❌ Campos con error de validación: ${errorFields.join(', ')}`);
       await this.page.screenshot({ path: `reports/screenshots/stuck-contrato-${Date.now()}.png`, fullPage: true });
 
       if (errorFields.length > 0) {
         throw new Error(`Contract save failed. Invalid fields: ${errorFields.join(', ')}`);
       }
     } else {
-      logger.info(`⚠️ Contract form submitted (URL: ${currentUrl})`);
+      logger.info(`⚠️ Formulario de contrato enviado (URL: ${currentUrl})`);
     }
 
 
@@ -1406,7 +1406,7 @@ export class TmsApiClient {
     const routeId = isDemo ? '47' : '715';
     const routeCargoId = isDemo ? '47_6' : '715_19';
 
-    logger.info(`🛣️ Adding Route ${routeId} and Cargo ${routeCargoId} with SLOW tarifa entry...`);
+    logger.info(`🛣️ Añadiendo Ruta ${routeId} y Carga ${routeCargoId} con entrada de tarifa LENTA...`);
 
 
 
@@ -1478,7 +1478,7 @@ export class TmsApiClient {
 
 
 
-      logger.warn('⚠️ Modal did not open, retrying...');
+      logger.warn('⚠️ El modal no se abrió, reintentando...');
 
 
 
@@ -1508,13 +1508,13 @@ export class TmsApiClient {
     await btnPlusRoute.evaluate(el => (el as HTMLElement).click());
 
     // Wait for loading modal to disappear (CRITICAL: blocks all clicks)
-    logger.info('⏳ Waiting for loading modal to disappear...');
+    logger.info('⏳ Esperando que el modal de carga desaparezca...');
     try {
       await this.page.waitForSelector('#modalCargando', { state: 'hidden', timeout: 15000 });
-      logger.info('✅ Loading modal hidden');
+      logger.info('✅ Modal de carga oculto');
     } catch {
       // Fallback: force-hide via JS if still visible
-      logger.warn('⚠️ Loading modal timeout, forcing hide via JS...');
+      logger.warn('⚠️ Tiempo de espera del modal de carga agotado, forzando cierre vía JS...');
       await this.page.evaluate(() => {
         const loadingModal = document.getElementById('modalCargando');
         if (loadingModal) {
@@ -1564,11 +1564,11 @@ export class TmsApiClient {
       if (icon) icon.click(); else (el as HTMLElement).click();
     });
     // Wait for loading modal after adding route tariff
-    logger.info('⏳ Waiting for loading modal after route tariff...');
+    logger.info('⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...');
     try {
       await this.page.waitForSelector('#modalCargando', { state: 'hidden', timeout: 15000 });
     } catch {
-      logger.warn('⚠️ Loading modal timeout, forcing hide...');
+      logger.warn('⚠️ Tiempo de espera del modal de carga agotado, forzando cierre...');
       await this.page.evaluate(() => {
         const m = document.getElementById('modalCargando');
         if (m) { m.classList.remove('show'); m.style.display = 'none'; }
@@ -1610,7 +1610,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`💰 Filling tarifa conductor SLOWLY: ${tarifaConductor}`);
+    logger.info(`💰 Llenando tarifa conductor LENTAMENTE: ${tarifaConductor}`);
 
 
 
@@ -1622,7 +1622,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`💰 Filling tarifa viaje SLOWLY: ${tarifaViaje}`);
+    logger.info(`💰 Llenando tarifa viaje LENTAMENTE: ${tarifaViaje}`);
 
 
 
@@ -1642,7 +1642,7 @@ export class TmsApiClient {
 
 
 
-    logger.info('💾 Saving contract with routes...');
+    logger.info('💾 Guardando contrato con rutas...');
 
 
 
@@ -1667,21 +1667,9 @@ export class TmsApiClient {
 
 
     if (finalUrl.includes('/editar/') || finalUrl.includes('/index')) {
-
-
-
-      logger.info('✅ Contract with routes saved successfully');
-
-
-
+      logger.info('✅ Contrato con rutas guardado exitosamente');
     } else {
-
-
-
-      logger.warn(`⚠️ Contract save status uncertain (URL: ${finalUrl})`);
-
-
-
+      logger.warn(`⚠️ Estado del guardado del contrato incierto (URL: ${finalUrl})`);
     }
 
 
@@ -1710,14 +1698,14 @@ export class TmsApiClient {
 
   // --- 6. PLANIFICAR VIAJE (FIX CARGA & AUTO-HEALING) ---
   async createViaje(clienteNombre: string, nroViaje: string) {
-    logger.info(`🚚 UI: Creating Viaje [${nroViaje}] for Cliente [${clienteNombre}]`);
+    logger.info(`🚚 UI: Creando Viaje [${nroViaje}] para Cliente [${clienteNombre}]`);
 
     await this.page.goto(`${this.baseUrl}/viajes/crear`);
     await this.page.waitForLoadState('networkidle');
 
     // --- FUNCIÓN HELPER: Llenar Formulario (Reutilizable para Auto-Healing) ---
     const fillForm = async (isRetry = false) => {
-      logger.info(`📝 Filling Form (Retry: ${isRetry})...`);
+      logger.info(`📝 Llenando formulario (Reintento: ${isRetry})...`);
 
       // 1. Campos de Texto
       await this.page.fill('#viajes-nro_viaje', nroViaje);
@@ -1832,7 +1820,7 @@ export class TmsApiClient {
     // FIX QA: Both QA and Demo use 'viajes-carga_id' (not 'viajes-codigo_carga_id')
     const cargaSelectIdFinal = 'viajes-carga_id';
 
-    logger.info(`📦 SELECCIONANDO CARGA AL FINAL (Polling DOM for ${cargaSelectIdFinal} to have option ${codigoCargaTextFinal})...`);
+    logger.info(`📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que ${cargaSelectIdFinal} tenga la opción ${codigoCargaTextFinal})...`);
 
     // Esperar explícitamente a que el AJAX traiga la opción de Carga
     await this.page.waitForFunction(({ id, text }) => {
@@ -1860,7 +1848,7 @@ export class TmsApiClient {
         return `${id}="${el.value}"`;
       }).join(' | ');
     });
-    logger.info(`📋 Form state before save: ${formDiag}`);
+    logger.info(`📋 Estado del formulario antes de guardar: ${formDiag}`);
 
     // 14. PRE-GUARDAR: Limpiar modales/backdrops residuales que puedan interceptar el clic
     await this.page.evaluate(() => {
@@ -1875,7 +1863,7 @@ export class TmsApiClient {
     await this.page.waitForTimeout(500);
 
     // 15. GUARDAR - con verificación de que el botón existe y es clickeable
-    logger.info('💾 Clicking Guardar...');
+    logger.info('💾 Haciendo clic en Guardar...');
     const guardarBtn = this.page.locator('#btn_guardar_form');
     await guardarBtn.waitFor({ state: 'visible', timeout: 10000 });
 
@@ -1894,7 +1882,7 @@ export class TmsApiClient {
       this.page.waitForResponse(
         (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
         { timeout: 15000 }
-      ).catch(() => logger.warn('⚠️ No response captured after Guardar click')),
+      ).catch(() => logger.warn('⚠️ No se capturó respuesta después de hacer clic en Guardar')),
       guardarBtn.evaluate(el => (el as HTMLElement).click()),
     ]);
 
@@ -2001,7 +1989,7 @@ export class TmsApiClient {
   // --- 7. ASIGNAR VIAJE (ORDENADO: Selección -> Espera -> Healer -> Vehículo) ---
   async assignViaje(nroViaje: string, transportistaNombre: string, patenteVehiculo: string, nombreConductor: string) {
 
-    logger.info(`🚚 UI: Assigning Viaje [${nroViaje}]`);
+    logger.info(`🚚 UI: Asignando Viaje [${nroViaje}]`);
 
 
 
@@ -2043,7 +2031,7 @@ export class TmsApiClient {
 
     // Damos tiempo a que Bermann cargue los vehículos y termine de "temblar"
 
-    logger.info('⏳ Waiting 4s for vehicle cascade stabilization...');
+    logger.info('⏳ Esperando 4s para la estabilización de la cascada de vehículos...');
 
     await this.page.locator('body').click(); // Blur para asegurar evento
 
@@ -2061,7 +2049,7 @@ export class TmsApiClient {
 
     if (!currentTrans?.toUpperCase().includes(transportistaNombre.toUpperCase())) {
 
-      logger.warn(`⚠️ Transportista reset detected! Re-applying value...`);
+      logger.warn(`⚠️ ¡Se detectó un reseteo del transportista! Reaplicando valor...`);
 
 
 
@@ -2079,7 +2067,7 @@ export class TmsApiClient {
 
     } else {
 
-      logger.info('✅ Transportista is stable.');
+      logger.info('✅ El transportista está estable.');
 
     }
 
@@ -2095,7 +2083,7 @@ export class TmsApiClient {
 
     // B.1 Esperar a que los datos existan (usando el ID correcto)
 
-    logger.info(`⏳ Waiting for Vehicle data in #viajes-vehiculo_uno_id...`);
+    logger.info(`⏳ Esperando datos del vehículo en #viajes-vehiculo_uno_id...`);
 
     try {
 
@@ -2109,11 +2097,11 @@ export class TmsApiClient {
 
       }, null, { timeout: 15000 });
 
-      logger.info('✅ Vehicle data loaded!');
+      logger.info('✅ ¡Datos del vehículo cargados!');
 
     } catch (e) {
 
-      logger.warn('⚠️ Timeout waiting for vehicle data. Attempting selection anyway...');
+      logger.warn('⚠️ Tiempo de espera agotado esperando los datos del vehículo. Intentando selección de todas formas...');
 
     }
 
@@ -2121,7 +2109,7 @@ export class TmsApiClient {
 
     // B.2 Selección por Inyección JS (ID Corregido)
 
-    logger.info(`🚛 Selecting Vehicle via JS: ${patenteVehiculo}`);
+    logger.info(`🚛 Seleccionando vehículo vía JS: ${patenteVehiculo}`);
 
     await this.forceSelectByText('viajes-vehiculo_uno_id', patenteVehiculo);
 
@@ -2141,7 +2129,7 @@ export class TmsApiClient {
 
     // C.1 Selección Conductor
 
-    logger.info(`👨‍✈️ Selecting Conductor: ${nombreConductor}`);
+    logger.info(`👨‍✈️ Seleccionando Conductor: ${nombreConductor}`);
 
     await this.forceSelectByText('viajes-conductor_id', nombreConductor);
 
@@ -2151,7 +2139,7 @@ export class TmsApiClient {
 
     // C.2 Guardar
 
-    logger.info('💾 Clicking Guardar...');
+    logger.info('💾 Haciendo clic en Guardar...');
 
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -2167,7 +2155,7 @@ export class TmsApiClient {
 
     if (await modal.isVisible({ timeout: 3000 }).catch(() => false)) {
 
-      logger.info('⚠️ Accepting confirmation modal...');
+      logger.info('⚠️ Aceptando modal de confirmación...');
 
       await this.page.locator('button:has-text("Aceptar")').first().evaluate(el => (el as HTMLElement).click());
 
@@ -2176,9 +2164,9 @@ export class TmsApiClient {
 
 
     // ── FIX: Verificación por búsqueda en grid de /viajes/asignar ──
-    logger.info('🔍 Verifying assignment: waiting for redirect to /viajes/asignar...');
+    logger.info('🔍 Verificando asignación: esperando redirección a /viajes/asignar...');
     await this.verifyAssignmentInGrid(nroViaje);
-    logger.info(`✅ Viaje [${nroViaje}] assigned successfully`);
+    logger.info(`✅ Viaje [${nroViaje}] asignado exitosamente`);
 
   }
 
@@ -2190,16 +2178,16 @@ export class TmsApiClient {
     // 1. Esperar redirect a /viajes/asignar
     await this.page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
     await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
-      logger.warn('⚠️ networkidle timeout post-redirect, continuando...');
+      logger.warn('⚠️ Tiempo de espera networkidle agotado post-redirección, continuando...');
     });
-    logger.info(`📍 Redirected to: ${this.page.url()}`);
+    logger.info(`📍 Redirigido a: ${this.page.url()}`);
 
     // 2. Buscar el viaje en el filtro
     const searchInput = this.page.locator('#search');
     await searchInput.waitFor({ state: 'visible', timeout: 10000 });
     await searchInput.fill(nroViaje);
     await searchInput.press('Enter');
-    logger.info(`🔎 Searching for trip: ${nroViaje}`);
+    logger.info(`🔎 Buscando viaje: ${nroViaje}`);
 
     // 3. Esperar actualización del grid
     await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
@@ -2306,7 +2294,7 @@ export class TmsApiClient {
 
 
 
-      logger.warn('⚠️ UI Selection glitch, ensuring with JS...');
+      logger.warn('⚠️ Fallo en la selección de la interfaz de usuario, asegurando con JS...');
 
 
 
@@ -2322,7 +2310,7 @@ export class TmsApiClient {
 
 
 
-    logger.info('💉 Ensuring value with JS Injection...');
+    logger.info('💉 Asegurando valor con inyección JS...');
 
 
 
@@ -2464,7 +2452,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`📋 Selecting ${fieldName}: "${textToSelect}"`);
+    logger.info(`📋 Seleccionando ${fieldName}: "${textToSelect}"`);
 
 
 
@@ -2560,7 +2548,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`✅ ${fieldName} selected`);
+    logger.info(`✅ ${fieldName} seleccionado`);
 
 
 

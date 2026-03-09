@@ -36,7 +36,7 @@ export class ClienteFormPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    logger.info("Navigating to Cliente creation page");
+    logger.info("Navegando a la página de creación de Cliente");
     await this.page.goto("/clientes/crear");
     await this.page.waitForLoadState("networkidle");
     const coreElement = this.page.locator(this.selectors.nombre);
@@ -44,37 +44,37 @@ export class ClienteFormPage extends BasePage {
   }
 
   async fillNombre(nombre: string): Promise<void> {
-    logger.info(`Filling nombre (razón social): ${nombre}`);
+    logger.info(`Completando nombre (razón social): ${nombre}`);
     await this.fill(this.selectors.nombre, nombre);
   }
 
   async fillRut(rut: string): Promise<void> {
-    logger.info(`Filling RUT: ${rut}`);
+    logger.info(`Completando RUT: ${rut}`);
     await this.fillRutWithVerify(this.selectors.rut, rut);
   }
 
   async fillNombreFantasia(nombreFantasia: string): Promise<void> {
-    logger.info(`Filling nombre fantasia: ${nombreFantasia}`);
+    logger.info(`Completando nombre fantasía: ${nombreFantasia}`);
     await this.fill(this.selectors.nombreFantasia, nombreFantasia);
   }
 
   async fillCalle(calle: string): Promise<void> {
-    logger.info(`Filling calle: ${calle}`);
+    logger.info(`Completando calle: ${calle}`);
     await this.fill(this.selectors.calle, calle);
   }
 
   async fillAltura(altura: string): Promise<void> {
-    logger.info(`Filling altura: ${altura}`);
+    logger.info(`Completando altura: ${altura}`);
     await this.fill(this.selectors.altura, altura);
   }
 
   async fillOtros(otros: string): Promise<void> {
-    logger.info(`Filling otros: ${otros}`);
+    logger.info(`Completando otros: ${otros}`);
     await this.fill(this.selectors.otros, otros);
   }
 
   async selectTipoCliente(tipo: string): Promise<void> {
-    logger.info(`Selecting tipo cliente: ${tipo}`);
+    logger.info(`Seleccionando tipo de cliente: ${tipo}`);
     try {
       if (!(await this.isVisible(this.selectors.tipoClienteButton))) return;
       await this.click(this.selectors.tipoClienteButton, true);
@@ -87,9 +87,9 @@ export class ClienteFormPage extends BasePage {
         .locator(".dropdown-item")
         .filter({ hasText: tipo });
       await option.evaluate((node: HTMLElement) => node.click());
-      logger.info(`✅ Tipo cliente "${tipo}" selected`);
+      logger.info(`✅ Tipo de cliente "${tipo}" seleccionado`);
     } catch (error) {
-      logger.error(`Failed to select tipo cliente: ${tipo}`, error);
+      logger.error(`Fallo al seleccionar tipo de cliente: ${tipo}`, error);
       await this.takeScreenshot("select-tipo-cliente-error");
       throw error;
     }
@@ -102,12 +102,12 @@ export class ClienteFormPage extends BasePage {
    * The proven approach: open dropdown → click bs-select-all → close dropdown.
    */
   async selectAllPoligonos(): Promise<void> {
-    logger.info('Selecting all Polígonos');
+    logger.info('Seleccionando todos los Polígonos');
     try {
       // Scroll the Polígonos button into view first
       const button = this.page.locator(this.selectors.poligonosButton);
       if (!(await button.isVisible({ timeout: 3000 }).catch(() => false))) {
-        logger.warn('⚠️ Polígonos dropdown not visible — skipping');
+        logger.warn('⚠️ Dropdown de Polígonos no visible — saltando');
         return;
       }
       await button.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
@@ -145,19 +145,19 @@ export class ClienteFormPage extends BasePage {
       });
 
       if (result.success) {
-        logger.info(`✅ All Polígonos selected: ${result.selected}/${result.total}`);
+        logger.info(`✅ Todos los Polígonos seleccionados: ${result.selected}/${result.total}`);
       } else {
-        logger.warn(`⚠️ Polígonos selection issue: ${result.error}`);
+        logger.warn(`⚠️ Problema en la selección de Polígonos: ${result.error}`);
       }
 
       await this.page.waitForTimeout(300);
     } catch (error) {
-      logger.warn('⚠️ Failed to select Polígonos — skipping gracefully', error);
+      logger.warn('⚠️ Fallo al seleccionar Polígonos — saltando con gracia', error);
     }
   }
 
   async clickGuardar(): Promise<void> {
-    logger.info("Clicking save button");
+    logger.info("Haciendo clic en el botón guardar");
     await this.click(this.selectors.btnGuardar);
   }
 
@@ -171,7 +171,7 @@ export class ClienteFormPage extends BasePage {
         url.includes("/clientes/view")
       );
     } catch (error) {
-      logger.error("Failed to check if form saved", error);
+      logger.error("Fallo al verificar si el formulario se guardó", error);
       return false;
     }
   }
@@ -200,7 +200,7 @@ export class ClienteFormPage extends BasePage {
         // Close the dropdown before returning so the page state is clean
         await this.page.keyboard.press("Escape");
         await this.page.waitForTimeout(300);
-        logger.warn(`⚠️ No ${label} options available (count=${count})`);
+        logger.warn(`⚠️ No hay opciones de ${label} disponibles (count=${count})`);
         return { success: false };
       }
 
@@ -209,14 +209,14 @@ export class ClienteFormPage extends BasePage {
       const text = await selected.textContent();
       await selected.evaluate((node: HTMLElement) => node.click());
 
-      logger.info(`✅ Random ${label} selected: ${text?.trim()}`);
+      logger.info(`✅ ${label} aleatorio seleccionado: ${text?.trim()}`);
       if (cascadeWaitMs > 0) await this.page.waitForTimeout(cascadeWaitMs);
       return { success: true, selectedText: text?.trim() ?? "" };
     } catch (error) {
       // Close dropdown if still open
       await this.page.keyboard.press("Escape").catch(() => { });
       await this.page.waitForTimeout(300);
-      logger.warn(`⚠️ Failed to select random ${label}`, error);
+      logger.warn(`⚠️ Fallo al seleccionar ${label} aleatorio`, error);
       return { success: false };
     }
   }
@@ -231,11 +231,11 @@ export class ClienteFormPage extends BasePage {
    */
   async selectRandomLocationCascade(maxRetries = 5): Promise<void> {
     logger.info(
-      `🌍 Selecting random location (Región → Ciudad → Comuna), max ${maxRetries} attempts`,
+      `🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx ${maxRetries} intentos`,
     );
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      logger.info(`📍 Location attempt ${attempt}/${maxRetries}`);
+      logger.info(`📍 Intento de ubicación ${attempt}/${maxRetries}`);
 
       // Step 1: Select Región
       const region = await this.trySelectRandomFromDropdown(
@@ -244,7 +244,7 @@ export class ClienteFormPage extends BasePage {
         800,
       );
       if (!region.success) {
-        logger.error("❌ No region options available at all");
+        logger.error("❌ No hay opciones de región disponibles");
         await this.takeScreenshot("select-location-no-regions");
         throw new Error("No region options available");
       }
@@ -257,7 +257,7 @@ export class ClienteFormPage extends BasePage {
       );
       if (!ciudad.success) {
         logger.warn(
-          `⚠️ No ciudad options for región "${region.selectedText}", retrying with another región...`,
+          `⚠️ No hay opciones de ciudad para la región "${region.selectedText}", reintentando con otra región...`,
         );
         continue;
       }
@@ -269,14 +269,14 @@ export class ClienteFormPage extends BasePage {
       );
       if (!comuna.success) {
         logger.warn(
-          `⚠️ No comuna options for ciudad "${ciudad.selectedText}" (región: "${region.selectedText}"), retrying...`,
+          `⚠️ No hay opciones de comuna para la ciudad "${ciudad.selectedText}" (región: "${region.selectedText}"), reintentando...`,
         );
         continue;
       }
 
       // Success!
       logger.info(
-        `✅ Location selected: ${region.selectedText} → ${ciudad.selectedText} → ${comuna.selectedText}`,
+        `✅ Ubicación seleccionada: ${region.selectedText} → ${ciudad.selectedText} → ${comuna.selectedText}`,
       );
       return;
     }
@@ -329,7 +329,7 @@ export class ClienteFormPage extends BasePage {
     const invalidFields = this.page.locator(this.selectors.invalidField);
     const count = await invalidFields.count();
     if (count > 0) {
-      logger.warn(`⚠️ Found ${count} validation error(s) on form`);
+      logger.warn(`⚠️ Se encontraron ${count} error(es) de validación en el formulario`);
     }
     return count > 0;
   }

@@ -39,7 +39,7 @@ export class ClienteFactory {
     const clientePage = new ClienteFormPage(this.page);
 
     try {
-      logger.info(`Creating cliente: ${clienteData.nombre}`);
+      logger.info(`Creando cliente: ${clienteData.nombre}`);
       await clientePage.navigate();
       await this.page.waitForTimeout(1000);
 
@@ -58,11 +58,11 @@ export class ClienteFactory {
       await this.page.goto('https://moveontruckqa.bermanntms.cl/clientes/index');
       await this.page.waitForTimeout(2000);
 
-      logger.info(`✅ Cliente created: ${clienteData.nombre}`);
+      logger.info(`✅ Cliente creado: ${clienteData.nombre}`);
       return clienteData;
 
     } catch (error) {
-      logger.error('Failed to create cliente', error);
+      logger.error('Fallo al crear cliente', error);
       await this.page.screenshot({ 
         path: `./reports/screenshots/create-cliente-error-${Date.now()}.png`,
         fullPage: true 

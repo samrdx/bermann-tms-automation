@@ -53,7 +53,7 @@ export class ConductorFactory {
     const conductorPage = new ConductorFormPage(this.page);
 
     try {
-      logger.info(`Creating conductor: ${conductorData.nombre} ${conductorData.apellido}`);
+      logger.info(`Creando conductor: ${conductorData.nombre} ${conductorData.apellido}`);
       await conductorPage.navigate();
       await this.page.waitForTimeout(1000);
 
@@ -77,7 +77,7 @@ export class ConductorFactory {
           await conductorPage.selectLicencia(conductorData.licencia);
           await this.page.waitForTimeout(300);
         } catch (error) {
-          logger.warn('Licencia field not available');
+          logger.warn('El campo de licencia no está disponible');
         }
       }
 
@@ -86,7 +86,7 @@ export class ConductorFactory {
           await conductorPage.setVencimientoLicencia(conductorData.vencimientoLicencia);
           await this.page.waitForTimeout(300);
         } catch (error) {
-          logger.warn('Vencimiento licencia field not available');
+          logger.warn('El campo de vencimiento de licencia no está disponible');
         }
       }
 
@@ -97,11 +97,11 @@ export class ConductorFactory {
       await this.page.goto('https://moveontruckqa.bermanntms.cl/conductores/index');
       await this.page.waitForTimeout(2000);
 
-      logger.info(`✅ Conductor created: ${conductorData.usuario}`);
+      logger.info(`✅ Conductor creado: ${conductorData.usuario}`);
       return conductorData;
 
     } catch (error) {
-      logger.error('Failed to create conductor', error);
+      logger.error('Fallo al crear conductor', error);
       await this.page.screenshot({ 
         path: `./reports/screenshots/create-conductor-error-${Date.now()}.png`,
         fullPage: true 

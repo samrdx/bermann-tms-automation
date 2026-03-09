@@ -150,7 +150,7 @@ export class ConductorFormPage extends BasePage {
     await this.page.waitForTimeout(500);
     const selectedText = await button.innerText();
     if (!selectedText.toLowerCase().includes(optionText.toLowerCase())) {
-      logger.warn(`⚠️ Dropdown UI didn't update to [${optionText}]. Current: [${selectedText}]. Forcing value via JS...`);
+      logger.warn(`⚠️ La UI del dropdown no se actualizó a [${optionText}]. Actual: [${selectedText}]. Forzando valor vía JS...`);
     }
 
     // ALWAYS force sync the underlying <select> to prevent validation errors like "Transportista ID no puede estar vacío"

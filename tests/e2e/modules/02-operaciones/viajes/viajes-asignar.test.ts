@@ -324,7 +324,7 @@ test.describe('[V02] Viajes - Asignar', () => {
 
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info('='.repeat(80));
-        logger.info('STEP 6.5: ASIGNAR VIAJE (LEGACY) COMPLETE!');
+        logger.info('PASO 6.5: ¡ASIGNAR VIAJE (LEGACY) COMPLETADO!');
         logger.info(`   Nro Viaje    : ${nroViaje}`);
         logger.info(`   Transportista: ${transNombre}`);
         logger.info(`   Vehículo     : ${patente}`);

@@ -27,7 +27,7 @@ export class VehiculoHelper {
         const patente = generatePatente();
         const muestra = `VEH-${Date.now()}`; // Unique identifier
 
-        logger.info(`🌱 UI Seeding Vehiculo: Patente [${patente}] for Transportista: ${transportistaName}`);
+        logger.info(`🌱 Sembrado UI Vehículo: Patente [${patente}] para Transportista: ${transportistaName}`);
 
         // 1. Navigate
         await vehiculoPage.navigate();
@@ -59,9 +59,9 @@ export class VehiculoHelper {
         // Verify success via URL redirection
         await page.waitForTimeout(2000);
         if (!await vehiculoPage.isFormSaved()) {
-            logger.warn('⚠️ Vehiculo save might have failed or redirection is slow.');
+            logger.warn('⚠️ Es posible que el guardado del vehículo haya fallado o la redirección sea lenta.');
         } else {
-            logger.info('✅ Vehiculo created successfully');
+            logger.info('✅ Vehículo creado exitosamente');
         }
 
         return {

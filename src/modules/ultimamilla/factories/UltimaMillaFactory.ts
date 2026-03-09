@@ -60,7 +60,7 @@ export class UltimaMillaFactory {
     const orderPage = new UltimaMillaFormPage(this.page);
 
     try {
-      logger.info(`Creating Ultima Milla order: ${orderData.codigoPedido}`);
+      logger.info(`Creando pedido de Ultima Milla: ${orderData.codigoPedido}`);
       await orderPage.navigate();
       await this.page.waitForTimeout(1000);
 
@@ -74,11 +74,11 @@ export class UltimaMillaFactory {
         throw new Error('Form was not saved successfully (URL did not stay or toast missing)');
       }
 
-      logger.info(`✅ Ultima Milla Order created: ${orderData.codigoPedido}`);
+      logger.info(`✅ Pedido de Ultima Milla creado: ${orderData.codigoPedido}`);
       return orderData;
 
     } catch (error) {
-      logger.error('Failed to create Ultima Milla order', error);
+      logger.error('Fallo al crear el pedido de Ultima Milla', error);
       await this.page.screenshot({
         path: `./reports/screenshots/create-ultimamilla-error-${Date.now()}.png`,
         fullPage: true
