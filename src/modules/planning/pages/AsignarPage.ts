@@ -51,8 +51,10 @@ export class AsignarPage extends BasePage {
 
     if (await searchInput.isVisible()) {
       logger.info(`🔍 Buscando viaje ${nroViaje} en la grilla de Asignación...`);
-      await searchInput.clear();
-      await searchInput.fill(nroViaje);
+      // FIX FIREFOX: Limpieza segura y escritura lenta
+      await searchInput.fill('');
+      await this.page.waitForTimeout(200);
+      await searchInput.pressSequentially(nroViaje, { delay: 100 });
 
       const buscarBtn = this.page.locator('#buscar, a:has-text("Buscar"), button:has-text("Buscar")').first();
 
@@ -68,7 +70,7 @@ export class AsignarPage extends BasePage {
       ]);
 
       await this.page.waitForLoadState('networkidle').catch(() => { });
-      await this.page.waitForTimeout(3000); // Wait for Angular/Grid to render the rows
+      await this.page.waitForTimeout(3500); // Aumento de tiempo de espera para Firefox en CI
       searchApplied = true;
     }
 
