@@ -55,13 +55,20 @@ export class AsignarPage extends BasePage {
       await searchInput.fill(nroViaje);
 
       const buscarBtn = this.page.locator('#buscar, a:has-text("Buscar"), button:has-text("Buscar")').first();
-      if (await buscarBtn.isVisible()) {
-        await buscarBtn.evaluate(el => (el as HTMLElement).click());
-      } else {
-        await this.page.keyboard.press('Enter');
-      }
-      await this.page.waitForLoadState('networkidle');
-      await this.page.waitForTimeout(2000);
+
+      await Promise.all([
+        this.page.waitForLoadState('domcontentloaded').catch(() => { }),
+        (async () => {
+          if (await buscarBtn.isVisible()) {
+            await buscarBtn.evaluate(el => (el as HTMLElement).click());
+          } else {
+            await this.page.keyboard.press('Enter');
+          }
+        })()
+      ]);
+
+      await this.page.waitForLoadState('networkidle').catch(() => { });
+      await this.page.waitForTimeout(3000); // Wait for Angular/Grid to render the rows
       searchApplied = true;
     }
 
