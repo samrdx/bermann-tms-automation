@@ -83,14 +83,14 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             baseNombre: transportista.baseNombre || transportista.nombre.split(' - ')[0],
         };
 
-        logger.info(`✅ Step 1/4 Complete - Transportista: ${transportista.nombre}`);
+        logger.info(`✅ Paso 1/4 Completado - Transportista: ${transportista.nombre}`);
         logger.info(`   RUT: ${transportista.documento}, ID: ${transportista.id}`);
         logger.info('');
 
         // =================================================================
         // STEP 2: Create Cliente (Client)
         // =================================================================
-        logger.info('👤 STEP 2/4: Creating Cliente...');
+        logger.info('👤 Paso 2/4: Creando Cliente...');
 
         const cliente = await ClienteHelper.createClienteViaUI(page);
 
@@ -112,14 +112,14 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             email: cliente.email,
         };
 
-        logger.info(`✅ Step 2/4 Complete - Cliente: ${cliente.nombre}`);
+        logger.info(`✅ Paso 2/4 Complete - Cliente: ${cliente.nombre}`);
         logger.info(`   RUT: ${cliente.rut}`);
         logger.info('');
 
         // =================================================================
         // STEP 3: Create Vehiculo (Vehicle with 3 KG capacity)
         // =================================================================
-        logger.info('🚛 STEP 3/4: Creating Vehiculo...');
+        logger.info('🚛 Paso 3/4: Creando Vehiculo...');
         const vehiculo = await VehiculoHelper.createVehiculoViaUI(page, transportista.nombre);
 
         operationalData.vehiculo = {
@@ -129,14 +129,14 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             capacity: '3 KG',
         };
 
-        logger.info(`✅ Step 3/4 Complete - Vehiculo: ${vehiculo.patente}`);
-        logger.info(`   Capacity: 3 KG`);
+        logger.info(`✅ Paso 3/4 Completado - Vehiculo: ${vehiculo.patente}`);
+        logger.info(`   Capacidad: 3 KG`);
         logger.info('');
 
         // =================================================================
         // STEP 4: Create Conductor (Driver)
         // =================================================================
-        logger.info('👨‍✈️ STEP 4/4: Creating Conductor...');
+        logger.info('👨‍✈️ Paso 4/4: Creando Conductor...');
         const conductor = await ConductorHelper.createConductorViaUI(page, transportista.nombre);
 
         operationalData.conductor = {
@@ -148,7 +148,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             transportistaNombre: conductor.transportistaName,
         };
 
-        logger.info(`✅ Step 4/4 Complete - Conductor: ${conductor.nombre} ${conductor.apellido}`);
+        logger.info(`✅ Paso 4/4 Completado - Conductor: ${conductor.nombre} ${conductor.apellido}`);
         logger.info(`   RUT: ${conductor.rut}`);
         logger.info('');
 
@@ -164,21 +164,21 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         fs.writeFileSync(outputPath, JSON.stringify(operationalData, null, 2), 'utf-8');
 
         logger.info('='.repeat(80));
-        logger.info('💾 OPERATIONAL DATA EXPORTED (Browser-Isolated)');
+        logger.info('💾 DATA OPERACIONAL EXPORTADA (Browser-Isolated)');
         logger.info('='.repeat(80));
-        logger.info(`📁 Browser: ${browserName} | File: ${outputPath}`);
-        logger.info(`🌐 Worker ${workerIndex} | Project: ${projectName}`);
+        logger.info(`📁 Navegador: ${browserName} | Archivo: ${outputPath}`);
+        logger.info(`🌐 Worker ${workerIndex} | Projecto: ${projectName}`);
         logger.info('');
-        logger.info('📦 Summary:');
+        logger.info('📦 Resumen:');
         logger.info(`   Transportista: ${operationalData.transportista.nombre} (${operationalData.transportista.rut})`);
         logger.info(`   Cliente: ${operationalData.cliente.nombre} (${operationalData.cliente.rut})`);
         logger.info(`   Vehiculo: ${operationalData.vehiculo.patente} (3 KG)`);
         logger.info(`   Conductor: ${operationalData.conductor.nombre} ${operationalData.conductor.apellido} (${operationalData.conductor.rut})`);
         logger.info('');
-        logger.info(`⏱️  Execution Time: ${elapsedTime}s`);
+        logger.info(`⏱️  Tiempo de Ejecución: ${elapsedTime}s`);
         logger.info('='.repeat(80));
-        logger.info('✅ BASE OPERATIONAL SUITE COMPLETED SUCCESSFULLY!');
-        logger.info('🎯 Data ready for Contract Creation and Trip Planning tests');
+        logger.info('✅ BASE OPERATIONAL SUITE COMPLETADA EXITOSAMENTE!');
+        logger.info('🎯 Data lista para tests de creación de contrato y planificación de viajes');
         logger.info('='.repeat(80));
 
         // Allure parameters — resumen de entidades creadas

@@ -4,6 +4,7 @@ import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
 /**
  * Step 6.5: Asignar Viaje (Legacy - uses seeded data from JSON)
@@ -295,10 +296,19 @@ test.describe('[V02] Viajes - Asignar', () => {
                 );
             }
 
-            // Verify the row shows 'Asignado' status
             const rowText = await viajeRow.innerText();
             const isAsignado = rowText.toLowerCase().includes('asignado');
             logger.info(`✅ Viaje [${searchId}] confirmed in grid. Status Asignado: ${isAsignado}`);
+
+            entityTracker.register({
+                type: 'Viaje',
+                name: nroViaje,
+                id: searchId,
+                asociado: transNombre,
+                patente: patente,
+                extra: `Conductor: ${conductorFull}`,
+                estado: 'ASIGNADO'
+            });
         });
 
         // Persist final status to JSON

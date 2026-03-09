@@ -5,26 +5,22 @@ import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
 import { createLogger } from '../../../src/utils/logger.js';
 import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../src/utils/entityTracker.js';
 
 const logger = createLogger('ViajesFinalizarTest');
 
 test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
   test.setTimeout(420000); // 7 min para creación de datos + test
 
-  test('Debería buscar y finalizar un viaje asignado en Monitoreo', async ({ page }) => {
+  test('Flujo E2E Completo (Atómico) - CREACION DE ENTIDADES HASTA FINALIZAR VIAJE', async ({ page }) => {
     const startTime = Date.now();
     await allure.epic('TMS E2E Flow');
     await allure.feature('Flujo Completo Atómico');
     await allure.story('Crear → Asignar → Finalizar Viaje');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
-    logger.info('='.repeat(80));
-    logger.info('TEST: Buscar y Finalizar Viaje en Monitoreo');
-    logger.info('='.repeat(80));
+    logger.fase(1, 'Preparación de Datos (API)');
 
-    // ============================================================
-    // FASE 1: PREPARACIÓN DE DATOS (TmsApiClient)
-    // ============================================================
-    logger.info('FASE 1: Creando ecosistema de datos de prueba...');
+    logger.paso('Creando ecosistema de datos de prueba...');
 
     const api = new TmsApiClient(page);
     await api.initialize();
@@ -35,14 +31,19 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     const cliName = `CliMon ${timestamp}`;
     const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
 
-    logger.info(`Datos: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
+    logger.subpaso(`Configuración: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
 
     // 1.1 Entidades base
     await api.createTransportista(transName, generateValidChileanRUT());
     await api.createCliente(cliName);
     const patente = await api.createVehiculo(transName);
     const conductor = await api.createConductor(transName);
-    logger.info(`Entidades creadas: Vehiculo=[${patente}] Conductor=[${conductor}]`);
+    logger.success(`Entidades base creadas: Vehiculo=[${patente}] Conductor=[${conductor}]`);
+
+    entityTracker.register({ type: 'Transportista', name: transName });
+    entityTracker.register({ type: 'Cliente', name: cliName });
+    entityTracker.register({ type: 'Vehiculo', name: patente, patente, asociado: transName });
+    entityTracker.register({ type: 'Conductor', name: conductor, asociado: transName });
 
     // Allure parameters — entidades
     await allure.parameter('Transportista', transName);
@@ -54,7 +55,10 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     // 1.2 Contratos (requeridos para crear viajes)
     await api.createContratoVenta(cliName);
     await api.createContratoCosto(transName);
-    logger.info('Contratos creados (Venta + Costo)');
+    logger.success('Contratos creados y asociados.');
+
+    entityTracker.register({ type: 'Contrato', name: 'Venta', asociado: cliName });
+    entityTracker.register({ type: 'Contrato', name: 'Costo', asociado: transName });
 
     await allure.parameter('Contrato Venta', `Cliente: ${cliName}`);
     await allure.parameter('Contrato Costo', `Transportista: ${transName}`);
@@ -84,12 +88,16 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
 
     // 1.3 Planificar Viaje
     await api.createViaje(cliName, nroViaje);
-    logger.info(`Viaje [${nroViaje}] planificado`);
+    logger.success(`Viaje [${nroViaje}] planificado correctamente`);
 
-    // ============================================================
-    // FASE 1.4: ASIGNAR VIAJE (Patrón probado de viajes-asignar.test.ts)
-    // ============================================================
-    logger.info(`FASE 1.4: Asignando viaje [${nroViaje}] con Bootstrap Select...`);
+    entityTracker.register({ 
+        type: 'Viaje', 
+        name: nroViaje, 
+        asociado: cliName, 
+        estado: 'PLANIFICADO' 
+    });
+
+    logger.fase(2, `Asignación del Viaje [${nroViaje}]`);
 
     // 1.4.1 Navegar a Asignar y abrir la fila del viaje
     const asignarPage = new AsignarPage(page);
@@ -191,7 +199,16 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     // ── FIX: Verificación por búsqueda en grid de /viajes/asignar ──
     logger.info('Verificando asignación: esperando redirect a /viajes/asignar...');
     await verifyAssignmentInGrid(page, logger, nroViaje);
-    logger.info(`Viaje [${nroViaje}] asignado exitosamente a [${transName}]`);
+    logger.success(`Viaje [${nroViaje}] asignado exitosamente a [${transName}]`);
+
+    entityTracker.register({ 
+        type: 'Viaje', 
+        name: nroViaje, 
+        asociado: transName, 
+        patente: patente, 
+        extra: `Conductor: ${conductor}`,
+        estado: 'ASIGNADO' 
+    });
 
     // 1.4.11 Limpiar modales residuales post-asignación
     await page.evaluate(() => {
@@ -205,12 +222,10 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     });
     await page.waitForTimeout(500);
 
-    logger.info('FASE 1 COMPLETA: Precondiciones listas');
+    logger.success('Precondiciones y asignación listas');
 
-    // ============================================================
-    // FASE 2: NAVEGAR A MONITOREO
-    // ============================================================
-    logger.info('FASE 2: Navegando a Monitoreo...');
+    logger.fase(3, 'Ejecución en Monitoreo');
+    logger.paso('Navegando a Monitoreo...');
 
     const monitoreo = new MonitoreoPage(page);
     await monitoreo.navegar();
@@ -227,14 +242,18 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
 
     logger.info('FASE 3 COMPLETA: Viaje finalizado');
 
+    entityTracker.register({ 
+        type: 'Viaje', 
+        name: nroViaje, 
+        estado: 'FINALIZADO' 
+    });
+
     // ============================================================
     // RESUMEN
     // ============================================================
     const tiempoEjecucion = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.info('='.repeat(80));
-    logger.info(`TEST OK: Viaje [${nroViaje}] buscado y finalizado en Monitoreo`);
-    logger.info(`Tiempo de ejecución: ${tiempoEjecucion}s`);
-    logger.info('='.repeat(80));
+    logger.success(`Viaje [${nroViaje}] buscado y finalizado correctamente`);
+    logger.info(`Tiempo total: ${tiempoEjecucion}s`);
 
     await allure.parameter('Estado Viaje', 'FINALIZADO');
     await allure.parameter('Duración (s)', tiempoEjecucion);

@@ -5,6 +5,7 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { config } from '../../../../../src/config/environment.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
 /**
  * Contract Creation - Tipo Venta (Uses Seeded Cliente)
@@ -150,6 +151,13 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
                 logger.info(`✅ Contract ID from grid: ${finalId}`);
             }
         }
+
+        entityTracker.register({
+            type: 'Contrato',
+            name: nroContrato,
+            id: finalId,
+            asociado: clienteNombre
+        });
 
         // =================================================================
         // PHASE 8: Persist to JSON

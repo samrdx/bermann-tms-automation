@@ -40,11 +40,19 @@ import { ClienteFactory } from '../modules/commercial/factories/ClienteFactory.j
 import { UltimaMillaFormPage } from '../modules/ultimamilla/pages/UltimaMillaPage.js';
 import { UltimaMillaFactory } from '../modules/ultimamilla/factories/UltimaMillaFactory.js';
 
+// Utils
+import { entityTracker, EntityTracker } from '../utils/entityTracker.js';
+import { Page } from '@playwright/test';
+
 // Declare the types of your fixtures.
 type MyFixtures = {
+  // Utils
+  entityTracker: EntityTracker;
+
   // Pages
   loginPage: LoginPage;
   dashboardPage: DashboardPage;
+  // ... (rest of Page types)
   contratosPage: ContratosFormPage;
   transportistaPage: TransportistaFormPage;
   conductorPage: ConductorFormPage;
@@ -69,8 +77,14 @@ type MyFixtures = {
 };
 
 // Extend base test to include fixtures.
-// Extend base test to include fixtures.
 export const test = base.extend<MyFixtures>({
+  // Utils
+  entityTracker: async ({ }, use) => {
+    // Reseteamos el tracker al inicio de cada test
+    entityTracker.clear();
+    await use(entityTracker);
+  },
+
   // Pages
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
@@ -106,29 +120,36 @@ export const test = base.extend<MyFixtures>({
   },
 
   // Factories
-  transportistaFactory: async ({ page }, use) => {
+  transportistaFactory: async ({ page }: { page: Page }, use: (r: TransportistaFactory) => Promise<void>) => {
     await use(new TransportistaFactory(page));
   },
-  vehiculoFactory: async ({ page }, use) => {
+  vehiculoFactory: async ({ page }: { page: Page }, use: (r: VehiculoFactory) => Promise<void>) => {
     await use(new VehiculoFactory(page));
   },
-  conductorFactory: async ({ page }, use) => {
+  conductorFactory: async ({ page }: { page: Page }, use: (r: ConductorFactory) => Promise<void>) => {
     await use(new ConductorFactory(page));
   },
-  clienteFactory: async ({ page }, use) => {
+  clienteFactory: async ({ page }: { page: Page }, use: (r: ClienteFactory) => Promise<void>) => {
     await use(new ClienteFactory(page));
   },
-  contratoFactory: async ({ page }, use) => {
+  contratoFactory: async ({ page }: { page: Page }, use: (r: ContratoFactory) => Promise<void>) => {
     await use(new ContratoFactory(page));
   },
 
   // Ultima Milla
-  ultimaMillaPage: async ({ page }, use) => {
+  ultimaMillaPage: async ({ page }: { page: Page }, use: (r: UltimaMillaFormPage) => Promise<void>) => {
     await use(new UltimaMillaFormPage(page));
   },
-  ultimaMillaFactory: async ({ page }, use) => {
+  ultimaMillaFactory: async ({ page }: { page: Page }, use: (r: UltimaMillaFactory) => Promise<void>) => {
     await use(new UltimaMillaFactory(page));
   },
+});
+
+// Hook para loggear resumen después de cada test
+test.afterEach(async ({ }, testInfo) => {
+  if (testInfo.status === 'passed' || testInfo.status === 'failed') {
+    entityTracker.logSummary();
+  }
 });
 
 export { expect } from '@playwright/test';

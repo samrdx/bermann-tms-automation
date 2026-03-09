@@ -16,7 +16,7 @@ import { allure } from 'allure-playwright';
 test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
     test.setTimeout(120000);
 
-    test('Should finalize an assigned trip using data from worker JSON', async ({ page }, testInfo) => {
+    test('Debe finalizar un viaje asignado usando datos del JSON', async ({ page }, testInfo) => {
         await allure.epic('TMS Legacy Flow');
         await allure.feature('03-Viajes');
         await allure.story('Finalizar Viaje');
@@ -24,15 +24,15 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
         const startTime = Date.now();
 
         logger.info('='.repeat(80));
-        logger.info('Starting Monitoreo: Finalizar Viaje (Legacy from JSON)');
+        logger.info('Iniciando Prueba de Monitoreo: Finalizar Viaje (Legacy from JSON)');
         logger.info('='.repeat(80));
 
         // PHASE 1: Load Data
-        logger.info('PHASE 1: Loading worker-specific JSON data...');
+        logger.info('Fase 1: Cargando datos del JSON del trabajador...');
         const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
-            throw new Error(`Data file not found at ${dataPath}. Please run prerequisites.`);
+            throw new Error(`Archivo de datos no encontrado en ${dataPath}. Por favor, ejecute los prerrequisitos.`);
         }
 
         const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
@@ -42,7 +42,7 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
             throw new Error('❌ Missing: viaje.nroViaje in JSON. Run: npm run test:legacy:planificar/asignar');
         }
 
-        logger.info(`✅ Loaded Viaje: ${nroViaje}`);
+        logger.info(`✅ Viaje cargado: ${nroViaje}`);
 
         await allure.parameter('Nro Viaje', String(nroViaje));
         await allure.parameter('Ambiente', process.env.ENV || 'QA');
@@ -52,17 +52,17 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
 
         // PHASE 2: Navigation to Monitoreo
         const monitoreo = new MonitoreoPage(page);
-        await test.step('Phase 2: Navigate to Monitoreo', async () => {
-            logger.info('PHASE 2: Navigating to Monitoreo...');
+        await test.step('Fase 2: Navegando al Monitoreo', async () => {
+            logger.info('Fase 2: Navegando al Monitoreo...');
             await monitoreo.navigate();
-            logger.info('✅ Monitoreo page loaded');
+            logger.info('✅ Pagina Monitoreo cargada');
         });
 
         // PHASE 3: Search and Finalize
-        await test.step(`Phase 3: Finalizing Viaje ${nroViaje}`, async () => {
-            logger.info(`🔍 Searching and finalizing voyage: ${nroViaje}`);
+        await test.step(`Fase 3: Finalizando Viaje ${nroViaje}`, async () => {
+            logger.info(`🔍 Buscando y finalizando viaje: ${nroViaje}`);
             await monitoreo.finalizarViaje(nroViaje);
-            logger.info('✅ Finalization command executed');
+            logger.info('✅ Comando de finalización ejecutado');
         });
 
         // PHASE 4: Update JSON
@@ -73,7 +73,7 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
 
         const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
         logger.info('='.repeat(80));
-        logger.info(`MONITOREO COMPLETE! Duration: ${executionTime}s`);
+        logger.info(`MONITOREO COMPLETADO! Duración: ${executionTime}s`);
         logger.info('='.repeat(80));
     });
 });

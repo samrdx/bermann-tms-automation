@@ -9,6 +9,7 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { Transportista, TransportistaHelper } from '../../../../api-helpers/TransportistaHelper.js';
 import * as fs from 'fs';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
 test.describe('[E01] Entidades - Crear Transportista', () => {
   test.setTimeout(120000);
@@ -41,14 +42,14 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
       formaPago: 'Contado'
     };
 
-    await test.step('Phase 1: Navigate', async () => {
-      logger.info('Compass PHASE 1: Navigate to Create Transportista');
+    await test.step('Fase 1: Navegar', async () => {
+      logger.info('FASE 1: Navegar hasta creación de transportista');
       await transportistaPage.navigate();
-      logger.info('✅ Navigation successful');
+      logger.info('✅ Navegación exitosa');
     });
 
-    await test.step('Phase 2: Fill Form', async () => {
-      logger.info('📝 PHASE 2: Fill Transportista Form');
+    await test.step('Fase 2: Completar formulario', async () => {
+      logger.info('📝 Fase 2: Completando formulario de transportista');
       await transportistaPage.fillNombre(testData.nombre);
       await transportistaPage.fillRazonSocial(testData.razonSocial);
       await transportistaPage.fillDocumento(testData.documento);
@@ -61,26 +62,26 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
       await transportistaPage.fillAltura(testData.altura);
       await transportistaPage.selectFormaPago(testData.formaPago);
 
-      logger.info('✅ Form filled');
+      logger.info('✅ Formulario completado');
     });
 
-    await test.step('Phase 3: Save', async () => {
-      logger.info('💾 PHASE 3: Save Transportista');
+    await test.step('Fase 3: Guardar', async () => {
+      logger.info('💾 Fase 3: Guardar transportista');
       await transportistaPage.clickGuardar();
       await page.waitForTimeout(5000);
-      logger.info('✅ Save initiated');
+      logger.info('✅ Guardado iniciado');
     });
 
     let createdTransportista: Transportista;
 
-    await test.step('Phase 4: Verify and Save Data', async () => {
-      logger.info('✅ PHASE 4: Verification and Data Storage');
+    await test.step('Fase 4: Verificar y guardar datos', async () => {
+      logger.info('✅ Fase 4: Verificación y guardado de datos');
       const isSaved = await transportistaPage.isFormSaved();
 
       if (!isSaved) {
         const hasErrors = await transportistaPage.hasValidationErrors();
         if (hasErrors) {
-          logger.error('❌ Validation errors validation failed');
+          logger.error('❌ Errores de validación');
           await page.screenshot({ path: './reports/screenshots/transportista-validation-error.png', fullPage: true });
         }
       }
@@ -95,6 +96,12 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
         testData.razonSocial
       );
 
+      entityTracker.register({ 
+        type: 'Transportista', 
+        name: createdTransportista.nombre, 
+        id: String(createdTransportista.id) 
+      });
+
       // Save data to worker-specific JSON
       const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
       let currentData: any = {};
@@ -107,8 +114,8 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
       await allure.parameter('Nombre Transportista', createdTransportista.nombre);
       await allure.parameter('Transportista ID', String(createdTransportista.id ?? 'N/A'));
 
-      logger.info(`✅ Transportista data saved to ${dataPath}`);
-      logger.info('✅ Test PASSED');
+      logger.info(`✅ Datos del transportista guardados en ${dataPath}`);
+      logger.info('✅ Prueba exitosa');
     });
   });
 });

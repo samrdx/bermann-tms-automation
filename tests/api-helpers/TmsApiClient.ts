@@ -8,6 +8,7 @@ import {
   generateRandomLastName,
   generateValidChileanRUT
 } from '../../src/utils/rutGenerator.js';
+import { entityTracker } from '../../src/utils/entityTracker.js';
 
 
 export class TmsApiClient {
@@ -352,10 +353,10 @@ export class TmsApiClient {
       throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
     }
 
-    logger.info(`✅ Transportista created with ID: ${id}`);
-    return id;
+    logger.info(`✅ Transportista creado: ${nombre} | ID: ${id}`);
+    entityTracker.register({ type: 'Transportista', name: nombre, id: String(id) });
+    return String(id);
   }
-
 
   // --- 2. CLIENTE ---
   async createCliente(nombre: string): Promise<string> {
@@ -447,7 +448,9 @@ export class TmsApiClient {
     ]);
 
     // ... (El resto de la lógica de extracción de ID se mantiene igual)
-    return this.extractIdAfterSave(nombre, 'Cliente');
+    const id = await this.extractIdAfterSave(nombre, 'Cliente');
+    entityTracker.register({ type: 'Cliente', name: nombre, id: String(id) });
+    return id;
   }
 
   /**
@@ -829,84 +832,50 @@ export class TmsApiClient {
       })
 
 
-
     ]);
 
-
-
-    logger.info(`✅ Vehículo created: ${patente}`);
-
-
-
+    logger.info(`✅ Vehículo creado: ${patente}`);
+    entityTracker.register({
+      type: 'Vehiculo',
+      name: patente,
+      patente: patente,
+      asociado: transportistaNombre
+    });
     return patente;
-
-
 
   }
 
   // --- 4. CONDUCTOR ---
-  async createConductor(transportistaNombre: string): Promise<string> {
-
-
+  async createConductor(transportistaNombre: string): Promise<any> {
 
     const nombre = generateRandomName();
-
-
+    const apellido = generateRandomLastName(); // Added for new register call
+    const email = `test${Math.floor(Math.random() * 100000)}@example.com`; // Added for new register call
 
     const rut = generateValidChileanRUT();
 
-
-
     const usuario = `user${Math.floor(Math.random() * 100000)}`;
-
-
 
     const clave = `pass${Math.floor(Math.random() * 100000)}`;
 
-
-
     logger.info(`👨‍✈️ UI: Creating Conductor [${nombre}] for Transportista: ${transportistaNombre}`);
-
-
 
     await this.page.goto(`${this.baseUrl}/conductores/crear`);
 
-
-
     await this.page.waitForLoadState('networkidle');
-
-
 
     await this.page.waitForSelector('input[name="Conductores[nombre]"]', { state: 'visible', timeout: 15000 });
 
 
-
-
-
-
-
     await this.page.fill('input[name="Conductores[usuario]"]', usuario);
-
-
 
     await this.page.fill('input[name="Conductores[clave]"]', clave);
 
-
-
     await this.page.fill('input[name="Conductores[nombre]"]', nombre);
 
-
-
-    await this.page.fill('input[name="Conductores[apellido]"]', generateRandomLastName());
-
-
+    await this.page.fill('input[name="Conductores[apellido]"]', apellido);
 
     await this.typeRutSlowly('input[name="Conductores[documento]"]', rut);
-
-
-
-
-
 
 
     await this.page.evaluate(() => {
@@ -914,94 +883,45 @@ export class TmsApiClient {
       if (btn) btn.click();
     });
 
-
-
     await this.page.waitForTimeout(500);
-
-
 
     await this.page.keyboard.press('ArrowDown');
 
-
-
     await this.page.keyboard.press('Enter');
 
-
-
     await this.page.waitForTimeout(500);
-
-
-
-
-
 
 
     const fechaVencimiento = new Date();
 
-
-
     fechaVencimiento.setFullYear(fechaVencimiento.getFullYear() + 1);
-
-
 
     const dia = String(fechaVencimiento.getDate()).padStart(2, '0');
 
-
-
     const mes = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
-
-
 
     const anio = fechaVencimiento.getFullYear();
 
-
-
     const fechaStr = `${dia}-${mes}-${anio}`;
-
-
 
     logger.info(`📅 Setting fecha vencimiento licencia: ${fechaStr}`);
 
 
-
-
-
-
-
     const fechaInput = this.page.locator('#conductores-fecha_vencimiento_licencia, input[name="Conductores[fecha_vencimiento_licencia]"]').first();
-
-
 
     if (await fechaInput.isVisible({ timeout: 2000 }).catch(() => false)) {
 
-
-
       await fechaInput.click();
-
-
 
       await this.page.waitForTimeout(300);
 
-
-
       await fechaInput.fill(fechaStr);
-
-
 
       await this.page.keyboard.press('Tab');
 
-
-
       await this.page.waitForTimeout(500);
 
-
-
     }
-
-
-
-
-
 
 
     await this.page.evaluate(() => {
@@ -1009,92 +929,50 @@ export class TmsApiClient {
       if (btn) btn.click();
     });
 
-
-
     await this.page.waitForTimeout(500);
-
-
 
     const searchBox = this.page.locator('.dropdown-menu.show .bs-searchbox input');
 
-
-
     if (await searchBox.isVisible()) {
-
-
 
       await searchBox.fill(transportistaNombre);
 
-
-
       await this.page.waitForTimeout(1000);
-
-
 
     }
 
-
-
     await this.page.keyboard.press('ArrowDown');
-
-
 
     await this.page.keyboard.press('Enter');
 
-
-
     await this.page.waitForTimeout(500);
-
-
-
-
-
 
 
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body.classList.remove('modal-open');
     });
-    await this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); });
-
-
+    const res = await Promise.all([ // Capture response for new logic
+      this.page.waitForResponse(resp => resp.url().includes('/conductores/') && resp.status() < 400, { timeout: 15000 }),
+      this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); })
+    ]);
 
     await this.page.waitForTimeout(3000);
 
-
-
-
-
-
-
-    const currentUrl = this.page.url();
-
-
-
-    if (currentUrl.includes('/index') || currentUrl.includes('/ver') || currentUrl.includes('/editar')) {
-
-
-
-      logger.info(`✅ Conductor created: ${nombre}`);
-
-
-
+    if (res[0].ok()) {
+      logger.info(`✅ Conductor creado: ${nombre} ${apellido}`);
+      entityTracker.register({ 
+        type: 'Conductor', 
+        name: nombre, 
+        apellido: apellido, 
+        asociado: transportistaNombre 
+      });
+      return nombre;
     } else {
-
-
-
+      const currentUrl = this.page.url();
       logger.info(`⚠️ Conductor form submitted (URL: ${currentUrl})`);
-
-
-
+      throw new Error(`Failed to create Conductor. Status: ${res[0].status()}`);
     }
-
-
-
-    return nombre;
-
-
-
   }
 
   // --- 5. LÓGICA DE CONTRATOS ---
@@ -1483,15 +1361,12 @@ export class TmsApiClient {
 
     if (currentUrl.includes('/editar/')) {
 
-
-
       logger.info(`✅ Contract header saved! Adding routes...`);
-
-
-
+      entityTracker.register({
+        type: tipoVal === '1' ? 'Contrato Costo' : 'Contrato Venta',
+        name: nro
+      });
       await this.addRouteAndTarifas('20000', '50000');
-
-
 
     } else if (currentUrl.includes('/crear')) {
       logger.warn(`⚠️ Still on create page. URL: ${currentUrl}. Extrayendo campos con error...`);
@@ -2015,7 +1890,7 @@ export class TmsApiClient {
     });
 
     // Clic con espera de respuesta de red
-    await Promise.all([
+    const res = await Promise.all([
       this.page.waitForResponse(
         (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
         { timeout: 15000 }
@@ -2033,7 +1908,13 @@ export class TmsApiClient {
     const toastExacto = this.page.getByText('Viaje Creado con éxito', { exact: true });
     if (await toastExacto.isVisible({ timeout: 5000 }).catch(() => false)) {
       logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast exacto)`);
-      return;
+      entityTracker.register({
+        type: 'Viaje',
+        name: nroViaje,
+        asociado: clienteNombre,
+        estado: 'PLANIFICADO'
+      });
+      return nroViaje;
     }
 
     // Estrategia 2: Toast o alerta parcial
@@ -2041,7 +1922,8 @@ export class TmsApiClient {
     if (await toastAlt.isVisible({ timeout: 2000 }).catch(() => false)) {
       const text = await toastAlt.textContent().catch(() => '');
       logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast alt: "${text?.trim().substring(0, 60)}")`);
-      return;
+      entityTracker.register({ type: 'Viaje', name: nroViaje });
+      return nroViaje;
     }
 
     // Verificar si hay error visible ANTES de ir a la grilla
@@ -2061,7 +1943,13 @@ export class TmsApiClient {
     // Si la URL cambió a /viajes/asignar, el viaje se creó correctamente
     if (currentUrl.includes('/viajes/asignar') || currentUrl.includes('/viajes/index')) {
       logger.info(`✅ Viaje [${nroViaje}] creado (redirect a ${currentUrl})`);
-      return;
+      entityTracker.register({
+        type: 'Viaje',
+        name: nroViaje,
+        asociado: clienteNombre,
+        estado: 'PLANIFICADO'
+      });
+      return nroViaje;
     }
 
     // Fallback: navegar a grilla y buscar
@@ -2081,7 +1969,13 @@ export class TmsApiClient {
     const viajeRow = this.page.locator(`text="${nroViaje}"`);
     if (await viajeRow.isVisible({ timeout: 3000 }).catch(() => false)) {
       logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla de asignación por texto`);
-      return;
+      entityTracker.register({
+        type: 'Viaje',
+        name: nroViaje,
+        asociado: clienteNombre,
+        estado: 'PLANIFICADO'
+      });
+      return nroViaje;
     }
 
     // Verificar por conteo de filas luego de aplicar el filtro
@@ -2089,7 +1983,13 @@ export class TmsApiClient {
     const rowCount = await allRows.count().catch(() => 0);
     if (rowCount >= 1) {
       logger.info(`✅ Viaje [${nroViaje}] creado: encontradas ${rowCount} filas en grilla de asignación`);
-      return;
+      entityTracker.register({ 
+        type: 'Viaje', 
+        name: nroViaje, 
+        asociado: clienteNombre, 
+        estado: 'PLANIFICADO' 
+      });
+      return nroViaje;
     }
 
     throw new Error(`❌ Viaje [${nroViaje}] no encontrado. El botón Guardar puede no haber ejecutado el submit. URL final: ${this.page.url()}`);

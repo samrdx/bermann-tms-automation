@@ -14,6 +14,7 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
 import { Transportista } from '../../../../api-helpers/TransportistaHelper.js';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
 test.describe('[E04] Entidades - Crear Conductor', () => {
     test.setTimeout(120000);
@@ -34,10 +35,10 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
             throw new Error('seededTransportista not found in data file. Make sure transportistas-crear.test.ts runs first and successfully seeds a Transportista.');
         }
         transportistaName = seededTransportista.nombre;
-        logger.info(`✅ Loaded seededTransportista: ${transportistaName} (ID: ${seededTransportista.id})`);
+        logger.info(`✅ Cargado seededTransportista: ${transportistaName} (ID: ${seededTransportista.id})`);
     });
 
-    test('Should create a new Conductor and link to Transportista', async ({
+    test('Debe crear un Conductor correctamente y asociarlo a un transportista', async ({
         page,
         conductorPage
     }, testInfo) => {
@@ -61,12 +62,12 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
 
         // Note: Already authenticated via storageState from setup project
 
-        await test.step('Phase 1: Navigate to Conductor Creation', async () => {
+        await test.step('Fase 1: Navegar hasta creación de conductor', async () => {
             await conductorPage.navigate();
         });
 
-        await test.step('Phase 2: Fill Form', async () => {
-            logger.info(`📝 Filling Conductor Form for: ${testData.nombre} ${testData.apellido}`);
+        await test.step('Fase 2: Completar formulario', async () => {
+            logger.info(`📝 Completando formulario de conductor para: ${testData.nombre} ${testData.apellido}`);
 
             await conductorPage.fillUsuario(testData.usuario);
             await conductorPage.fillClave(testData.clave);
@@ -85,7 +86,7 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
             await conductorPage.selectTransportista(transportistaName);
         });
 
-        await test.step('Phase 3: Save and Verify', async () => {
+        await test.step('Fase 3: Guardar y verificar', async () => {
             // Capture values BEFORE saving since form will navigate away
             const expectedNombre = await page.locator('#conductores-nombre').inputValue().catch(() => '');
             const expectedApellido = await page.locator('#conductores-apellido').inputValue().catch(() => '');
@@ -98,6 +99,15 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
             expect(isSaved).toBeTruthy();
 
             if (isSaved) {
+                logger.info(`✅ Conductor [${expectedNombre} ${expectedApellido}] guardado exitosamente`);
+                
+                entityTracker.register({ 
+                    type: 'Conductor', 
+                    name: expectedNombre, 
+                    apellido: expectedApellido, 
+                    asociado: transportistaName 
+                });
+
                 const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
                 const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
                 data.seededConductor = {
@@ -108,12 +118,12 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
                     transportistaNombre: transportistaName
                 };
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
-                logger.info(`✅ seededConductor saved: ${expectedNombre} ${expectedApellido}`);
+                logger.info(`✅ seededConductor guardado: ${expectedNombre} ${expectedApellido}`);
 
                 await allure.parameter('Conductor', `${expectedNombre} ${expectedApellido}`.trim());
                 await allure.parameter('RUT Conductor', expectedRut);
             }
-            logger.info('✅ Conductor Created and Saved Successfully');
+            logger.info('✅ Conductor creado y guardado exitosamente');
         });
 
     });

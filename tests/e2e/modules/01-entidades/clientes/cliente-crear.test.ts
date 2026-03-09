@@ -8,6 +8,7 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { ClienteHelper, Cliente } from '../../../../api-helpers/ClienteHelper.js';
 import * as fs from 'fs';
 import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
 test.describe('[E02] Entidades - Crear Cliente', () => {
   test.setTimeout(120000);
@@ -37,14 +38,14 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
       tipoCliente: 'Distribución', // Exists in both QA and Demo
     };
 
-    await test.step('Phase 1: Navigate', async () => {
-      logger.info('🧭 PHASE 1: Navigate to Create Cliente');
+    await test.step('Fase 1: Navigar', async () => {
+      logger.info('🧭 FASE 1: Navegar hasta creación de cliente');
       await clientePage.navigate();
-      logger.info('✅ Navigation successful');
+      logger.info('✅ Navegación correcta');
     });
 
-    await test.step('Phase 2: Fill Form', async () => {
-      logger.info('📝 PHASE 2: Fill Cliente Form');
+    await test.step('Fase 2: Completar formulario', async () => {
+      logger.info('📝 FASE 2: Completar formulario');
       await clientePage.fillNombre(testData.nombre);
       await clientePage.fillRut(testData.rut);
       await clientePage.fillNombreFantasia(testData.nombreFantasia);
@@ -59,32 +60,31 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
       // Select all Polígonos (required)
       await clientePage.selectAllPoligonos();
 
-      logger.info('✅ Form filled');
+      logger.info('✅ Formulario Completado');
     });
 
-    await test.step('Phase 3: Save', async () => {
-      logger.info('💾 PHASE 3: Save Cliente');
+    await test.step('Fase 3: Guardar', async () => {
+      logger.info('💾 FASE 3: Guardar Cliente');
       await clientePage.clickGuardar();
       await page.waitForTimeout(5000);
-      logger.info('✅ Save initiated');
+      logger.info('✅ Guardar iniciado');
     });
 
     let createdCliente: Cliente;
 
-    await test.step('Phase 4: Verify and Save Data', async () => {
-      logger.info('✅ PHASE 4: Verification and Data Storage');
+    await test.step('Fase 4: Verificar y guardar datos', async () => {
+      logger.info('✅ FASE 4: Verificar y guardar datos');
       const isSaved = await clientePage.isFormSaved();
 
       if (!isSaved) {
         const hasErrors = await clientePage.hasValidationErrors();
         if (hasErrors) {
-          logger.error('❌ Validation errors detected');
+          logger.error('❌ Error de validación detectado');
           await page.screenshot({ path: './reports/screenshots/cliente-validation-error.png', fullPage: true });
         }
       }
       expect(isSaved).toBeTruthy();
 
-      // Extract ID and name for storage
       createdCliente = await ClienteHelper.extractClienteIdAndName(
         page,
         testData.nombre,
@@ -92,6 +92,12 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
         testData.baseNombre,
         testData.nombreFantasia
       );
+
+      entityTracker.register({ 
+        type: 'Cliente', 
+        name: createdCliente.nombre || testData.nombre, 
+        id: String(createdCliente.id) 
+      });
 
       await allure.parameter('Nombre Cliente', createdCliente.nombre || testData.nombreFantasia);
       await allure.parameter('Cliente ID', String(createdCliente.id ?? 'N/A'));
@@ -105,8 +111,8 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
       currentData.seededCliente = createdCliente;
       fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
 
-      logger.info(`✅ Cliente data saved to ${dataPath}`);
-      logger.info('✅ Test PASSED');
+      logger.info(`✅ Datos del cliente guardado en ${dataPath}`);
+      logger.info('✅ Prueba exitosa');
     });
   });
 });
