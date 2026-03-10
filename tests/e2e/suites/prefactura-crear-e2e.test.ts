@@ -1,0 +1,177 @@
+import { test, expect } from '../../../src/fixtures/base.js';
+import { MonitoreoPage } from '../../../src/modules/monitoring/pages/MonitoreoPage.js';
+import { PrefacturaPage } from '../../../src/modules/finanzas/PrefacturaPage.js';
+import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
+import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
+import { createLogger } from '../../../src/utils/logger.js';
+import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
+import { allure } from 'allure-playwright';
+import { entityTracker } from '../../../src/utils/entityTracker.js';
+import { NamingHelper } from '../../../src/utils/NamingHelper.js';
+
+const logger = createLogger('PrefacturaCrearE2ETest');
+let prefacturaId = 'N/A';
+let createdEntities: any = {};
+
+test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
+  test.setTimeout(480000); // 8 min para creación de datos + flujo de viaje + prefactura
+
+  test('Flujo E2E Completo Atómico - PREFACTURAR VIAJE FINALIZADO', async ({ page }) => {
+    const startTime = Date.now();
+    await allure.epic('TMS E2E Flow');
+    await allure.feature('Modulo Finanzas');
+    await allure.story('Crear Viaje → Finalizar → Crear Prefactura');
+    await allure.parameter('Ambiente', process.env.ENV || 'QA');
+    logger.fase(1, 'Preparación de Datos (API)');
+
+    const api = new TmsApiClient(page);
+    await api.initialize();
+
+    // 1. Crear Ecosistema
+    const transName = NamingHelper.getTransportistaName().nombre;
+    const cliName = NamingHelper.getClienteName().nombre;
+    const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
+
+    logger.subpaso(`Setup: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
+
+    await api.createTransportista(transName, generateValidChileanRUT());
+    await api.createCliente(cliName);
+    const patente = await api.createVehiculo(transName);
+    const conductor = await api.createConductor(transName);
+
+    entityTracker.register({ type: 'Transportista', name: transName });
+    entityTracker.register({ type: 'Cliente', name: cliName });
+
+    // Contratos
+    const contratoVenta = await api.createContratoVenta(cliName);
+    const contratoCosto = await api.createContratoCosto(transName);
+
+    createdEntities = {
+        transportista: transName,
+        cliente: cliName,
+        vehiculo: patente,
+        conductor: conductor,
+        contratoVenta: contratoVenta,
+        contratoCosto: contratoCosto,
+        viaje: nroViaje
+    };
+
+    logger.info('Estabilizando navegador...');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForTimeout(2000);
+    
+    // Limpiar modales residuales
+    await page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+      document.body.classList.remove('modal-open');
+    });
+
+    // Planificar
+    await api.createViaje(cliName, nroViaje);
+    logger.success(`Viaje [${nroViaje}] planificado.`);
+
+    // 2. Asignar
+    logger.fase(2, `Asignación del Viaje [${nroViaje}]`);
+    const asignarPage = new AsignarPage(page);
+    await asignarPage.navigate();
+    await asignarPage.selectViajeRow(nroViaje);
+
+    // Seleccionamos Transportista (usando evaluation JS para agilizar un test tan grande)
+    await page.evaluate(({ transId, tsName }) => {
+        const select = document.getElementById(transId) as HTMLSelectElement;
+        if (!select) return;
+        const opt = Array.from(select.options).find(o => o.text.toUpperCase().includes(tsName.toUpperCase()));
+        if (opt) {
+            select.value = opt.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            // @ts-ignore
+            if (window.jQuery) window.jQuery(select).selectpicker('refresh');
+        }
+    }, { transId: 'viajes-transportista_id', tsName: transName });
+    await page.waitForTimeout(1000);
+
+    // Seleccionar Vehiculo y Conductor
+    await selectBootstrapByDataId(page, 'viajes-vehiculo_uno_id', patente);
+    await selectBootstrapByDataId(page, 'viajes-conductor_id', conductor);
+    await page.waitForTimeout(500);
+
+    const guardarBtn = page.locator('#btn_guardar_form');
+    await guardarBtn.click();
+
+    // Confirmar modal si aparece
+    const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
+    if (await btnConfirmar.isVisible({ timeout: 5000 })) {
+        await btnConfirmar.click();
+    }
+    
+    await page.waitForTimeout(2000);
+    logger.success(`Viaje [${nroViaje}] asignado.`);
+
+    // 3. Monitoreo (Finalizar)
+    logger.fase(3, 'Finalizar Viaje');
+    const monitoreo = new MonitoreoPage(page);
+    await monitoreo.navegar();
+    await monitoreo.finalizarViaje(nroViaje);
+    logger.success(`Viaje [${nroViaje}] finalizado.`);
+
+    // 4. PREFACTURA (Flujo Nuevo)
+    logger.fase(4, 'Generación de Prefactura');
+    const prefacturaPage = new PrefacturaPage(page);
+    
+    await test.step('Navegar y filtrar viajes finalizados', async () => {
+        await prefacturaPage.navigateToCrear();
+        await prefacturaPage.filtrarViajesPorCliente(cliName);
+    });
+
+    await test.step('Generar Prefactura y procesar', async () => {
+        await prefacturaPage.generarPrefactura();
+    });
+
+    await test.step('Verificar prefactura en el Index', async () => {
+        // Redirecciona automáticamente según spec, pero igual usamos el index como comprobación
+        prefacturaId = await prefacturaPage.buscarPrefacturaEnIndex(cliName);
+    });
+
+    const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
+    logger.success(`Proceso de Prefactura Finalizado Correctamente`);
+    
+    // RESUMEN FINAL SOLICITADO POR USUARIO
+    logger.info('='.repeat(80));
+    logger.info('   RESUMEN DE EJECUCIÓN E2E - PREFACTURA');
+    logger.info('='.repeat(80));
+    logger.info(`🔹 Cliente        : [${createdEntities.cliente}]`);
+    logger.info(`🔹 Transportista  : [${createdEntities.transportista}]`);
+    logger.info(`🔹 Vehículo       : [${createdEntities.vehiculo}]`);
+    logger.info(`🔹 Conductor      : [${createdEntities.conductor}]`);
+    logger.info(`🔹 Contrato Venta : [${createdEntities.contratoVenta}]`);
+    logger.info(`🔹 Contrato Costo : [${createdEntities.contratoCosto}]`);
+    logger.info(`🔹 Viaje          : [${createdEntities.viaje}]`);
+    logger.info(`✅ PREFACTURA ID  : [${prefacturaId}]`);
+    logger.info('='.repeat(80));
+    
+    logger.info(`Tiempo total: ${executionTime}s`);
+
+    await allure.parameter('Estado Viaje', 'PREFACTURADO');
+    await allure.parameter('Duración (s)', executionTime);
+  });
+});
+
+// Helper interno para agilizar E2E test
+async function selectBootstrapByDataId(page: any, dataId: string, text: string) {
+    await page.evaluate(({ selectId, textSelected }: { selectId: string; textSelected: string }) => {
+        const select = document.getElementById(selectId) as HTMLSelectElement;
+        if (!select) return;
+        const option = Array.from(select.options).find(opt =>
+          opt.text.toUpperCase().includes(textSelected.toUpperCase())
+        );
+        if (option) {
+          select.value = option.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          // @ts-ignore
+          if (window.jQuery && window.jQuery(select).selectpicker) {
+            // @ts-ignore
+            window.jQuery(select).selectpicker('refresh');
+          }
+        }
+      }, { selectId: dataId, textSelected: text });
+}

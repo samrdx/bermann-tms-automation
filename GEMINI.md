@@ -73,10 +73,10 @@ When executing tasks or receiving specific commands, ALWAYS invoke the correspon
 |----------|-------|--------------|
 | Active Branch | main | 2026-03-07 |
 | Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-03-07 |
-| Completed Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) | 2026-03-07 |
-| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-03-07 |
-| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-03-07 |
-| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring (complete) | 2026-03-07 |
+| Completed Modules | 7 (auth, transport, commercial, contracts, planning, monitoring, finanzas) | 2026-03-10 |
+| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-03-10 |
+| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-03-10 |
+| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring -> Prefactura (complete) | 2026-03-10 |
 | TypeScript Compilation | Clean (0 errors) | 2026-03-07 |
 | Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-03-07 |
 | CI/CD | Hybrid workflow (atomic + legacy jobs) | 2026-03-07 |
@@ -499,6 +499,8 @@ npm run test:auth:logout       # Run logout test only
 # === ATOMIC E2E (Full flow, no JSON deps) ===
 npm run test:qa:trip:full-flow    # QA: full E2E (viajes-finalizar-e2e.test.ts)
 npm run test:demo:trip:full-flow  # Demo: full E2E (same file, ENV=DEMO)
+npm run test:qa:prefactura:e2e    # QA: prefactura full E2E (prefactura-crear-e2e.test.ts)
+npm run test:demo:prefactura:e2e  # Demo: prefactura full E2E (same file, ENV=DEMO)
 
 # === LEGACY QA (Dependent, Sequential Tests) ===
 npm run test:qa:legacy:setup           # Run base entities setup
@@ -513,12 +515,12 @@ npm run test:qa:legacy:asignar         # Assign trip (reads nroViaje from JSON)
 npm run test:qa:legacy:finalizar       # Finalize/Monitoreo (viajes-monitoreo.test.ts)
 
 # === FULL FLOWS (QA) ===
-npm run test:qa:flow:setup-to-viajes      # setup -> contratos -> viajes (via base-entities)
-npm run test:qa:flow:entidades-to-viajes  # individual entities -> contratos -> viajes
+npm run test:qa:flow:setup-to-prefactura      # setup -> contratos -> viajes (via base-entities)
+npm run test:qa:flow:entidades-to-prefactura  # individual entities -> contratos -> viajes
 
 # === DEMO (Sequential end-to-end) ===
 npm run test:demo:legacy:entidades         # Demo entities (sequential)
-npm run test:demo:flow:entidades-to-viajes # Demo: entities -> contratos -> viajes
+npm run test:demo:flow:entidades-to-prefactura # Demo: entities -> contratos -> viajes
 
 # === GRANULAR (Debugging Individual Tests) ===
 npm run test:qa:entity:transportista   # Create transportista entity
@@ -546,14 +548,16 @@ npm run clean:allure:demo      # Clean Demo results + report
 npm run clean:allure           # Clean everything
 
 # === FULL RUNS (clean + test + generate + open) ===
-npm run run:all:qa             # QA: entidades-to-viajes + E2E + Allure report
-npm run run:all:demo           # Demo: entidades-to-viajes + E2E + Allure report
+npm run run:all:qa             # QA: entidades-to-prefactura + E2E + Allure report
+npm run run:all:demo           # Demo: entidades-to-prefactura + E2E + Allure report
 npm run test:all               # QA + Demo: all tests + generate both reports (no open)
-npm run run:qa:setup-to-viajes # QA: setup + contratos + viajes + serve
-npm run run:qa:entidades-to-viajes  # QA: entidades individuales + contratos + viajes + serve
+npm run run:qa:setup-to-prefactura # QA: setup + contratos + viajes + serve
+npm run run:qa:entidades-to-prefactura  # QA: entidades individuales + contratos + viajes + serve
 npm run run:qa:e2e             # QA: E2E atómico + serve
-npm run run:demo:entidades-to-viajes # Demo: entidades + contratos + viajes + serve
+npm run run:qa:prefactura:e2e   # QA: Prefactura E2E + serve
+npm run run:demo:entidades-to-prefactura # Demo: entidades + contratos + viajes + serve
 npm run run:demo:e2e           # Demo: E2E atómico + serve
+npm run run:demo:prefactura:e2e # Demo: Prefactura E2E + serve
 
 npm run show-report            # Open Playwright HTML test report
 npm run codegen                # Launch Playwright codegen for TMS QA environment
@@ -589,6 +593,10 @@ npm run clean                  # Clean reports and logs
 6. **monitoring** - `src/modules/monitoring/`
    - MonitoreoPage
    - Tests: `02-operaciones/Monitoreo/viajes-monitoreo.test.ts` (legacy) and `tests/e2e/suites/viajes-finalizar-e2e.test.ts` (atomic E2E)
+
+7. **finanzas** - `src/modules/finanzas/`
+   - PrefacturaPage
+   - Tests: `tests/e2e/suites/prefactura-crear-e2e.test.ts` (atomic E2E)
 
 ### Test Organization
 
