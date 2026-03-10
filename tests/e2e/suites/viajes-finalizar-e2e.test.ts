@@ -387,8 +387,6 @@ async function selectOptionByTextJS(page: any, text: string): Promise<boolean> {
 /**
  * Verificação determinista: espera redirect a /viajes/asignar,
  * busca o nroViaje no filtro #search, e verifica que exista no grid.
- * Em Demo o nroViaje não aparece como texto visível (coluna "Viaje maestro" = "N/A"),
- * então usa um fallback: se a busca devolveu 1 fila, aceita como exitosa.
  */
 async function verifyAssignmentInGrid(page: any, log: any, nroViaje: string): Promise<void> {
   // 1. Esperar redirect a /viajes/asignar
@@ -436,42 +434,13 @@ async function verifyAssignmentInGrid(page: any, log: any, nroViaje: string): Pr
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
   await page.waitForTimeout(1500);
 
-  // 4. Verificar que el viaje aparece como texto visible en el grid (funciona en QA)
+  // 4. Verificar que el viaje aparece como texto visible en el grid (funciona en QA y Demo)
   const viajeRow = page.locator(`text="${nroViaje}"`).first();
   const isVisible = await viajeRow.isVisible({ timeout: 3000 }).catch(() => false);
 
   if (isVisible) {
     log.info(`Viaje [${nroViaje}] encontrado en el grid de asignacion`);
     return;
-  }
-
-  // 5. Fallback Demo: en Demo el nroViaje no aparece como texto en el grid
-  //    (columna "Viaje maestro" = "N/A"). Si la busqueda arrojo exactamente 1 fila,
-  //    verificamos que tenga estado "Asignado".
-  log.info('[Demo fallback] nroViaje no visible como texto. Verificando por conteo de filas...');
-  const allRows = page.locator('#tabla_asignar tbody tr');
-  const rowCount = await allRows.count().catch(() => 0);
-
-  if (rowCount === 1) {
-    const rowText = await allRows.first().innerText().catch(() => '');
-    log.info(`[Demo] Fila unica encontrada. Texto: ${rowText.substring(0, 120)}`);
-    if (rowText.toLowerCase().includes('asignado')) {
-      log.info(`[Demo] Viaje [${nroViaje}] verificado: fila unica con estado "Asignado"`);
-      return;
-    }
-    log.warn(`[Demo] Fila unica sin texto "Asignado". Continuando de todos modos...`);
-    return;
-  }
-
-  if (rowCount > 1) {
-    log.warn(`[Demo] ${rowCount} filas encontradas. Buscando nroViaje en celdas...`);
-    for (let i = 0; i < rowCount; i++) {
-      const rowText = await allRows.nth(i).innerText().catch(() => '');
-      if (rowText.includes(nroViaje)) {
-        log.info(`[Demo] Viaje [${nroViaje}] encontrado en fila ${i + 1}`);
-        return;
-      }
-    }
   }
 
   const visibleErrors = await page.locator('.alert-danger, .toast-error')

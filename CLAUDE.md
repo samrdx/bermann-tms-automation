@@ -25,19 +25,19 @@
 
 ---
 
-## Project Status Dashboard (Updated: 2026-02-20)
+## Project Status Dashboard (Updated: 2026-03-10)
 
 | Category | Value | Last Updated |
 |----------|-------|--------------|
-| Active Branch | main | 2026-02-20 |
-| Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-02-20 |
-| Completed Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) | 2026-02-20 |
-| Pass Rate | 100% | 2026-02-20 |
-| Operational Skills | 5 TMS-specific + 1 meta-skill | 2026-02-20 |
-| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring (complete) | 2026-02-20 |
-| TypeScript Compilation | Clean (0 errors) | 2026-02-20 |
-| Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-02-20 |
-| CI/CD | Hybrid workflow (atomic + legacy jobs) | 2026-02-20 |
+| Active Branch | main | 2026-03-10 |
+| Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-03-10 |
+| Completed Modules | 7 (auth, transport, commercial, contracts, planning, monitoring, finanzas) | 2026-03-10 |
+| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-03-10 |
+| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-03-10 |
+| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring -> Prefactura (complete) | 2026-03-10 |
+| TypeScript Compilation | Clean (0 errors) | 2026-03-10 |
+| Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-03-10 |
+| CI/CD | Hybrid workflow (atomic + legacy jobs) | 2026-03-10 |
 
 ---
 

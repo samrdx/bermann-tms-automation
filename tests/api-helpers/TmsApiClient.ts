@@ -1011,7 +1011,7 @@ export class TmsApiClient {
 
 
 
-  private async fillGenericContract(tipoVal: '1' | '2', entityName: string, selectId: string) {
+  private async fillGenericContract(tipoVal: '1' | '2', entityName: string, selectId: string): Promise<string> {
 
 
 
@@ -1402,6 +1402,8 @@ export class TmsApiClient {
 
 
 
+    await this.page.waitForTimeout(1000); // Brief DOM stabilization
+    return nro;
   }
 
   private async addRouteAndTarifas(tarifaConductor: string, tarifaViaje: string): Promise<void> {
@@ -1679,24 +1681,12 @@ export class TmsApiClient {
 
   }
 
-  async createContratoCosto(transportistaNombre: string) {
-
-
-
-    await this.fillGenericContract('1', transportistaNombre, 'contrato-transportista_id');
-
-
-
+  async createContratoCosto(transportistaNombre: string): Promise<string> {
+    return await this.fillGenericContract('1', transportistaNombre, 'contrato-transportista_id');
   }
 
-  async createContratoVenta(clienteNombre: string) {
-
-
-
-    await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id');
-
-
-
+  async createContratoVenta(clienteNombre: string): Promise<string> {
+    return await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id');
   }
 
   // --- 6. PLANIFICAR VIAJE (FIX CARGA & AUTO-HEALING) ---
@@ -1926,6 +1916,10 @@ export class TmsApiClient {
 
     // Estrategia 3: Verificar si redirigió (éxito silencioso) o buscar en grilla
     // FIX FIREFOX: Esperar a que la URL se estabilice antes de leerla (Firefox es más lento para redirigir)
+    await Promise.race([
+      this.page.waitForURL('**/viajes/asignar**', { timeout: 10000 }),
+      this.page.waitForURL('**/viajes/index**', { timeout: 10000 })
+    ]).catch(() => { });
     await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => { });
     await this.page.waitForTimeout(1000);
     const currentUrl = this.page.url();
