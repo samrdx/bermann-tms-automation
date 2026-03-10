@@ -1,0 +1,21 @@
+2026-03-10 12:57:15 [INFO]: ENTORNO: DEMO 🎭
+2026-03-10 12:57:15 [INFO]: ✅ Transportista seeded cargado: Demo_tra_austral_797 (ID: 209)
+2026-03-10 12:57:15 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-10 12:57:18 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_austral_797
+2026-03-10 12:57:18 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_EWVQ56
+2026-03-10 12:57:18 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_EWVQ56
+2026-03-10 12:57:19 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_austral_797
+2026-03-10 12:57:21 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_austral_797" seleccionado
+2026-03-10 12:57:21 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-10 12:57:21 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-10 12:57:22 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 28 TON
+2026-03-10 12:57:23 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" seleccionada
+2026-03-10 12:57:23 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-10 12:57:27 [INFO]: ✅ Vehículo [Demo_veh_EWVQ56] guardado exitosamente
+2026-03-10 12:57:27 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_EWVQ56
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🚚 Vehiculo      : [Demo_veh_EWVQ56]              | Patente: Demo_veh_EWVQ56 | Asociado: Demo_tra_austral_797
+====================================================================================================

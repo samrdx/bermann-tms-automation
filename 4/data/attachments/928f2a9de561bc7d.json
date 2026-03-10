@@ -1,0 +1,14 @@
+{
+  "transportista": "Demo_tra_transportes_910",
+  "cliente": "Demo_cli_central_641",
+  "vehiculo": "Demo_veh_MCYL83",
+  "conductor": "Demo_con_elena",
+  "nroViaje": "866199",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "189.91",
+  "ambiente": "DEMO"
+}

@@ -1,0 +1,70 @@
+2026-03-10 12:45:13 [INFO]: ENTORNO: QA 🧪
+2026-03-10 12:45:13 [INFO]: ================================================================================
+2026-03-10 12:45:13 [INFO]: Iniciando Paso 6: Planificar Viaje
+2026-03-10 12:45:13 [INFO]: ================================================================================
+2026-03-10 12:45:13 [INFO]: Cargando datos de entidades existentes del JSON específico del worker...
+2026-03-10 12:45:13 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-10 12:45:13 [INFO]: Entidades cargadas:
+2026-03-10 12:45:13 [INFO]:    Cliente source: seededCliente ✅
+2026-03-10 12:45:13 [INFO]:    Cliente: Qa_cli_global_561
+2026-03-10 12:45:13 [INFO]: 
+2026-03-10 12:45:13 [INFO]: Environment: QA
+2026-03-10 12:45:13 [INFO]: Configuration: {
+  "tipoOperacion": "tclp2210",
+  "tipoServicio": "tclp2210",
+  "tipoViaje": "Normal",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "Pallet_Furgon_Frio_10ton",
+  "ruta": "05082025-1",
+  "origenManual": "",
+  "destinoManual": ""
+}
+2026-03-10 12:45:13 [INFO]: Fase 1: Navegar a Planificar Viajes
+2026-03-10 12:45:13 [INFO]: [PlanificarViajesPage] Navegando a la página de Planificar Viajes
+2026-03-10 12:45:18 [INFO]: Navegación exitosa
+2026-03-10 12:45:18 [INFO]: Fase 2: Completar formulario de viaje
+2026-03-10 12:45:18 [INFO]: [PlanificarViajesPage] Completando Nro Viaje: 85351
+2026-03-10 12:45:18 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Operacion: [tclp2210]
+2026-03-10 12:45:21 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Servicio: [tclp2210]
+2026-03-10 12:45:24 [INFO]: Seleccionando Cliente: Qa_cli_global spa_561
+2026-03-10 12:45:24 [INFO]: [PlanificarViajesPage] Seleccionando Cliente: [Qa_cli_global spa_561]
+2026-03-10 12:45:28 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Viaje: [Normal]
+2026-03-10 12:45:29 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-10 12:45:33 [INFO]: [PlanificarViajesPage] Seleccionando Unidad Negocio: [Defecto]
+2026-03-10 12:45:37 [INFO]: [PlanificarViajesPage] Seleccionando Codigo Carga: [Pallet_Furgon_Frio_10ton]
+2026-03-10 12:45:41 [INFO]: Intentando agregar Ruta: 05082025-1...
+2026-03-10 12:45:41 [INFO]: [PlanificarViajesPage] Añadiendo ruta: 05082025-1
+2026-03-10 12:45:45 [INFO]: [PlanificarViajesPage] Ruta [05082025-1] encontrada en la fila 1
+2026-03-10 12:45:45 [INFO]: [PlanificarViajesPage] Esperando a que Origen/Destino se completen...
+2026-03-10 12:45:45 [INFO]: Formulario completado
+2026-03-10 12:45:45 [INFO]: Fase 3: Guardar Viaje
+2026-03-10 12:45:45 [INFO]: [PlanificarViajesPage] Haciendo clic en Guardar...
+2026-03-10 12:45:45 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-10 12:45:50 [INFO]: URL post-guardado: https://moveontruckqa.bermanntms.cl/viajes/crear
+2026-03-10 12:45:50 [WARN]: ⚠️ ⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.
+2026-03-10 12:45:50 [INFO]: Boton guardar clickeado y navegacion completada
+2026-03-10 12:45:50 [INFO]: Fase 4: Verificación
+2026-03-10 12:45:50 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-10 12:45:54 [INFO]: Buscando en la grilla de Asignar usando: 85351
+2026-03-10 12:45:54 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 85351 en la grilla de Asignación...
+2026-03-10 12:45:59 [INFO]: [AsignarViajesPage] ✅ Viaje 85351 encontrado por coincidencia de texto en la fila 1
+2026-03-10 12:45:59 [INFO]: ✅ Viaje encontrado en /viajes/asignar usando búsqueda: 85351
+2026-03-10 12:45:59 [INFO]: Actualizando JSON del worker con la información del viaje...
+2026-03-10 12:45:59 [INFO]: Saved viaje.nroViaje: 85351
+2026-03-10 12:45:59 [INFO]: ================================================================================
+2026-03-10 12:45:59 [INFO]: PASO 6: ¡PLANIFICAR VIAJE COMPLETADO!
+2026-03-10 12:45:59 [INFO]: ================================================================================
+2026-03-10 12:45:59 [INFO]: Tiempo de ejecución: 45.45s
+2026-03-10 12:45:59 [INFO]: 
+2026-03-10 12:45:59 [INFO]: Detalles del viaje:
+2026-03-10 12:45:59 [INFO]:    Nro Viaje: 85351
+2026-03-10 12:45:59 [INFO]:    Cliente: Qa_cli_global spa_561
+2026-03-10 12:45:59 [INFO]:    Ruta: 05082025-1
+2026-03-10 12:45:59 [INFO]:    Status: PLANIFICADO
+2026-03-10 12:45:59 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🎫 Viaje         : [85351]                        | ID: N/A | Asociado: Qa_cli_global spa_561 | Estado: PLANIFICADO
+====================================================================================================

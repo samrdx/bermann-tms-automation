@@ -1,0 +1,26 @@
+2026-03-10 12:40:39 [INFO]: ENTORNO: QA 🧪
+2026-03-10 12:40:39 [INFO]: ✅ Cargado seededTransportista: Qa_tra_horizonte_170 (ID: 1798)
+2026-03-10 12:40:41 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-10 12:40:44 [INFO]: 📝 Completando formulario de conductor para: Qa_con_carmen Qa_con_pérez
+2026-03-10 12:40:44 [INFO]: [ConductorFormPage] Llenando usuario: mcypbq68
+2026-03-10 12:40:44 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-10 12:40:44 [INFO]: [ConductorFormPage] Llenando nombre: Qa_con_carmen
+2026-03-10 12:40:44 [INFO]: [ConductorFormPage] Llenando apellido: Qa_con_pérez
+2026-03-10 12:40:44 [INFO]: [ConductorFormPage] Llenando documento: 18.293.364-3
+2026-03-10 12:40:44 [INFO]: [BasePage] Ingresando RUT con verificación: [18.293.364-3] en #conductores-documento
+2026-03-10 12:40:46 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 18.293.364-3
+2026-03-10 12:40:46 [INFO]: [ConductorFormPage] Llenando telefono: +56985422601
+2026-03-10 12:40:46 [INFO]: [ConductorFormPage] Llenando email: qa_con_carmenqa_con_perez@hotmail.com
+2026-03-10 12:40:46 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-10 12:40:47 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-10 12:40:47 [INFO]: [ConductorFormPage] Seleccionando transportista: [Qa_tra_horizonte_170]
+2026-03-10 12:40:49 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-10 12:40:51 [INFO]: ✅ Conductor [Qa_con_carmen Qa_con_pérez] guardado exitosamente
+2026-03-10 12:40:51 [INFO]: ✅ seededConductor guardado: Qa_con_carmen Qa_con_pérez
+2026-03-10 12:40:51 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+👤 Conductor     : [Qa_con_carmen Qa_con_pérez]   | Asociado: Qa_tra_horizonte_170
+====================================================================================================

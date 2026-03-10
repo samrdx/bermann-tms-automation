@@ -1,0 +1,41 @@
+2026-03-10 12:55:45 [INFO]: ENTORNO: DEMO 🎭
+2026-03-10 12:55:45 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-10 12:55:45 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-10 12:55:48 [INFO]: ✅ Navegación exitosa
+2026-03-10 12:55:48 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-10 12:55:48 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_andes_206
+2026-03-10 12:55:48 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_andes_206
+2026-03-10 12:55:49 [INFO]: [TransportistaFormPage] Completando documento (RUT): 63888069-5
+2026-03-10 12:55:49 [INFO]: [BasePage] Ingresando RUT con verificación: [63888069-5] en #transportistas-documento
+2026-03-10 12:55:50 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 63.888.069-5
+2026-03-10 12:55:50 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-10 12:55:51 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-10 12:55:51 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-10 12:55:51 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-10 12:55:52 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region del Maule
+2026-03-10 12:55:53 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Talca
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: San Rafael
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region del Maule → Talca → San Rafael
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] Completando calle: Av. Las Condes
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] Completando altura: 623
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-10 12:55:55 [INFO]: ✅ Formulario completado
+2026-03-10 12:55:55 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-10 12:55:55 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-10 12:56:01 [INFO]: ✅ Guardado iniciado
+2026-03-10 12:56:01 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-10 12:56:03 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-10 12:56:03 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-10 12:56:03 [INFO]: 🔍 Buscando por nombre: Demo_tra_andes_206
+2026-03-10 12:56:03 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-10 12:56:05 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 210
+2026-03-10 12:56:05 [INFO]: ✅ ID del Transportista [Demo_tra_andes_206] extraído exitosamente: 210
+2026-03-10 12:56:05 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-demo.json
+2026-03-10 12:56:05 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: SEED-TRANSPORTISTA-FIREFOX
+====================================================================================================
+🏭 Transportista : [Demo_tra_andes_206]           | ID: 210
+====================================================================================================
