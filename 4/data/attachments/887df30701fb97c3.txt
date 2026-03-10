@@ -1,0 +1,206 @@
+2026-03-10 05:00:11 [INFO]: ENTORNO: DEMO 🎭
+2026-03-10 05:00:11 [INFO]: 
+2026-03-10 05:00:11 [INFO]: ================================================================================
+2026-03-10 05:00:11 [INFO]: [ViajesFinalizarTest] [FASE 1] 🚀 PREPARACIÓN DE DATOS (API)
+2026-03-10 05:00:11 [INFO]: ================================================================================
+2026-03-10 05:00:11 [INFO]: [ViajesFinalizarTest] [PASO] 🟦 Creando ecosistema de datos de prueba...
+2026-03-10 05:00:11 [INFO]: ✅ TmsApiClient inicializado
+2026-03-10 05:00:11 [INFO]: [ViajesFinalizarTest] [SUBPASO] 🔸 Configuración: Transportista=[Demo_tra_horizonte_917] Cliente=[Demo_cli_central_277] Viaje=[822849]
+2026-03-10 05:00:11 [INFO]: 🚀 UI: Creando Transportista [Demo_tra_horizonte_917] RUT: [93683377-2]
+2026-03-10 05:00:14 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [93683377-2] en input[name="Transportistas[documento]"]
+2026-03-10 05:00:16 [INFO]: ✅ RUT verificado (intento 1): 93.683.377-2
+2026-03-10 05:00:17 [INFO]: 💾 Guardando Transportista vía Inyección JS...
+2026-03-10 05:00:19 [INFO]: ✅ Transportista [Demo_tra_horizonte_917] creado exitosamente
+2026-03-10 05:00:19 [INFO]: 📍 URL después de guardar: https://demo.bermanntms.cl/transportistas/index
+2026-03-10 05:00:19 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla...
+2026-03-10 05:00:21 [INFO]: 🔍 Buscando por RUT: 93683377-2
+2026-03-10 05:00:22 [WARN]: ⚠️ ⚠️ La búsqueda por RUT falló, recurriendo a la búsqueda por nombre...
+2026-03-10 05:00:22 [INFO]: 🔎 Búsqueda completada con: Demo_tra_horizonte_917
+2026-03-10 05:00:24 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-10 05:00:24 [INFO]: ✅ ID de Transportista desde el link: 207
+2026-03-10 05:00:24 [INFO]: ✅ Transportista creado: Demo_tra_horizonte_917 | ID: 207
+2026-03-10 05:00:24 [INFO]: 🚀 UI: Creando Cliente [Demo_cli_central_277] RUT: [98549373-1]
+2026-03-10 05:00:25 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [98549373-1] en #clientes-rut
+2026-03-10 05:00:27 [INFO]: ✅ RUT verificado (intento 1): 98.549.373-1
+2026-03-10 05:00:27 [INFO]: ⚡ JS Click: button[data-id="clientes-tipo_cliente_id"]
+2026-03-10 05:00:28 [INFO]: ⚡ JS Click: button[data-id="clientes-region_id"]
+2026-03-10 05:00:30 [INFO]: ⚡ JS Click: button[data-id="clientes-ciudad_id"]
+2026-03-10 05:00:31 [INFO]: ⚡ JS Click: button[data-id="clientes-comuna_id"]
+2026-03-10 05:00:32 [INFO]: 📍 Seleccionando Polígonos (drop_zones)...
+2026-03-10 05:00:33 [INFO]: ✅ Polígonos: Seleccionar Todos clickeado
+2026-03-10 05:00:34 [INFO]: ⚡ JS Click: #btn_guardar
+2026-03-10 05:00:34 [INFO]: 📍 URL después de guardar (Cliente): https://demo.bermanntms.cl/clientes/crear
+2026-03-10 05:00:34 [INFO]: 🔍 Usando filtro de búsqueda para encontrar Cliente: Demo_cli_central_277
+2026-03-10 05:00:36 [INFO]: 🔎 Búsqueda completada con: Demo_cli_central_277
+2026-03-10 05:00:36 [INFO]: 🔎 Activando búsqueda con Enter y clic en Buscar...
+2026-03-10 05:00:36 [INFO]: ⚡ JS Click: #buscar
+2026-03-10 05:00:41 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-10 05:00:41 [WARN]: ⚠️ ⚠️ No se pudo extraer el ID de Cliente inicialmente para: Demo_cli_central_277. Intentando Rescate de Grilla...
+2026-03-10 05:00:42 [INFO]: ⚡ JS Click: #buscar
+2026-03-10 05:00:46 [INFO]: ✅ Cliente ID desde link de Rescate de Grilla: 194
+2026-03-10 05:00:46 [INFO]: 🚛 UI: Creando Vehículo [Demo_veh_PJHO21] para Transportista: Demo_tra_horizonte_917
+2026-03-10 05:00:50 [INFO]: 🚛 Seleccionando Tipo Vehículo: TRACTO
+2026-03-10 05:00:52 [INFO]: 📦 Seleccionando Capacidad: 3 KG
+2026-03-10 05:00:57 [INFO]: ✅ Vehículo creado: Demo_veh_PJHO21
+2026-03-10 05:00:57 [INFO]: 👨‍✈️ UI: Creando Conductor [Demo_con_sofía] para Transportista: Demo_tra_horizonte_917
+2026-03-10 05:00:59 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [58998458-7] en input[name="Conductores[documento]"]
+2026-03-10 05:01:01 [INFO]: ✅ RUT verificado (intento 1): 58.998.458-7
+2026-03-10 05:01:02 [INFO]: 📅 Estableciendo fecha vencimiento licencia: 10-03-2027
+2026-03-10 05:01:07 [INFO]: ✅ Conductor creado: Demo_con_sofía Demo_con_martínez
+2026-03-10 05:01:07 [INFO]: [ViajesFinalizarTest] [OK] ✅ Entidades base creadas: Vehiculo=[Demo_veh_PJHO21] Conductor=[Demo_con_sofía]
+2026-03-10 05:01:07 [INFO]: 📝 Creando contrato [228657] tipo=VENTA para: Demo_cli_central_277
+2026-03-10 05:01:10 [INFO]: 📋 Estableciendo tipo de contrato a: VENTA
+2026-03-10 05:01:10 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-10 05:01:25 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-10 05:01:26 [INFO]: 📋 Estableciendo subtipo para contrato de VENTA...
+2026-03-10 05:01:27 [INFO]: 📋 Seleccionando Cliente: "Demo_cli_central_277"
+2026-03-10 05:01:27 [INFO]: ✅ Seleccionado: DEMO_CLI_CENTRAL_277 (valor: 194)
+2026-03-10 05:01:27 [INFO]: 📅 [DEMO] Estableciendo Fecha vencimiento vía JS con Eventos...
+2026-03-10 05:01:27 [INFO]: 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto...
+2026-03-10 05:01:27 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-10 05:01:32 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-10 05:01:32 [INFO]: 🛣️ Añadiendo Ruta 47 y Carga 47_6 con entrada de tarifa LENTA...
+2026-03-10 05:01:33 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-10 05:01:33 [INFO]: ✅ Modal de carga oculto
+2026-03-10 05:01:36 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-10 05:01:37 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-10 05:01:38 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-10 05:01:41 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-10 05:01:44 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-10 05:01:44 [INFO]: 📝 Creando contrato [936449] tipo=COSTO para: Demo_tra_horizonte_917
+2026-03-10 05:01:46 [INFO]: 📋 Estableciendo tipo de contrato a: COSTO
+2026-03-10 05:01:46 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-10 05:02:01 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-10 05:02:02 [INFO]: 📋 Seleccionando Transportista: "Demo_tra_horizonte_917"
+2026-03-10 05:02:02 [INFO]: ✅ Seleccionado: DEMO_TRA_HORIZONTE_917 (valor: 207)
+2026-03-10 05:02:03 [INFO]: 📅 [DEMO] Estableciendo Fecha vencimiento vía JS con Eventos...
+2026-03-10 05:02:03 [INFO]: 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto...
+2026-03-10 05:02:03 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-10 05:02:08 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-10 05:02:08 [INFO]: 🛣️ Añadiendo Ruta 47 y Carga 47_6 con entrada de tarifa LENTA...
+2026-03-10 05:02:09 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-10 05:02:09 [INFO]: ✅ Modal de carga oculto
+2026-03-10 05:02:11 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-10 05:02:12 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-10 05:02:14 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-10 05:02:17 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-10 05:02:20 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-10 05:02:20 [INFO]: [ViajesFinalizarTest] [OK] ✅ Contratos creados y asociados.
+2026-03-10 05:02:20 [INFO]: [ViajesFinalizarTest] Estabilizando navegador antes de crear viaje...
+2026-03-10 05:02:23 [INFO]: [ViajesFinalizarTest] Limpiando modales residuales post-contratos...
+2026-03-10 05:02:24 [INFO]: 🚚 UI: Creando Viaje [822849] para Cliente [Demo_cli_central_277]
+2026-03-10 05:02:26 [INFO]: 📝 Llenando formulario (Reintento: false)...
+2026-03-10 05:02:26 [INFO]: 📋 Seleccionando Tipo Operación: "Distribución"
+2026-03-10 05:02:27 [INFO]: ✅ Tipo Operación seleccionado
+2026-03-10 05:02:27 [INFO]: 📋 Seleccionando Tipo Servicio: "Lcl"
+2026-03-10 05:02:28 [INFO]: ✅ Tipo Servicio seleccionado
+2026-03-10 05:02:28 [INFO]: 📋 Seleccionando Cliente: "Demo_cli_central_277"
+2026-03-10 05:02:29 [INFO]: ✅ Cliente seleccionado
+2026-03-10 05:02:30 [INFO]: 📋 Seleccionando Tipo Viaje: "DIRECTO"
+2026-03-10 05:02:31 [INFO]: ✅ Tipo Viaje seleccionado
+2026-03-10 05:02:31 [INFO]: 📋 Seleccionando Unidad Negocio: "Defecto"
+2026-03-10 05:02:32 [INFO]: ✅ Unidad Negocio seleccionado
+2026-03-10 05:02:32 [INFO]: 📍 PASO 1: Abriendo dropdown Origen...
+2026-03-10 05:02:34 [INFO]: 📍 PASO 2: Seleccionando "233_CD SuperZoo_Quilicura"...
+2026-03-10 05:02:35 [INFO]: ✅ Origen seleccionado: 233_CD SuperZoo_Quilicura
+2026-03-10 05:02:35 [INFO]: 📍 PASO 3: Abriendo dropdown Destino...
+2026-03-10 05:02:37 [INFO]: 📍 PASO 4: Seleccionando "Divisa"...
+2026-03-10 05:02:38 [INFO]: ✅ Destino seleccionado: Divisa
+2026-03-10 05:02:40 [INFO]: 📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que viajes-carga_id tenga la opción CONTENEDOR DRY)...
+2026-03-10 05:02:41 [INFO]: 📋 Estado del formulario antes de guardar: viajes-nro_viaje="822849" | tipo_operacion_form="Distribución" (opts:9) | viajes-tipo_servicio_id="Lcl" (opts:2) | viajes-cliente_id="Demo_cli_central_277" (opts:190) | viajes-tipo_viaje_id="DIRECTO" (opts:4) | viajes-unidad_negocio_id="Defecto" (opts:9) | viajes-carga_id="CONTENEDOR DRY" (opts:2) | _origendestinoform-origen="233_CD SuperZoo_Quilicura" (opts:838) | _origendestinoform-destino="Divisa" (opts:838)
+2026-03-10 05:02:41 [INFO]: 💾 Haciendo clic en Guardar...
+2026-03-10 05:02:44 [INFO]: ⏳ Verificando creación del viaje...
+2026-03-10 05:02:44 [INFO]: ✅ Viaje [822849] creado exitosamente (toast exacto)
+2026-03-10 05:02:44 [INFO]: [ViajesFinalizarTest] [OK] ✅ Viaje [822849] planificado correctamente
+2026-03-10 05:02:44 [INFO]: 
+2026-03-10 05:02:44 [INFO]: ================================================================================
+2026-03-10 05:02:44 [INFO]: [ViajesFinalizarTest] [FASE 2] 🚀 ASIGNACIÓN DEL VIAJE [822849]
+2026-03-10 05:02:44 [INFO]: ================================================================================
+2026-03-10 05:02:44 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-10 05:02:46 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 822849
+2026-03-10 05:02:46 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 822849 en la grilla de Asignación...
+2026-03-10 05:02:51 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 822849
+2026-03-10 05:02:53 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-10 05:02:53 [INFO]: [ViajesFinalizarTest] Selección robusta Transportista: "Demo_tra_horizonte_917"
+2026-03-10 05:02:57 [INFO]: [ViajesFinalizarTest] Transportista verificado: Demo_tra_horizonte_917
+2026-03-10 05:02:57 [INFO]: [ViajesFinalizarTest] Esperando cascada AJAX (carga de vehículos/conductores)...
+2026-03-10 05:02:58 [INFO]: [ViajesFinalizarTest] Seleccionando Vehículo: Demo_veh_PJHO21
+2026-03-10 05:02:59 [INFO]: [ViajesFinalizarTest] Bootstrap dropdown [viajes-vehiculo_uno_id] -> "Demo_veh_PJHO21"
+2026-03-10 05:02:59 [INFO]: [ViajesFinalizarTest] Seleccionando Conductor: Demo_con_sofía
+2026-03-10 05:03:00 [INFO]: [ViajesFinalizarTest] Bootstrap dropdown [viajes-conductor_id] -> "Demo_con_sofía"
+2026-03-10 05:03:00 [INFO]: [ViajesFinalizarTest] Verificación final del Transportista antes de guardar...
+2026-03-10 05:03:00 [INFO]: [ViajesFinalizarTest] Transportista confirmado: "Demo_tra_horizonte_917"
+2026-03-10 05:03:01 [INFO]: [ViajesFinalizarTest] Guardando asignación...
+2026-03-10 05:03:01 [INFO]: [ViajesFinalizarTest] Verificando asignación: esperando redirect a /viajes/asignar...
+2026-03-10 05:03:04 [INFO]: [ViajesFinalizarTest] Redirected to: https://demo.bermanntms.cl/viajes/asignar
+2026-03-10 05:03:06 [INFO]: [ViajesFinalizarTest] Search input found via selector: #search
+2026-03-10 05:03:06 [INFO]: [ViajesFinalizarTest] Buscando viaje: 822849
+2026-03-10 05:03:07 [INFO]: [ViajesFinalizarTest] [Demo fallback] nroViaje no visible como texto. Verificando por conteo de filas...
+2026-03-10 05:03:07 [INFO]: [ViajesFinalizarTest] [Demo] Fila unica encontrada. Texto: 	6613	N/A	-	DIRECTO	2026-03-10 02:02:42	Demo_cli_central_277	Asignado	233_CD SuperZoo_Quilicura	Divisa	Demo_con_sofía De
+2026-03-10 05:03:07 [INFO]: [ViajesFinalizarTest] [Demo] Viaje [822849] verificado: fila unica con estado "Asignado"
+2026-03-10 05:03:07 [INFO]: [ViajesFinalizarTest] [OK] ✅ Viaje [822849] asignado exitosamente a [Demo_tra_horizonte_917]
+2026-03-10 05:03:08 [INFO]: [ViajesFinalizarTest] [OK] ✅ Precondiciones y asignación listas
+2026-03-10 05:03:08 [INFO]: 
+2026-03-10 05:03:08 [INFO]: ================================================================================
+2026-03-10 05:03:08 [INFO]: [ViajesFinalizarTest] [FASE 3] 🚀 EJECUCIÓN EN MONITOREO
+2026-03-10 05:03:08 [INFO]: ================================================================================
+2026-03-10 05:03:08 [INFO]: [ViajesFinalizarTest] [PASO] 🟦 Navegando a Monitoreo...
+2026-03-10 05:03:08 [INFO]: [MonitoreoPage] 📍 Navegando a: /viajes/monitoreo
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 📍 URL Actual: https://demo.bermanntms.cl/viajes/monitoreo
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] ✅ Página de Monitoreo cargada exitosamente
+2026-03-10 05:03:11 [INFO]: [ViajesFinalizarTest] FASE 2 COMPLETADA: Página de Monitoreo cargada
+2026-03-10 05:03:11 [INFO]: [ViajesFinalizarTest] FASE 3: Buscando viaje y finalizando...
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 🚀 UI: === Iniciando Finalización para el Viaje [822849] ===
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 🔎 UI: Paso 1: Buscando Viaje...
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 🔎 UI: Buscando Viaje [822849]...
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] ⏳ UI: Esperando input #id...
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 👁️ UI: Input #id visible
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 📝 UI: Filtro de ID completado con: "822849"
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] 🔎 UI: Disparando búsqueda (multi-estrategia)...
+2026-03-10 05:03:11 [INFO]: [MonitoreoPage] ✅ UI: Buscar disparado vía JS (elemento #buscar)
+2026-03-10 05:03:12 [INFO]: [MonitoreoPage] ✅ UI: Estabilización post-búsqueda completa
+2026-03-10 05:03:12 [INFO]: [MonitoreoPage] ⏳ UI: Esperando a que la fila del viaje aparezca dentro de #registros...
+2026-03-10 05:03:12 [INFO]: [MonitoreoPage] ✅ UI: Fila de viaje reconocida dentro de #registros
+2026-03-10 05:03:12 [INFO]: [MonitoreoPage] 📜 UI: Scrolleando a la fila del viaje...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] ✅ UI: Fila de Viaje confirmada y visible
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] 🕰️ UI: Paso 2: Haciendo clic en Horario GPS (Agregar)...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] 🕰️ UI: Accediendo a "Horario GPS" (Agregar)...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] 🔎 UI: Haciendo clic en Agregar (showModalEditTripWithoutGPSManually) vía JS...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] ✅ UI: Clic en Agregar vía JS (showModalEditTripWithoutGPSManually)
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] ⏳ UI: Esperando modal #modalCambioEstadoSinGps (display: block)...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] ✅ UI: Modal #modalCambioEstadoSinGps abierto
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] 📝 UI: Paso 3: Confirmando Finalización...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] 📝 UI: Procesando modal #modalCambioEstadoSinGps...
+2026-03-10 05:03:14 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/modal-horario-gps-contenido-1773118994609.png 📸
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] 🔎 UI: Seleccionando "Finalizado" en #drop_state_without_gps...
+2026-03-10 05:03:14 [INFO]: [MonitoreoPage] ✅ UI: Finalizado seleccionado
+2026-03-10 05:03:15 [INFO]: [MonitoreoPage] 💾 UI: Haciendo clic en Guardar (#modificarEstadoViaje_sinGps)...
+2026-03-10 05:03:15 [INFO]: [MonitoreoPage] ✅ UI: Guardar clicado
+2026-03-10 05:03:17 [INFO]: [MonitoreoPage] 🧹 UI: Cerrando modales Bootstrap...
+2026-03-10 05:03:18 [INFO]: [MonitoreoPage] ✅ UI: Modales cerrados
+2026-03-10 05:03:18 [INFO]: [MonitoreoPage] 🏁 UI: Finalización confirmada exitosamente
+2026-03-10 05:03:18 [INFO]: [MonitoreoPage] 🏁 UI: === Viaje [822849] Finalizado Exitosamente ===
+2026-03-10 05:03:18 [INFO]: [ViajesFinalizarTest] FASE 3 COMPLETADA: Viaje finalizado
+2026-03-10 05:03:18 [INFO]: [ViajesFinalizarTest] [OK] ✅ Viaje [822849] buscado y finalizado correctamente
+2026-03-10 05:03:18 [INFO]: [ViajesFinalizarTest] Tiempo total: 187.08s
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_horizonte_917]       | ID: 207
+🏢 Cliente       : [Demo_cli_central_277]         | ID: 194
+🚚 Vehiculo      : [Demo_veh_PJHO21]              | Patente: Demo_veh_PJHO21 | Asociado: Demo_tra_horizonte_917
+👤 Conductor     : [Demo_con_sofía Demo_con_martínez] | Asociado: Demo_tra_horizonte_917
+🏭 Transportista : [Demo_tra_horizonte_917]      
+🏢 Cliente       : [Demo_cli_central_277]        
+🚚 Vehiculo      : [Demo_veh_PJHO21]              | Patente: Demo_veh_PJHO21 | Asociado: Demo_tra_horizonte_917
+👤 Conductor     : [Demo_con_sofía]               | Asociado: Demo_tra_horizonte_917
+🔹 Contrato Venta: [228657]                      
+🔹 Contrato Costo: [936449]                      
+📄 Contrato      : [Venta]                        | Asociado: Demo_cli_central_277
+📄 Contrato      : [Costo]                        | Asociado: Demo_tra_horizonte_917
+🎫 Viaje         : [822849]                       | Asociado: Demo_cli_central_277 | Estado: PLANIFICADO
+🎫 Viaje         : [822849]                       | Asociado: Demo_cli_central_277 | Estado: PLANIFICADO
+🎫 Viaje         : [822849]                       | Patente: Demo_veh_PJHO21 | Asociado: Demo_tra_horizonte_917 | Estado: ASIGNADO | Conductor: Demo_con_sofía
+🎫 Viaje         : [822849]                       | Estado: FINALIZADO
+====================================================================================================

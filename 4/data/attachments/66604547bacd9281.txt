@@ -1,0 +1,68 @@
+2026-03-10 04:49:11 [INFO]: ENTORNO: DEMO 🎭
+2026-03-10 04:49:11 [INFO]: ================================================================================
+2026-03-10 04:49:11 [INFO]: 🚀 Iniciando prueba de creación de Contrato Tipo Costo (Seeded Transportista)
+2026-03-10 04:49:11 [INFO]: ================================================================================
+2026-03-10 04:49:11 [INFO]: 📦 Transportista: "Demo_tra_transportes_989" (ID: 203)
+2026-03-10 04:49:11 [INFO]: 📝 Nro Contrato: 151921
+2026-03-10 04:49:11 [INFO]: Fase 2: Completando el encabezado del contrato...
+2026-03-10 04:49:11 [INFO]: [ContratosFormPage] 📝 Completando información básica del contrato (Fase 1) - Tipo: Costo
+2026-03-10 04:49:11 [INFO]: [ContratosFormPage] Navegando a la página de creación de contrato: /contrato/crear
+2026-03-10 04:49:14 [INFO]: [ContratosFormPage] ✅ Página de creación de contrato cargada y campo Nro Contrato visible
+2026-03-10 04:49:14 [INFO]: [ContratosFormPage] Completando Nro Contrato: 151921
+2026-03-10 04:49:15 [INFO]: [ContratosFormPage] 🔽 Seleccionando Tipo Contrato = Costo...
+2026-03-10 04:49:19 [INFO]: [ContratosFormPage] ✅ Tipo Costo seleccionado
+2026-03-10 04:49:19 [INFO]: [ContratosFormPage] 🔽 Seleccionando transportista: "Demo_tra_transportes_989"...
+2026-03-10 04:49:20 [INFO]: [ContratosFormPage] 🔍 El dropdown de transportista tiene caja de búsqueda — usando búsqueda
+2026-03-10 04:49:21 [INFO]: [ContratosFormPage] ✅ Transportista seleccionado
+2026-03-10 04:49:21 [INFO]: [ContratosFormPage] 📅 [DEMO] Seleccionando Fecha de vencimiento: 31/12/2026
+2026-03-10 04:49:22 [INFO]: [ContratosFormPage] ✅ Fecha de vencimiento establecida en 31/12/2026 vía daypicker
+2026-03-10 04:49:22 [INFO]: [ContratosFormPage] 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto
+2026-03-10 04:49:23 [INFO]: [ContratosFormPage] ✅ Unidad de negocio establecida en "Defecto"
+2026-03-10 04:49:23 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier fondo de modal...
+2026-03-10 04:49:24 [INFO]: [ContratosFormPage] 💾 Guardando encabezado básico del contrato...
+2026-03-10 04:49:28 [INFO]: [ContratosFormPage] ✅ Encabezado del contrato creado exitosamente con ID: 330
+2026-03-10 04:49:28 [INFO]: [ContratosFormPage] 📍 Redirigido a: https://demo.bermanntms.cl/contrato/editar/330
+2026-03-10 04:49:28 [INFO]: ✅ Header guardado — Contract ID: 330
+2026-03-10 04:49:28 [INFO]: ✅ URL después de guardar header: https://demo.bermanntms.cl/contrato/editar/330
+2026-03-10 04:49:28 [INFO]: Fase 3: Agregando ruta 715 con tarifas 20000 / 50000...
+2026-03-10 04:49:28 [INFO]: [ContratosFormPage] 🛣️ Añadiendo Ruta 47 (ambiente DEMO)
+2026-03-10 04:49:28 [INFO]: [ContratosFormPage] Haciendo clic en el botón "Añadir Ruta"
+2026-03-10 04:49:30 [INFO]: [ContratosFormPage] Esperando a que aparezca el modal de rutas...
+2026-03-10 04:49:30 [INFO]: [ContratosFormPage] ✅ Modal de rutas visible
+2026-03-10 04:49:31 [INFO]: [ContratosFormPage] Seleccionando Ruta 47
+2026-03-10 04:49:32 [INFO]: [ContratosFormPage] Cerrando modal de rutas
+2026-03-10 04:49:33 [INFO]: [ContratosFormPage] Haciendo clic en "Añadir Carga" para la Ruta 47
+2026-03-10 04:49:34 [INFO]: [ContratosFormPage] ✅ Modal de carga visible
+2026-03-10 04:49:34 [INFO]: [ContratosFormPage] Seleccionando Carga vía: //a[@id='btn_plus_ruta_47_6']//i[@class='fa fa-plus']
+2026-03-10 04:49:35 [INFO]: [ContratosFormPage] Cerrando modal de carga
+2026-03-10 04:49:36 [INFO]: [ContratosFormPage] Completando tarifas: Conductor=20000, Viaje=50000
+2026-03-10 04:49:38 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_extra_47 establecido en "50000"
+2026-03-10 04:49:40 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_conductor_47 establecido en "20000"
+2026-03-10 04:49:41 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier modal restante
+2026-03-10 04:49:42 [INFO]: [ContratosFormPage] ✅ Ruta 47 y carga añadidas exitosamente
+2026-03-10 04:49:42 [INFO]: ✅ Ruta y tarifas agregadas
+2026-03-10 04:49:42 [INFO]: Fase 4: Guardando contrato final...
+2026-03-10 04:49:42 [INFO]: [ContratosFormPage] 💾 Guardando contrato y extrayendo ID
+2026-03-10 04:49:49 [INFO]: [ContratosFormPage] URL actual después de guardar: https://demo.bermanntms.cl/contrato/index
+2026-03-10 04:49:49 [WARN]: [ContratosFormPage] ⚠️ ⚠️ Fallo al extraer el ID del contrato de la URL: https://demo.bermanntms.cl/contrato/index, devolviendo cadena vacía para confiar en la búsqueda de índice
+2026-03-10 04:49:49 [INFO]:    URL después de guardar contrato final: https://demo.bermanntms.cl/contrato/index
+2026-03-10 04:49:49 [INFO]:    Contrato ID Extraido: ""
+2026-03-10 04:49:49 [WARN]: ⚠️ ⚠️ No se pudo extraer el ID de la URL — se verificará a través de la búsqueda en el índice
+2026-03-10 04:49:49 [INFO]: Fase 5: Navegando a /contrato/index para verificar la creación...
+2026-03-10 04:49:49 [INFO]: 🔍 Intentos de verificación 1/3...
+2026-03-10 04:49:51 [INFO]: ⌨️ Buscando por transportista: Demo_tra_transportes_989
+2026-03-10 04:49:53 [INFO]: ✅ Contrato 151921 encontrado en el índice!
+2026-03-10 04:49:53 [INFO]: ✅ Contrato ID extraido del índice: 330
+2026-03-10 04:49:53 [INFO]: ✅ Contrato 151921 verificado en el índice — Nro: 151921 | ID: 330
+2026-03-10 04:49:53 [INFO]: ================================================================================
+2026-03-10 04:49:53 [INFO]: ✅ Creación de Contrato - Costo COMPLETADO
+2026-03-10 04:49:53 [INFO]:    Nro Contrato : 151921
+2026-03-10 04:49:53 [INFO]:    Contrato ID  : 330
+2026-03-10 04:49:53 [INFO]:    Transportista: Demo_tra_transportes_989
+2026-03-10 04:49:53 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+📄 Contrato      : [151921]                       | ID: 330 | Asociado: Demo_tra_transportes_989
+====================================================================================================

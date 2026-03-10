@@ -1,0 +1,21 @@
+2026-03-10 04:30:48 [INFO]: ENTORNO: QA 🧪
+2026-03-10 04:30:48 [INFO]: ✅ Transportista seeded cargado: Qa_tra_andes_222 (ID: 1793)
+2026-03-10 04:30:48 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-10 04:30:51 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_andes_222
+2026-03-10 04:30:51 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_TD8990
+2026-03-10 04:30:51 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_TD8990
+2026-03-10 04:30:52 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_andes_222
+2026-03-10 04:30:54 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_andes_222" seleccionado
+2026-03-10 04:30:54 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-10 04:30:54 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-10 04:30:55 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 3 KG
+2026-03-10 04:30:56 [INFO]: [VehiculoFormPage] ✅ Capacidad "3 KG" seleccionada
+2026-03-10 04:30:56 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-10 04:31:00 [INFO]: ✅ Vehículo [Qa_veh_TD8990] guardado exitosamente
+2026-03-10 04:31:00 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_TD8990
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🚚 Vehiculo      : [Qa_veh_TD8990]                | Patente: Qa_veh_TD8990 | Asociado: Qa_tra_andes_222
+====================================================================================================

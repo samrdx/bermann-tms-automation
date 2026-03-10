@@ -1,0 +1,49 @@
+2026-03-10 04:37:03 [INFO]: ENTORNO: QA 🧪
+2026-03-10 04:37:03 [INFO]: ================================================================================
+2026-03-10 04:37:03 [INFO]: Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: QA]
+2026-03-10 04:37:03 [INFO]: ================================================================================
+2026-03-10 04:37:03 [INFO]: Fase 1: Cargando datos del JSON...
+2026-03-10 04:37:03 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-10 04:37:03 [INFO]:    Transportista : Qa_tra_andes_222
+2026-03-10 04:37:03 [INFO]:    Vehículo      : Qa_veh_TD8990
+2026-03-10 04:37:03 [INFO]:    Conductor     : Qa_con_carlos Qa_con_fernández
+2026-03-10 04:37:03 [INFO]:    Nro Viaje     : 25819
+2026-03-10 04:37:03 [INFO]:    Search ID     : 25819 (nroViaje)
+2026-03-10 04:37:03 [INFO]: Fase 2: Navegando a /viajes/asignar... [isDemo=false]
+2026-03-10 04:37:03 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-10 04:37:07 [INFO]: 🔍 Buscando viaje "25819" y abriendo formulario de edición...
+2026-03-10 04:37:07 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 25819
+2026-03-10 04:37:07 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 25819 en la grilla de Asignación...
+2026-03-10 04:37:12 [INFO]: [AsignarViajesPage] ✅ Viaje 25819 encontrado por coincidencia de texto en la fila 1
+2026-03-10 04:37:15 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-10 04:37:15 [INFO]: ✅ Formulario de asignación de viaje cargado — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/5519
+2026-03-10 04:37:15 [INFO]: Fase 3: Seleccionando Transportista: Qa_tra_andes_222
+2026-03-10 04:37:15 [INFO]: 🛡️ Robust Selection: Transportista "Qa_tra_andes_222"
+2026-03-10 04:37:20 [INFO]: ✅ Transportista verified: Qa_tra_andes_222
+2026-03-10 04:37:20 [INFO]: Fase 4: Esperando recarga de cascada...
+2026-03-10 04:37:20 [INFO]: Fase 5: Seleccionando Vehículo: Qa_veh_TD8990
+2026-03-10 04:37:22 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "Qa_veh_TD8990"
+2026-03-10 04:37:22 [INFO]: Fase 6: Seleccionando Conductor: Qa_con_carlos Qa_con_fernández
+2026-03-10 04:37:24 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Qa_con_carlos Qa_con_fernández"
+2026-03-10 04:37:24 [INFO]: Fase 7: Verificación final anti-reset para Transportista...
+2026-03-10 04:37:24 [INFO]: ✅ Transportista confirmado: "Qa_tra_andes_222"
+2026-03-10 04:37:24 [INFO]: Fase 8: Guardar asignación...
+2026-03-10 04:37:25 [INFO]: 💾 Guardado completado
+2026-03-10 04:37:25 [INFO]: Fase 9: Verificando asignación en grilla /viajes/asignar...
+2026-03-10 04:37:29 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-10 04:37:31 [INFO]: ✅ Viaje [25819] confirmado en grilla. Estado Asignado: true
+2026-03-10 04:37:31 [INFO]: ✅ JSON actualizado: viaje.status = ASIGNADO
+2026-03-10 04:37:31 [INFO]: ================================================================================
+2026-03-10 04:37:31 [INFO]: PASO 6.5: ¡ASIGNAR VIAJE (LEGACY) COMPLETADO!
+2026-03-10 04:37:31 [INFO]:    Nro Viaje    : 25819
+2026-03-10 04:37:31 [INFO]:    Transportista: Qa_tra_andes_222
+2026-03-10 04:37:31 [INFO]:    Vehículo     : Qa_veh_TD8990
+2026-03-10 04:37:31 [INFO]:    Conductor    : Qa_con_carlos Qa_con_fernández
+2026-03-10 04:37:31 [INFO]:    Duration     : 28.09s
+2026-03-10 04:37:31 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🎫 Viaje         : [25819]                        | ID: 25819 | Patente: Qa_veh_TD8990 | Asociado: Qa_tra_andes_222 | Estado: ASIGNADO | Conductor: Qa_con_carlos Qa_con_fernández
+====================================================================================================

@@ -1,0 +1,41 @@
+2026-03-10 04:29:20 [INFO]: ENTORNO: QA 🧪
+2026-03-10 04:29:20 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-10 04:29:20 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-10 04:29:23 [INFO]: ✅ Navegación exitosa
+2026-03-10 04:29:23 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-10 04:29:23 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_transportes_172
+2026-03-10 04:29:23 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_transportes_172
+2026-03-10 04:29:23 [INFO]: [TransportistaFormPage] Completando documento (RUT): 55110895-3
+2026-03-10 04:29:23 [INFO]: [BasePage] Ingresando RUT con verificación: [55110895-3] en #transportistas-documento
+2026-03-10 04:29:25 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 55.110.895-3
+2026-03-10 04:29:25 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros Con Flota Si Genera Contrato
+2026-03-10 04:29:25 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros Con Flota Si Genera Contrato" seleccionado
+2026-03-10 04:29:26 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-10 04:29:26 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-10 04:29:26 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Tarapaca
+2026-03-10 04:29:28 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Tamarugal
+2026-03-10 04:29:29 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Huara
+2026-03-10 04:29:29 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Tarapaca → Tamarugal → Huara
+2026-03-10 04:29:29 [INFO]: [TransportistaFormPage] Completando calle: Calle Huérfanos
+2026-03-10 04:29:29 [INFO]: [TransportistaFormPage] Completando altura: 683
+2026-03-10 04:29:29 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-10 04:29:30 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-10 04:29:30 [INFO]: ✅ Formulario completado
+2026-03-10 04:29:30 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-10 04:29:30 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-10 04:29:35 [INFO]: ✅ Guardado iniciado
+2026-03-10 04:29:35 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-10 04:29:37 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-10 04:29:37 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-10 04:29:37 [INFO]: 🔍 Buscando por nombre: Qa_tra_transportes_172
+2026-03-10 04:29:37 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-10 04:29:39 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 1794
+2026-03-10 04:29:39 [INFO]: ✅ ID del Transportista [Qa_tra_transportes_172] extraído exitosamente: 1794
+2026-03-10 04:29:39 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-10 04:29:39 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: SEED-TRANSPORTISTA-FIREFOX
+====================================================================================================
+🏭 Transportista : [Qa_tra_transportes_172]       | ID: 1794
+====================================================================================================

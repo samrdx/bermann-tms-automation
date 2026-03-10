@@ -1,0 +1,14 @@
+{
+  "transportista": "Demo_tra_austral_432",
+  "cliente": "Demo_cli_industrial_237",
+  "vehiculo": "Demo_veh_EX9798",
+  "conductor": "Demo_con_sofía",
+  "nroViaje": "137667",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "182.57",
+  "ambiente": "DEMO"
+}

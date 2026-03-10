@@ -1,0 +1,14 @@
+{
+  "transportista": "Qa_tra_transportes_225",
+  "cliente": "Qa_cli_industrial_732",
+  "vehiculo": "Qa_veh_PMFD58",
+  "conductor": "Qa_con_carlos",
+  "nroViaje": "938378",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "200.44",
+  "ambiente": "QA"
+}

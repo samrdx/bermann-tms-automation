@@ -1,0 +1,21 @@
+2026-03-10 04:48:00 [INFO]: ENTORNO: DEMO 🎭
+2026-03-10 04:48:00 [INFO]: ✅ Transportista seeded cargado: Demo_tra_transportes_989 (ID: 203)
+2026-03-10 04:48:00 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-10 04:48:03 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_transportes_989
+2026-03-10 04:48:03 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_WXCI19
+2026-03-10 04:48:03 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_WXCI19
+2026-03-10 04:48:04 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_transportes_989
+2026-03-10 04:48:06 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_transportes_989" seleccionado
+2026-03-10 04:48:06 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-10 04:48:06 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-10 04:48:07 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 28 TON
+2026-03-10 04:48:08 [INFO]: [VehiculoFormPage] ✅ Capacidad "28 TON" seleccionada
+2026-03-10 04:48:08 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-10 04:48:12 [INFO]: ✅ Vehículo [Demo_veh_WXCI19] guardado exitosamente
+2026-03-10 04:48:12 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_WXCI19
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🚚 Vehiculo      : [Demo_veh_WXCI19]              | Patente: Demo_veh_WXCI19 | Asociado: Demo_tra_transportes_989
+====================================================================================================

@@ -1,0 +1,26 @@
+2026-03-10 04:48:50 [INFO]: ENTORNO: DEMO 🎭
+2026-03-10 04:48:50 [INFO]: ✅ Cargado seededTransportista: Demo_tra_andes_450 (ID: 204)
+2026-03-10 04:48:51 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-10 04:48:54 [INFO]: 📝 Completando formulario de conductor para: Demo_con_elena Demo_con_torres
+2026-03-10 04:48:54 [INFO]: [ConductorFormPage] Llenando usuario: encvcl92
+2026-03-10 04:48:54 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-10 04:48:54 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_elena
+2026-03-10 04:48:54 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_torres
+2026-03-10 04:48:54 [INFO]: [ConductorFormPage] Llenando documento: 41.688.875-2
+2026-03-10 04:48:54 [INFO]: [BasePage] Ingresando RUT con verificación: [41.688.875-2] en #conductores-documento
+2026-03-10 04:48:56 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 41.688.875-2
+2026-03-10 04:48:56 [INFO]: [ConductorFormPage] Llenando telefono: +56932674707
+2026-03-10 04:48:56 [INFO]: [ConductorFormPage] Llenando email: demo_con_elenademo_con_torres@gmail.com
+2026-03-10 04:48:56 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-10 04:48:57 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-10 04:48:57 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_andes_450]
+2026-03-10 04:48:58 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-10 04:49:01 [INFO]: ✅ Conductor [Demo_con_elena Demo_con_torres] guardado exitosamente
+2026-03-10 04:49:01 [INFO]: ✅ seededConductor guardado: Demo_con_elena Demo_con_torres
+2026-03-10 04:49:01 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_elena Demo_con_torres] | Asociado: Demo_tra_andes_450
+====================================================================================================

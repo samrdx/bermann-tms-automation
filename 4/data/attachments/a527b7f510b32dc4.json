@@ -1,0 +1,14 @@
+{
+  "transportista": "Demo_tra_horizonte_917",
+  "cliente": "Demo_cli_central_277",
+  "vehiculo": "Demo_veh_PJHO21",
+  "conductor": "Demo_con_sofía",
+  "nroViaje": "822849",
+  "contratos": [
+    "Costo",
+    "Venta"
+  ],
+  "estadoFinal": "FINALIZADO",
+  "duracionSegundos": "187.08",
+  "ambiente": "DEMO"
+}

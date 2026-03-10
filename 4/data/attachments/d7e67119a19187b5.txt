@@ -1,0 +1,44 @@
+2026-03-10 04:30:15 [INFO]: ENTORNO: QA 🧪
+2026-03-10 04:30:15 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-10 04:30:15 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-10 04:30:18 [INFO]: ✅ Navegación correcta
+2026-03-10 04:30:18 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-10 04:30:18 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_industrial_497
+2026-03-10 04:30:18 [INFO]: [ClienteFormPage] Completando RUT: 85806659-K
+2026-03-10 04:30:18 [INFO]: [BasePage] Ingresando RUT con verificación: [85806659-K] en #clientes-rut
+2026-03-10 04:30:20 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 85806659K, Obtenido: 85806659. Usando JS para forzar valor...
+2026-03-10 04:30:20 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-10 04:30:20 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-10 04:30:20 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_industrial spa_497
+2026-03-10 04:30:21 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-10 04:30:21 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-10 04:30:22 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-10 04:30:22 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-10 04:30:23 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de los Lagos
+2026-03-10 04:30:24 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Palena
+2026-03-10 04:30:26 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Futaleufú
+2026-03-10 04:30:26 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de los Lagos → Palena → Futaleufú
+2026-03-10 04:30:26 [INFO]: [ClienteFormPage] Completando calle: Av. Apoquindo
+2026-03-10 04:30:26 [INFO]: [ClienteFormPage] Completando altura: 488
+2026-03-10 04:30:26 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-10 04:30:27 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 570/570
+2026-03-10 04:30:27 [INFO]: ✅ Formulario Completado
+2026-03-10 04:30:27 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-10 04:30:27 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-10 04:30:32 [INFO]: ✅ Guardar iniciado
+2026-03-10 04:30:32 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-10 04:30:34 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-10 04:30:34 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-10 04:30:34 [INFO]: 🔍 Buscando por RUT: 85806659-K (limpio: 85806659K)
+2026-03-10 04:30:34 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-10 04:30:36 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-10 04:30:36 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 1097
+2026-03-10 04:30:36 [INFO]: ✅ Cliente [Qa_cli_industrial_497] ID: 1097 identificado exitosamente
+2026-03-10 04:30:36 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-10 04:30:36 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_industrial_497]        | ID: 1097
+====================================================================================================
