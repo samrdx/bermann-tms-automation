@@ -98,8 +98,8 @@ export default defineConfig({
 
     // --- SEEDING PROJECTS (Run before main tests that consume their data) ---
     {
-      name: 'seed-transportista-chromium',
-      testMatch: /tests\/e2e\/modules\/01-entidades\/transport\/transportistas-crear\.test\.ts/,
+      name: `seed-transportista-chromium`,
+      testMatch: 'e2e/modules/01-entidades/transport/transportistas-crear.test.ts',
       use: {
         ...devices['Desktop Chrome'],
         storageState: `playwright/.auth/user-${envName}.json`, // Use the authentication state
@@ -107,8 +107,8 @@ export default defineConfig({
       dependencies: ['setup'],
     },
     {
-      name: 'seed-transportista-firefox',
-      testMatch: /tests\/e2e\/modules\/01-entidades\/transport\/transportistas-crear\.test\.ts/,
+      name: `seed-transportista-firefox`,
+      testMatch: 'e2e/modules/01-entidades/transport/transportistas-crear.test.ts',
       use: {
         ...devices['Desktop Firefox'],
         storageState: `playwright/.auth/user-${envName}.json`, // Use the authentication state
@@ -119,39 +119,39 @@ export default defineConfig({
     // --- AUTH UTILS ---
     {
       name: 'auth-tests',
-      testMatch: /tests\/e2e\/auth\/.+\.test\.ts/,
+      testMatch: 'e2e/auth/**/*.test.ts',
       use: devices['Desktop Chrome'],
     },
 
     // --- BASE ENTITIES SETUP ---
     {
       name: 'base-entities-chromium',
-      testMatch: /base-entities\.setup\.ts/,
+      testMatch: 'e2e/suites/base-entities.setup.ts',
       use: devices['Desktop Chrome'],
       dependencies: ['setup'],
     },
     {
       name: 'base-entities-firefox',
-      testMatch: /base-entities\.setup\.ts/,
+      testMatch: 'e2e/suites/base-entities.setup.ts',
       use: devices['Desktop Firefox'],
       dependencies: ['setup'],
     },
-    /* 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD
-    {
-      name: 'base-entities-webkit',
-      testMatch: /base-entities\.setup\.ts/,
-      use: devices['Desktop Safari'],
-      dependencies: ['setup'],
-    },
-    */
+    // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD
+    // {
+    //   name: 'base-entities-webkit',
+    //   testMatch: 'e2e/suites/base-entities.setup.ts',
+    //   use: devices['Desktop Safari'],
+    //   dependencies: ['setup'],
+    // },
 
     // --- MAIN TEST PROJECTS ---
     {
       name: `chromium-${envName}`,
       testMatch: [
-        /tests\/e2e\/modules\/(?!01-entidades\/transport\/transportistas-crear\.test\.ts).+\.test\.ts/, // Exclude transportistas-crear.test.ts
-        /tests\/e2e\/suites\/.+\.test\.ts/,
+        'e2e/modules/**/*.test.ts',
+        'e2e/suites/**/*.test.ts',
       ],
+      testIgnore: ['**/transportistas-crear.test.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: `playwright/.auth/user-${envName}.json`,
@@ -165,9 +165,10 @@ export default defineConfig({
     {
       name: `firefox-${envName}`,
       testMatch: [
-        /tests\/e2e\/modules\/(?!01-entidades\/transport\/transportistas-crear\.test\.ts).+\.test\.ts/, // Exclude transportistas-crear.test.ts
-        /tests\/e2e\/suites\/.+\.test\.ts/,
+        'e2e/modules/**/*.test.ts',
+        'e2e/suites/**/*.test.ts',
       ],
+      testIgnore: ['**/transportistas-crear.test.ts'],
       use: {
         ...devices['Desktop Firefox'],
         storageState: `playwright/.auth/user-${envName}.json`,
@@ -176,20 +177,19 @@ export default defineConfig({
       dependencies: ['setup'],
     },
 
-    /* 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY
-     * Se mantiene comentado para referencia futura o debugging local puntual.
-    {
-      name: 'webkit',
-      testMatch: [
-        /tests\/e2e\/modules\/.+\.test\.ts/,
-        /tests\/e2e\/suites\/.+\.test\.ts/,
-      ],
-      use: {
-        ...devices['Desktop Safari'],
-        storageState: playwright/.auth/user-.json,
-      },
-      dependencies: ['setup'],
-    },
-    */
+    // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY
+    // Se mantiene comentado para referencia futura o debugging local puntual.
+    // {
+    //   name: 'webkit',
+    //   testMatch: [
+    //     'e2e/modules/**/*.test.ts',
+    //     'e2e/suites/**/*.test.ts',
+    //   ],
+    //   use: {
+    //     ...devices['Desktop Safari'],
+    //     storageState: `playwright/.auth/user-${envName}.json`,
+    //   },
+    //   dependencies: ['setup'],
+    // },
   ],
-});
+});
