@@ -62,6 +62,7 @@ export class EntityTracker {
       'Conductor': '👤',
       'Contrato': '📄',
       'Viaje': '🎫',
+      'Prefactura': '💳',
       'Finanzas': '💰'
     };
 

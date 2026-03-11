@@ -52,8 +52,8 @@ export class VehiculoHelper {
         await vehiculoPage.selectTipoRampla('Plana');
 
         // 5. Select Capacity
-        // Using '3 KG' as shown in the dropdown
-        await vehiculoPage.selectCapacidad('3 KG');
+        // Using '1 a 12 TON' as requested for the new QA standards
+        await vehiculoPage.selectCapacidad('1 a 12 TON');
 
         // 6. Save
         await vehiculoPage.clickGuardar();

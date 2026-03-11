@@ -7,7 +7,7 @@ const logger = createLogger('ContratosFormPage');
 
 /**
  * Environment-specific route/cargo configuration.
- * QA uses Route 715 / Cargo 715_19.
+ * QA uses Route 1413 / Cargo 1413_2.
  * Demo uses Route 47 / Cargo 47_6.
  */
 interface RouteConfig {
@@ -245,7 +245,7 @@ export class ContratosFormPage extends BasePage {
 
   /**
    * Opens modal, selects the correct Route & Cargo per environment, fills tariffs.
-   * QA: Route 715 / Cargo 715_19
+   * QA: Route 1413 / Cargo 1413_2
    * Demo: Route 47 / Cargo 47_6
    */
   async addSpecificRouteAndCargo(
@@ -617,13 +617,13 @@ export class ContratosFormPage extends BasePage {
     }
     // QA (default)
     return {
-      routeId: '715',
-      routeButtonSelector: 'a#btn_plus_715',
-      addCargoButtonSelector: '#btn_click_715',
-      cargoButtonSelector: 'a#btn_plus_ruta_715_19',
-      tarifaViajeSelector: '#txt_tarifa_extra_715',
-      tarifaConductorSelector: '#txt_tarifa_conductor_715',
-      tarifaClienteSelector: '#txt_tarifa_cliente_715',
+      routeId: '1413',
+      routeButtonSelector: 'a#btn_plus_1413',
+      addCargoButtonSelector: '#btn_click_1413',
+      cargoButtonSelector: 'a#btn_plus_ruta_1413_2',
+      tarifaViajeSelector: '#txt_tarifa_extra_1413',
+      tarifaConductorSelector: '#txt_tarifa_conductor_1413',
+      tarifaClienteSelector: '#txt_tarifa_cliente_1413',
     };
   }
 
@@ -654,9 +654,11 @@ export class ContratosFormPage extends BasePage {
       backdrops.forEach(backdrop => backdrop.remove());
 
       // Remove modal-open class from body
-      document.body.classList.remove('modal-open');
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+      document.body?.classList.remove('modal-open');
+      if (document.body) {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
     });
 
     await this.page.waitForTimeout(500);

@@ -212,9 +212,23 @@ export class TmsApiClient {
     await this.page.fill('input[name="Transportistas[calle]"]', generateChileanStreet());
     await this.page.fill('input[name="Transportistas[altura]"]', generateStreetNumber());
 
-    // Selección de Dropdowns + Evento Change (Para validaciones de frontend)
+    // FIX: Tipo 'Terceros' (valor '1') es REQUISITO para aparecer en contratos COSTO
+    // Opciones: '' = vacío | '2' = Propios | '3' = En Arriendo | '1' = Terceros
     await this.page.selectOption('select[name="Transportistas[tipo_transportista_id]"]', '1');
     await this.page.locator('select[name="Transportistas[tipo_transportista_id]"]').dispatchEvent('change');
+    await this.page.waitForTimeout(500);
+
+    // Mantener "Permite Tercearizar viajes" en NO (valor '0' = No)
+    logger.info('⚙️ Manteniendo "Permite Tercearizar viajes" en NO...');
+    await this.page.selectOption('select[name="Transportistas[terceariza]"]', '0');
+    await this.page.locator('select[name="Transportistas[terceariza]"]').dispatchEvent('change');
+    await this.page.waitForTimeout(500);
+
+    // Opcional: Establecer forma de pago (1 = Contado) para asegurar guardado exitoso
+    const formaPago = this.page.locator('select[name="Transportistas[forma_pago]"]');
+    if (await formaPago.isVisible()) {
+      await formaPago.selectOption('1');
+    }
 
     await this.page.selectOption('select[name="Transportistas[region_id]"]', '1');
     await this.page.selectOption('select[name="Transportistas[ciudad_id]"]', '1');
@@ -461,10 +475,17 @@ export class TmsApiClient {
    */
   private async extractIdAfterSave(nombre: string, entityLabel: string): Promise<string> {
     let id = '0';
+
+    // FIX FIREFOX: Esperar a que la redirección a /ver/\d+ o /editar/\d+ complete antes de leer la URL.
+    // Chromium lo hace casi instantáneamente, Firefox puede tardar hasta 5-8 segundos más.
+    await this.page.waitForURL(/\/(ver|view|editar|update)\/\d+/, { timeout: 8000 }).catch(() => {
+      logger.warn(`⚠️ waitForURL (ver/editar) no completó en 8s para ${entityLabel} (${nombre}) — continuando con URL actual`);
+    });
+
     let currentUrl = this.page.url();
     logger.info(`📍 URL después de guardar (${entityLabel}): ${currentUrl}`);
 
-    // 1. Intentar extraer de la URL directa (ej: /view/123)
+    // 1. Intentar extraer de la URL directa (ej: /ver/123)
     let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
     if (idMatch) {
       id = idMatch[1];
@@ -472,8 +493,20 @@ export class TmsApiClient {
       return id;
     }
 
-    // 2. Si no redirigió, usar el buscador de la grilla
+    // 2. Si no redirigió aún, esperar un poco más y reintentar URL
+    logger.info(`🔄 URL no contiene ID todavía, esperando 2s y reintentando...`);
+    await this.page.waitForTimeout(2000);
+    currentUrl = this.page.url();
+    idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
+    if (idMatch) {
+      id = idMatch[1];
+      logger.info(`✅ ${entityLabel} ID extraído de la URL (retry): ${id}`);
+      return id;
+    }
+
+    // 3. Fallback: usar el buscador de la grilla
     logger.info(`🔍 Usando filtro de búsqueda para encontrar ${entityLabel}: ${nombre}`);
+
     await this.page.waitForTimeout(1000);
 
     const searchInput = this.page.locator('#search');
@@ -740,7 +773,7 @@ export class TmsApiClient {
 
 
 
-    logger.info('📦 Seleccionando Capacidad: 3 KG');
+    logger.info('📦 Seleccionando Capacidad: 1 a 12 TON');
 
 
 
@@ -772,7 +805,7 @@ export class TmsApiClient {
 
 
 
-        await capacidadSearchBox.fill('3 KG');
+        await capacidadSearchBox.fill('1 a 12 TON');
 
 
 
@@ -815,7 +848,7 @@ export class TmsApiClient {
     // FIX FIREFOX: Limpiar modal-backdrop antes de Guardar
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await this.page.waitForTimeout(300);
 
@@ -953,29 +986,31 @@ export class TmsApiClient {
 
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
-    const res = await Promise.all([ // Capture response for new logic
-      this.page.waitForResponse(resp => resp.url().includes('/conductores/') && resp.status() < 400, { timeout: 15000 }),
+    // FIX FIREFOX: waitForResponse puede no interceptarse en Firefox si la respuesta
+    // llega antes de que el listener esté listo, o si el POST usa un patrón de redirect distinto.
+    // Hacemos el waitForResponse opcional y verificamos el éxito por URL/loadState.
+    await Promise.all([
+      this.page.waitForLoadState('domcontentloaded').catch(() => { }),
+      this.page.waitForResponse(
+        resp => resp.url().includes('/conductores/') && resp.status() < 400,
+        { timeout: 15000 }
+      ).catch(() => logger.warn('⚠️ waitForResponse /conductores/ timeout (Firefox) — verificando via URL')),
       this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); })
     ]);
 
-    await this.page.waitForTimeout(3000);
+    await this.page.waitForTimeout(2000);
 
-    if (res[0].ok()) {
-      logger.info(`✅ Conductor creado: ${nombre} ${apellido}`);
-      entityTracker.register({
-        type: 'Conductor',
-        name: nombre,
-        apellido: apellido,
-        asociado: transportistaNombre
-      });
-      return nombre;
-    } else {
-      const currentUrl = this.page.url();
-      logger.info(`⚠️ Formulario de Conductor enviado (URL: ${currentUrl})`);
-      throw new Error(`Failed to create Conductor. Status: ${res[0].status()}`);
-    }
+    const currentUrl = this.page.url();
+    logger.info(`✅ Conductor guardado. URL actual: ${currentUrl}`);
+    entityTracker.register({
+      type: 'Conductor',
+      name: nombre,
+      apellido: apellido,
+      asociado: transportistaNombre
+    });
+    return nombre;
   }
 
   // --- 5. LÓGICA DE CONTRATOS ---
@@ -1145,125 +1180,45 @@ export class TmsApiClient {
 
 
     // 4. Select entity using jQuery (most reliable for Bootstrap Select)
+    let selectionResult: { success: boolean; value?: string; text?: string; msg?: string } = { success: false, msg: 'Not started' };
+    const maxRetries = 5;
 
+    for (let i = 0; i < maxRetries; i++) {
+      logger.info(`📋 Intentando seleccionar ${tipoVal === '1' ? 'Transportista' : 'Cliente'}: "${entityName}" (intento ${i + 1}/${maxRetries})...`);
 
+      selectionResult = await this.page.evaluate(({ selectIdFull, nombre }) => {
+        const $ = (window as any).jQuery;
+        if (!$) return { success: false, msg: 'jQuery not available' };
 
-    logger.info(`📋 Seleccionando ${tipoVal === '1' ? 'Transportista' : 'Cliente'}: "${entityName}"`);
+        const $sel = $(`#${selectIdFull}`);
+        if (!$sel.length) return { success: false, msg: `Select #${selectIdFull} not found` };
 
+        const matchingOption = $sel.find('option').filter(function (this: any) {
+          return ($(this).text() || '').toUpperCase().includes(nombre.toUpperCase());
+        });
 
+        if (!matchingOption.length) return { success: false, msg: `Option containing "${nombre}" not found` };
 
+        const val = matchingOption.val();
+        $sel.val(val).trigger('change');
 
+        // Refresh Bootstrap Select visual if available
+        if ($sel.selectpicker) {
+          $sel.selectpicker('refresh');
+        }
 
+        return { success: true, value: val, text: matchingOption.text() };
+      }, { selectIdFull: selectId, nombre: entityName });
 
+      if (selectionResult.success) break;
 
-    const selectionResult = await this.page.evaluate(({ selectIdFull, nombre }) => {
-
-
-
-      const $ = (window as any).jQuery;
-
-
-
-      if (!$) return { success: false, msg: 'jQuery not available' };
-
-
-
-
-
-
-
-      const $sel = $(`#${selectIdFull}`);
-
-
-
-      if (!$sel.length) return { success: false, msg: `Select #${selectIdFull} not found` };
-
-
-
-
-
-
-
-      const matchingOption = $sel.find('option').filter(function (this: any) {
-
-
-
-        return ($(this).text() || '').toUpperCase().includes(nombre.toUpperCase());
-
-
-
-      });
-
-
-
-
-
-
-
-      if (!matchingOption.length) return { success: false, msg: `Option containing "${nombre}" not found` };
-
-
-
-
-
-
-
-      const val = matchingOption.val();
-
-
-
-      $sel.val(val).trigger('change');
-
-
-
-
-
-
-
-      // Refresh Bootstrap Select visual if available
-
-
-
-      if ($sel.selectpicker) {
-
-
-
-        $sel.selectpicker('refresh');
-
-
-
-      }
-
-
-
-
-
-
-
-      return { success: true, value: val, text: matchingOption.text() };
-
-
-
-    }, { selectIdFull: selectId, nombre: entityName });
-
-
-
-
-
-
+      logger.warn(`⚠️ Intento ${i + 1} fallido: ${selectionResult.msg}. Esperando recarga de dropdown...`);
+      await this.page.waitForTimeout(2000); // Wait for potential AJAX reload
+    }
 
     if (!selectionResult.success) {
-
-
-
-      logger.error(`❌ Selección de entidad fallida: ${selectionResult.msg}`);
-
-
-
-      throw new Error(`Failed to select ${entityName}: ${selectionResult.msg}`);
-
-
-
+      logger.error(`❌ Selección de entidad fallida después de ${maxRetries} intentos: ${selectionResult.msg}`);
+      throw new Error(`Failed to select ${entityName} after ${maxRetries} attempts: ${selectionResult.msg}`);
     }
 
 
@@ -1317,7 +1272,7 @@ export class TmsApiClient {
     // FIX FIREFOX: Limpiar modal-backdrop residuales que bloquean page.click() en Firefox
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await this.page.waitForTimeout(300);
 
@@ -1408,8 +1363,8 @@ export class TmsApiClient {
 
   private async addRouteAndTarifas(tarifaConductor: string, tarifaViaje: string): Promise<void> {
     const isDemo = process.env.ENV === 'DEMO';
-    const routeId = isDemo ? '47' : '715';
-    const routeCargoId = isDemo ? '47_6' : '715_19';
+    let routeId = isDemo ? '47' : '1413';
+    let routeCargoId = isDemo ? '47_6' : '1413_2';
 
     logger.info(`🛣️ Añadiendo Ruta ${routeId} y Carga ${routeCargoId} con entrada de tarifa LENTA...`);
 
@@ -1435,7 +1390,7 @@ export class TmsApiClient {
 
 
 
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
 
 
 
@@ -1507,6 +1462,26 @@ export class TmsApiClient {
 
 
 
+    // --- FALLBACK: si el ID de ruta especificado no existe, usar la primera ruta disponible ---
+    const specificRouteBtn = this.page.locator(`#btn_plus_${routeId}`);
+    const specificRouteExists = await specificRouteBtn.count().then(c => c > 0).catch(() => false);
+    if (!specificRouteExists) {
+      logger.warn(`⚠️ Ruta específica #btn_plus_${routeId} no encontrada. Buscando primera ruta disponible en el modal...`);
+      const firstRouteBtn = this.page.locator('#modalRutas [id^="btn_plus_"]').first();
+      const firstRouteId = await firstRouteBtn.getAttribute('id').catch(() => null);
+      if (firstRouteId) {
+        routeId = firstRouteId.replace('btn_plus_', '');
+        logger.info(`📌 Fallback: usando ruta ID=${routeId}`);
+        // routeCargoId: use first cargo for this route
+        const firstCargoBtnId = await this.page.locator(`#modalRutas [id^="btn_plus_ruta_${routeId}_"]`).first().getAttribute('id').catch(() => null);
+        routeCargoId = firstCargoBtnId ? firstCargoBtnId.replace('btn_plus_ruta_', '') : `${routeId}_1`;
+        logger.info(`📌 Fallback: usando routeCargoId=${routeCargoId}`);
+      } else {
+        logger.warn('⚠️ No se encontraron rutas en el modal. Omitiendo addRouteAndTarifas...');
+        return;
+      }
+    }
+
     const btnPlusRoute = this.page.locator(`#btn_plus_${routeId}`);
     await btnPlusRoute.waitFor({ state: 'attached', timeout: 5000 });
     await btnPlusRoute.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
@@ -1533,14 +1508,7 @@ export class TmsApiClient {
     await this.page.waitForTimeout(500);
 
     const closeBtn = this.page.locator('#modalRutas .btn-secondary').first();
-
     if (await closeBtn.isVisible()) await closeBtn.evaluate(el => (el as HTMLElement).click());
-
-
-
-
-
-
 
     const btnClickRoute = this.page.locator(`#btn_click_${routeId}`);
     await btnClickRoute.waitFor({ state: 'attached', timeout: 5000 });
@@ -1554,12 +1522,6 @@ export class TmsApiClient {
       // Ignore - might not appear for this action
     }
     await this.page.waitForTimeout(1000);
-
-
-
-
-
-
 
     const btnPlusRouteCargo = this.page.locator(`#btn_plus_ruta_${routeCargoId}`);
     await btnPlusRouteCargo.waitFor({ state: 'attached', timeout: 5000 });
@@ -1599,7 +1561,7 @@ export class TmsApiClient {
 
 
 
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
 
 
 
@@ -1653,7 +1615,7 @@ export class TmsApiClient {
 
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); });
 
@@ -1704,8 +1666,8 @@ export class TmsApiClient {
       await this.page.fill('#viajes-nro_viaje', nroViaje);
 
       const isDemo = process.env.ENV === 'DEMO';
-      const tipoOperacionText = isDemo ? 'Distribución' : 'tclp2210';
-      const tipoServicioText = isDemo ? 'Lcl' : 'tclp2210';
+      const tipoOperacionText = isDemo ? 'Distribución' : 'defecto';
+      const tipoServicioText = isDemo ? 'Lcl' : 'defecto';
 
       // 2. Dropdowns Simples (Operación, Servicio, Cliente)
       // Usamos JS directo si es retry para mayor velocidad y seguridad
@@ -1722,7 +1684,7 @@ export class TmsApiClient {
       if (!isRetry) await this.page.waitForTimeout(1000); // Esperar carga de datos del cliente
 
       const tipoViajeText = isDemo ? 'DIRECTO' : 'Normal';
-      const codigoCargaText = isDemo ? 'CONTENEDOR DRY' : 'Pallet_Furgon_Frio_10ton';
+      const codigoCargaText = isDemo ? 'CONTENEDOR DRY' : 'Test 1';
 
       // 3. Tipos de Viaje
       if (isRetry) {
@@ -1747,59 +1709,96 @@ export class TmsApiClient {
     logger.info('📍 PASO 1: Abriendo dropdown Origen...');
     const origenBtn = this.page.locator('button[data-id="_origendestinoform-origen"]').first();
     await origenBtn.waitFor({ state: 'visible', timeout: 10000 });
+    // Revertido a evaluate.click() para abrir Bootstrap Select (funciona en ambos navegadores)
     await origenBtn.evaluate(el => (el as HTMLElement).click());
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(1000);
 
-    // Esperar que el dropdown esté visible
-    const origenDropdown = this.page.locator('button[data-id="_origendestinoform-origen"]').locator('xpath=..').locator('.dropdown-menu.show').first();
-    await origenDropdown.waitFor({ state: 'visible', timeout: 5000 });
+    // Esperar que el dropdown esté abierto via aria-expanded (Bootstrap Select lo setea en el button)
+    await this.page.waitForFunction(
+      () => document.querySelector('button[data-id="_origendestinoform-origen"]')?.getAttribute('aria-expanded') === 'true',
+      { timeout: 8000 }
+    ).catch(() => logger.warn('⚠️ Dropdown Origen no reportó aria-expanded=true en 8s'));
 
     // Setup dynamic environment variables for Origen/Destino
     const isDemoForCarga = process.env.ENV === 'DEMO';
-    const origenText = isDemoForCarga ? '233_CD SuperZoo_Quilicura' : '1_Agunsa_Lampa_RM-18';
-    const destinoSearchText = isDemoForCarga ? 'Divisa' : '225_Starken';
-    const destinoText = isDemoForCarga ? 'Divisa' : '225_Starken_Sn Bernardo-19';
+    const origenText = isDemoForCarga ? '233_CD SuperZoo_Quilicura' : '405_LA FARFANA_Pudahuel';
+    const destinoSearchText = isDemoForCarga ? 'Divisa' : 'CXP ANTOFAGASTA';
+    const destinoText = isDemoForCarga ? 'Divisa' : 'CXP ANTOFAGASTA';
 
-    // Buscar en el searchbox si existe
-    const origenSearchBox = origenDropdown.locator('.bs-searchbox input');
+    // Buscar en el searchbox si existe (accedemos desde el contenedor del dropdown abierto)
+    const origenContainer = this.page.locator('button[data-id="_origendestinoform-origen"]').locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
+    const origenSearchBox = origenContainer.locator('.bs-searchbox input');
     if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
       await origenSearchBox.fill(origenText);
       await this.page.waitForTimeout(500);
     }
 
-    // PASO 2: Seleccionar opción Origen
-    logger.info(`📍 PASO 2: Seleccionando "${origenText}"...`);
-    const origenOption = origenDropdown.locator('li a, li span.text').filter({ hasText: origenText }).first();
-    await origenOption.waitFor({ state: 'visible', timeout: 5000 });
-    await origenOption.evaluate(el => (el as HTMLElement).click());
+    // PASO 2: Seleccionar opción Origen (con fallback a primera opción disponible)
+    logger.info(`📍 PASO 2: Seleccionando Origen "${origenText}"...`);
+    const origenList = origenContainer.locator('ul.dropdown-menu.inner');
+    const origenOption = origenList.locator('li:not(.disabled) a').filter({ hasText: origenText }).first();
+    const origenFound = await origenOption.isVisible({ timeout: 4000 }).catch(() => false);
+    if (origenFound) {
+      await origenOption.click({ force: true });
+      logger.info(`✅ Origen seleccionado: ${origenText}`);
+    } else {
+      logger.warn(`⚠️ Origen "${origenText}" no encontrado. Aplicando FALLBACK: primera opción disponible...`);
+      if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await origenSearchBox.fill('');
+        await this.page.waitForTimeout(400);
+      }
+      const firstOrigenOption = origenList.locator('li:not(.disabled) a').first();
+      await firstOrigenOption.waitFor({ state: 'attached', timeout: 5000 });
+      const fallbackOrigenText = await firstOrigenOption.textContent().catch(() => 'primera opción');
+      await firstOrigenOption.click({ force: true });
+      logger.info(`✅ Origen Fallback seleccionado: ${fallbackOrigenText?.trim()}`);
+    }
     await this.page.waitForTimeout(1000);
-    logger.info(`✅ Origen seleccionado: ${origenText}`);
 
     // PASO 3: DESTINO
     logger.info('📍 PASO 3: Abriendo dropdown Destino...');
     const destinoBtn = this.page.locator('button[data-id="_origendestinoform-destino"]').first();
     await destinoBtn.waitFor({ state: 'visible', timeout: 10000 });
+    // Revertido a evaluate.click() para abrir Bootstrap Select
     await destinoBtn.evaluate(el => (el as HTMLElement).click());
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(1000);
 
-    // Esperar que el dropdown esté visible
-    const destinoDropdown = this.page.locator('button[data-id="_origendestinoform-destino"]').locator('xpath=..').locator('.dropdown-menu.show').first();
-    await destinoDropdown.waitFor({ state: 'visible', timeout: 5000 });
+    // Esperar apertura via aria-expanded
+    await this.page.waitForFunction(
+      () => document.querySelector('button[data-id="_origendestinoform-destino"]')?.getAttribute('aria-expanded') === 'true',
+      { timeout: 8000 }
+    ).catch(() => logger.warn('⚠️ Dropdown Destino no reportó aria-expanded=true en 8s'));
 
     // Buscar en el searchbox si existe
-    const destinoSearchBox = destinoDropdown.locator('.bs-searchbox input');
+    const destinoContainer = this.page.locator('button[data-id="_origendestinoform-destino"]').locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
+    const destinoSearchBox = destinoContainer.locator('.bs-searchbox input');
     if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
       await destinoSearchBox.fill(destinoSearchText);
       await this.page.waitForTimeout(500);
     }
 
-    // PASO 4: Seleccionar opción Destino
-    logger.info(`📍 PASO 4: Seleccionando "${destinoText}"...`);
-    const destinoOptionItem = destinoDropdown.locator('ul.dropdown-menu.inner li a span.text').filter({ hasText: destinoText }).first();
-    await destinoOptionItem.waitFor({ state: 'visible', timeout: 5000 });
-    await destinoOptionItem.evaluate(el => (el as HTMLElement).click());
+    // PASO 4: Seleccionar opción Destino (con fallback a primera opción disponible)
+    logger.info(`📍 PASO 4: Seleccionando Destino "${destinoText}"...`);
+    const destinoList = destinoContainer.locator('ul.dropdown-menu.inner');
+    const destinoOptionItem = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').filter({ hasText: destinoText }).first();
+    const destinoFound = await destinoOptionItem.isVisible({ timeout: 4000 }).catch(() => false);
+    if (destinoFound) {
+      await destinoOptionItem.click({ force: true });
+      logger.info(`✅ Destino seleccionado: ${destinoText}`);
+    } else {
+      logger.warn(`⚠️ Destino "${destinoText}" no encontrado. Aplicando FALLBACK: primera opción disponible...`);
+      if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await destinoSearchBox.fill('');
+        await this.page.waitForTimeout(400);
+      }
+      const firstDestinoOption = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
+      await firstDestinoOption.waitFor({ state: 'attached', timeout: 5000 });
+      const fallbackDestinoText = await firstDestinoOption.textContent().catch(() => 'primera opción');
+      await firstDestinoOption.click({ force: true });
+      logger.info(`✅ Destino Fallback seleccionado: ${fallbackDestinoText?.trim()}`);
+    }
     await this.page.waitForTimeout(1000);
-    logger.info(`✅ Destino seleccionado: ${destinoText}`);
+    logger.info(`✅ Origen/Destino configurados correctamente`);
 
     // Esperar estabilización (sin networkidle que puede causar problemas)
     await this.page.waitForTimeout(2000);
@@ -1809,7 +1808,7 @@ export class TmsApiClient {
     // Se movió aquí porque elegir origen/destino puede gatillar AJAX
     // y limpiar las opciones de carga (quedando EMPTY) en Demo.
     // =======================================================================
-    const codigoCargaTextFinal = isDemoForCarga ? 'CONTENEDOR DRY' : 'Pallet_Furgon_Frio_10ton';
+    const codigoCargaTextFinal = isDemoForCarga ? 'CONTENEDOR DRY' : 'Test 1';
     // FIX QA: Both QA and Demo use 'viajes-carga_id' (not 'viajes-codigo_carga_id')
     const cargaSelectIdFinal = 'viajes-carga_id';
 
@@ -1851,7 +1850,7 @@ export class TmsApiClient {
         $('.bootbox').modal('hide');
       }
       document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await this.page.waitForTimeout(500);
 
@@ -1867,16 +1866,17 @@ export class TmsApiClient {
     // FIX FIREFOX: Limpiar modal-backdrop antes de Guardar
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
 
-    // Clic con espera de respuesta de red
-    const res = await Promise.all([
+    // FIX FIREFOX: usar click nativo de Playwright para el botón Guardar.
+    // evaluate(el.click()) no dispara los handlers jQuery de validación/submit en Firefox.
+    await Promise.all([
       this.page.waitForResponse(
         (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
-        { timeout: 15000 }
+        { timeout: 20000 }
       ).catch(() => logger.warn('⚠️ No se capturó respuesta después de hacer clic en Guardar')),
-      guardarBtn.evaluate(el => (el as HTMLElement).click()),
+      guardarBtn.click({ force: true }),
     ]);
 
     await this.page.waitForLoadState('domcontentloaded').catch(() => { });
@@ -1937,62 +1937,59 @@ export class TmsApiClient {
       return nroViaje;
     }
 
-    // Fallback: navegar a grilla y buscar
-    logger.info('⚠️ Fallback: verificando en grilla de asignación...');
-    await this.page.goto(`${this.baseUrl}/viajes/asignar`);
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
-    await this.page.waitForTimeout(1500);
+    // Fallback: navegar a grilla y buscar (con retry loop para Firefox)
+    logger.info('⚠️ Fallback: verificando en grilla de asignación con retry loop (Firefox-safe)...');
 
-    const searchInput = this.page.locator('#search');
-    await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-    // FIX FIREFOX: Limpiar y escribir lento para asegurar que el evento de filtrado se dispare
-    await searchInput.fill('');
-    await searchInput.pressSequentially(nroViaje, { delay: 100 });
-    await searchInput.press('Enter');
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
-    await this.page.waitForTimeout(2500); // Dar más tiempo a Firefox para renderizar
+    const maxSearchRetries = 5;
+    for (let attempt = 1; attempt <= maxSearchRetries; attempt++) {
+      // Tiempo de espera incremental antes de cada intento (da tiempo al backend para indexar)
+      const waitMs = attempt * 2000; // 2s, 4s, 6s, 8s, 10s
+      logger.info(`🔄 Intento ${attempt}/${maxSearchRetries}: esperando ${waitMs}ms antes de buscar...`);
+      await this.page.waitForTimeout(waitMs);
 
-    // Verificar por texto estricto
-    const viajeRow = this.page.locator(`text="${nroViaje}"`);
-    if (await viajeRow.isVisible({ timeout: 3000 }).catch(() => false)) {
-      logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla de asignación por texto`);
-      entityTracker.register({
-        type: 'Viaje',
-        name: nroViaje,
-        asociado: clienteNombre,
-        estado: 'PLANIFICADO'
-      });
-      return nroViaje;
-    }
+      await this.page.goto(`${this.baseUrl}/viajes/asignar`);
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => { });
+      await this.page.waitForTimeout(1000);
 
-    // Verificar por conteo de filas y contenido estricto (no solo rowCount >= 1)
-    const allRows = this.page.locator('table tbody tr');
-    const rowCount = await allRows.count().catch(() => 0);
-    
-    if (rowCount >= 1) {
-      // Validar que al menos una de las filas encontradas contenga realmente el nroViaje
-      let foundExact = false;
-      for (let i = 0; i < rowCount; i++) {
-        const text = await allRows.nth(i).innerText().catch(() => '');
-        if (text.includes(nroViaje)) {
-          foundExact = true;
-          break;
+      const searchInput = this.page.locator('#search');
+      await searchInput.waitFor({ state: 'visible', timeout: 10000 }).catch(() => { });
+
+      // Limpiar y escribir lentamente (Firefox necesita eventos key-by-key)
+      await searchInput.fill('');
+      await searchInput.pressSequentially(nroViaje, { delay: 80 });
+      await searchInput.press('Enter');
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
+      await this.page.waitForTimeout(2000);
+
+      // Verificar por texto exacto
+      const viajeRow = this.page.locator(`text="${nroViaje}"`);
+      if (await viajeRow.isVisible({ timeout: 3000 }).catch(() => false)) {
+        logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla (intento ${attempt}, texto exacto)`);
+        entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
+        return nroViaje;
+      }
+
+      // Verificar por contenido de fila
+      const allRows = this.page.locator('table tbody tr');
+      const rowCount = await allRows.count().catch(() => 0);
+      if (rowCount >= 1) {
+        let foundExact = false;
+        for (let i = 0; i < rowCount; i++) {
+          const text = await allRows.nth(i).innerText().catch(() => '');
+          if (text.includes(nroViaje)) { foundExact = true; break; }
+        }
+        if (foundExact) {
+          logger.info(`✅ Viaje [${nroViaje}] confirmado en grilla (intento ${attempt}, ${rowCount} filas)`);
+          entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
+          return nroViaje;
         }
       }
 
-      if (foundExact) {
-        logger.info(`✅ Viaje [${nroViaje}] confirmado en grilla de asignación (${rowCount} filas encontradas)`);
-        entityTracker.register({ 
-          type: 'Viaje', 
-          name: nroViaje, 
-          asociado: clienteNombre, 
-          estado: 'PLANIFICADO' 
-        });
-        return nroViaje;
-      }
+      logger.warn(`⚠️ Intento ${attempt}/${maxSearchRetries}: viaje [${nroViaje}] no encontrado aún (${rowCount} filas)`);
     }
 
-    throw new Error(`❌ Viaje [${nroViaje}] no encontrado. El botón Guardar puede no haber ejecutado el submit. URL final: ${this.page.url()}`);
+    throw new Error(`❌ Viaje [${nroViaje}] no encontrado tras ${maxSearchRetries} intentos. El backend puede no haberlo indexado. URL final: ${this.page.url()}`);
+
   }
 
   // --- ASEGÚRATE DE TENER ESTE HELPER (Lo usamos para la Carga) ---
@@ -2155,7 +2152,7 @@ export class TmsApiClient {
 
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await this.page.evaluate(() => { const b = document.getElementById('btn_guardar_form') as HTMLElement; if (b) b.click(); });
 

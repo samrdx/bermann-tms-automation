@@ -82,7 +82,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
         $('.bootbox').modal('hide');
       }
       document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await page.waitForTimeout(1000);
 
@@ -171,7 +171,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     logger.info('Guardando asignación...');
     await page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     const guardarBtn = page.locator('#btn_guardar_form');
     await guardarBtn.waitFor({ state: 'visible', timeout: 5000 });
@@ -218,7 +218,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
         $('.bootbox').modal('hide');
       }
       document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
     await page.waitForTimeout(500);
 

@@ -88,14 +88,14 @@ test.describe('[V01] Viajes - Planificar', () => {
     // =================================================================
     const isDemo = process.env.ENV === 'DEMO';
     const config = {
-      tipoOperacion: isDemo ? 'Distribución' : 'tclp2210',
-      tipoServicio: isDemo ? 'Lcl' : 'tclp2210',
+      tipoOperacion: isDemo ? 'Distribución' : 'defecto',
+      tipoServicio: isDemo ? 'Lcl' : 'defecto',
       tipoViaje: isDemo ? 'DIRECTO' : 'Normal',
       unidadNegocio: isDemo ? 'Defecto' : 'Defecto',
-      codigoCarga: isDemo ? 'CONTENEDOR DRY' : 'Pallet_Furgon_Frio_10ton',
-      ruta: isDemo ? '47' : '05082025-1',
-      origenManual: isDemo ? '233_CD SuperZoo_Quilicura' : '',
-      destinoManual: isDemo ? 'Divisa' : ''
+      codigoCarga: isDemo ? 'CONTENEDOR DRY' : 'Test 1',
+      ruta: isDemo ? '47' : '( MINEDUC) BSF_PUDAHUEL-CXP_ANF',
+      origenManual: isDemo ? '233_CD SuperZoo_Quilicura' : '405_LA FARFANA_Pudahuel',
+      destinoManual: isDemo ? 'Divisa' : 'CXP ANTOFAGASTA'
     };
 
     logger.info(`Environment: ${process.env.ENV || 'QA'}`);
@@ -266,7 +266,7 @@ test.describe('[V01] Viajes - Planificar', () => {
       ...operationalData.viaje,
       nroViaje: nroViaje,
       cliente: clienteNombre,
-      ruta: '05082025-1',
+      ruta: config.ruta,
       status: 'PLANIFICADO'
     };
 
@@ -286,7 +286,7 @@ test.describe('[V01] Viajes - Planificar', () => {
     logger.info('Detalles del viaje:');
     logger.info(`   Nro Viaje: ${nroViaje}`);
     logger.info(`   Cliente: ${clienteNombre}`);
-    logger.info(`   Ruta: 05082025-1`);
+    logger.info(`   Ruta: ${config.ruta}`);
     logger.info(`   Status: PLANIFICADO`);
     logger.info('='.repeat(80));
   });

@@ -260,7 +260,7 @@ export class MonitoreoPage extends BasePage {
             }, { timeout: 15000 });
             // Asegurar body.modal-open para que Playwright detecte el modal como visible
             await this.page.evaluate(() => {
-                document.body.classList.add('modal-open');
+                document.body?.classList.add('modal-open');
             });
             logger.info('✅ UI: Modal #modalCambioEstadoSinGps abierto');
         } catch {
@@ -380,7 +380,7 @@ export class MonitoreoPage extends BasePage {
                 $('.bootbox').modal('hide');
             }
             document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-            document.body.classList.remove('modal-open');
+            document.body?.classList.remove('modal-open');
         });
         await this.page.waitForTimeout(500);
         logger.info('✅ UI: Modales cerrados');

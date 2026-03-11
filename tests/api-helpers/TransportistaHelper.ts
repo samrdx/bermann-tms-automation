@@ -207,8 +207,8 @@ export class TransportistaHelper {
         await transportistaPage.fillRazonSocial(razonSocial);
         await transportistaPage.fillDocumento(documento);
 
-        // Select Type - Use "Terceros" in Demo, otherwise "Terceros Con Flota Si Genera Contrato"
-        const transportistaType = isDemoMode() ? 'Terceros' : 'Terceros Con Flota Si Genera Contrato';
+        // Select Type - Use "Terceros" for both Demo and QA as tested previously
+        const transportistaType = 'Terceros';
         await transportistaPage.selectTipoTransportista(transportistaType);
 
         await page.waitForTimeout(500);

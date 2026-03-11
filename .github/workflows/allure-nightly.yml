@@ -9,7 +9,7 @@ on:
 jobs:
   test-and-report:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -28,50 +28,62 @@ jobs:
         run: npx playwright install --with-deps chromium firefox
 
       # ==========================================
-      # 1. QA TESTS
+      # 1. QA TESTS — Legacy Flow + E2E Atómico
       # ==========================================
-      - name: 🏃 Run Full QA Flow Envs
+      - name: 🏃 QA – Legacy Flow (entidades → contratos → viajes → prefactura)
         env:
-          ENV: 'QA'
+          ENV: QA
           CI: true
-          HEADLESS: true
-          # Usamos los mismos secrets para ambos ambientes a menos que difieran en Bermann
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
-        # continue-on-error para no romper el workflow si los tests fallan; queremos ver el reporte de todos modos
         continue-on-error: true
-        # Ejecuta flujo legacy completo + E2E atómico para QA
         run: |
           npm run clean:allure:qa
-          npm run test:qa:flow:entidades-to-viajes
-          npm run test:qa:trip:full-flow
+          npm run test:qa:flow:entidades-to-prefactura
+
+      - name: ⚡ QA – E2E Atómico (prefactura-crear-e2e, Chromium + Firefox)
+        env:
+          ENV: QA
+          CI: true
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+        continue-on-error: true
+        run: npm run test:qa:e2e:ci
 
       # ==========================================
-      # 2. DEMO TESTS
+      # 2. DEMO TESTS — Legacy Flow + E2E Atómico
       # ==========================================
-      - name: 🏃 Run Full DEMO Flow Envs
+      - name: 🏃 DEMO – Legacy Flow (entidades → contratos → viajes → prefactura)
         env:
-          ENV: 'DEMO'
+          ENV: DEMO
           CI: true
-          HEADLESS: true
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
         continue-on-error: true
         run: |
           npm run clean:allure:demo
-          npm run test:demo:flow:entidades-to-viajes
-          npm run test:demo:trip:full-flow
+          npm run test:demo:flow:entidades-to-prefactura
+
+      - name: ⚡ DEMO – E2E Atómico (prefactura-crear-e2e, Chromium + Firefox)
+        env:
+          ENV: DEMO
+          CI: true
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+        continue-on-error: true
+        run: npm run test:demo:e2e:ci
 
       # ==========================================
-      # 3. MERGE & ALLURE REPORT
+      # 3. MERGE RESULTS + ALLURE → GITHUB PAGES
       # ==========================================
-      - name: 📂 Merge Allure Results
+      - name: 📂 Merge Allure Results (QA + DEMO)
+        if: always()
         run: |
           mkdir -p allure-results
           cp -r allure-results-qa/* allure-results/ || true
           cp -r allure-results-demo/* allure-results/ || true
 
-      - name: 📈 Get Allure history
+      - name: 📈 Get Allure history (gh-pages)
         uses: actions/checkout@v4
         if: always()
         continue-on-error: true
@@ -79,7 +91,7 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: 🔨 Generate Allure Report
+      - name: 🔨 Generate Allure Report con historial
         uses: simple-elf/allure-report-action@master
         if: always()
         id: allure-report
