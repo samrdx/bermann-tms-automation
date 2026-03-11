@@ -61,7 +61,7 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
 
             await page.waitForTimeout(1000);
 
-            const capacidad = isDemoMode() ? '28 TON' : '3 KG';
+            const capacidad = isDemoMode() ? '1 a 12 TON' : '1 a 12 TON';
             await vehiculoPage.selectCapacidad(capacidad);
         });
 

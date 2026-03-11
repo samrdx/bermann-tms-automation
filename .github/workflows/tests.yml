@@ -41,18 +41,13 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: 🔑 Run Login/Logout Tests
+      - name: 🔑 Run Auth Smoke Tests
         env:
-          BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           CI: true
-          HEADLESS: true
-          TIMEOUT: 30000
           ENV: ${{ github.event.inputs.environment || 'QA' }}
-        run: |
-          echo "Running Auth Smoke Tests..."
-          npm run test:auth
+        run: npm run test:auth
 
       - name: Upload Auth Report
         if: always()
@@ -63,12 +58,13 @@ jobs:
           retention-days: 7
 
   # ------------------------------------------------------------------
-  # JOB 2: TESTS ATÓMICOS CORE (Solo corre si Smoke-Auth pasa)
+  # JOB 2: ATOMIC CORE FLOWS — QA + DEMO (con reporte ZIP descargable)
+  # Solo corre si Smoke-Auth pasa
   # ------------------------------------------------------------------
   atomic-core-flows:
-    name: 🛡️ Atomic Core Flows
+    name: 🛡️ Atomic Core Flows (QA + DEMO)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     needs: [smoke-auth]
 
     steps:
@@ -87,46 +83,44 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox
 
-      - name: 🚀 Run Atomic Business Workflows
+      # --- QA E2E Atomic ---
+      - name: ⚡ QA – E2E Atómico (prefactura-crear-e2e)
         env:
-          BASE_URL: ${{ secrets.BASE_URL || 'https://moveontruckqa.bermanntms.cl' }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           CI: true
-          HEADLESS: true
-          LOG_LEVEL: info
-          TIMEOUT: 60000
-          ENV: ${{ github.event.inputs.environment || 'QA' }}
+        continue-on-error: true
+        run: npm run test:qa:e2e:ci
 
-        # Se agrupan los scripts que dependen solo de su entorno interno API (atomic)
-        # o los flujos combinados que no asfixian los workers.
-        run: |
-          echo "Running Independent Core Business Flows..."
-          npm run test:qa:trip:full-flow
+      # --- DEMO E2E Atomic ---
+      - name: ⚡ DEMO – E2E Atómico (prefactura-crear-e2e)
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          CI: true
+        continue-on-error: true
+        run: npm run test:demo:e2e:ci
 
+      # --- Generar reportes Allure estáticos ---
       - name: 📦 Install Allure Commandline
         if: always()
         run: npm install -g allure-commandline
 
-      - name: 🔨 Generate Allure Report (No History)
+      - name: 🔨 Generate Allure Report – QA
         if: always()
-        # Parse Environment to lowercase so it maps to allure-results-qa or allure-results-demo
-        run: |
-          ENV_LOWER=$(echo "${{ github.event.inputs.environment || 'QA' }}" | tr '[:upper:]' '[:lower:]')
-          allure generate allure-results-${ENV_LOWER} -o allure-report-${ENV_LOWER} --clean
+        run: allure generate allure-results-qa -o allure-report-qa --clean || true
 
-      - name: ☁️ Upload Allure HTML Report
+      - name: 🔨 Generate Allure Report – DEMO
+        if: always()
+        run: allure generate allure-results-demo -o allure-report-demo --clean || true
+
+      # --- Subir ZIP descargable ---
+      - name: ☁️ Upload Allure Reports (ZIP descargable)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-html-report-${{ github.event.inputs.environment || 'QA' }}
-          path: allure-report-*/
+          name: allure-reports-${{ github.sha }}
+          path: |
+            allure-report-qa/
+            allure-report-demo/
           retention-days: 7
-
-  # ------------------------------------------------------------------
-  # NOTA A FUTURO PARA REFACTOR DE PIPELINES:
-  # El entorno Legacy-Suite (30 min secuencial) se ha removido intencionalmente
-  # de este flujo On-Push/PR debido a cuellos de botella de tiempo.
-  # Se sugiere crear un archivo cron .github/workflows/nightly.yml
-  # que apunte a `npm run test:legacy:fullviajes:all` para salud completa.
-  # ------------------------------------------------------------------

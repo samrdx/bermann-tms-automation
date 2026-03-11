@@ -102,8 +102,8 @@ export class PlanificarPage extends BasePage {
       logger.info('🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...');
       await this.page.evaluate(() => {
         document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-        document.body.classList.remove('modal-open');
-        document.body.style.paddingRight = '';
+        document.body?.classList.remove('modal-open');
+        if (document.body) document.body.style.paddingRight = '';
       });
       await this.page.waitForTimeout(500); // Settle time
     }
@@ -186,11 +186,11 @@ export class PlanificarPage extends BasePage {
     }
   }
 
-  async selectTipoOperacion(tipo: string = 'tclp2210'): Promise<void> {
+  async selectTipoOperacion(tipo: string): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnTipoOperacion, tipo, 'Tipo Operacion');
   }
 
-  async selectTipoServicio(tipo: string = 'tclp2210'): Promise<void> {
+  async selectTipoServicio(tipo: string): Promise<void> {
     await this.selectBootstrapDropdown(this.selectors.btnTipoServicio, tipo, 'Tipo Servicio');
   }
 

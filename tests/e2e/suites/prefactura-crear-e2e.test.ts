@@ -16,7 +16,7 @@ let createdEntities: any = {};
 test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
   test.setTimeout(480000); // 8 min para creación de datos + flujo de viaje + prefactura
 
-  test('Flujo E2E Completo Atómico - PREFACTURAR VIAJE FINALIZADO', async ({ page }) => {
+  test('Flujo E2E Completo Atómico - PREFACTURAR VIAJE FINALIZADO', async ({ page }, testInfo) => {
     const startTime = Date.now();
     await allure.epic('TMS E2E Flow');
     await allure.feature('Modulo Finanzas');
@@ -63,7 +63,7 @@ test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
     // Limpiar modales residuales
     await page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-      document.body.classList.remove('modal-open');
+      document.body?.classList.remove('modal-open');
     });
 
     // Planificar
@@ -130,29 +130,43 @@ test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
     await test.step('Verificar prefactura en el Index', async () => {
         // Redirecciona automáticamente según spec, pero igual usamos el index como comprobación
         prefacturaId = await prefacturaPage.buscarPrefacturaEnIndex(cliName);
+        // Registrar prefactura en entityTracker para el resumen
+        entityTracker.register({
+          type: 'Prefactura',
+          name: 'Creada',
+          id: prefacturaId,
+          extra: `Cliente: ${cliName}`
+        });
     });
 
     const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.success(`Proceso de Prefactura Finalizado Correctamente`);
-    
-    // RESUMEN FINAL SOLICITADO POR USUARIO
-    logger.info('='.repeat(80));
-    logger.info('   RESUMEN DE EJECUCIÓN E2E - PREFACTURA');
-    logger.info('='.repeat(80));
-    logger.info(`🔹 Cliente        : [${createdEntities.cliente}]`);
-    logger.info(`🔹 Transportista  : [${createdEntities.transportista}]`);
-    logger.info(`🔹 Vehículo       : [${createdEntities.vehiculo}]`);
-    logger.info(`🔹 Conductor      : [${createdEntities.conductor}]`);
-    logger.info(`🔹 Contrato Venta : [${createdEntities.contratoVenta}]`);
-    logger.info(`🔹 Contrato Costo : [${createdEntities.contratoCosto}]`);
-    logger.info(`🔹 Viaje          : [${createdEntities.viaje}]`);
-    logger.info(`✅ PREFACTURA ID  : [${prefacturaId}]`);
-    logger.info('='.repeat(80));
-    
-    logger.info(`Tiempo total: ${executionTime}s`);
+    logger.success('Proceso de Prefactura Finalizado Correctamente');
 
-    await allure.parameter('Estado Viaje', 'PREFACTURADO');
+    // --- RESUMEN EN ALLURE (attachment + parameters) ---
+    const browser = testInfo.project.name.toUpperCase();
+    const summaryText = entityTracker.getSummaryTable(browser);
+
+    // Attachment visible en el reporte como sección expandible
+    await testInfo.attach('📊 Resumen de Entidades Creadas', {
+      body: summaryText,
+      contentType: 'text/plain'
+    });
+
+    // Parámetros visibles en el header del test en Allure
+    await allure.parameter('Ambiente', process.env.ENV || 'QA');
+    await allure.parameter('Transportista', transName);
+    await allure.parameter('Cliente', cliName);
+    await allure.parameter('Vehículo', patente);
+    await allure.parameter('Contrato Venta', createdEntities.contratoVenta);
+    await allure.parameter('Contrato Costo', createdEntities.contratoCosto);
+    await allure.parameter('Viaje', nroViaje);
+    await allure.parameter('Prefactura ID', prefacturaId);
+    await allure.parameter('Estado Final', '✅ PREFACTURADO');
     await allure.parameter('Duración (s)', executionTime);
+
+    // Log a consola (CI/CD visibility)
+    logger.info(summaryText);
+    logger.info(`⏱️ Tiempo total: ${executionTime}s`);
   });
 });
 

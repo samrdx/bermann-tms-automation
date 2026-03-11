@@ -69,12 +69,12 @@ This document centralizes all CSS selectors used across the project's Page Objec
 | **invalidField** | `[aria-invalid="true"]` | Baja |
 | **helpBlock** | `.help-block.badge.badge-danger` | Baja |
 | **btnOutlineSuccess** | `.btn.btn-outline-success.btn-sm` | Baja |
-| **btnPlus715** | `#btn_plus_715` | Alta |
+| **btnPlus1413** | `#btn_plus_1413` | Alta |
 | **btnCerrarModal** | `.btn.btn-secondary.waves-effect.waves-light` | Baja |
-| **btnAddCarga** | `#btn_click_715` | Alta |
-| **btnAddRuta** | `#btn_plus_ruta_715_19` | Alta |
-| **inputTarifaViaje** | `#txt_tarifa_extra_715` | Alta |
-| **inputTarifaConductor** | `#txt_tarifa_conductor_715` | Alta |
+| **btnAddCarga** | `#btn_click_1413` | Alta |
+| **btnAddRuta** | `#btn_plus_ruta_1413_2` | Alta |
+| **inputTarifaViaje** | `#txt_tarifa_extra_1413` | Alta |
+| **inputTarifaConductor** | `#txt_tarifa_conductor_1413` | Alta |
 
 ## DashboardPage
 

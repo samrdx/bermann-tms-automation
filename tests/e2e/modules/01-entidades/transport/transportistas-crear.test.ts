@@ -35,9 +35,7 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
       documento: generateValidChileanRUT(),
       calle: generateChileanStreet(),
       altura: randomStreetNumber.toString(),
-      tipo: isDemoMode()
-        ? 'Terceros'
-        : 'Terceros Con Flota Si Genera Contrato',
+      tipo: 'Terceros',
       formaPago: 'Contado'
     };
 

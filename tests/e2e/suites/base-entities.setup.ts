@@ -126,11 +126,11 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
             patente: vehiculo.patente,
             muestra: vehiculo.muestra,
             transportistaNombre: vehiculo.transportistaName,
-            capacity: '3 KG',
+            capacity: '1 a 12 TON',
         };
 
         logger.info(`✅ Paso 3/4 Completado - Vehiculo: ${vehiculo.patente}`);
-        logger.info(`   Capacidad: 3 KG`);
+        logger.info(`   Capacidad: 1 a 12 TON`);
         logger.info('');
 
         // =================================================================
@@ -172,7 +172,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         logger.info('📦 Resumen:');
         logger.info(`   Transportista: ${operationalData.transportista.nombre} (${operationalData.transportista.rut})`);
         logger.info(`   Cliente: ${operationalData.cliente.nombre} (${operationalData.cliente.rut})`);
-        logger.info(`   Vehiculo: ${operationalData.vehiculo.patente} (3 KG)`);
+        logger.info(`   Vehiculo: ${operationalData.vehiculo.patente} (1 a 12 TON)`);
         logger.info(`   Conductor: ${operationalData.conductor.nombre} ${operationalData.conductor.apellido} (${operationalData.conductor.rut})`);
         logger.info('');
         logger.info(`⏱️  Tiempo de Ejecución: ${elapsedTime}s`);
