@@ -76,7 +76,7 @@ export class UltimaMillaFormPage extends BasePage {
 
         await this.selectUnidadNegocio();
         await this.selectCliente(data.clienteDropdown);
-        await this.selectVentanaHoraria('Atardecer');
+        await this.selectVentanaHoraria('Todo El Dia');
 
         // Seleccionar embalaje y llenar cantidad y peso revelados
         await this.selectTipoEmbalaje('Caja');
