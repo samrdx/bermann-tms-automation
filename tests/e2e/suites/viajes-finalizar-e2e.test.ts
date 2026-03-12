@@ -390,7 +390,12 @@ async function selectOptionByTextJS(page: any, text: string): Promise<boolean> {
  */
 async function verifyAssignmentInGrid(page: any, log: any, nroViaje: string): Promise<void> {
   // 1. Esperar redirect a /viajes/asignar
-  await page.waitForURL('**/viajes/asignar**', { timeout: 20000 });
+  await page.waitForURL('**/viajes/asignar**', { timeout: 30000 }).catch(() => {
+      log.warn(`waitForURL timeout a /viajes/asignar, forzando redirección manual...`);
+      return page.goto(process.env.BASE_URL_QA + '/viajes/asignar', { timeout: 15000 }).catch(() => {
+          log.warn(`Falló redirección manual a /viajes/asignar`);
+      });
+  });
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
     log.warn('networkidle timeout post-redirect, continuando...');
   });

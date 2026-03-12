@@ -1362,11 +1362,10 @@ export class TmsApiClient {
   }
 
   private async addRouteAndTarifas(tarifaConductor: string, tarifaViaje: string): Promise<void> {
-    const isDemo = process.env.ENV === 'DEMO';
-    let routeId = isDemo ? '47' : '1413';
-    let routeCargoId = isDemo ? '47_6' : '1413_2';
+    let routeId = '';
+    let routeCargoId = '';
 
-    logger.info(`🛣️ Añadiendo Ruta ${routeId} y Carga ${routeCargoId} con entrada de tarifa LENTA...`);
+    logger.info(`🛣️ Añadiendo Ruta (Dinámica) con entrada de tarifa LENTA...`);
 
 
 
@@ -1462,24 +1461,16 @@ export class TmsApiClient {
 
 
 
-    // --- FALLBACK: si el ID de ruta especificado no existe, usar la primera ruta disponible ---
-    const specificRouteBtn = this.page.locator(`#btn_plus_${routeId}`);
-    const specificRouteExists = await specificRouteBtn.count().then(c => c > 0).catch(() => false);
-    if (!specificRouteExists) {
-      logger.warn(`⚠️ Ruta específica #btn_plus_${routeId} no encontrada. Buscando primera ruta disponible en el modal...`);
-      const firstRouteBtn = this.page.locator('#modalRutas [id^="btn_plus_"]').first();
-      const firstRouteId = await firstRouteBtn.getAttribute('id').catch(() => null);
-      if (firstRouteId) {
-        routeId = firstRouteId.replace('btn_plus_', '');
-        logger.info(`📌 Fallback: usando ruta ID=${routeId}`);
-        // routeCargoId: use first cargo for this route
-        const firstCargoBtnId = await this.page.locator(`#modalRutas [id^="btn_plus_ruta_${routeId}_"]`).first().getAttribute('id').catch(() => null);
-        routeCargoId = firstCargoBtnId ? firstCargoBtnId.replace('btn_plus_ruta_', '') : `${routeId}_1`;
-        logger.info(`📌 Fallback: usando routeCargoId=${routeCargoId}`);
-      } else {
-        logger.warn('⚠️ No se encontraron rutas en el modal. Omitiendo addRouteAndTarifas...');
-        return;
-      }
+    // --- LECTURA DINÁMICA: usar la primera ruta disponible en el modal ---
+    // Buscar cualquier botón de ruta que NO sea de carga (los de carga contienen "_ruta_")
+    const firstRouteBtn = this.page.locator('#modalRutas [id^="btn_plus_"]:not([id*="_ruta_"])').first();
+    const firstRouteIdAttr = await firstRouteBtn.getAttribute('id').catch(() => null);
+    if (firstRouteIdAttr) {
+      routeId = firstRouteIdAttr.replace('btn_plus_', '');
+      logger.info(`📌 Dinámico: usando ruta ID=${routeId}`);
+    } else {
+      logger.warn('⚠️ No se encontraron rutas en el modal. Omitiendo addRouteAndTarifas...');
+      return;
     }
 
     const btnPlusRoute = this.page.locator(`#btn_plus_${routeId}`);
@@ -1522,6 +1513,16 @@ export class TmsApiClient {
       // Ignore - might not appear for this action
     }
     await this.page.waitForTimeout(1000);
+
+    // routeCargoId: use first cargo for this route, fetched AFTER expanding the route
+    // Buscamos cualquier botón que inicie con btn_plus_ruta_ y tenga el routeId correcto
+    const firstCargoBtn = this.page.locator(`[id^="btn_plus_ruta_${routeId}_"]`).first();
+    // Esperar a que el elemento aparezca en el DOM (en caso de que la carga asíncrona demore un poco)
+    await firstCargoBtn.waitFor({ state: 'attached', timeout: 5000 }).catch(() => null);
+
+    const firstCargoBtnId = await firstCargoBtn.getAttribute('id').catch(() => null);
+    routeCargoId = firstCargoBtnId ? firstCargoBtnId.replace('btn_plus_ruta_', '') : `${routeId}_1`;
+    logger.info(`📌 Dinámico: usando routeCargoId=${routeCargoId} de elemento: ${firstCargoBtnId}`);
 
     const btnPlusRouteCargo = this.page.locator(`#btn_plus_ruta_${routeCargoId}`);
     await btnPlusRouteCargo.waitFor({ state: 'attached', timeout: 5000 });
@@ -1665,34 +1666,27 @@ export class TmsApiClient {
       // 1. Campos de Texto
       await this.page.fill('#viajes-nro_viaje', nroViaje);
 
-      const isDemo = process.env.ENV === 'DEMO';
-      const tipoOperacionText = isDemo ? 'Distribución' : 'defecto';
-      const tipoServicioText = isDemo ? 'Lcl' : 'defecto';
-
       // 2. Dropdowns Simples (Operación, Servicio, Cliente)
       // Usamos JS directo si es retry para mayor velocidad y seguridad
       if (isRetry) {
-        await this.forceSelectByText('tipo_operacion_form', tipoOperacionText); // Asumiendo ID del select oculto
-        await this.forceSelectByText('viajes-tipo_servicio_id', tipoServicioText);
+        await this.forceSelectFirstAvailable('tipo_operacion_form');
+        await this.forceSelectFirstAvailable('viajes-tipo_servicio_id');
         await this.forceSelectByText('viajes-cliente_id', clienteNombre);
       } else {
-        await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', tipoOperacionText, 'Tipo Operación');
-        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', tipoServicioText, 'Tipo Servicio');
+        await this.selectBootstrapDropdownFirstAvailable('button[data-id="tipo_operacion_form"]', 'Tipo Operación');
+        await this.selectBootstrapDropdownFirstAvailable('button[data-id="viajes-tipo_servicio_id"]', 'Tipo Servicio');
         await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
       }
 
       if (!isRetry) await this.page.waitForTimeout(1000); // Esperar carga de datos del cliente
 
-      const tipoViajeText = isDemo ? 'DIRECTO' : 'Normal';
-      const codigoCargaText = isDemo ? 'CONTENEDOR DRY' : 'Test 1';
-
       // 3. Tipos de Viaje
       if (isRetry) {
-        await this.forceSelectByText('viajes-tipo_viaje_id', tipoViajeText);
-        await this.forceSelectByText('viajes-unidad_negocio_id', 'Defecto');
+        await this.forceSelectFirstAvailable('viajes-tipo_viaje_id');
+        await this.forceSelectFirstAvailable('viajes-unidad_negocio_id');
       } else {
-        await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_viaje_id"]', tipoViajeText, 'Tipo Viaje');
-        await this.selectBootstrapDropdownSimple('button[data-id="viajes-unidad_negocio_id"]', 'Defecto', 'Unidad Negocio');
+        await this.selectBootstrapDropdownFirstAvailable('button[data-id="viajes-tipo_viaje_id"]', 'Tipo Viaje');
+        await this.selectBootstrapDropdownFirstAvailable('button[data-id="viajes-unidad_negocio_id"]', 'Unidad Negocio');
       }
     };
 
@@ -1709,7 +1703,6 @@ export class TmsApiClient {
     logger.info('📍 PASO 1: Abriendo dropdown Origen...');
     const origenBtn = this.page.locator('button[data-id="_origendestinoform-origen"]').first();
     await origenBtn.waitFor({ state: 'visible', timeout: 10000 });
-    // Revertido a evaluate.click() para abrir Bootstrap Select (funciona en ambos navegadores)
     await origenBtn.evaluate(el => (el as HTMLElement).click());
     await this.page.waitForTimeout(1000);
 
@@ -1719,47 +1712,30 @@ export class TmsApiClient {
       { timeout: 8000 }
     ).catch(() => logger.warn('⚠️ Dropdown Origen no reportó aria-expanded=true en 8s'));
 
-    // Setup dynamic environment variables for Origen/Destino
-    const isDemoForCarga = process.env.ENV === 'DEMO';
-    const origenText = isDemoForCarga ? '233_CD SuperZoo_Quilicura' : '405_LA FARFANA_Pudahuel';
-    const destinoSearchText = isDemoForCarga ? 'Divisa' : 'CXP ANTOFAGASTA';
-    const destinoText = isDemoForCarga ? 'Divisa' : 'CXP ANTOFAGASTA';
-
-    // Buscar en el searchbox si existe (accedemos desde el contenedor del dropdown abierto)
     const origenContainer = this.page.locator('button[data-id="_origendestinoform-origen"]').locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
     const origenSearchBox = origenContainer.locator('.bs-searchbox input');
-    if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await origenSearchBox.fill(origenText);
-      await this.page.waitForTimeout(500);
-    }
 
-    // PASO 2: Seleccionar opción Origen (con fallback a primera opción disponible)
-    logger.info(`📍 PASO 2: Seleccionando Origen "${origenText}"...`);
+    // PASO 2: Seleccionar opción Origen (primera opción disponible)
+    logger.info(`📍 PASO 2: Seleccionando primera opción de Origen...`);
     const origenList = origenContainer.locator('ul.dropdown-menu.inner');
-    const origenOption = origenList.locator('li:not(.disabled) a').filter({ hasText: origenText }).first();
-    const origenFound = await origenOption.isVisible({ timeout: 4000 }).catch(() => false);
-    if (origenFound) {
-      await origenOption.evaluate(el => (el as HTMLElement).click());
-      logger.info(`✅ Origen seleccionado: ${origenText}`);
-    } else {
-      logger.warn(`⚠️ Origen "${origenText}" no encontrado. Aplicando FALLBACK: primera opción disponible...`);
-      if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await origenSearchBox.fill('');
-        await this.page.waitForTimeout(400);
-      }
-      const firstOrigenOption = origenList.locator('li:not(.disabled) a').first();
-      await firstOrigenOption.waitFor({ state: 'attached', timeout: 5000 });
-      const fallbackOrigenText = await firstOrigenOption.textContent().catch(() => 'primera opción');
-      await firstOrigenOption.evaluate(el => (el as HTMLElement).click());
-      logger.info(`✅ Origen Fallback seleccionado: ${fallbackOrigenText?.trim()}`);
+
+    // Limpiar searchbox por si acaso
+    if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await origenSearchBox.fill('');
+      await this.page.waitForTimeout(400);
     }
+    const firstOrigenOption = origenList.locator('li:not(.disabled) a').first();
+    await firstOrigenOption.waitFor({ state: 'attached', timeout: 5000 });
+    const fallbackOrigenText = await firstOrigenOption.textContent().catch(() => 'primera opción');
+    await firstOrigenOption.evaluate(el => (el as HTMLElement).click());
+    logger.info(`✅ Origen seleccionado: ${fallbackOrigenText?.trim()}`);
+
     await this.page.waitForTimeout(1000);
 
     // PASO 3: DESTINO
     logger.info('📍 PASO 3: Abriendo dropdown Destino...');
     const destinoBtn = this.page.locator('button[data-id="_origendestinoform-destino"]').first();
     await destinoBtn.waitFor({ state: 'visible', timeout: 10000 });
-    // Revertido a evaluate.click() para abrir Bootstrap Select
     await destinoBtn.evaluate(el => (el as HTMLElement).click());
     await this.page.waitForTimeout(1000);
 
@@ -1769,34 +1745,23 @@ export class TmsApiClient {
       { timeout: 8000 }
     ).catch(() => logger.warn('⚠️ Dropdown Destino no reportó aria-expanded=true en 8s'));
 
-    // Buscar en el searchbox si existe
     const destinoContainer = this.page.locator('button[data-id="_origendestinoform-destino"]').locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
     const destinoSearchBox = destinoContainer.locator('.bs-searchbox input');
-    if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await destinoSearchBox.fill(destinoSearchText);
-      await this.page.waitForTimeout(500);
-    }
 
-    // PASO 4: Seleccionar opción Destino (con fallback a primera opción disponible)
-    logger.info(`📍 PASO 4: Seleccionando Destino "${destinoText}"...`);
+    // PASO 4: Seleccionar opción Destino (primera opción disponible)
+    logger.info(`📍 PASO 4: Seleccionando primera opción de Destino...`);
     const destinoList = destinoContainer.locator('ul.dropdown-menu.inner');
-    const destinoOptionItem = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').filter({ hasText: destinoText }).first();
-    const destinoFound = await destinoOptionItem.isVisible({ timeout: 4000 }).catch(() => false);
-    if (destinoFound) {
-      await destinoOptionItem.evaluate(el => (el as HTMLElement).click());
-      logger.info(`✅ Destino seleccionado: ${destinoText}`);
-    } else {
-      logger.warn(`⚠️ Destino "${destinoText}" no encontrado. Aplicando FALLBACK: primera opción disponible...`);
-      if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await destinoSearchBox.fill('');
-        await this.page.waitForTimeout(400);
-      }
-      const firstDestinoOption = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
-      await firstDestinoOption.waitFor({ state: 'attached', timeout: 5000 });
-      const fallbackDestinoText = await firstDestinoOption.textContent().catch(() => 'primera opción');
-      await firstDestinoOption.evaluate(el => (el as HTMLElement).click());
-      logger.info(`✅ Destino Fallback seleccionado: ${fallbackDestinoText?.trim()}`);
+
+    if (await destinoSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await destinoSearchBox.fill('');
+      await this.page.waitForTimeout(400);
     }
+    const firstDestinoOption = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
+    await firstDestinoOption.waitFor({ state: 'attached', timeout: 5000 });
+    const fallbackDestinoText = await firstDestinoOption.textContent().catch(() => 'primera opción');
+    await firstDestinoOption.evaluate(el => (el as HTMLElement).click());
+    logger.info(`✅ Destino seleccionado: ${fallbackDestinoText?.trim()}`);
+
     await this.page.waitForTimeout(1000);
     logger.info(`✅ Origen/Destino configurados correctamente`);
 
@@ -1808,22 +1773,21 @@ export class TmsApiClient {
     // Se movió aquí porque elegir origen/destino puede gatillar AJAX
     // y limpiar las opciones de carga (quedando EMPTY) en Demo.
     // =======================================================================
-    const codigoCargaTextFinal = isDemoForCarga ? 'CONTENEDOR DRY' : 'Test 1';
     // FIX QA: Both QA and Demo use 'viajes-carga_id' (not 'viajes-codigo_carga_id')
     const cargaSelectIdFinal = 'viajes-carga_id';
 
-    logger.info(`📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que ${cargaSelectIdFinal} tenga la opción ${codigoCargaTextFinal})...`);
+    logger.info(`📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que ${cargaSelectIdFinal} tenga opciones válidas)...`);
 
-    // Esperar explícitamente a que el AJAX traiga la opción de Carga
-    await this.page.waitForFunction(({ id, text }) => {
+    // Esperar explícitamente a que el AJAX traiga opciones de Carga
+    await this.page.waitForFunction(({ id }) => {
       const select = document.getElementById(id) as HTMLSelectElement;
       if (!select) return false;
-      return Array.from(select.options).some(opt => opt.text.toUpperCase().includes(text.toUpperCase()));
-    }, { id: cargaSelectIdFinal, text: codigoCargaTextFinal }, { timeout: 15000 }).catch(() => {
-      logger.warn(`⚠️ Timeout esperando que la opción de carga '${codigoCargaTextFinal}' apareciera en '#${cargaSelectIdFinal}'.`);
+      return Array.from(select.options).some(opt => opt.value && opt.value !== "");
+    }, { id: cargaSelectIdFinal }, { timeout: 15000 }).catch(() => {
+      logger.warn(`⚠️ Timeout esperando que aparecieran opciones de carga en '#${cargaSelectIdFinal}'.`);
     });
 
-    await this.forceSelectByText(cargaSelectIdFinal, codigoCargaTextFinal);
+    await this.forceSelectFirstAvailable(cargaSelectIdFinal);
     await this.page.waitForTimeout(1000);
     // DIAGNÓSTICO: Verificar estado completo del formulario (incluyendo Origen/Destino)
     const formDiag = await this.page.evaluate(() => {
@@ -2567,6 +2531,40 @@ export class TmsApiClient {
 
   }
 
+  private async selectBootstrapDropdownFirstAvailable(buttonSelector: string, fieldName: string): Promise<void> {
+    logger.info(`📋 Seleccionando primera opción disponible en ${fieldName}...`);
+    const btn = this.page.locator(buttonSelector);
+    await btn.waitFor({ state: 'visible', timeout: 10000 });
+    await btn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await btn.evaluate(el => (el as HTMLElement).click());
+
+    const parent = btn.locator('xpath=..');
+    const dropdownMenu = parent.locator('div.dropdown-menu.show').first();
+    await dropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Esperar a que el AJAX traiga la opción y asegurarse de no seleccionar la opción vacía "Seleccione..."
+    const option = dropdownMenu.locator('li:not(.disabled):not(.selected) a').filter({
+      hasNot: this.page.locator('text="Seleccione..."')
+    }).first();
+    await option.waitFor({ state: 'attached', timeout: 8000 }).catch(() => {
+        // Fallback: Si todas las opciones fallan y solo hay 'Seleccione...' o disabled
+        logger.warn(`⚠️ Opciones filtradas no encontradas para ${fieldName}. Seleccionando primera disponible.`);
+    });
+    const fallbackOption = dropdownMenu.locator('li:not(.disabled) a span.text, li:not(.disabled) a').nth(1);
+
+    // Si la opción filtrada está visible la usamos, si no usamos la n+1 asumiendo la 0 es Seleccione
+    const targetOption = await option.isVisible() ? option : fallbackOption;
+
+    const optionText = await targetOption.textContent().catch(() => 'desconocido');
+    await targetOption.evaluate(el => (el as HTMLElement).click());
+
+    if (await dropdownMenu.isVisible({ timeout: 500 }).catch(() => false)) {
+      await this.page.keyboard.press('Escape');
+    }
+    await this.page.waitForTimeout(300);
+    logger.info(`✅ ${fieldName} seleccionado: ${optionText?.trim()}`);
+  }
+
   private async forceSelectByText(selectId: string, textToSelect: string): Promise<void> {
     await this.page.evaluate(({ id, text }) => {
       const select = document.getElementById(id) as HTMLSelectElement;
@@ -2586,6 +2584,25 @@ export class TmsApiClient {
         }
       }
     }, { id: selectId, text: textToSelect });
+  }
+
+  private async forceSelectFirstAvailable(selectId: string): Promise<void> {
+    await this.page.evaluate(({ id }) => {
+      const select = document.getElementById(id) as HTMLSelectElement;
+      if (!select) return;
+
+      const option = Array.from(select.options).find(opt => opt.value && opt.value !== "");
+      if (option) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // @ts-ignore
+        if (window.jQuery && window.jQuery(select).selectpicker) {
+          // @ts-ignore
+          window.jQuery(select).selectpicker('refresh');
+        }
+      }
+    }, { id: selectId });
   }
 
 }
