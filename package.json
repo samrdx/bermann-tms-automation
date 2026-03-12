@@ -83,7 +83,10 @@
     "// === OPCION B: Full runs con HTML estático (encadenable) ===": "",
     "run:all:qa": "npm run clean:allure:qa && cross-env HEADLESS=false npm run test:qa:flow:entidades-to-prefactura && cross-env HEADLESS=false npm run test:qa:trip:full-flow && npm run allure:generate:qa && npm run allure:open:qa",
     "run:all:demo": "npm run clean:allure:demo && cross-env HEADLESS=false npm run test:demo:flow:entidades-to-prefactura && cross-env HEADLESS=false npm run test:demo:trip:full-flow && npm run allure:generate:demo && npm run allure:open:demo",
-    "test:all": "npm run clean:allure && npm run test:qa:flow:entidades-to-prefactura && npm run test:qa:trip:full-flow && npm run test:demo:flow:entidades-to-prefactura && npm run test:demo:trip:full-flow && npm run allure:generate:qa && npm run allure:generate:demo"
+    "test:all": "npm run clean:allure && npm run test:qa:flow:entidades-to-prefactura && npm run test:qa:trip:full-flow && npm run test:demo:flow:entidades-to-prefactura && npm run test:demo:trip:full-flow && npm run allure:generate:qa && npm run allure:generate:demo",
+    "// === Ultima Milla === ": "",
+    "test:qa:ultimamilla:pedido-crear": "cross-env ENV=QA playwright test tests/e2e/modules/ultimamilla/pedido-crear.test.ts --trace on",
+    "run:qa:ultimamilla:pedido-crear": "npm run clean:allure:qa && cross-env ENV=QA HEADLESS=false ALLURE_RESULTS_DIR=allure-results-qa playwright test tests/e2e/modules/ultimamilla/pedido-crear.test.ts --headed --trace on ; npm run allure:serve:qa"
   },
   "dependencies": {
     "dotenv": "^16.6.1",
