@@ -179,23 +179,21 @@ export class MonitoreoPage extends BasePage {
     private async clickBuscar(inputId: any): Promise<void> {
         logger.info('🔎 UI: Disparando búsqueda (multi-estrategia)...');
 
-        // Strategy 1: JS click on #buscar element (same as TmsApiClient pattern)
-        const clickedViaId = await this.page.evaluate(() => {
-            const btn = document.getElementById('buscar');
-            if (btn) { (btn as HTMLElement).click(); return true; }
-            return false;
-        });
+        // Execute both enter and JS click for maximum robustness (especially in Demo/Firefox)
+        await Promise.all([
+            this.page.waitForLoadState('domcontentloaded').catch(() => { }),
+            inputId.press('Enter').catch(() => { }),
+            this.page.evaluate(() => {
+                const btn = document.getElementById('buscar');
+                if (btn) { (btn as HTMLElement).click(); }
+            }).catch(() => { })
+        ]);
 
-        if (clickedViaId) {
-            logger.info('✅ UI: Buscar disparado vía JS (elemento #buscar)');
-        } else {
-            // Strategy 2: Enter on the filter input (universal fallback)
-            logger.info('⚠️ UI: #buscar no encontrado — presionando Enter en el campo #id...');
-            await inputId.press('Enter');
-            logger.info('✅ UI: Buscar disparado vía tecla Enter');
-        }
+        logger.info('✅ UI: Buscar disparado combinando JS y tecla Enter');
 
         // Wait for AJAX to complete before checking #registros
+        // Give time for the grid to start its loading process
+        await this.page.waitForTimeout(2000);
         await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
             logger.warn('⚠️ UI: tiempo de espera networkidle agotado después de Buscar, continuando...');
         });

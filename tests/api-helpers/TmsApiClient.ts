@@ -1739,7 +1739,7 @@ export class TmsApiClient {
     const origenOption = origenList.locator('li:not(.disabled) a').filter({ hasText: origenText }).first();
     const origenFound = await origenOption.isVisible({ timeout: 4000 }).catch(() => false);
     if (origenFound) {
-      await origenOption.click({ force: true });
+      await origenOption.evaluate(el => (el as HTMLElement).click());
       logger.info(`✅ Origen seleccionado: ${origenText}`);
     } else {
       logger.warn(`⚠️ Origen "${origenText}" no encontrado. Aplicando FALLBACK: primera opción disponible...`);
@@ -1750,7 +1750,7 @@ export class TmsApiClient {
       const firstOrigenOption = origenList.locator('li:not(.disabled) a').first();
       await firstOrigenOption.waitFor({ state: 'attached', timeout: 5000 });
       const fallbackOrigenText = await firstOrigenOption.textContent().catch(() => 'primera opción');
-      await firstOrigenOption.click({ force: true });
+      await firstOrigenOption.evaluate(el => (el as HTMLElement).click());
       logger.info(`✅ Origen Fallback seleccionado: ${fallbackOrigenText?.trim()}`);
     }
     await this.page.waitForTimeout(1000);
@@ -1783,7 +1783,7 @@ export class TmsApiClient {
     const destinoOptionItem = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').filter({ hasText: destinoText }).first();
     const destinoFound = await destinoOptionItem.isVisible({ timeout: 4000 }).catch(() => false);
     if (destinoFound) {
-      await destinoOptionItem.click({ force: true });
+      await destinoOptionItem.evaluate(el => (el as HTMLElement).click());
       logger.info(`✅ Destino seleccionado: ${destinoText}`);
     } else {
       logger.warn(`⚠️ Destino "${destinoText}" no encontrado. Aplicando FALLBACK: primera opción disponible...`);
@@ -1794,7 +1794,7 @@ export class TmsApiClient {
       const firstDestinoOption = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
       await firstDestinoOption.waitFor({ state: 'attached', timeout: 5000 });
       const fallbackDestinoText = await firstDestinoOption.textContent().catch(() => 'primera opción');
-      await firstDestinoOption.click({ force: true });
+      await firstDestinoOption.evaluate(el => (el as HTMLElement).click());
       logger.info(`✅ Destino Fallback seleccionado: ${fallbackDestinoText?.trim()}`);
     }
     await this.page.waitForTimeout(1000);
@@ -1940,10 +1940,10 @@ export class TmsApiClient {
     // Fallback: navegar a grilla y buscar (con retry loop para Firefox)
     logger.info('⚠️ Fallback: verificando en grilla de asignación con retry loop (Firefox-safe)...');
 
-    const maxSearchRetries = 5;
+    const maxSearchRetries = 8;
     for (let attempt = 1; attempt <= maxSearchRetries; attempt++) {
       // Tiempo de espera incremental antes de cada intento (da tiempo al backend para indexar)
-      const waitMs = attempt * 2000; // 2s, 4s, 6s, 8s, 10s
+      const waitMs = attempt * 2000; // 2s, 4s, 6s...
       logger.info(`🔄 Intento ${attempt}/${maxSearchRetries}: esperando ${waitMs}ms antes de buscar...`);
       await this.page.waitForTimeout(waitMs);
 
@@ -1957,7 +1957,11 @@ export class TmsApiClient {
       // Limpiar y escribir lentamente (Firefox necesita eventos key-by-key)
       await searchInput.fill('');
       await searchInput.pressSequentially(nroViaje, { delay: 80 });
-      await searchInput.press('Enter');
+      await Promise.all([
+        this.page.waitForLoadState('domcontentloaded').catch(() => { }),
+        searchInput.press('Enter').catch(() => { }),
+        this.clickViaJS('#buscar').catch(() => { })
+      ]);
       await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
       await this.page.waitForTimeout(2000);
 
