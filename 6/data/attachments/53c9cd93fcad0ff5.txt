@@ -1,0 +1,21 @@
+2026-03-12 05:09:51 [INFO]: ENTORNO: DEMO 🎭
+2026-03-12 05:09:51 [INFO]: ✅ Transportista seeded cargado: Demo_tra_cargo_246 (ID: 240)
+2026-03-12 05:09:52 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-12 05:09:54 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_cargo_246
+2026-03-12 05:09:54 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_YY5977
+2026-03-12 05:09:54 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_YY5977
+2026-03-12 05:09:55 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_cargo_246
+2026-03-12 05:09:57 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_cargo_246" seleccionado
+2026-03-12 05:09:57 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-12 05:09:58 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-12 05:09:59 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-12 05:09:59 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-12 05:09:59 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-12 05:10:03 [INFO]: ✅ Vehículo [Demo_veh_YY5977] guardado exitosamente
+2026-03-12 05:10:03 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_YY5977
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🚚 Vehiculo      : [Demo_veh_YY5977]              | Patente: Demo_veh_YY5977 | Asociado: Demo_tra_cargo_246
+====================================================================================================

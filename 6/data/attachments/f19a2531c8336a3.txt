@@ -1,0 +1,30 @@
+2026-03-12 05:17:27 [INFO]: ENTORNO: DEMO 🎭
+2026-03-12 05:17:27 [INFO]: ================================================================================
+2026-03-12 05:17:27 [INFO]: Iniciando Paso 8: Creación de Prefactura (LEGACY)
+2026-03-12 05:17:27 [INFO]: ================================================================================
+2026-03-12 05:17:27 [INFO]: Fase 1: Cargando datos del JSON del trabajador...
+2026-03-12 05:17:27 [INFO]: ✅ Viaje finalizado cargado: 92060 para cliente Demo_cli_logistica spa_584
+2026-03-12 05:17:27 [INFO]: Fase 2: Navegando a /prefactura/crear...
+2026-03-12 05:17:27 [INFO]: [PrefacturaPage] Navegando a /prefactura/crear
+2026-03-12 05:17:30 [INFO]: ✅ Pagina Crear Prefactura cargada
+2026-03-12 05:17:30 [INFO]: [PrefacturaPage] Buscando viajes para el cliente: Demo_cli_logistica spa_584
+2026-03-12 05:17:30 [INFO]: [PrefacturaPage] Asegurando rango de fechas...
+2026-03-12 05:17:34 [INFO]: [PrefacturaPage] Seleccionando opción: DEMO_CLI_LOGISTICA SPA_584
+2026-03-12 05:17:37 [INFO]: [PrefacturaPage] Seleccionando opción: Pesos Chilenos
+2026-03-12 05:17:41 [INFO]: [PrefacturaPage] Esperando resultados en la grilla (Firefox Robust Wait)...
+2026-03-12 05:18:01 [WARN]: [PrefacturaPage] ⚠️ Tiempo de espera agotado esperando resultados de la grilla
+2026-03-12 05:18:01 [INFO]: ✅ Viajes filtrados en grilla
+2026-03-12 05:18:01 [INFO]: [PrefacturaPage] Generando prefactura para el viaje cargado...
+2026-03-12 05:18:01 [INFO]: [PrefacturaPage] Haciendo clic en "btn agregar"
+2026-03-12 05:18:02 [INFO]: [PrefacturaPage] Haciendo clic en Guardar
+2026-03-12 05:18:02 [INFO]: [PrefacturaPage] Esperando redirección automática a /prefactura/index y mensaje de éxito
+2026-03-12 05:18:05 [INFO]: ✅ Comando de generación de prefactura ejecutado exitosamente
+2026-03-12 05:18:05 [INFO]: [PrefacturaPage] Buscando prefacturas para el cliente: Demo_cli_logistica spa_584 en /index
+2026-03-12 05:18:06 [INFO]: [PrefacturaPage] Seleccionando opción: DEMO_CLI_LOGISTICA SPA_584
+2026-03-12 05:18:06 [INFO]: [PrefacturaPage] Haciendo clic en botón Buscar (Index)
+2026-03-12 05:18:09 [INFO]: [PrefacturaPage] Se encontraron 1 registros. ID de la primera prefactura: [72]
+2026-03-12 05:18:09 [INFO]: ✅ Prefactura visualizada correctamente en /prefactura/index
+2026-03-12 05:18:09 [INFO]: ✅ JSON updated: viaje.prefacturado = true
+2026-03-12 05:18:09 [INFO]: ================================================================================
+2026-03-12 05:18:09 [INFO]: PASO 8: ¡CREACIÓN DE PREFACTURA (LEGACY) COMPLETADO!
+2026-03-12 05:18:09 [INFO]: ================================================================================

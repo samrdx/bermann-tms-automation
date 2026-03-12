@@ -1,0 +1,49 @@
+2026-03-12 05:16:11 [INFO]: ENTORNO: DEMO 🎭
+2026-03-12 05:16:11 [INFO]: ================================================================================
+2026-03-12 05:16:11 [INFO]: Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: DEMO]
+2026-03-12 05:16:11 [INFO]: ================================================================================
+2026-03-12 05:16:11 [INFO]: Fase 1: Cargando datos del JSON...
+2026-03-12 05:16:11 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-12 05:16:11 [INFO]:    Transportista : Demo_tra_horizonte_601
+2026-03-12 05:16:11 [INFO]:    Vehículo      : Demo_veh_RMHO15
+2026-03-12 05:16:11 [INFO]:    Conductor     : Demo_con_ana Demo_con_silva
+2026-03-12 05:16:11 [INFO]:    Nro Viaje     : 73469
+2026-03-12 05:16:11 [INFO]:    Search ID     : 6642 (internal grid ID)
+2026-03-12 05:16:11 [INFO]: Fase 2: Navegando a /viajes/asignar... [isDemo=true]
+2026-03-12 05:16:11 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-12 05:16:15 [INFO]: 🔍 Buscando viaje "6642" y abriendo formulario de edición...
+2026-03-12 05:16:15 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 6642
+2026-03-12 05:16:15 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 6642 en la grilla de Asignación...
+2026-03-12 05:16:19 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 6642
+2026-03-12 05:16:22 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-12 05:16:22 [INFO]: ✅ Formulario de asignación de viaje cargado — URL: https://demo.bermanntms.cl/viajes/editar/6642
+2026-03-12 05:16:22 [INFO]: Fase 3: Seleccionando Transportista: Demo_tra_horizonte_601
+2026-03-12 05:16:22 [INFO]: 🛡️ Robust Selection: Transportista "Demo_tra_horizonte_601"
+2026-03-12 05:16:26 [INFO]: ✅ Transportista verified: Demo_tra_horizonte_601
+2026-03-12 05:16:26 [INFO]: Fase 4: Esperando recarga de cascada...
+2026-03-12 05:16:27 [INFO]: Fase 5: Seleccionando Vehículo: Demo_veh_RMHO15
+2026-03-12 05:16:28 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "Demo_veh_RMHO15"
+2026-03-12 05:16:28 [INFO]: Fase 6: Seleccionando Conductor: Demo_con_ana Demo_con_silva
+2026-03-12 05:16:29 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Demo_con_ana Demo_con_silva"
+2026-03-12 05:16:29 [INFO]: Fase 7: Verificación final anti-reset para Transportista...
+2026-03-12 05:16:29 [INFO]: ✅ Transportista confirmado: "Demo_tra_horizonte_601"
+2026-03-12 05:16:30 [INFO]: Fase 8: Guardar asignación...
+2026-03-12 05:16:30 [INFO]: 💾 Guardado completado
+2026-03-12 05:16:30 [INFO]: Fase 9: Verificando asignación en grilla /viajes/asignar...
+2026-03-12 05:16:34 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-12 05:16:36 [INFO]: ✅ Viaje [6642] confirmado en grilla. Estado Asignado: true
+2026-03-12 05:16:36 [INFO]: ✅ JSON actualizado: viaje.status = ASIGNADO
+2026-03-12 05:16:36 [INFO]: ================================================================================
+2026-03-12 05:16:36 [INFO]: PASO 6.5: ¡ASIGNAR VIAJE (LEGACY) COMPLETADO!
+2026-03-12 05:16:36 [INFO]:    Nro Viaje    : 73469
+2026-03-12 05:16:36 [INFO]:    Transportista: Demo_tra_horizonte_601
+2026-03-12 05:16:36 [INFO]:    Vehículo     : Demo_veh_RMHO15
+2026-03-12 05:16:36 [INFO]:    Conductor    : Demo_con_ana Demo_con_silva
+2026-03-12 05:16:36 [INFO]:    Duration     : 24.77s
+2026-03-12 05:16:36 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🎫 Viaje         : [73469]                        | ID: 6642 | Patente: Demo_veh_RMHO15 | Asociado: Demo_tra_horizonte_601 | Estado: ASIGNADO | Conductor: Demo_con_ana Demo_con_silva
+====================================================================================================

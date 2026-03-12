@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_logistica_968]       | ID: 243
+🏢 Cliente       : [Demo_cli_distribuidora_670]   | ID: 229
+🚚 Vehiculo      : [Demo_veh_GSMP25]              | Patente: Demo_veh_GSMP25 | Asociado: Demo_tra_logistica_968
+👤 Conductor     : [Demo_con_juan Demo_con_torres] | Asociado: Demo_tra_logistica_968
+🏭 Transportista : [Demo_tra_logistica_968]      
+🏢 Cliente       : [Demo_cli_distribuidora_670]  
+🔹 Contrato Venta: [817445]                      
+🔹 Contrato Costo: [796589]                      
+🎫 Viaje         : [875133]                       | Asociado: Demo_cli_distribuidora_670 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 75 | Cliente: Demo_cli_distribuidora_670
+====================================================================================================

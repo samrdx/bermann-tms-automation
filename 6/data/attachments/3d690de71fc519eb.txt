@@ -1,0 +1,26 @@
+2026-03-12 05:10:40 [INFO]: ENTORNO: DEMO 🎭
+2026-03-12 05:10:40 [INFO]: ✅ Cargado seededTransportista: Demo_tra_horizonte_601 (ID: 241)
+2026-03-12 05:10:41 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-12 05:10:44 [INFO]: 📝 Completando formulario de conductor para: Demo_con_ana Demo_con_silva
+2026-03-12 05:10:44 [INFO]: [ConductorFormPage] Llenando usuario: blyzcd65
+2026-03-12 05:10:44 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-12 05:10:44 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_ana
+2026-03-12 05:10:44 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_silva
+2026-03-12 05:10:44 [INFO]: [ConductorFormPage] Llenando documento: 93.198.362-8
+2026-03-12 05:10:44 [INFO]: [BasePage] Ingresando RUT con verificación: [93.198.362-8] en #conductores-documento
+2026-03-12 05:10:45 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 93.198.362-8
+2026-03-12 05:10:45 [INFO]: [ConductorFormPage] Llenando telefono: +56943818198
+2026-03-12 05:10:45 [INFO]: [ConductorFormPage] Llenando email: demo_con_anademo_con_silva@hotmail.com
+2026-03-12 05:10:45 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-12 05:10:47 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-12 05:10:47 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_horizonte_601]
+2026-03-12 05:10:48 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-12 05:10:50 [INFO]: ✅ Conductor [Demo_con_ana Demo_con_silva] guardado exitosamente
+2026-03-12 05:10:50 [INFO]: ✅ seededConductor guardado: Demo_con_ana Demo_con_silva
+2026-03-12 05:10:50 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_ana Demo_con_silva]  | Asociado: Demo_tra_horizonte_601
+====================================================================================================

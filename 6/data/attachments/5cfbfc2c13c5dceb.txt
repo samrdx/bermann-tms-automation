@@ -1,0 +1,42 @@
+2026-03-12 04:46:22 [INFO]: ENTORNO: QA 🧪
+2026-03-12 04:46:22 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-12 04:46:22 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-12 04:46:25 [INFO]: ✅ Navegación correcta
+2026-03-12 04:46:25 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-12 04:46:25 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_importadora_632
+2026-03-12 04:46:25 [INFO]: [ClienteFormPage] Completando RUT: 81344928-5
+2026-03-12 04:46:25 [INFO]: [BasePage] Ingresando RUT con verificación: [81344928-5] en #clientes-rut
+2026-03-12 04:46:27 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 81.344.928-5
+2026-03-12 04:46:27 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_importadora spa_632
+2026-03-12 04:46:27 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-12 04:46:28 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-12 04:46:28 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-12 04:46:28 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-12 04:46:29 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region del Maule
+2026-03-12 04:46:30 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Curicó
+2026-03-12 04:46:32 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Rauco
+2026-03-12 04:46:32 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region del Maule → Curicó → Rauco
+2026-03-12 04:46:32 [INFO]: [ClienteFormPage] Completando calle: Calle Estado
+2026-03-12 04:46:32 [INFO]: [ClienteFormPage] Completando altura: 179
+2026-03-12 04:46:32 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-12 04:46:32 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-12 04:46:32 [INFO]: ✅ Formulario Completado
+2026-03-12 04:46:32 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-12 04:46:32 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-12 04:46:37 [INFO]: ✅ Guardar iniciado
+2026-03-12 04:46:37 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-12 04:46:39 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-12 04:46:39 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-12 04:46:39 [INFO]: 🔍 Buscando por RUT: 81344928-5 (limpio: 813449285)
+2026-03-12 04:46:39 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-12 04:46:41 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-12 04:46:41 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 178
+2026-03-12 04:46:41 [INFO]: ✅ Cliente [Qa_cli_importadora_632] ID: 178 identificado exitosamente
+2026-03-12 04:46:41 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-firefox-qa.json
+2026-03-12 04:46:41 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_importadora_632]       | ID: 178
+====================================================================================================

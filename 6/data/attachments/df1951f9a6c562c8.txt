@@ -1,0 +1,13 @@
+2026-03-12 04:46:51 [INFO]: ENTORNO: QA 🧪
+2026-03-12 04:46:51 [INFO]: ✅ Transportista seeded cargado: Qa_tra_rutas_287 (ID: 249)
+2026-03-12 04:46:52 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-12 04:46:54 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_rutas_287
+2026-03-12 04:46:54 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_PG5217
+2026-03-12 04:46:54 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_PG5217
+2026-03-12 04:46:55 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_rutas_287
+2026-03-12 04:46:57 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_rutas_287" seleccionado
+2026-03-12 04:46:57 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-12 04:46:58 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-12 04:46:59 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-12 04:46:59 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-12 04:46:59 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar

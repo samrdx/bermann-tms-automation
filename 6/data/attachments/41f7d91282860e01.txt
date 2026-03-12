@@ -1,0 +1,41 @@
+2026-03-12 05:08:05 [INFO]: ENTORNO: DEMO 🎭
+2026-03-12 05:08:05 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-12 05:08:05 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-12 05:08:08 [INFO]: ✅ Navegación exitosa
+2026-03-12 05:08:08 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-12 05:08:08 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_cargo_246
+2026-03-12 05:08:08 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_cargo_246
+2026-03-12 05:08:08 [INFO]: [TransportistaFormPage] Completando documento (RUT): 93502738-1
+2026-03-12 05:08:08 [INFO]: [BasePage] Ingresando RUT con verificación: [93502738-1] en #transportistas-documento
+2026-03-12 05:08:10 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 93.502.738-1
+2026-03-12 05:08:10 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-12 05:08:10 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-12 05:08:11 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-12 05:08:11 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-12 05:08:12 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de la Araucania
+2026-03-12 05:08:13 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Malleco
+2026-03-12 05:08:14 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Curacautín
+2026-03-12 05:08:14 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de la Araucania → Malleco → Curacautín
+2026-03-12 05:08:14 [INFO]: [TransportistaFormPage] Completando calle: Av. Vicuña Mackenna
+2026-03-12 05:08:14 [INFO]: [TransportistaFormPage] Completando altura: 599
+2026-03-12 05:08:14 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-12 05:08:15 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-12 05:08:15 [INFO]: ✅ Formulario completado
+2026-03-12 05:08:15 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-12 05:08:15 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-12 05:08:20 [INFO]: ✅ Guardado iniciado
+2026-03-12 05:08:20 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-12 05:08:22 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-12 05:08:22 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-12 05:08:22 [INFO]: 🔍 Buscando por nombre: Demo_tra_cargo_246
+2026-03-12 05:08:22 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-12 05:08:24 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 240
+2026-03-12 05:08:24 [INFO]: ✅ ID del Transportista [Demo_tra_cargo_246] extraído exitosamente: 240
+2026-03-12 05:08:24 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-demo.json
+2026-03-12 05:08:24 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: SEED-TRANSPORTISTA-CHROMIUM
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_246]           | ID: 240
+====================================================================================================

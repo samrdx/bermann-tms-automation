@@ -1,0 +1,21 @@
+2026-03-12 05:10:05 [INFO]: ENTORNO: DEMO 🎭
+2026-03-12 05:10:05 [INFO]: ✅ Transportista seeded cargado: Demo_tra_horizonte_601 (ID: 241)
+2026-03-12 05:10:07 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-12 05:10:09 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_horizonte_601
+2026-03-12 05:10:09 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_RMHO15
+2026-03-12 05:10:09 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_RMHO15
+2026-03-12 05:10:11 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_horizonte_601
+2026-03-12 05:10:12 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_horizonte_601" seleccionado
+2026-03-12 05:10:12 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-12 05:10:13 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-12 05:10:14 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-12 05:10:14 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-12 05:10:14 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-12 05:10:19 [INFO]: ✅ Vehículo [Demo_veh_RMHO15] guardado exitosamente
+2026-03-12 05:10:19 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_RMHO15
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🚚 Vehiculo      : [Demo_veh_RMHO15]              | Patente: Demo_veh_RMHO15 | Asociado: Demo_tra_horizonte_601
+====================================================================================================

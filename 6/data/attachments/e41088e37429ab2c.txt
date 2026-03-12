@@ -1,0 +1,13 @@
+2026-03-12 04:48:10 [INFO]: ENTORNO: QA 🧪
+2026-03-12 04:48:10 [INFO]: ✅ Transportista seeded cargado: Qa_tra_horizonte_284 (ID: 250)
+2026-03-12 04:48:11 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-12 04:48:14 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_horizonte_284
+2026-03-12 04:48:14 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_SVWG60
+2026-03-12 04:48:14 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_SVWG60
+2026-03-12 04:48:15 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_horizonte_284
+2026-03-12 04:48:17 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_horizonte_284" seleccionado
+2026-03-12 04:48:17 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-12 04:48:18 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-12 04:48:19 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-12 04:48:19 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-12 04:48:19 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar

@@ -1,0 +1,140 @@
+2026-03-12 04:58:10 [INFO]: ENTORNO: QA 🧪
+2026-03-12 04:58:10 [INFO]: 
+2026-03-12 04:58:10 [INFO]: ================================================================================
+2026-03-12 04:58:10 [INFO]: [PrefacturaCrearE2ETest] [FASE 1] 🚀 PREPARACIÓN DE DATOS (API)
+2026-03-12 04:58:10 [INFO]: ================================================================================
+2026-03-12 04:58:10 [INFO]: ✅ TmsApiClient inicializado
+2026-03-12 04:58:10 [INFO]: [PrefacturaCrearE2ETest] [SUBPASO] 🔸 Setup: Transportista=[Qa_tra_austral_688] Cliente=[Qa_cli_comercial_237] Viaje=[486502]
+2026-03-12 04:58:10 [INFO]: 🚀 UI: Creando Transportista [Qa_tra_austral_688] RUT: [51249298-3]
+2026-03-12 04:58:13 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [51249298-3] en input[name="Transportistas[documento]"]
+2026-03-12 04:58:15 [INFO]: ✅ RUT verificado (intento 1): 51.249.298-3
+2026-03-12 04:58:15 [INFO]: ⚙️ Manteniendo "Permite Tercearizar viajes" en NO...
+2026-03-12 04:58:18 [INFO]: 💾 Guardando Transportista vía Inyección JS...
+2026-03-12 04:58:20 [INFO]: ✅ Transportista [Qa_tra_austral_688] creado exitosamente
+2026-03-12 04:58:20 [INFO]: 📍 URL después de guardar: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-12 04:58:20 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla...
+2026-03-12 04:58:22 [INFO]: 🔍 Buscando por RUT: 51249298-3
+2026-03-12 04:58:22 [WARN]: ⚠️ ⚠️ La búsqueda por RUT falló, recurriendo a la búsqueda por nombre...
+2026-03-12 04:58:23 [INFO]: 🔎 Búsqueda completada con: Qa_tra_austral_688
+2026-03-12 04:58:25 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-12 04:58:25 [INFO]: ✅ ID de Transportista desde el link: 254
+2026-03-12 04:58:25 [INFO]: ✅ Transportista creado: Qa_tra_austral_688 | ID: 254
+2026-03-12 04:58:25 [INFO]: 🚀 UI: Creando Cliente [Qa_cli_comercial_237] RUT: [40563886-K]
+2026-03-12 04:58:26 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [40563886-K] en #clientes-rut
+2026-03-12 04:58:28 [WARN]: ⚠️ ⚠️ Diferencia en RUT (intento 1). Obtenido: [40.563.886-], Esperado: [40563886K]. Reintentando más lento...
+2026-03-12 04:58:30 [INFO]: ✅ RUT verificado (intento 2): 40.563.886-k
+2026-03-12 04:58:30 [INFO]: ⚡ JS Click: button[data-id="clientes-tipo_cliente_id"]
+2026-03-12 04:58:31 [INFO]: ⚡ JS Click: button[data-id="clientes-region_id"]
+2026-03-12 04:58:33 [INFO]: ⚡ JS Click: button[data-id="clientes-ciudad_id"]
+2026-03-12 04:58:34 [INFO]: ⚡ JS Click: button[data-id="clientes-comuna_id"]
+2026-03-12 04:58:35 [INFO]: 📍 Seleccionando Polígonos (drop_zones)...
+2026-03-12 04:58:35 [WARN]: ⚠️ ⚠️ Dropdown de polígonos no visible
+2026-03-12 04:58:35 [INFO]: ⚡ JS Click: #btn_guardar
+2026-03-12 04:58:43 [WARN]: ⚠️ ⚠️ waitForURL (ver/editar) no completó en 8s para Cliente (Qa_cli_comercial_237) — continuando con URL actual
+2026-03-12 04:58:43 [INFO]: 📍 URL después de guardar (Cliente): https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-12 04:58:43 [INFO]: 🔄 URL no contiene ID todavía, esperando 2s y reintentando...
+2026-03-12 04:58:45 [INFO]: 🔍 Usando filtro de búsqueda para encontrar Cliente: Qa_cli_comercial_237
+2026-03-12 04:58:46 [INFO]: 🔎 Búsqueda completada con: Qa_cli_comercial_237
+2026-03-12 04:58:46 [INFO]: 🔎 Activando búsqueda con Enter y clic en Buscar...
+2026-03-12 04:58:46 [INFO]: ⚡ JS Click: #buscar
+2026-03-12 04:58:50 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-12 04:58:50 [INFO]: ✅ Cliente ID desde el link: 182
+2026-03-12 04:58:50 [INFO]: 🚛 UI: Creando Vehículo [Qa_veh_NEUD46] para Transportista: Qa_tra_austral_688
+2026-03-12 04:58:54 [INFO]: 🚛 Seleccionando Tipo Vehículo: TRACTO
+2026-03-12 04:58:56 [INFO]: 📦 Seleccionando Capacidad: 1 a 12 TON
+2026-03-12 04:59:00 [INFO]: ✅ Vehículo creado: Qa_veh_NEUD46
+2026-03-12 04:59:00 [INFO]: 👨‍✈️ UI: Creando Conductor [Qa_con_maría] para Transportista: Qa_tra_austral_688
+2026-03-12 04:59:03 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [27810166-5] en input[name="Conductores[documento]"]
+2026-03-12 04:59:04 [INFO]: ✅ RUT verificado (intento 1): 27.810.166-5
+2026-03-12 04:59:05 [INFO]: 📅 Estableciendo fecha vencimiento licencia: 12-03-2027
+2026-03-12 04:59:10 [INFO]: ✅ Conductor guardado. URL actual: https://moveontruckqa.bermanntms.cl/conductores/index
+2026-03-12 04:59:10 [INFO]: 📝 Creando contrato [564933] tipo=VENTA para: Qa_cli_comercial_237
+2026-03-12 04:59:13 [INFO]: 📋 Estableciendo tipo de contrato a: VENTA
+2026-03-12 04:59:13 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-12 04:59:28 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-12 04:59:29 [INFO]: 📋 Estableciendo subtipo para contrato de VENTA...
+2026-03-12 04:59:30 [INFO]: 📋 Intentando seleccionar Cliente: "Qa_cli_comercial_237" (intento 1/5)...
+2026-03-12 04:59:30 [INFO]: ✅ Seleccionado: QA_CLI_COMERCIAL_237 (valor: 182)
+2026-03-12 04:59:30 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-12 04:59:36 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-12 04:59:36 [INFO]: 🛣️ Añadiendo Ruta 1413 y Carga 1413_2 con entrada de tarifa LENTA...
+2026-03-12 04:59:37 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-12 04:59:37 [INFO]: ✅ Modal de carga oculto
+2026-03-12 04:59:39 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-12 04:59:40 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-12 04:59:41 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-12 04:59:44 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-12 04:59:47 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-12 04:59:49 [INFO]: 📝 Creando contrato [438714] tipo=COSTO para: Qa_tra_austral_688
+2026-03-12 04:59:51 [INFO]: 📋 Estableciendo tipo de contrato a: COSTO
+2026-03-12 04:59:51 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-12 05:00:06 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-12 05:00:07 [INFO]: 📋 Intentando seleccionar Transportista: "Qa_tra_austral_688" (intento 1/5)...
+2026-03-12 05:00:07 [INFO]: ✅ Seleccionado: QA_TRA_AUSTRAL_688 (valor: 254)
+2026-03-12 05:00:07 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-12 05:00:13 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-12 05:00:13 [INFO]: 🛣️ Añadiendo Ruta 1413 y Carga 1413_2 con entrada de tarifa LENTA...
+2026-03-12 05:00:14 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-12 05:00:14 [INFO]: ✅ Modal de carga oculto
+2026-03-12 05:00:17 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-12 05:00:18 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-12 05:00:19 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-12 05:00:22 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-12 05:00:25 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-12 05:00:26 [INFO]: [PrefacturaCrearE2ETest] Estabilizando navegador...
+2026-03-12 05:00:28 [INFO]: 🚚 UI: Creando Viaje [486502] para Cliente [Qa_cli_comercial_237]
+2026-03-12 05:00:31 [INFO]: 📝 Llenando formulario (Reintento: false)...
+2026-03-12 05:00:31 [INFO]: 📋 Seleccionando Tipo Operación: "defecto"
+2026-03-12 05:00:31 [INFO]: ✅ Tipo Operación seleccionado
+2026-03-12 05:00:31 [INFO]: 📋 Seleccionando Tipo Servicio: "defecto"
+2026-03-12 05:00:32 [INFO]: ✅ Tipo Servicio seleccionado
+2026-03-12 05:00:32 [INFO]: 📋 Seleccionando Cliente: "Qa_cli_comercial_237"
+2026-03-12 05:00:33 [INFO]: ✅ Cliente seleccionado
+2026-03-12 05:00:34 [INFO]: 📋 Seleccionando Tipo Viaje: "Normal"
+2026-03-12 05:00:36 [INFO]: ✅ Tipo Viaje seleccionado
+2026-03-12 05:00:36 [INFO]: 📋 Seleccionando Unidad Negocio: "Defecto"
+2026-03-12 05:00:37 [INFO]: ✅ Unidad Negocio seleccionado
+2026-03-12 05:00:37 [INFO]: 📍 PASO 1: Abriendo dropdown Origen...
+2026-03-12 05:00:38 [INFO]: 📍 PASO 2: Seleccionando Origen "405_LA FARFANA_Pudahuel"...
+2026-03-12 05:00:38 [INFO]: ✅ Origen seleccionado: 405_LA FARFANA_Pudahuel
+2026-03-12 05:00:39 [INFO]: 📍 PASO 3: Abriendo dropdown Destino...
+2026-03-12 05:00:41 [INFO]: 📍 PASO 4: Seleccionando Destino "CXP ANTOFAGASTA"...
+2026-03-12 05:00:41 [INFO]: ✅ Destino seleccionado: CXP ANTOFAGASTA
+2026-03-12 05:00:42 [INFO]: ✅ Origen/Destino configurados correctamente
+2026-03-12 05:00:44 [INFO]: 📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que viajes-carga_id tenga la opción Test 1)...
+2026-03-12 05:00:45 [INFO]: 📋 Estado del formulario antes de guardar: viajes-nro_viaje="486502" | tipo_operacion_form="defecto" (opts:4) | viajes-tipo_servicio_id="defecto" (opts:2) | viajes-cliente_id="Qa_cli_comercial_237" (opts:129) | viajes-tipo_viaje_id="Normal" (opts:8) | viajes-unidad_negocio_id="Defecto" (opts:3) | viajes-carga_id="Test 1" (opts:2) | _origendestinoform-origen="405_LA FARFANA_Pudahuel" (opts:725) | _origendestinoform-destino="CXP ANTOFAGASTA" (opts:725)
+2026-03-12 05:00:46 [INFO]: 💾 Haciendo clic en Guardar...
+2026-03-12 05:00:48 [INFO]: ⏳ Verificando creación del viaje...
+2026-03-12 05:00:49 [INFO]: ✅ Viaje [486502] creado exitosamente (toast exacto)
+2026-03-12 05:00:49 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [486502] planificado.
+2026-03-12 05:00:49 [INFO]: 
+2026-03-12 05:00:49 [INFO]: ================================================================================
+2026-03-12 05:00:49 [INFO]: [PrefacturaCrearE2ETest] [FASE 2] 🚀 ASIGNACIÓN DEL VIAJE [486502]
+2026-03-12 05:00:49 [INFO]: ================================================================================
+2026-03-12 05:00:49 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-12 05:00:53 [INFO]: [AsignarViajesPage] === Iniciando Asignación para 486502 (Modo Inyección) ===
+2026-03-12 05:00:53 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 486502
+2026-03-12 05:00:53 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 486502 en la grilla de Asignación...
+2026-03-12 05:00:58 [INFO]: [AsignarViajesPage] ✅ Viaje 486502 encontrado por coincidencia de texto en la fila 1
+2026-03-12 05:01:00 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-12 05:01:00 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Transportista: "Qa_tra_austral_688"
+2026-03-12 05:01:02 [INFO]: [AsignarViajesPage] ✅ Transportista seleccionado exitosamente: Qa_tra_austral_688
+2026-03-12 05:01:03 [INFO]: [AsignarViajesPage] ⏳ Esperando cascada (cargando vehículos)...
+2026-03-12 05:01:09 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Vehículo Principal: "Qa_veh_NEUD46"
+2026-03-12 05:01:11 [WARN]: [AsignarViajesPage] ⚠️ ⚠️ Vehículo Principal "Qa_veh_NEUD46" no encontrado. Opciones disponibles (0):
+
+2026-03-12 05:01:11 [WARN]: [AsignarViajesPage] ⚠️ ⚠️ Aplicando FALLBACK a primera opción...
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_austral_688]           | ID: 254
+🏢 Cliente       : [Qa_cli_comercial_237]         | ID: 182
+🚚 Vehiculo      : [Qa_veh_NEUD46]                | Patente: Qa_veh_NEUD46 | Asociado: Qa_tra_austral_688
+👤 Conductor     : [Qa_con_maría Qa_con_rojas]    | Asociado: Qa_tra_austral_688
+🏭 Transportista : [Qa_tra_austral_688]          
+🏢 Cliente       : [Qa_cli_comercial_237]        
+🔹 Contrato Venta: [564933]                      
+🔹 Contrato Costo: [438714]                      
+🎫 Viaje         : [486502]                       | Asociado: Qa_cli_comercial_237 | Estado: PLANIFICADO
+====================================================================================================

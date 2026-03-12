@@ -1,0 +1,47 @@
+2026-03-12 04:45:56 [INFO]: ENTORNO: QA 🧪
+2026-03-12 04:45:56 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-12 04:45:56 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-12 04:46:00 [INFO]: ✅ Navegación correcta
+2026-03-12 04:46:00 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-12 04:46:00 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_importadora_881
+2026-03-12 04:46:00 [INFO]: [ClienteFormPage] Completando RUT: 74920280-7
+2026-03-12 04:46:00 [INFO]: [BasePage] Ingresando RUT con verificación: [74920280-7] en #clientes-rut
+2026-03-12 04:46:01 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 74.920.280-7
+2026-03-12 04:46:01 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_importadora spa_881
+2026-03-12 04:46:01 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-12 04:46:02 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-12 04:46:02 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-12 04:46:02 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-12 04:46:03 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Magallanes
+2026-03-12 04:46:04 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Porvenir
+2026-03-12 04:46:06 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=0)
+2026-03-12 04:46:06 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Porvenir" (región: "Region de Magallanes"), reintentando...
+2026-03-12 04:46:06 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 2/5
+2026-03-12 04:46:07 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Valparaiso
+2026-03-12 04:46:08 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: San Felipe de Aconcagua
+2026-03-12 04:46:09 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Putaendo
+2026-03-12 04:46:09 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Valparaiso → San Felipe de Aconcagua → Putaendo
+2026-03-12 04:46:09 [INFO]: [ClienteFormPage] Completando calle: Av. Vicuña Mackenna
+2026-03-12 04:46:09 [INFO]: [ClienteFormPage] Completando altura: 879
+2026-03-12 04:46:09 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-12 04:46:09 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-12 04:46:09 [INFO]: ✅ Formulario Completado
+2026-03-12 04:46:09 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-12 04:46:09 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-12 04:46:15 [INFO]: ✅ Guardar iniciado
+2026-03-12 04:46:15 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-12 04:46:17 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-12 04:46:17 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-12 04:46:17 [INFO]: 🔍 Buscando por RUT: 74920280-7 (limpio: 749202807)
+2026-03-12 04:46:17 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-12 04:46:19 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-12 04:46:19 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 177
+2026-03-12 04:46:19 [INFO]: ✅ Cliente [Qa_cli_importadora_881] ID: 177 identificado exitosamente
+2026-03-12 04:46:19 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/last-run-data-chromium-qa.json
+2026-03-12 04:46:19 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_importadora_881]       | ID: 177
+====================================================================================================

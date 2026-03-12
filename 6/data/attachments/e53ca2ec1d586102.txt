@@ -1,0 +1,139 @@
+2026-03-12 05:01:27 [INFO]: ENTORNO: QA 🧪
+2026-03-12 05:01:27 [INFO]: 
+2026-03-12 05:01:27 [INFO]: ================================================================================
+2026-03-12 05:01:27 [INFO]: [PrefacturaCrearE2ETest] [FASE 1] 🚀 PREPARACIÓN DE DATOS (API)
+2026-03-12 05:01:27 [INFO]: ================================================================================
+2026-03-12 05:01:27 [INFO]: ✅ TmsApiClient inicializado
+2026-03-12 05:01:27 [INFO]: [PrefacturaCrearE2ETest] [SUBPASO] 🔸 Setup: Transportista=[Qa_tra_express_503] Cliente=[Qa_cli_logistica_365] Viaje=[273134]
+2026-03-12 05:01:27 [INFO]: 🚀 UI: Creando Transportista [Qa_tra_express_503] RUT: [78624368-8]
+2026-03-12 05:01:31 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [78624368-8] en input[name="Transportistas[documento]"]
+2026-03-12 05:01:32 [INFO]: ✅ RUT verificado (intento 1): 78.624.368-8
+2026-03-12 05:01:33 [INFO]: ⚙️ Manteniendo "Permite Tercearizar viajes" en NO...
+2026-03-12 05:01:35 [INFO]: 💾 Guardando Transportista vía Inyección JS...
+2026-03-12 05:01:37 [INFO]: ✅ Transportista [Qa_tra_express_503] creado exitosamente
+2026-03-12 05:01:37 [INFO]: 📍 URL después de guardar: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-12 05:01:37 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla...
+2026-03-12 05:01:39 [INFO]: 🔍 Buscando por RUT: 78624368-8
+2026-03-12 05:01:39 [WARN]: ⚠️ ⚠️ La búsqueda por RUT falló, recurriendo a la búsqueda por nombre...
+2026-03-12 05:01:39 [INFO]: 🔎 Búsqueda completada con: Qa_tra_express_503
+2026-03-12 05:01:41 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-12 05:01:41 [INFO]: ✅ ID de Transportista desde el link: 255
+2026-03-12 05:01:41 [INFO]: ✅ Transportista creado: Qa_tra_express_503 | ID: 255
+2026-03-12 05:01:41 [INFO]: 🚀 UI: Creando Cliente [Qa_cli_logistica_365] RUT: [72072516-9]
+2026-03-12 05:01:43 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [72072516-9] en #clientes-rut
+2026-03-12 05:01:45 [INFO]: ✅ RUT verificado (intento 1): 72.072.516-9
+2026-03-12 05:01:45 [INFO]: ⚡ JS Click: button[data-id="clientes-tipo_cliente_id"]
+2026-03-12 05:01:45 [INFO]: ⚡ JS Click: button[data-id="clientes-region_id"]
+2026-03-12 05:01:47 [INFO]: ⚡ JS Click: button[data-id="clientes-ciudad_id"]
+2026-03-12 05:01:49 [INFO]: ⚡ JS Click: button[data-id="clientes-comuna_id"]
+2026-03-12 05:01:49 [INFO]: 📍 Seleccionando Polígonos (drop_zones)...
+2026-03-12 05:01:49 [WARN]: ⚠️ ⚠️ Dropdown de polígonos no visible
+2026-03-12 05:01:49 [INFO]: ⚡ JS Click: #btn_guardar
+2026-03-12 05:01:57 [WARN]: ⚠️ ⚠️ waitForURL (ver/editar) no completó en 8s para Cliente (Qa_cli_logistica_365) — continuando con URL actual
+2026-03-12 05:01:57 [INFO]: 📍 URL después de guardar (Cliente): https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-12 05:01:57 [INFO]: 🔄 URL no contiene ID todavía, esperando 2s y reintentando...
+2026-03-12 05:01:59 [INFO]: 🔍 Usando filtro de búsqueda para encontrar Cliente: Qa_cli_logistica_365
+2026-03-12 05:02:01 [INFO]: 🔎 Búsqueda completada con: Qa_cli_logistica_365
+2026-03-12 05:02:01 [INFO]: 🔎 Activando búsqueda con Enter y clic en Buscar...
+2026-03-12 05:02:01 [INFO]: ⚡ JS Click: #buscar
+2026-03-12 05:02:05 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-12 05:02:05 [INFO]: ✅ Cliente ID desde el link: 183
+2026-03-12 05:02:05 [INFO]: 🚛 UI: Creando Vehículo [Qa_veh_VQ9069] para Transportista: Qa_tra_express_503
+2026-03-12 05:02:08 [INFO]: 🚛 Seleccionando Tipo Vehículo: TRACTO
+2026-03-12 05:02:11 [INFO]: 📦 Seleccionando Capacidad: 1 a 12 TON
+2026-03-12 05:02:14 [INFO]: ✅ Vehículo creado: Qa_veh_VQ9069
+2026-03-12 05:02:14 [INFO]: 👨‍✈️ UI: Creando Conductor [Qa_con_josé] para Transportista: Qa_tra_express_503
+2026-03-12 05:02:17 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [19147024-9] en input[name="Conductores[documento]"]
+2026-03-12 05:02:19 [INFO]: ✅ RUT verificado (intento 1): 19.147.024-9
+2026-03-12 05:02:20 [INFO]: 📅 Estableciendo fecha vencimiento licencia: 12-03-2027
+2026-03-12 05:02:24 [INFO]: ✅ Conductor guardado. URL actual: https://moveontruckqa.bermanntms.cl/conductores/index
+2026-03-12 05:02:24 [INFO]: 📝 Creando contrato [417090] tipo=VENTA para: Qa_cli_logistica_365
+2026-03-12 05:02:28 [INFO]: 📋 Estableciendo tipo de contrato a: VENTA
+2026-03-12 05:02:28 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-12 05:02:43 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-12 05:02:44 [INFO]: 📋 Estableciendo subtipo para contrato de VENTA...
+2026-03-12 05:02:44 [INFO]: 📋 Intentando seleccionar Cliente: "Qa_cli_logistica_365" (intento 1/5)...
+2026-03-12 05:02:44 [INFO]: ✅ Seleccionado: QA_CLI_LOGISTICA_365 (valor: 183)
+2026-03-12 05:02:45 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-12 05:02:50 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-12 05:02:50 [INFO]: 🛣️ Añadiendo Ruta 1413 y Carga 1413_2 con entrada de tarifa LENTA...
+2026-03-12 05:02:51 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-12 05:02:51 [INFO]: ✅ Modal de carga oculto
+2026-03-12 05:02:54 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-12 05:02:55 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-12 05:02:56 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-12 05:02:59 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-12 05:03:02 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-12 05:03:03 [INFO]: 📝 Creando contrato [792020] tipo=COSTO para: Qa_tra_express_503
+2026-03-12 05:03:06 [INFO]: 📋 Estableciendo tipo de contrato a: COSTO
+2026-03-12 05:03:06 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-12 05:03:21 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-12 05:03:22 [INFO]: 📋 Intentando seleccionar Transportista: "Qa_tra_express_503" (intento 1/5)...
+2026-03-12 05:03:22 [INFO]: ✅ Seleccionado: QA_TRA_EXPRESS_503 (valor: 255)
+2026-03-12 05:03:23 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-12 05:03:28 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-12 05:03:28 [INFO]: 🛣️ Añadiendo Ruta 1413 y Carga 1413_2 con entrada de tarifa LENTA...
+2026-03-12 05:03:29 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-12 05:03:29 [INFO]: ✅ Modal de carga oculto
+2026-03-12 05:03:31 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-12 05:03:32 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-12 05:03:34 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-12 05:03:37 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-12 05:03:40 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-12 05:03:41 [INFO]: [PrefacturaCrearE2ETest] Estabilizando navegador...
+2026-03-12 05:03:43 [INFO]: 🚚 UI: Creando Viaje [273134] para Cliente [Qa_cli_logistica_365]
+2026-03-12 05:03:45 [INFO]: 📝 Llenando formulario (Reintento: false)...
+2026-03-12 05:03:45 [INFO]: 📋 Seleccionando Tipo Operación: "defecto"
+2026-03-12 05:03:46 [INFO]: ✅ Tipo Operación seleccionado
+2026-03-12 05:03:46 [INFO]: 📋 Seleccionando Tipo Servicio: "defecto"
+2026-03-12 05:03:47 [INFO]: ✅ Tipo Servicio seleccionado
+2026-03-12 05:03:47 [INFO]: 📋 Seleccionando Cliente: "Qa_cli_logistica_365"
+2026-03-12 05:03:48 [INFO]: ✅ Cliente seleccionado
+2026-03-12 05:03:49 [INFO]: 📋 Seleccionando Tipo Viaje: "Normal"
+2026-03-12 05:03:50 [INFO]: ✅ Tipo Viaje seleccionado
+2026-03-12 05:03:50 [INFO]: 📋 Seleccionando Unidad Negocio: "Defecto"
+2026-03-12 05:03:51 [INFO]: ✅ Unidad Negocio seleccionado
+2026-03-12 05:03:51 [INFO]: 📍 PASO 1: Abriendo dropdown Origen...
+2026-03-12 05:03:52 [INFO]: 📍 PASO 2: Seleccionando Origen "405_LA FARFANA_Pudahuel"...
+2026-03-12 05:03:53 [INFO]: ✅ Origen seleccionado: 405_LA FARFANA_Pudahuel
+2026-03-12 05:03:54 [INFO]: 📍 PASO 3: Abriendo dropdown Destino...
+2026-03-12 05:03:55 [INFO]: 📍 PASO 4: Seleccionando Destino "CXP ANTOFAGASTA"...
+2026-03-12 05:03:55 [INFO]: ✅ Destino seleccionado: CXP ANTOFAGASTA
+2026-03-12 05:03:56 [INFO]: ✅ Origen/Destino configurados correctamente
+2026-03-12 05:03:58 [INFO]: 📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que viajes-carga_id tenga la opción Test 1)...
+2026-03-12 05:03:59 [INFO]: 📋 Estado del formulario antes de guardar: viajes-nro_viaje="273134" | tipo_operacion_form="defecto" (opts:4) | viajes-tipo_servicio_id="defecto" (opts:2) | viajes-cliente_id="Qa_cli_logistica_365" (opts:130) | viajes-tipo_viaje_id="Normal" (opts:8) | viajes-unidad_negocio_id="Defecto" (opts:3) | viajes-carga_id="Test 1" (opts:2) | _origendestinoform-origen="405_LA FARFANA_Pudahuel" (opts:725) | _origendestinoform-destino="CXP ANTOFAGASTA" (opts:725)
+2026-03-12 05:04:00 [INFO]: 💾 Haciendo clic en Guardar...
+2026-03-12 05:04:03 [INFO]: ⏳ Verificando creación del viaje...
+2026-03-12 05:04:03 [INFO]: ✅ Viaje [273134] creado exitosamente (toast exacto)
+2026-03-12 05:04:03 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [273134] planificado.
+2026-03-12 05:04:03 [INFO]: 
+2026-03-12 05:04:03 [INFO]: ================================================================================
+2026-03-12 05:04:03 [INFO]: [PrefacturaCrearE2ETest] [FASE 2] 🚀 ASIGNACIÓN DEL VIAJE [273134]
+2026-03-12 05:04:03 [INFO]: ================================================================================
+2026-03-12 05:04:03 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-12 05:04:07 [INFO]: [AsignarViajesPage] === Iniciando Asignación para 273134 (Modo Inyección) ===
+2026-03-12 05:04:07 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 273134
+2026-03-12 05:04:07 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 273134 en la grilla de Asignación...
+2026-03-12 05:04:12 [INFO]: [AsignarViajesPage] ✅ Viaje 273134 encontrado por coincidencia de texto en la fila 1
+2026-03-12 05:04:14 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-12 05:04:14 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Transportista: "Qa_tra_express_503"
+2026-03-12 05:04:16 [INFO]: [AsignarViajesPage] ✅ Transportista seleccionado exitosamente: Qa_tra_express_503
+2026-03-12 05:04:17 [INFO]: [AsignarViajesPage] ⏳ Esperando cascada (cargando vehículos)...
+2026-03-12 05:04:23 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Vehículo Principal: "Qa_veh_VQ9069"
+2026-03-12 05:04:25 [WARN]: [AsignarViajesPage] ⚠️ ⚠️ Vehículo Principal "Qa_veh_VQ9069" no encontrado. Opciones disponibles (0):
+
+2026-03-12 05:04:25 [WARN]: [AsignarViajesPage] ⚠️ ⚠️ Aplicando FALLBACK a primera opción...
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_express_503]           | ID: 255
+🏢 Cliente       : [Qa_cli_logistica_365]         | ID: 183
+🚚 Vehiculo      : [Qa_veh_VQ9069]                | Patente: Qa_veh_VQ9069 | Asociado: Qa_tra_express_503
+👤 Conductor     : [Qa_con_josé Qa_con_rodríguez] | Asociado: Qa_tra_express_503
+🏭 Transportista : [Qa_tra_express_503]          
+🏢 Cliente       : [Qa_cli_logistica_365]        
+🔹 Contrato Venta: [417090]                      
+🔹 Contrato Costo: [792020]                      
+🎫 Viaje         : [273134]                       | Asociado: Qa_cli_logistica_365 | Estado: PLANIFICADO
+====================================================================================================
