@@ -138,28 +138,67 @@ export class AsignarPage extends BasePage {
     return true;
   }
 
-  // --- ARMA SECRETA: INYECCIÓN DIRECTA ---
-  private async injectValueByText(textToFind: string, label: string): Promise<void> {
-    logger.info(`💉 Inyectando ${label}: "${textToFind}"`);
+  // --- INTERACCIÓN ROBUSTA DE DROPDOWNS (Bootstrap Select) ---
+  private getSelectButton(labelText: string): Locator {
+    // Busca un contenedor form-group que tenga un label con el texto, y devuelve el botón dropdown-toggle dentro
+    return this.page.locator('.form-group, .row').filter({ has: this.page.locator(`label:has-text("${labelText}")`) }).locator('button.dropdown-toggle').first();
+  }
 
-    const success = await this.page.evaluate((text) => {
-      // Buscar en todos los selects del documento
-      const selects = Array.from(document.querySelectorAll('select'));
-      for (const select of selects) {
-        const option = Array.from(select.options).find(opt => opt.text.includes(text));
-        if (option) {
-          select.value = option.value;
+  private async selectDropdownOption(buttonLocator: Locator, searchText: string, labelForLog: string): Promise<void> {
+    logger.info(`🔎 Buscando y seleccionando en ${labelForLog}: "${searchText}"`);
+
+    // 1. Click to open dropdown (use JS evaluate click for maximum compatibility en Firefox/Demo)
+    await buttonLocator.waitFor({ state: 'visible', timeout: 8000 }).catch(() => logger.warn(`⚠️ Botón para ${labelForLog} no visible aún`));
+    await buttonLocator.evaluate(el => (el as HTMLElement).click());
+    await this.page.waitForTimeout(1000);
+
+    const dropdownContainer = buttonLocator.locator('xpath=ancestor::div[contains(@class, "bootstrap-select")][1]');
+    const searchBox = dropdownContainer.locator('.bs-searchbox input[type="text"]');
+
+    // 2. Search if searchbox exists
+    if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await searchBox.fill(searchText);
+      await this.page.waitForTimeout(800); // Wait for filtering to happen
+    }
+
+    // 3. Find and select the option
+    const optionsList = dropdownContainer.locator('ul.dropdown-menu.inner');
+    const targetOption = optionsList.locator('li:not(.disabled) a').filter({ hasText: searchText }).first();
+
+    if (await targetOption.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await targetOption.evaluate(el => (el as HTMLElement).click());
+      logger.info(`✅ ${labelForLog} seleccionado exitosamente: ${searchText}`);
+    } else {
+      // DEBUG: Log all available options
+      const allOptionsText = await optionsList.locator('li:not(.disabled) a').evaluateAll(
+        els => els.map(el => (el as HTMLElement).innerText.trim()).filter(t => t)
+      );
+      logger.warn(`⚠️ ${labelForLog} "${searchText}" no encontrado. Opciones disponibles (${allOptionsText.length}):\n${allOptionsText.join(', ')}`);
+      logger.warn(`⚠️ Aplicando FALLBACK a primera opción...`);
+      // Fallback: clear search and pick first
+      if (await searchBox.isVisible().catch(() => false)) {
+        await searchBox.fill('');
+        await this.page.waitForTimeout(500);
+      }
+      const firstOption = optionsList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
+      await firstOption.waitFor({ state: 'attached', timeout: 5000 });
+      const fallbackText = await firstOption.textContent().catch(() => 'primera opción');
+      await firstOption.evaluate(el => (el as HTMLElement).click());
+      logger.info(`✅ ${labelForLog} FALLBACK seleccionado: ${fallbackText?.trim()}`);
+    }
+
+    // FIX CASCADAS: Asegurarnos de que el Select nativo dispare el evento change
+    // a veces evaluate(.click()) en el <a> no lo propaga hacia SelectPicker
+    await buttonLocator.evaluate((btn) => {
+      if (btn && btn.parentElement) {
+        // En btn-group, el <select> es sibling de nuestro target o esta dentro del abuelo
+        const select = btn.parentElement.parentElement?.querySelector('select');
+        if (select) {
           select.dispatchEvent(new Event('change', { bubbles: true }));
-          // Actualizar Bootstrap visualmente
-          // @ts-ignore
-          if (window.$) window.$(select).selectpicker('refresh');
-          return true;
         }
       }
-      return false;
-    }, textToFind);
+    });
 
-    if (!success) logger.warn(`⚠️ No se pudo inyectar "${textToFind}". Se intentará clic estándar como respaldo.`);
     await this.page.waitForTimeout(1000);
   }
 
@@ -176,17 +215,20 @@ export class AsignarPage extends BasePage {
     logger.info(`=== Iniciando Asignación para ${nroViaje} (Modo Inyección) ===`);
     await this.selectViajeRow(nroViaje);
 
-    // 1. Inyectar Transportista
-    await this.injectValueByText(data.transportista, 'Transportista');
+    // 1. Seleccionar Transportista
+    const transportistaBtn = this.page.locator('button[data-id="viajes-transportista_id"]');
+    await this.selectDropdownOption(transportistaBtn, data.transportista, 'Transportista');
 
-    logger.info('Esperando cascada (cargando vehículos)...');
+    logger.info('⏳ Esperando cascada (cargando vehículos)...');
     await this.page.waitForTimeout(6000); // Espera pasiva para que el backend cargue los vehículos
 
-    // 2. Inyectar Vehículo (Funciona aunque el botón parezca disabled)
-    await this.injectValueByText(data.vehiculoPrincipal, 'Vehículo');
+    // 2. Seleccionar Vehículo (Funciona aunque el botón parezca disabled inicialmente)
+    const vehiculoBtn = this.page.locator('button[data-id="viajes-vehiculo_uno_id"]');
+    await this.selectDropdownOption(vehiculoBtn, data.vehiculoPrincipal, 'Vehículo Principal');
 
-    // 3. Inyectar Conductor
-    await this.injectValueByText(data.conductor, 'Conductor');
+    // 3. Seleccionar Conductor
+    const conductorBtn = this.page.locator('button[data-id="viajes-conductor_id"]');
+    await this.selectDropdownOption(conductorBtn, data.conductor, 'Conductor');
 
     // 4. Guardar
     await this.clickGuardar();
