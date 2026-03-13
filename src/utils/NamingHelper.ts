@@ -75,4 +75,19 @@ export class NamingHelper {
             apellido: `${prefix}con_${cleanLastName}`
         };
     }
+
+    /**
+     * Genera un nombre estandarizado para Unidad de Negocio
+     * Regla: Qa_UN_ + [Nombre] + _ + [Random3]
+     * Ejemplo: Qa_UN_Norte_123
+     */
+    static getUnidadNegocioName(): string {
+        const prefix = this.getEnvPrefix();
+        const baseNames = ['Norte', 'Santiago', 'Centro', 'Sur', 'Poniente', 'Oriente'];
+        const baseName = baseNames[Math.floor(Math.random() * baseNames.length)];
+        const threeDigits = Math.floor(Math.random() * 900) + 100; // 100-999
+
+        return `${prefix}UN_${baseName}_${threeDigits}`;
+    }
 }
+
