@@ -1,35 +1,6 @@
-# Delta for 00-config
+# Spec: Configuracion de Rutas Multi-Ambiente (QA/DEMO)
 
-## ADDED Requirements
-
-### Requirement: Single Value Capacity (Valor Único)
-
-The system MUST allow creating a capacity with a single static value.
-
-#### Scenario: Create a single value capacity
-
-- GIVEN the user is on `/capacities/create`
-- WHEN the user ensures "¿Es rango?" is unchecked
-- AND enters a random numerical value (1-20) in "Capacidad Inicial"
-- AND selects a random unit between "KG" and "TON"
-- AND clicks save
-- THEN the system MUST display a success message
-- AND the capacity MUST be visible when searching in `/capacities/index`
-
-### Requirement: Range Capacity (Rango)
-
-The system MUST allow creating a capacity defined by a range (Initial and Final).
-
-#### Scenario: Create a range capacity
-
-- GIVEN the user is on `/capacities/create`
-- WHEN the user checks the "¿Es rango?" checkbox
-- AND enters a random numerical value (1-20) in "Capacidad Inicial"
-- AND enters a random numerical value (1-20) in "Capacidad Final"
-- AND selects a random unit between "KG" and "TON"
-- AND clicks save
-- THEN the system MUST display a success message
-- AND the capacity range MUST be visible when searching in `/capacities/index`
+## Requirements
 
 ### Requirement: Ruta Creation MUST Support QA and DEMO
 
@@ -79,6 +50,22 @@ The route test MUST provide execution traceability in logs and Allure.
 - **WHEN** the test completes
 - **THEN** logs MUST include `🚚`, `✅`, `📍`, and `📊`
 - **AND** Allure SHALL include `epic`, `feature`, `story`, parameters, and a final JSON attachment
+
+### Requirement: Framework Integration MUST Expose Route Fixture and Scripts
+
+The framework MUST expose the new page object via fixtures and execution scripts.
+
+#### Scenario: Route fixture is available in tests
+
+- **GIVEN** `src/fixtures/base.ts` is loaded
+- **WHEN** a test requests `rutaPage`
+- **THEN** fixture resolution SHALL instantiate `RutaPage` correctly
+
+#### Scenario: Route scripts exist for both environments
+
+- **GIVEN** project scripts are available
+- **WHEN** users run `test:qa:entity:ruta` or `test:demo:entity:ruta`
+- **THEN** each command SHALL execute `ruta-crear.test.ts` with the proper `ENV`
 
 ### Requirement: Created Route MUST Be Verifiable Through Search
 
