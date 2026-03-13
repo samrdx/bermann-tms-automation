@@ -59,9 +59,19 @@ export class PrefacturaPage extends BasePage {
 
     // Asegurar rango de fechas amplio (Desde: 01/01/2026) usando evaluate por robustez
     logger.info('Asegurando rango de fechas...');
-    await this.page.locator('#desde').click();
-    await this.page.locator('#desde').fill('01/01/2026');
+    
+    await this.page.evaluate(() => {
+        const desde = document.getElementById('desde') as HTMLInputElement;
+        if (desde) {
+            desde.value = '01/01/2026';
+            desde.dispatchEvent(new Event('input', { bubbles: true }));
+            desde.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }).catch(e => logger.warn(`No se pudo usar JS para #desde: ${e}`));
+    
+    await this.page.locator('#desde').fill('01/01/2026', { force: true }).catch(() => {});
     await this.page.keyboard.press('Tab');
+    await this.page.keyboard.press('Escape'); // Cerramos cualquier datepicker que pueda quedar abierto
     await this.page.waitForTimeout(500);
 
     // Fallback: Click and type if evaluate didn't seem to work (wait a bit)

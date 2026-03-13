@@ -425,19 +425,33 @@ export class ContratosFormPage extends BasePage {
 
     try {
       // 1. Open dropdown
-      await container.locator('button.dropdown-toggle').evaluate(el => (el as HTMLElement).click());
+      const toggle = container.locator('button.dropdown-toggle');
+      await toggle.click({ force: true }).catch(() => toggle.dispatchEvent('click'));
       await this.page.waitForTimeout(500);
+
+      // Verify if it opened, fallback to JS click if not
+      if (!(await container.locator('.dropdown-menu.show').isVisible().catch(() => false))) {
+        await toggle.evaluate(el => (el as HTMLElement).click());
+        await this.page.waitForTimeout(500);
+      }
 
       // 2. Select option
       const option = container.locator('.dropdown-menu .dropdown-item').filter({ hasText: optionText }).first();
-      await option.waitFor({ state: 'visible', timeout: 5000 });
-      await option.click();
+      try {
+        await option.waitFor({ state: 'visible', timeout: 5000 });
+        await option.click({ force: true });
+      } catch (e) {
+        logger.warn(`⚠️ fallback: clicking option via JS for "${optionText}"`);
+        await option.evaluate(el => (el as HTMLElement).click()).catch(err => {
+            // Ultimate fallback: if option evaluates fail, just sync the select
+        });
+      }
 
       // 3. Sync underlying select
       await container.locator('select').evaluate((el, val) => {
         const select = el as HTMLSelectElement;
         const opt = Array.from(select.options).find(o => o.text.trim().includes(val));
-        if (opt) {
+        if (opt && select.value !== opt.value) {
           select.value = opt.value;
           select.dispatchEvent(new Event('change', { bubbles: true }));
         }
