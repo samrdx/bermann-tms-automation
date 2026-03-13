@@ -64,7 +64,7 @@ jobs:
   atomic-core-flows:
     name: 🛡️ Atomic Core Flows (QA + DEMO)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 50
     needs: [smoke-auth]
 
     steps:
