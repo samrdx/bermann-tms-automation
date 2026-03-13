@@ -14,6 +14,7 @@ import { VehiculoFormPage } from '../modules/transport/pages/VehiculoPage.js';
 import { PlanificarPage } from '../modules/planning/pages/PlanificarPage.js';
 import { AsignarPage } from '../modules/planning/pages/AsignarPage.js';
 import { ClienteFormPage } from '../modules/commercial/pages/ClientePage.js';
+import { TipoCargaPage } from '../modules/configAdmin/pages/TipoCargaPage.js';
 
 // Transport Module
 import { TransportistaFactory } from '../modules/transport/factories/TransportistaFactory.js';
@@ -60,6 +61,7 @@ type MyFixtures = {
   viajesPlanificarPage: PlanificarPage;
   viajesAsignarPage: AsignarPage;
   clientePage: ClienteFormPage;
+  tipoCargaPage: TipoCargaPage;
 
   // Actions
   authActions: AuthActions;
@@ -112,6 +114,9 @@ export const test = base.extend<MyFixtures>({
   },
   clientePage: async ({ page }, use) => {
     await use(new ClienteFormPage(page));
+  },
+  tipoCargaPage: async ({ page }, use) => {
+    await use(new TipoCargaPage(page));
   },
 
   // Actions
