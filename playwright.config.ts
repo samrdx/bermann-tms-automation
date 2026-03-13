@@ -52,15 +52,15 @@ export default defineConfig({
   ],
 
   /*
-   * TIMEOUTS (Optimizados para CI lento):
-   * - Global: 3 min en CI.
-   * - Expect/Action: 20s en CI (spinners de carga y cascades AJAX).
+   * TIMEOUTS (Optimizados para CI y ambiente Demo lento):
+   * - Global: 4 min en Demo/CI.
+   * - Expect/Action: 30s en Demo/CI.
    */
-  timeout: process.env.CI ? 180 * 1000 : 60 * 1000,
+  timeout: (process.env.CI || ENV === 'DEMO') ? 240 * 1000 : 60 * 1000,
   expect: {
-    timeout: process.env.CI ? 20 * 1000 : 10 * 1000,
+    timeout: (process.env.CI || ENV === 'DEMO') ? 30 * 1000 : 10 * 1000,
     toPass: {
-      timeout: process.env.CI ? 30 * 1000 : 15 * 1000,
+      timeout: (process.env.CI || ENV === 'DEMO') ? 45 * 1000 : 15 * 1000,
       intervals: [500, 1000, 2000, 5000],
     },
   },
@@ -76,8 +76,8 @@ export default defineConfig({
      */
     viewport: { width: 1920, height: 1080 },
 
-    actionTimeout: process.env.CI ? 20 * 1000 : 10 * 1000,
-    navigationTimeout: process.env.CI ? 45 * 1000 : 20 * 1000,
+    actionTimeout: (process.env.CI || ENV === 'DEMO') ? 30 * 1000 : 10 * 1000,
+    navigationTimeout: (process.env.CI || ENV === 'DEMO') ? 60 * 1000 : 20 * 1000,
 
     /* Artifacts: Solo guardamos evidencia si falla */
     trace: 'retain-on-failure',
