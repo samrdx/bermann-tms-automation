@@ -111,5 +111,25 @@ export class NamingHelper {
             codigo: `${codePrefix}${fourDigits}`,
         };
     }
+
+    /**
+     * Genera datos estandarizados para Ruta
+     * Nombre QA: Qa_RT_[Zona]_[4digitos]
+     * Nombre DEMO: Demo_RT_[Zona]_[4digitos]
+     * Nro Ruta: numero de 6 digitos
+     */
+    static getRutaData(): { nombreRuta: string; nroRuta: string; baseNombre: string } {
+        const prefix = this.getEnvPrefix();
+        const baseNames = ['Norte', 'Centro', 'Sur', 'Litoral', 'Andes'];
+        const baseName = baseNames[Math.floor(Math.random() * baseNames.length)];
+        const fourDigits = Math.floor(Math.random() * 9000) + 1000;
+        const nroRuta = String(Math.floor(100000 + Math.random() * 900000));
+
+        return {
+            nombreRuta: `${prefix}RT_${baseName}_${fourDigits}`,
+            nroRuta,
+            baseNombre: `${prefix}RT_${baseName}`,
+        };
+    }
 }
 
