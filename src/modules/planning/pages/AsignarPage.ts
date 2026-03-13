@@ -203,12 +203,29 @@ export class AsignarPage extends BasePage {
   }
 
   async clickGuardar(): Promise<void> {
-    await this.page.evaluate((sel) => {
-      const btn = document.querySelector(sel) as HTMLElement;
-      if (btn) btn.click();
-    }, this.selectors.assignment.btnGuardar);
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(2000);
+    const btnGuardar = this.page.locator(this.selectors.assignment.btnGuardar);
+    await btnGuardar.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    
+    // FIX FIREFOX: Usar dispatchEvent en lugar de evaluate.click() 
+    await btnGuardar.dispatchEvent('click');
+    
+    // Esperar si aparece el bootbox
+    const btnConfirmar = this.page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
+    if (await btnConfirmar.isVisible({ timeout: 4000 }).catch(() => false)) {
+      logger.info('⚠️ Aceptando modal de confirmación en Guardar...');
+      await btnConfirmar.dispatchEvent('click');
+    }
+
+    // Wait for the modal or saving indicator to disappear or redirect to happen
+    await Promise.all([
+      this.page.waitForResponse(resp => resp.url().includes('/viajes/') && resp.status() < 400, { timeout: 20000 }).catch(() => {}),
+      this.page.waitForLoadState('networkidle').catch(() => {}),
+      // Wait for navigation away from /editar
+      this.page.waitForURL(url => !url.href.includes('/editar'), { timeout: 20000 }).catch(() => logger.warn('⏳ Ningún redireccionamiento detectado en 20s'))
+    ]);
+    
+    // Additional wait to be safe, as sometimes UI is ready but DB record takes a sec
+    await this.page.waitForTimeout(3000);
   }
 
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {

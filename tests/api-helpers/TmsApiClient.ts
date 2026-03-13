@@ -1871,12 +1871,13 @@ export class TmsApiClient {
 
     // FIX FIREFOX: usar click nativo de Playwright para el botón Guardar.
     // evaluate(el.click()) no dispara los handlers jQuery de validación/submit en Firefox.
+    // .click() normal puede quedar colgado en Firefox si la navegación interrumpe la promesa.
     await Promise.all([
       this.page.waitForResponse(
         (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
         { timeout: 20000 }
       ).catch(() => logger.warn('⚠️ No se capturó respuesta después de hacer clic en Guardar')),
-      guardarBtn.click({ force: true }),
+      guardarBtn.dispatchEvent('click'),
     ]);
 
     await this.page.waitForLoadState('domcontentloaded').catch(() => { });

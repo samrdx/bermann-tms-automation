@@ -89,6 +89,11 @@ export class MonitoreoPage extends BasePage {
     async buscarViaje(nroViaje: string): Promise<void> {
         logger.info(`🔎 UI: Buscando Viaje [${nroViaje}]...`);
 
+        // Wait for initial grid AJAX to complete before attempting search to prevent race conditions
+        await this.page.waitForLoadState('networkidle').catch(() => {});
+        // Also ensure the structure of #registros has loaded
+        await this.page.locator('#registros').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+
         try {
             // 1. Llenar filtro de ID del viaje
             logger.info('⏳ UI: Esperando input #id...');
@@ -128,14 +133,15 @@ export class MonitoreoPage extends BasePage {
 
                 await inputId.waitFor({ state: 'visible', timeout: 10000 });
                 await inputId.clear();
-                await inputId.fill(nroViaje);
-                await this.clickBuscar(inputId);
+                await this.page.waitForTimeout(500); // Wait after clear
+                await inputId.pressSequentially(nroViaje, { delay: 100 }); // Slower typing for Firefox
+                await this.clickBuscar(inputId, true); // Pasar true para indicar reintento largo
                 logger.info('🔄 UI: Re-filtro ejecutado, esperando fila del viaje...');
 
                 try {
                     const rowLoadedRetry = Promise.any([
-                        contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error(); }),
-                        contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error(); })
+                        contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 35000 }).catch(() => { throw new Error(); }),
+                        contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 35000 }).catch(() => { throw new Error(); })
                     ]);
                     await rowLoadedRetry;
                     logger.info(`✅ UI: Fila de viaje encontrada en el reintento`);
@@ -176,8 +182,11 @@ export class MonitoreoPage extends BasePage {
      * Estrategia 1: JS click en #buscar (patrón probado en TmsApiClient para todos los módulos).
      * Estrategia 2: Enter en el input #id (fallback universal — funciona en cualquier form).
      */
-    private async clickBuscar(inputId: any): Promise<void> {
+    private async clickBuscar(inputId: any, isRetry: boolean = false): Promise<void> {
         logger.info('🔎 UI: Disparando búsqueda (multi-estrategia)...');
+
+        // Extra wait before clicking in Firefox to avoid state detachment
+        await this.page.waitForTimeout(500);
 
         // Execute both enter and JS click for maximum robustness (especially in Demo/Firefox)
         await Promise.all([
@@ -193,7 +202,7 @@ export class MonitoreoPage extends BasePage {
 
         // Wait for AJAX to complete before checking #registros
         // Give time for the grid to start its loading process
-        await this.page.waitForTimeout(2000);
+        await this.page.waitForTimeout(isRetry ? 4000 : 2500); // Wait more on retry for Firefox
         await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
             logger.warn('⚠️ UI: tiempo de espera networkidle agotado después de Buscar, continuando...');
         });
