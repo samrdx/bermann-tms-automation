@@ -12,6 +12,10 @@ export class NamingHelper {
         return isDemoMode() ? 'Demo_' : 'Qa_';
     }
 
+    private static getEnvCodePrefix(): string {
+        return isDemoMode() ? 'DEMO' : 'QA';
+    }
+
     /**
      * Genera un nombre estandarizado para Cliente
      * Regla: Qa_cli_ + [Nombre] + null + _ + [Random3]
@@ -88,6 +92,24 @@ export class NamingHelper {
         const threeDigits = Math.floor(Math.random() * 900) + 100; // 100-999
 
         return `${prefix}UN_${baseName}_${threeDigits}`;
+    }
+
+    /**
+     * Genera datos estandarizados para Tipo de Carga
+     * Tipo QA: Qa_TC_Carga General_1234
+     * Tipo DEMO: Demo_TC_Carga General_1234
+     * Codigo QA: QA1234
+     * Codigo DEMO: DEMO1234
+     */
+    static getTipoCargaData(): { tipo: string; codigo: string } {
+        const prefix = this.getEnvPrefix();
+        const codePrefix = this.getEnvCodePrefix();
+        const fourDigits = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+
+        return {
+            tipo: `${prefix}TC_Carga General_${fourDigits}`,
+            codigo: `${codePrefix}${fourDigits}`,
+        };
     }
 }
 
