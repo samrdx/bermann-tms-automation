@@ -4,7 +4,7 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../modules/auth/pages/LoginPage.js';
 import { AuthActions } from '../modules/auth/actions/AuthActions.js';
 
-// Contracts Module
+// Modules
 import { ContratosFormPage } from '../modules/contracts/pages/ContratosPage.js';
 import { ContratoFactory } from '../modules/contracts/factories/ContratoFactory.js';
 import { DashboardPage } from '../modules/auth/pages/DashboardPage.js';
@@ -15,6 +15,8 @@ import { PlanificarPage } from '../modules/planning/pages/PlanificarPage.js';
 import { AsignarPage } from '../modules/planning/pages/AsignarPage.js';
 import { ClienteFormPage } from '../modules/commercial/pages/ClientePage.js';
 import { TipoCargaPage } from '../modules/configAdmin/pages/TipoCargaPage.js';
+import { TipoOperacionPage } from '../modules/configAdmin/pages/TipoOperacionPage.js';
+import { TipoServicioPage } from '../modules/configAdmin/pages/TipoServicioPage.js';
 import { RutaPage } from '../modules/configAdmin/pages/RutaPage.js';
 
 // Transport Module
@@ -63,6 +65,8 @@ type MyFixtures = {
   viajesAsignarPage: AsignarPage;
   clientePage: ClienteFormPage;
   tipoCargaPage: TipoCargaPage;
+  tipoOperacionPage: TipoOperacionPage;
+  tipoServicioPage: TipoServicioPage;
   rutaPage: RutaPage;
 
   // Actions
@@ -120,6 +124,11 @@ export const test = base.extend<MyFixtures>({
   tipoCargaPage: async ({ page }, use) => {
     await use(new TipoCargaPage(page));
   },
+  tipoOperacionPage: async ({ page }, use) => {
+    await use(new TipoOperacionPage(page));
+  },
+  tipoServicioPage: async ({ page }, use) => {
+    await use(new TipoServicioPage(page));
   rutaPage: async ({ page }, use) => {
     await use(new RutaPage(page));
   },
