@@ -111,5 +111,34 @@ export class NamingHelper {
             codigo: `${codePrefix}${fourDigits}`,
         };
     }
+
+    /**
+     * Genera nombre para maestros de Carga.
+     * Regla: Qa_<Tag>_<Random5>
+     * Ejemplo: Qa_Unidad_17102
+     *
+     * Nota: Se usa prefijo Qa_ tambien en Demo para mantener
+     * el contrato solicitado por el flujo de carga setup.
+     */
+    static getCargaMasterName(tag: string): string {
+        const safeTag = tag
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '');
+
+        const randomFiveDigits = Math.floor(10000 + Math.random() * 90000);
+        return `Qa_${safeTag}_${randomFiveDigits}`;
+    }
+
+    /**
+     * Nombre especifico para Tipo de Rampla.
+     * Regla solicitada: qa_tiporam_<5digitos>
+     * Ejemplo: qa_tiporam_12345
+     */
+    static getTipoRamplaName(): string {
+        const randomFiveDigits = Math.floor(10000 + Math.random() * 90000);
+        return `qa_tiporam_${randomFiveDigits}`;
+    }
 }
 
