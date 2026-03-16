@@ -139,6 +139,23 @@ export class NamingHelper {
     static getTipoRamplaName(): string {
         const randomFiveDigits = Math.floor(10000 + Math.random() * 90000);
         return `qa_tiporam_${randomFiveDigits}`;
+     * Genera datos estandarizados para Ruta
+     * Nombre QA: Qa_RT_[Zona]_[4digitos]
+     * Nombre DEMO: Demo_RT_[Zona]_[4digitos]
+     * Nro Ruta: numero de 6 digitos
+     */
+    static getRutaData(): { nombreRuta: string; nroRuta: string; baseNombre: string } {
+        const prefix = this.getEnvPrefix();
+        const baseNames = ['Norte', 'Centro', 'Sur', 'Litoral', 'Andes'];
+        const baseName = baseNames[Math.floor(Math.random() * baseNames.length)];
+        const fourDigits = Math.floor(Math.random() * 9000) + 1000;
+        const nroRuta = String(Math.floor(100000 + Math.random() * 900000));
+
+        return {
+            nombreRuta: `${prefix}RT_${baseName}_${fourDigits}`,
+            nroRuta,
+            baseNombre: `${prefix}RT_${baseName}`,
+        };
     }
 }
 
