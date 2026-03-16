@@ -115,6 +115,24 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
+    {
+      name: 'seed-tipo-operacion-chromium',
+      testMatch: 'e2e/modules/01-entidades/config/tipo-operacion-crear.test.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: `playwright/.auth/user-${envName}.json`,
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'seed-tipo-operacion-firefox',
+      testMatch: 'e2e/modules/01-entidades/config/tipo-operacion-crear.test.ts',
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: `playwright/.auth/user-${envName}.json`,
+      },
+      dependencies: ['setup'],
+    },
 
     // --- AUTH UTILS ---
     {
@@ -151,7 +169,7 @@ export default defineConfig({
         'e2e/modules/**/*.test.ts',
         'e2e/suites/**/*.test.ts',
       ],
-      testIgnore: ['**/transportistas-crear.test.ts'],
+      testIgnore: ['**/transportistas-crear.test.ts', '**/tipo-operacion-crear.test.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: `playwright/.auth/user-${envName}.json`,
@@ -160,7 +178,7 @@ export default defineConfig({
           args: ['--disable-dev-shm-usage', '--no-sandbox']
         }
       },
-      dependencies: ['setup'],
+      dependencies: ['setup', 'seed-tipo-operacion-chromium'],
     },
     {
       name: `firefox-${envName}`,
@@ -168,13 +186,13 @@ export default defineConfig({
         'e2e/modules/**/*.test.ts',
         'e2e/suites/**/*.test.ts',
       ],
-      testIgnore: ['**/transportistas-crear.test.ts'],
+      testIgnore: ['**/transportistas-crear.test.ts', '**/tipo-operacion-crear.test.ts'],
       use: {
         ...devices['Desktop Firefox'],
         storageState: `playwright/.auth/user-${envName}.json`,
         // IMPORTANTE: Sin launchOptions.args que rompan Firefox
       },
-      dependencies: ['setup'],
+      dependencies: ['setup', 'seed-tipo-operacion-firefox'],
     },
 
     // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY
@@ -192,4 +210,4 @@ export default defineConfig({
     //   dependencies: ['setup'],
     // },
   ],
-});
+});
