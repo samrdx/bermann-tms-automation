@@ -65,6 +65,34 @@ export class DataPathHelper {
     }
 
     /**
+     * Canonical setup artifact path requested by the Carga seeding flow.
+     * Output filename is fixed as "carga_setup_data.json".
+     */
+    static getCargaSetupDataPath(): string {
+        const dirPath = path.join(process.cwd(), 'playwright', '.data');
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+
+        return path.join(dirPath, 'carga_setup_data.json');
+    }
+
+    /**
+     * Worker/browser isolated setup artifact path to avoid collisions
+     * when setup is executed in parallel projects.
+     */
+    static getScopedCargaSetupDataPath(testInfo: TestInfo): string {
+        const dirPath = path.join(process.cwd(), 'playwright', '.data');
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+
+        const env = (process.env.ENV || 'QA').toLowerCase();
+        const browser = this.getBrowserName(testInfo);
+        return path.join(dirPath, `carga_setup_data-${browser}-${env}.json`);
+    }
+
+    /**
      * Get project identifier (browser name)
      * 
      * @param testInfo - Playwright TestInfo object
