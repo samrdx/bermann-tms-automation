@@ -107,18 +107,36 @@ qa-automation-framework/
 
 Control the target environment using the `ENV` variable:
 
-- **QA (Default):** `npm run [script]` or `ENV=QA [script]`
-- **Demo:** `ENV=DEMO [script]`
+- **QA (Default):** `npm run pw:test:qa -- <path-or-pattern>`
+- **Demo:** `npm run pw:test:demo -- <path-or-pattern>`
+
+Canonical command model:
+
+- `pw:test:*` is the canonical Playwright layer.
+- `test:*` and `run:*` remain as legacy-compatible aliases during migration.
+- Composite commands use fail-fast chaining (`&&`) to avoid serving reports after failures.
+- Setup projects (unidad de negocio, tipo operación, etc.) run only when `RUN_SETUP_PROJECTS=true` is enabled by setup commands.
 
 ### Common Scripts
 
 | Category | Command | Description |
 | --- | --- | --- |
+| **Canonical Base** | `npm run pw:test:qa -- <pattern>` | Run any suite in QA |
+| | `npm run pw:test:demo -- <pattern>` | Run any suite in Demo |
+| **Canonical Config Setup** | `npm run pw:test:qa:config:phase1` | Setup config phase 1 (QA) |
+| | `npm run pw:test:demo:config:phase1` | Setup config phase 1 (Demo) |
+| **Organized by Env** | `npm run qa:smoke:legacy` | Sequential QA smoke flow |
+| | `npm run qa:e2e` | Full QA E2E flow |
+| | `npm run demo:smoke:legacy` | Sequential Demo smoke flow |
+| | `npm run demo:e2e` | Full Demo E2E flow |
+| **Canonical E2E CI** | `npm run pw:test:qa:e2e:prefactura:ci` | Prefactura atomic E2E in QA (CI-friendly) |
+| | `npm run pw:test:demo:e2e:prefactura:ci` | Prefactura atomic E2E in Demo (CI-friendly) |
 | **Smoke / Auth** | `npm run test:auth` | Run all authentication tests |
-| **Atomic E2E** | `npm run test:qa:trip:full-flow` | Complete flow without state dependencies (QA) |
-| | `npm run test:demo:trip:full-flow` | Complete flow without state dependencies (Demo) |
+| **Legacy Atomic E2E** | `npm run test:qa:trip:full-flow` | Legacy alias for QA atomic E2E flow |
+| | `npm run test:demo:trip:full-flow` | Legacy alias for Demo atomic E2E flow |
 | **Legacy QA** | `npm run test:qa:legacy:setup` | Run base entities setup (Steps 1-4) |
 | | `npm run test:qa:flow:setup-to-viajes` | Setup -> Contratos -> Viajes |
+| **Cross Environment** | `npm run run:all-envs:trip:full-flow` | Run QA + Demo in parallel with fail-fast behavior |
 | **Reports** | `npm run allure:serve:qa` | Serve Allure report for QA |
 | | `npm run allure:serve:demo` | Serve Allure report for Demo |
 | | `npm run show-report` | Open standard Playwright HTML report |
@@ -137,8 +155,8 @@ npm run allure:open:qa
 # Direct serve (QA)
 npm run allure:serve:qa
 
-# Full run: Clean + Test + Serve (Demo)
-npm run run:demo:e2e
+# Full run (legacy alias): Clean + Test + Serve (Demo)
+npm run test:demo:trip:full-flow
 ```
 
 ### Test Classification
@@ -184,7 +202,7 @@ Artifacts (traces, videos) are retained for 7 days on failure.
 Data flow:
 
 ```text
-auth.setup.ts -> playwright/.auth/user.json
+auth.setup.ts -> playwright/.auth/user-<env>.json
      |
 base-entities.setup.ts (3 browsers in parallel)
      |
