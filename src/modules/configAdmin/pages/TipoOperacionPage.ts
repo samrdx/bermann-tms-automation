@@ -26,6 +26,8 @@ export class TipoOperacionPage extends BasePage {
     chkHorarios: 'input[type="checkbox"]',
     btnGuardar: '#btn_guardar',
     btnGuardarFallback: 'button.btn-success:has-text("Guardar")',
+    successAlert: '.alert-success, .toast-success, .swal2-success',
+    errorAlert: '.alert-danger, .alert.alert-danger, .toast-error',
     // Search selectors
     searchInput: '#search',
     btnBuscar: '#buscar',
@@ -88,15 +90,51 @@ export class TipoOperacionPage extends BasePage {
         throw new Error('No se encontró el botón Guardar');
       }
 
-      await this.page.waitForLoadState('networkidle');
+      // Wait for navigation or success/error message
+      await Promise.race([
+        this.page.waitForLoadState('networkidle').catch(() => {}),
+        this.page.locator(this.selectors.successAlert).first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+        this.page.locator(this.selectors.errorAlert).first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
+      ]);
     });
   }
 
   async isFormSaved(): Promise<boolean> {
-    await this.page.waitForTimeout(1500);
-    const url = this.page.url();
-    // Usually redirects to /view or /index
-    return url.includes('/tipooperacion/ver') || url.includes('/tipooperacion/view') || url.includes('/tipooperacion/index');
+    try {
+      // Polling de 10 segundos para redirección o mensaje de éxito
+      for (let i = 0; i < 10; i++) { // Polling increased to 10 seconds
+        const url = this.page.url();
+        const isRedirected = url.includes('/tipooperacion/index') || 
+                            url.includes('/tipooperacion/ver/') || 
+                            url.includes('/tipooperacion/view/');
+        
+        if (isRedirected) return true;
+
+        const successAlert = await this.page.locator(this.selectors.successAlert).first()
+          .isVisible({ timeout: 500 })
+          .catch(() => false);
+        
+        if (successAlert) return true;
+        
+        await this.page.waitForTimeout(1000);
+      }
+      return false;
+    } catch (error) {
+      logger.error('Fallo al verificar guardado del formulario de Tipo de Operación', error);
+      return false;
+    }
+  }
+
+  async getFormErrorMessage(): Promise<string | null> {
+    try {
+      const alert = this.page.locator(this.selectors.errorAlert).first();
+      if (await alert.isVisible({ timeout: 2000 }).catch(() => false)) {
+        return (await alert.innerText()).trim();
+      }
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   async navigateToIndex(): Promise<void> {

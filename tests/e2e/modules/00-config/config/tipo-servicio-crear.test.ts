@@ -3,6 +3,7 @@ import { createLogger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { TipoServicioData } from '../../../../../src/modules/configAdmin/pages/TipoServicioPage.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 const logger = createLogger('TipoServicioTest');
 
@@ -12,7 +13,7 @@ interface SeededTipoOperacion {
   env: string;
 }
 
-test.describe('Configuracion Admin: Tipo de Servicio', () => {
+test.describe('[CONFIG03] - Tipo de Servicio', () => {
   test.setTimeout(120000);
 
   const envName = (process.env.ENV || 'QA').toUpperCase();
@@ -37,7 +38,7 @@ test.describe('Configuracion Admin: Tipo de Servicio', () => {
     }
   });
 
-  test(`[${envName}] Crear Tipo de Servicio asociado a Tipo de Operacion`, async ({
+  test(`[${envName}] Crear Tipo de Servicio y asociarlo a Tipo de Operacion`, async ({
     tipoServicioPage,
   }, testInfo) => {
     const startTime = Date.now();
@@ -48,6 +49,13 @@ test.describe('Configuracion Admin: Tipo de Servicio', () => {
       nombre: `${tsPrefix}_${suffix}`,
       tipoOperacionNombre: seededTipoOperacion.nombre,
     };
+
+    await allure.epic('TMS Config Flow');
+    await allure.feature('01-Configuracion');
+    await allure.story('Tipo de Servicio');
+    await allure.parameter('Ambiente', envName);
+    await allure.parameter('Nombre', testData.nombre);
+    await allure.parameter('Tipo Operacion Vinculado', testData.tipoOperacionNombre);
 
     await test.step('Fase 1: Navegar a creacion de Tipo de Servicio', async () => {
       await tipoServicioPage.navigateToCreate();
@@ -93,6 +101,17 @@ test.describe('Configuracion Admin: Tipo de Servicio', () => {
     });
 
     const durationSeconds = ((Date.now() - startTime) / 1000).toFixed(2);
+    const summary = {
+      ambiente: envName,
+      nombre: testData.nombre,
+      tipoOperacionAsociado: testData.tipoOperacionNombre,
+      verificadoEnGrilla: isVisibleInGrid,
+      duracionSegundos: durationSeconds,
+    };
+
+    await allure.parameter('Duracion (s)', durationSeconds);
+    await allure.attachment('Tipo Servicio - Resumen Final', JSON.stringify(summary, null, 2), 'application/json');
+
     logger.info('='.repeat(80));
     logger.info('RESUMEN EJECUTIVO');
     logger.info(`RELACIÓN CREADA: [${testData.tipoOperacionNombre}] -> [${testData.nombre}]`);

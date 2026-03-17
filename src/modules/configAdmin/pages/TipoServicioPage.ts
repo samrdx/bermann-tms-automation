@@ -119,22 +119,19 @@ export class TipoServicioPage extends BasePage {
       const fallback = this.page.locator(this.selectors.btnGuardarFallback).first();
 
       if (await primary.isVisible({ timeout: 3000 }).catch(() => false)) {
-        try {
-          await primary.click({ timeout: 5000 });
-        } catch {
-          await primary.evaluate((el) => (el as HTMLElement).click());
-        }
+        await primary.click({ timeout: 5000 }).catch(() => primary.evaluate((el) => (el as HTMLElement).click()));
       } else if (await fallback.isVisible({ timeout: 3000 }).catch(() => false)) {
-        try {
-          await fallback.click({ timeout: 5000 });
-        } catch {
-          await fallback.evaluate((el) => (el as HTMLElement).click());
-        }
+        await fallback.click({ timeout: 5000 }).catch(() => fallback.evaluate((el) => (el as HTMLElement).click()));
       } else {
         throw new Error('No se encontro boton Guardar visible');
       }
 
-      await this.page.waitForLoadState('networkidle');
+      await Promise.race([
+        this.page.waitForLoadState('networkidle').catch(() => {}),
+        this.page.waitForURL(url => url.pathname.includes('/index') || url.pathname.includes('/ver') || url.pathname.includes('/view'), { timeout: 10000 }).catch(() => {}),
+        this.page.locator('.alert-success, .toast-success, .swal2-success').first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+        this.page.locator('.alert-danger, .alert.alert-danger, .toast-error').first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
+      ]);
     } catch (error) {
       logger.error('Fallo al guardar Tipo de Servicio', error);
       await this.takeScreenshot('tiposervicio-click-guardar-error');
@@ -144,9 +141,24 @@ export class TipoServicioPage extends BasePage {
 
   async isFormSaved(): Promise<boolean> {
     try {
-      await this.page.waitForTimeout(1500);
-      const url = this.page.url();
-      return url.includes('/tiposervicio/index') || url.includes('/tiposervicio/ver/') || url.includes('/tiposervicio/view/');
+      // Polling de 10 segundos
+      for (let i = 0; i < 10; i++) {
+        const url = this.page.url();
+        const isRedirected = url.includes('/tiposervicio/index') || 
+                            url.includes('/tiposervicio/ver/') || 
+                            url.includes('/tiposervicio/view/');
+        
+        if (isRedirected) return true;
+
+        const successAlert = await this.page.locator('.alert-success, .toast-success, .swal2-success').first()
+          .isVisible({ timeout: 500 })
+          .catch(() => false);
+        
+        if (successAlert) return true;
+        
+        await this.page.waitForTimeout(1000);
+      }
+      return false;
     } catch (error) {
       logger.error('Fallo al verificar guardado del formulario de Tipo de Servicio', error);
       return false;

@@ -10,7 +10,7 @@ export class LoginPage extends BasePage {
     usernameInput: '#login-usuario',
     passwordInput: '#login-clave',
     loginButton: 'button[type="submit"].btn-success',
-    errorMessage: '[data-notify="message"]',
+    errorMessage: '[data-notify="container"].alert-danger [data-notify="message"]',
     logoMin: '.logo-min',
   };
 

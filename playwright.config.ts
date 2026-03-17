@@ -20,7 +20,7 @@ export default defineConfig({
   testDir: './tests',
   outputDir: `test-results-${envName}`,
   testIgnore: ['**/examples/**'],
-  fullyParallel: true,
+  fullyParallel: false,
 
   /* * CRÍTICO PARA CI:
    * - En CI usamos 1 worker para evitar colisiones en la DB legacy.
@@ -89,49 +89,51 @@ export default defineConfig({
 
   tsconfig: './tsconfig.tests.json',
 
-  projects: [
-    // --- SETUP PROJECTS ---
+    projects: [
+    // --- AUTORIZACIÓN ---
     {
-      name: 'setup',
+      name: 'Autorización',
       testMatch: /auth\.setup\.ts/,
     },
 
-    // --- SEEDING PROJECTS (Run before main tests that consume their data) ---
+    // --- CONFIGURACIÓN SETUP: Fase 1  ---
     {
-      name: `seed-transportista-chromium`,
-      testMatch: 'e2e/modules/01-entidades/transport/transportistas-crear.test.ts',
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: `playwright/.auth/user-${envName}.json`, // Use the authentication state
-      },
-      dependencies: ['setup'],
-    },
-    {
-      name: `seed-transportista-firefox`,
-      testMatch: 'e2e/modules/01-entidades/transport/transportistas-crear.test.ts',
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: `playwright/.auth/user-${envName}.json`, // Use the authentication state
-      },
-      dependencies: ['setup'],
-    },
-    {
-      name: 'seed-tipo-operacion-chromium',
-      testMatch: 'e2e/modules/01-entidades/config/tipo-operacion-crear.test.ts',
+      name: `config-fase1-chromium`,
+      testMatch: 'e2e/suites/01-config-master.setup.ts',
       use: {
         ...devices['Desktop Chrome'],
         storageState: `playwright/.auth/user-${envName}.json`,
       },
-      dependencies: ['setup'],
+      dependencies: ['Autorización'],
     },
     {
-      name: 'seed-tipo-operacion-firefox',
-      testMatch: 'e2e/modules/01-entidades/config/tipo-operacion-crear.test.ts',
+      name: `config-fase1-firefox`,
+      testMatch: 'e2e/suites/01-config-master.setup.ts',
       use: {
         ...devices['Desktop Firefox'],
         storageState: `playwright/.auth/user-${envName}.json`,
       },
-      dependencies: ['setup'],
+      dependencies: ['Autorización'],
+    },
+
+    // --- CONFIGURACIÓN SETUP: Fase 2 (Carga) ---
+    {
+      name: `config-fase2-chromium`,
+      testMatch: 'e2e/suites/02-carga-master.setup.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: `playwright/.auth/user-${envName}.json`,
+      },
+      dependencies: ['Autorización'],
+    },
+    {
+      name: `config-fase2-firefox`,
+      testMatch: 'e2e/suites/02-carga-master.setup.ts',
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: `playwright/.auth/user-${envName}.json`,
+      },
+      dependencies: ['Autorización'],
     },
 
     // --- AUTH UTILS ---
@@ -141,26 +143,19 @@ export default defineConfig({
       use: devices['Desktop Chrome'],
     },
 
-    // --- BASE ENTITIES SETUP ---
+    // --- ENTIDADES BASE SETUP ---
     {
       name: 'base-entities-chromium',
       testMatch: 'e2e/suites/base-entities.setup.ts',
       use: devices['Desktop Chrome'],
-      dependencies: ['setup'],
+      dependencies: ['Autorización'],
     },
     {
       name: 'base-entities-firefox',
       testMatch: 'e2e/suites/base-entities.setup.ts',
       use: devices['Desktop Firefox'],
-      dependencies: ['setup'],
+      dependencies: ['Autorización'],
     },
-    // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD
-    // {
-    //   name: 'base-entities-webkit',
-    //   testMatch: 'e2e/suites/base-entities.setup.ts',
-    //   use: devices['Desktop Safari'],
-    //   dependencies: ['setup'],
-    // },
 
     // --- MAIN TEST PROJECTS ---
     {
@@ -169,16 +164,18 @@ export default defineConfig({
         'e2e/modules/**/*.test.ts',
         'e2e/suites/**/*.test.ts',
       ],
-      testIgnore: ['**/transportistas-crear.test.ts', '**/tipo-operacion-crear.test.ts'],
+      testIgnore: [
+        '**/suites/*.setup.ts',
+        '**/modules/00-config/config/**',
+      ],
       use: {
         ...devices['Desktop Chrome'],
         storageState: `playwright/.auth/user-${envName}.json`,
-        // Chrome acepta estos args, pero Firefox no. Aquí sí están bien.
         launchOptions: {
           args: ['--disable-dev-shm-usage', '--no-sandbox']
         }
       },
-      dependencies: ['setup', 'seed-tipo-operacion-chromium'],
+      dependencies: ['Autorización'],
     },
     {
       name: `firefox-${envName}`,
@@ -186,13 +183,15 @@ export default defineConfig({
         'e2e/modules/**/*.test.ts',
         'e2e/suites/**/*.test.ts',
       ],
-      testIgnore: ['**/transportistas-crear.test.ts', '**/tipo-operacion-crear.test.ts'],
+      testIgnore: [
+        '**/suites/*.setup.ts',
+        '**/modules/00-config/config/**',
+      ],
       use: {
         ...devices['Desktop Firefox'],
         storageState: `playwright/.auth/user-${envName}.json`,
-        // IMPORTANTE: Sin launchOptions.args que rompan Firefox
       },
-      dependencies: ['setup', 'seed-tipo-operacion-firefox'],
+      dependencies: ['Autorización'],
     },
 
     // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY

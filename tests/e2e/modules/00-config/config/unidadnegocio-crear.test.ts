@@ -1,8 +1,8 @@
-﻿import { test, expect } from '../../../../src/fixtures/base.js';
-import { getTestUser } from '../../../../src/config/credentials.js';
-import { logger } from '../../../../src/utils/logger.js';
-import { UnidadNegocioHelper } from '../../../api-helpers/UnidadNegocioHelper.js';
-import { DataPathHelper } from '../../../api-helpers/DataPathHelper.js';
+﻿import { test, expect } from '../../../../../src/fixtures/base.js';
+import { getTestUser } from '../../../../../src/config/credentials.js';
+import { logger } from '../../../../../src/utils/logger.js';
+import { UnidadNegocioHelper } from '../../../../api-helpers/UnidadNegocioHelper.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 

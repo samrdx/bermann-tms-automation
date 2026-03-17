@@ -247,11 +247,16 @@ export abstract class BasePage {
   async takeScreenshot(name: string): Promise<string> {
     const timestamp = Date.now();
     const screenshotPath = `./reports/screenshots/${name}-${timestamp}.png`;
-    await this.page.screenshot({
-      path: screenshotPath,
-      fullPage: true
-    });
-    logger.info(`Captura de Pantalla: ${screenshotPath} 📸`);
+    try {
+      await this.page.screenshot({
+        path: screenshotPath,
+        fullPage: true,
+        timeout: 5000 // Falla rápido si se queda pegado cargando fuentes
+      });
+      logger.info(`Captura de Pantalla: ${screenshotPath} 📸`);
+    } catch (error) {
+      logger.warn(`No se pudo tomar captura de pantalla ${name}: ${error instanceof Error ? error.message : 'Error desconocido'} 📸⚠️`);
+    }
     return screenshotPath;
   }
 

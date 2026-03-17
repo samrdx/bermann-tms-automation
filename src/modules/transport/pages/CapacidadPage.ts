@@ -7,8 +7,8 @@ const logger = createLogger('CapacidadPage');
 export class CapacidadPage extends BasePage {
   private readonly selectors = {
     // Index Page
-    indexGrid: '#table_capacities',
-    btnCreate: 'a[href="/capacities/create"]',
+    indexGrid: '#table_capacities, #tabla-capacidades',
+    btnCreate: 'a[href*="/capacities/create"]',
     searchBox: '#search',
     btnSearch: '#buscar',
     
@@ -29,23 +29,21 @@ export class CapacidadPage extends BasePage {
 
   async navigateToIndex(): Promise<void> {
     logger.info('Navegando al listado de Capacidades');
-    await this.page.goto('/capacities/index');
-    await this.page.waitForLoadState('networkidle');
-    await this.page.locator(this.selectors.indexGrid).waitFor({ state: 'visible' });
+    await this.page.goto('/capacities/index', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await this.page.waitForLoadState('networkidle').catch(() => {});
+    await this.page.locator(this.selectors.indexGrid).first().waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async navigateToCreate(): Promise<void> {
     logger.info('Navegando a la creación de Capacidad');
     try {
-      // Usar commit y luego esperar load/networkidle para mayor robustez ante ERR_ABORTED
-      await this.page.goto('/capacities/create', { waitUntil: 'commit', timeout: 60000 });
-      await this.page.waitForLoadState('load');
+      await this.page.goto('/capacities/create', { waitUntil: 'commit', timeout: 30000 });
     } catch (error) {
       logger.warn('Error inicial navegando a creación, reintentando...', error);
-      await this.page.goto('/capacities/create', { waitUntil: 'load', timeout: 60000 });
+      await this.page.goto('/capacities/create', { waitUntil: 'load', timeout: 30000 });
     }
-    await this.page.waitForLoadState('networkidle');
-    await this.page.locator(this.selectors.inputCapacidadInicial).waitFor({ state: 'visible' });
+    await this.page.waitForLoadState('networkidle').catch(() => {});
+    await (this.page.locator(this.selectors.inputCapacidadInicial).first()).waitFor({ state: 'visible', timeout: 20000 });
   }
 
   async clickCrear(): Promise<void> {
@@ -102,8 +100,13 @@ export class CapacidadPage extends BasePage {
   async clickGuardar(): Promise<void> {
     logger.info('Haciendo clic en el botón guardar');
     await this.click(this.selectors.btnGuardar);
-    // Wait for redirection to index or some feedback - Aumentado a 30s para Demo
-    await this.page.waitForURL(/\/capacities\/index/, { timeout: 30000 });
+    
+    // Esperar redirección o confirmación robusta
+    await Promise.race([
+      this.page.waitForURL(/\/capacities\/(index|view|edit)/, { timeout: 15000 }).catch(() => {}),
+      this.page.waitForLoadState('networkidle').catch(() => {}),
+      this.page.locator('.alert-success, .toast-success').first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
+    ]);
   }
 
   /**

@@ -53,7 +53,7 @@ allure-report-*/
 tmp/
 temp/
 *.tmp
-playwright/.data/last-run-data-*.json
+playwright/.data/
 
 # Test artifacts
 tests/**/*.js

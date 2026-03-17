@@ -1,4 +1,4 @@
-﻿import { isDemoMode } from './env-helper.js';
+import { isDemoMode } from './env-helper.js';
 
 /**
  * NamingHelper
@@ -131,17 +131,14 @@ export class NamingHelper {
         return `${prefix}${safeTag}_${randomFiveDigits}`;
     }
 
-    /**
-     * Nombre especifico para Tipo de Rampla.
-     * Regla QA: qa_tiporam_<5digitos>
-     * Regla DEMO: Demo_tiporam_<5digitos>
-     */
     static getTipoRamplaName(): string {
         const randomFiveDigits = Math.floor(10000 + Math.random() * 90000);
         return isDemoMode()
             ? `Demo_tiporam_${randomFiveDigits}`
             : `qa_tiporam_${randomFiveDigits}`;
-        return `qa_tiporam_${randomFiveDigits}`;
+    }
+
+    /**
      * Genera datos estandarizados para Ruta
      * Nombre QA: Qa_RT_[Zona]_[4digitos]
      * Nombre DEMO: Demo_RT_[Zona]_[4digitos]

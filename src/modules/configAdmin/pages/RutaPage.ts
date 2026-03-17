@@ -41,7 +41,7 @@ export class RutaPage extends BasePage {
     btnGuardar: '#btn_guardar',
     btnGuardarFallback: 'button.btn-success:has-text("Guardar"), button:has-text("Guardar")',
     successAlert: '.alert-success, .toast-success, .swal2-success',
-    errorAlert: '.alert-danger, .alert.alert-danger, .toast-error, .alert',
+    errorAlert: '.alert-danger, .alert.alert-danger, .toast-error',
     searchInput: '#search',
     searchButton: '#buscar',
     tableRows: '#tabla table tbody tr, #tabla-ruta tbody tr, table tbody tr',
@@ -55,9 +55,14 @@ export class RutaPage extends BasePage {
 
   async navigateToCreate(): Promise<void> {
     logger.info('Navegando a la pagina de creacion de Ruta');
-    await this.page.goto('/ruta/crear');
-    await this.page.waitForLoadState('domcontentloaded');
-    await this.page.locator(this.selectors.nombreRuta).waitFor({ state: 'visible', timeout: 10000 });
+    try {
+      await this.page.goto('/ruta/crear', { waitUntil: 'commit', timeout: 15000 });
+    } catch (error) {
+      logger.warn('Error inicial navegando a creación de ruta, reintentando con load...', error);
+      await this.page.goto('/ruta/crear', { waitUntil: 'load', timeout: 15000 });
+    }
+    await this.page.waitForLoadState('networkidle').catch(() => {});
+    await this.page.locator(this.selectors.nombreRuta).first().waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async fillNombreRuta(nombreRuta: string): Promise<void> {
@@ -133,10 +138,11 @@ export class RutaPage extends BasePage {
       const isSaved = await this.isFormSaved();
       if (!isSaved) {
         const errorMessage = await this.getFormErrorMessage();
+        await this.takeScreenshot('ruta-save-failure');
         if (errorMessage) {
           throw new Error(`No se pudo confirmar el guardado de la Ruta. Mensaje UI: ${errorMessage}`);
         }
-        throw new Error('No se pudo confirmar el guardado de la Ruta');
+        throw new Error('No se pudo confirmar el guardado de la Ruta (Timeout o Error desconocido)');
       }
 
       return {
@@ -168,7 +174,16 @@ export class RutaPage extends BasePage {
         throw new Error('No se encontro un boton Guardar visible para Ruta');
       }
 
-      await this.page.waitForLoadState('networkidle');
+      // Small pause to allow click trigger to start network/DOM activity
+      await this.page.waitForTimeout(1000);
+
+      // Wait for navigation, success alert or error alert
+      await Promise.race([
+        this.page.waitForLoadState('networkidle').catch(() => {}),
+        this.page.waitForURL((url) => url.toString().includes('/index') || url.toString().includes('/ver/'), { timeout: 10000 }).catch(() => {}),
+        this.page.locator(this.selectors.successAlert).first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+        this.page.locator(this.selectors.errorAlert).first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
+      ]).catch(() => {});
     } catch (error) {
       logger.error('Fallo al guardar Ruta', error);
       await this.takeScreenshot('ruta-guardar-error');
@@ -177,27 +192,38 @@ export class RutaPage extends BasePage {
   }
 
   async isFormSaved(): Promise<boolean> {
-    try {
-      await this.page.waitForTimeout(1500);
+    const startTime = Date.now();
+    const timeout = 15000; // 15s total wait
+    
+    logger.info('[RutaPage] Verificando guardado (polling)...');
+    
+    while (Date.now() - startTime < timeout) {
       const url = this.page.url();
-      const redirected =
-        url.includes('/ruta/index') ||
-        url.includes('/ruta/ver/') ||
-        url.includes('/rutas/index') ||
-        url.includes('/rutas/ver/');
-
-      if (redirected) {
+      const isRedirected = url.includes('/index') || url.includes('/ver/');
+      
+      if (isRedirected) {
+        logger.info(`[RutaPage] Guardado confirmado por URL: ${url}`);
         return true;
       }
+      
+      const success = await this.page.locator(this.selectors.successAlert).first().isVisible({ timeout: 500 }).catch(() => false);
+      if (success) {
+        logger.info('[RutaPage] Guardado confirmado por alerta de éxito');
+        return true;
+      }
+      
+      const error = await this.page.locator(this.selectors.errorAlert).first().isVisible({ timeout: 500 }).catch(() => false);
+      if (error) {
+        const msg = await this.getFormErrorMessage();
+        logger.error(`[RutaPage] Error detectado en formulario: ${msg}`);
+        return false;
+      }
 
-      const successVisible = await this.page.locator(this.selectors.successAlert).first()
-        .isVisible({ timeout: 2000 })
-        .catch(() => false);
-      return successVisible;
-    } catch (error) {
-      logger.error('Fallo al verificar guardado de Ruta', error);
-      return false;
+      await this.page.waitForTimeout(1000);
     }
+    
+    logger.warn('[RutaPage] Timeout esperando confirmación de guardado');
+    return false;
   }
 
   private async getFormErrorMessage(): Promise<string | null> {
