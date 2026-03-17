@@ -1,6 +1,6 @@
-import { test, expect } from '../../../../src/fixtures/base.js';
-import { logger } from '../../../../src/utils/logger.js';
-import { NamingHelper } from '../../../../src/utils/NamingHelper.js';
+import { test, expect } from '../../../../../src/fixtures/base.js';
+import { logger } from '../../../../../src/utils/logger.js';
+import { NamingHelper } from '../../../../../src/utils/NamingHelper.js';
 import { allure } from 'allure-playwright';
 
 test.describe('[CONFIG02] - Tipo de Carga', () => {

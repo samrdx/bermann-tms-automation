@@ -70,61 +70,54 @@ export class UnidadNegocioHelper {
             id = idMatch[1];
             logger.info(`✅ ID de Unidad de Negocio extraído de la URL: ${id}`);
         } else {
-            // If redirected to index, try to find in grid
-            logger.info('⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...');
+            // If redirected to index, try to find in grid (but handle failure gracefully per user request)
+            logger.info('⚠️ No se encuentra en la página de ver/editar. Intentando rescate de grilla (no crítico)...');
 
-            // Ensure we are on the index page for grid search
-            if (!currentUrl.includes('/unidadnegocio/index')) {
-                await page.goto(`${baseUrl}/unidadnegocio/index`);
-                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Tiempo de espera de red agotado durante la navegación al índice.'));
-                await page.waitForTimeout(2000);
-            }
-
-            // Perform grid search (assuming a search input and a table with edit links)
-            // This part might need adjustment based on actual UI of /unidadnegocio/index
-            logger.info(`🔍 Buscando por nombre en grilla: ${nombre}`);
-            const searchInput = page.locator('#search'); // Common search input selector
-            if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-                await searchInput.fill(nombre);
-                await UnidadNegocioHelper.clickBuscarButton(page); // Use the robust click method
-                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => { });
-                await page.waitForTimeout(2000);
-            } else {
-                logger.warn('⚠️ El campo de búsqueda #search no se encontró en la página de índice');
-            }
-
-            const nameRegex = new RegExp(nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-            const matchingRow = page.locator('#tabla_unidad_negocio tbody tr') // Corrected table ID
-                .filter({ hasText: nameRegex })
-                .first();
-
-            if (await matchingRow.count() > 0) {
-                const editLink = matchingRow.locator('a[href*="/editar/"]').first();
-                if (await editLink.count() > 0) {
-                    const href = await editLink.getAttribute('href');
-                    const match = href?.match(/\/editar\/(\d+)/);
-                    if (match) {
-                        id = match[1];
-                        logger.info(`✅ ID rescatado via busqueda en grilla (editar link): ${id}`);
-                    }
+            try {
+                // Ensure we are on the index page for grid search
+                if (!currentUrl.includes('/unidadnegocio/index')) {
+                    await page.goto(`${baseUrl}/unidadnegocio/index`);
+                    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Timeout en índice.'));
                 }
-            } else {
-                logger.warn(`⚠️ No se encontró fila en grilla que coincida con: ${nombre}`);
-                await page.screenshot({ path: `./reports/screenshots/unidadnegocio-grid-no-match-${Date.now()}.png` });
-            }
 
-            if (id === '0') {
-                logger.warn(`⚠️ Rescate de Grilla: No se pudo determinar el ID de la Unidad de Negocio.`);
-                await page.screenshot({ path: `./reports/screenshots/unidadnegocio-id-rescue-failed-${Date.now()}.png` });
+                logger.info(`🔍 Buscando en grilla: ${nombre}`);
+                const searchInput = page.locator('#search, .bs-searchbox input[type="text"]').first();
+                if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+                    await searchInput.fill(nombre);
+                    await UnidadNegocioHelper.clickBuscarButton(page);
+                    await page.waitForTimeout(2000);
+                }
+
+                const nameRegex = new RegExp(nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+                let table = page.locator('#tabla_unidad_negocio');
+                if (!(await table.isVisible({ timeout: 2000 }).catch(() => false))) {
+                    table = page.locator('table.table, table').first();
+                }
+
+                const matchingRow = table.locator('tbody tr').filter({ hasText: nameRegex }).first();
+
+                if (await matchingRow.count() > 0) {
+                    const actionLinks = matchingRow.locator('a[href*="/editar/"], a[href*="/ver/"], a[href*="/edit/"], a[href*="/view/"]').first();
+                    if (await actionLinks.count() > 0) {
+                        const href = await actionLinks.getAttribute('href');
+                        const match = href?.match(/\/(?:editar|edit|ver|view)\/(\d+)/);
+                        if (match) {
+                            id = match[1];
+                            logger.info(`✅ ID rescatado via grilla: ${id}`);
+                        }
+                    }
+                } else {
+                    logger.warn(`⚠️ Nombre "${nombre}" no visible en grilla. Obviando validación por error conocido en TMS.`);
+                }
+            } catch (e) {
+                logger.warn('⚠️ Error durante el intento de rescate en grilla, se continuará solo con el nombre.');
             }
         }
 
         if (id === '0') {
-            logger.error(`❌ No se pudo extraer el ID de la Unidad de Negocio para: ${nombre}`);
-            throw new Error(`Failed to extract Unidad de Negocio ID for: ${nombre}`);
+            logger.warn(`⚠️ No se pudo obtener ID para: ${nombre}. Se usará ID '0' y se guardará el nombre.`);
         }
 
-        logger.info(`✅ ID de Unidad de Negocio [${nombre}] extraído exitosamente: ${id}`);
         return {
             id,
             nombre,

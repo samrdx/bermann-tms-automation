@@ -1,12 +1,12 @@
-import { test, expect } from '../../../../src/fixtures/base.js';
-import { logger } from '../../../../src/utils/logger.js';
-import { NamingHelper } from '../../../../src/utils/NamingHelper.js';
+import { test, expect } from '../../../../../src/fixtures/base.js';
+import { logger } from '../../../../../src/utils/logger.js';
+import { NamingHelper } from '../../../../../src/utils/NamingHelper.js';
 import { allure } from 'allure-playwright';
 
-test.describe('[CONFIG03] - Ruta', () => {
+test.describe('[CONFIG05] - Ruta', () => {
   test.setTimeout(120000);
 
-  test('Crear Ruta multi-ambiente con origen/destino en rango 1_ a 467_', async ({
+  test('Crear Ruta con origen/destino en rango 1_ a 467_', async ({
     page,
     rutaPage,
   }) => {

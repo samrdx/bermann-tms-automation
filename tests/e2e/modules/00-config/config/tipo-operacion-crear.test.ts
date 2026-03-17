@@ -3,15 +3,16 @@ import { createLogger } from '../../../../../src/utils/logger.js';
 import { TipoOperacionData } from '../../../../../src/modules/configAdmin/pages/TipoOperacionPage.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
+import { allure } from 'allure-playwright';
 
 const logger = createLogger('TipoOperacionTest');
 
-test.describe('Configuracion Admin: Tiempos Operacionales', () => {
+test.describe('[CONFIG02] - Tipo de Operacion', () => {
   test.setTimeout(90000);
 
   const envName = (process.env.ENV || 'QA').toUpperCase();
 
-  test(`[${envName}] Crear Nuevo Tipo de Operacion con SLA`, async ({ tipoOperacionPage }, testInfo) => {
+  test(`[${envName}] Crear Nuevo Tipo de Operacion`, async ({ tipoOperacionPage }, testInfo) => {
     const startTime = Date.now();
     logger.info(`Iniciando Test de Creacion de Tipo de Operacion en ambiente: ${envName}`);
     logger.info('='.repeat(80));
@@ -26,6 +27,13 @@ test.describe('Configuracion Admin: Tiempos Operacionales', () => {
       permanenciaDestino: '01:30',
       validarHorarios: true,
     };
+
+    await allure.epic('TMS Config Flow');
+    await allure.feature('01-Configuracion');
+    await allure.story('Tipo de Operacion');
+    await allure.parameter('Ambiente', envName);
+    await allure.parameter('Nombre', testData.nombre);
+    await allure.parameter('Tiempo Previo', testData.tiempoPrevio);
 
     await test.step('Navegar a creacion de Tipo de Operacion', async () => {
       await tipoOperacionPage.navigateToCreate();
@@ -75,6 +83,21 @@ test.describe('Configuracion Admin: Tiempos Operacionales', () => {
     });
 
     const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
+    const summary = {
+      ambiente: envName,
+      nombre: testData.nombre,
+      SLA: {
+        previo: testData.tiempoPrevio,
+        origen: testData.permanenciaOrigen,
+        destino: testData.permanenciaDestino,
+      },
+      verificadoEnGrilla: isVisibleInGrid,
+      duracionSegundos: executionTime,
+    };
+
+    await allure.parameter('Duracion (s)', executionTime);
+    await allure.attachment('Tipo Operacion - Resumen Final', JSON.stringify(summary, null, 2), 'application/json');
+
     logger.info('='.repeat(80));
     logger.info(`RESUMEN DE EJECUCION (${envName})`);
     logger.info(`Nombre: ${testData.nombre}`);

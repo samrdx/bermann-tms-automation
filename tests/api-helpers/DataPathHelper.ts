@@ -54,7 +54,7 @@ export class DataPathHelper {
     static getWorkerDataPath(testInfo: TestInfo): string {
         const browserName = this.getBrowserName(testInfo);
         const env = (process.env.ENV || 'QA').toLowerCase();
-        const filename = `last-run-data-${browserName}-${env}.json`;
+        const filename = `setup-config-data-${browserName}-${env}.json`;
         const dirPath = path.join(process.cwd(), 'playwright', '.data');
 
         if (!fs.existsSync(dirPath)) {
