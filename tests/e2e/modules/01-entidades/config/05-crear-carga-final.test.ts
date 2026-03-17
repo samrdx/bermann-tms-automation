@@ -33,7 +33,8 @@ test.describe('[CONFIG03] - Crear Carga Final', () => {
     const envLabel = (process.env.ENV || 'QA').toUpperCase() === 'DEMO' ? 'DEMO' : 'QA';
     const browserName = DataPathHelper.getBrowserName(testInfo);
     const setupPath = DataPathHelper.getScopedCargaSetupDataPath(testInfo);
-    const codigoCarga = `Qa_COD_${Math.floor(10000 + Math.random() * 90000)}`;
+    const codigoPrefix = envLabel === 'DEMO' ? 'Demo_COD_' : 'Qa_COD_';
+    const codigoCarga = `${codigoPrefix}${Math.floor(10000 + Math.random() * 90000)}`;
 
     await allure.epic('TMS Config Flow');
     await allure.feature('01-Configuracion');
