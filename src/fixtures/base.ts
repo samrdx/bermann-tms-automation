@@ -19,6 +19,7 @@ import { TipoOperacionPage } from '../modules/configAdmin/pages/TipoOperacionPag
 import { TipoServicioPage } from '../modules/configAdmin/pages/TipoServicioPage.js';
 import { CargaMasterPage } from '../modules/configAdmin/pages/CargaMasterPage.js';
 import { CrearCargaPage } from '../modules/configAdmin/pages/CrearCargaPage.js';
+import { RutaPage } from '../modules/configAdmin/pages/RutaPage.js';
 
 // Transport Module
 import { TransportistaFactory } from '../modules/transport/factories/TransportistaFactory.js';
@@ -70,6 +71,7 @@ type MyFixtures = {
   tipoServicioPage: TipoServicioPage;
   cargaMasterPage: CargaMasterPage;
   crearCargaPage: CrearCargaPage;
+  rutaPage: RutaPage;
 
   // Actions
   authActions: AuthActions;
@@ -131,6 +133,8 @@ export const test = base.extend<MyFixtures>({
   },
   tipoServicioPage: async ({ page }, use) => {
     await use(new TipoServicioPage(page));
+  rutaPage: async ({ page }, use) => {
+    await use(new RutaPage(page));
   },
   cargaMasterPage: async ({ page }, use) => {
     await use(new CargaMasterPage(page));
