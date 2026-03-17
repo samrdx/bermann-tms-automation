@@ -264,27 +264,41 @@ export class CargaMasterPage extends BasePage {
     logger.info(`Verificando ${config.label} en index: ${nombre}`);
     await this.navigateToIndexWithRetry(config.indexPath, config.label);
 
-    await this.searchByNombre(nombre);
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      await this.searchByNombre(nombre);
 
-    const rowInCurrentPage = await this.findMatchingRow(nombre);
-    if (rowInCurrentPage) {
-      const id = await this.extractIdFromRow(rowInCurrentPage);
-      logger.info(`Registro validado en index para ${config.label}. ID detectado: ${id ?? 'N/A'}`);
-      return { found: true, id };
+      const rowInCurrentPage = await this.findMatchingRow(nombre);
+      if (rowInCurrentPage) {
+        const id = await this.extractIdFromRow(rowInCurrentPage);
+        logger.info(`Registro validado en index para ${config.label}. ID detectado: ${id ?? 'N/A'}`);
+        return { found: true, id };
+      }
+
+      const rowInPagination = await this.findMatchingRowInPagination(nombre);
+      if (rowInPagination) {
+        const id = await this.extractIdFromRow(rowInPagination);
+        logger.info(`Registro validado en paginacion para ${config.label}. ID detectado: ${id ?? 'N/A'}`);
+        return { found: true, id };
+      }
+
+      const textVisible = await this.page.getByText(nombre, { exact: false }).first()
+        .isVisible({ timeout: 2000 })
+        .catch(() => false);
+      if (textVisible) {
+        return { found: true, id: null };
+      }
+
+      if (attempt < 4) {
+        logger.warn(
+          `${config.label}: entidad "${nombre}" aun no visible en index (intento ${attempt}/4). Reintentando...`,
+        );
+        await this.page.waitForTimeout(1500);
+        await this.page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
+        await this.page.waitForTimeout(600);
+      }
     }
 
-    const rowInPagination = await this.findMatchingRowInPagination(nombre);
-    if (rowInPagination) {
-      const id = await this.extractIdFromRow(rowInPagination);
-      logger.info(`Registro validado en paginacion para ${config.label}. ID detectado: ${id ?? 'N/A'}`);
-      return { found: true, id };
-    }
-
-    const textVisible = await this.page.getByText(nombre, { exact: false }).first()
-      .isVisible({ timeout: 2000 })
-      .catch(() => false);
-
-    return { found: textVisible, id: null };
+    return { found: false, id: null };
   }
 
   private async findMatchingRow(nombre: string): Promise<Locator | null> {
@@ -305,8 +319,26 @@ export class CargaMasterPage extends BasePage {
   }
 
   private async findMatchingRowInPagination(nombre: string): Promise<Locator | null> {
-    for (let pageAttempt = 0; pageAttempt < 8; pageAttempt++) {
-      const nextLink = this.page.getByRole('link', { name: 'Siguiente' }).first();
+    const nextCandidates = [
+      this.page.getByRole('link', { name: /siguiente|next/i }).first(),
+      this.page.locator('a.page-link.next').first(),
+      this.page.locator('.pagination .page-link.next').first(),
+    ];
+
+    for (let pageAttempt = 0; pageAttempt < 20; pageAttempt++) {
+      let nextLink: Locator | null = null;
+      for (const candidate of nextCandidates) {
+        const visible = await candidate.isVisible({ timeout: 1000 }).catch(() => false);
+        if (visible) {
+          nextLink = candidate;
+          break;
+        }
+      }
+
+      if (!nextLink) {
+        break;
+      }
+
       const nextVisible = await nextLink.isVisible({ timeout: 1000 }).catch(() => false);
       if (!nextVisible) {
         break;
@@ -320,7 +352,9 @@ export class CargaMasterPage extends BasePage {
         break;
       }
 
-      await nextLink.click({ force: true });
+      await nextLink.click({ force: true }).catch(async () => {
+        await nextLink?.evaluate((el) => (el as HTMLElement).click());
+      });
       await this.page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
       await this.page.waitForTimeout(700);
 
@@ -354,8 +388,9 @@ export class CargaMasterPage extends BasePage {
       logger.warn('No se detecto boton Buscar; se continua con validacion directa de grilla');
     }
 
+    await this.page.locator('#modalCargando').waitFor({ state: 'hidden', timeout: 6000 }).catch(() => {});
     await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(1800);
   }
 
   private async clickBuscarButton(): Promise<boolean> {

@@ -13,6 +13,11 @@ interface CargaSetupOutput {
   createdAt: string;
   source: string;
   entities: Record<CargaEntityType, CargaEntitySeed>;
+  tipoOperacion: {
+    nombre: string;
+    createdAt: string;
+    source: string;
+  };
 }
 
 const CARGA_SEQUENCE: Array<{
@@ -52,6 +57,23 @@ test.describe('Configuracion Admin: Carga Master Setup', () => {
     const createdEntities: Partial<Record<CargaEntityType, CargaEntitySeed>> = {};
 
     try {
+      const workerDataPath = DataPathHelper.getWorkerDataPath(testInfo);
+      if (!fs.existsSync(workerDataPath)) {
+        throw new Error(
+          `No se encontro worker data: ${workerDataPath}. Ejecuta primero tipo-operacion-crear.test.ts`,
+        );
+      }
+
+      const workerData = JSON.parse(fs.readFileSync(workerDataPath, 'utf-8')) as {
+        seededTipoOperacion?: { nombre?: string; createdAt?: string };
+      };
+      const seededTipoOperacionNombre = workerData.seededTipoOperacion?.nombre?.trim();
+      if (!seededTipoOperacionNombre) {
+        throw new Error(
+          `No existe seededTipoOperacion en ${workerDataPath}. Ejecuta tipo-operacion-crear.test.ts antes de carga-setup.`,
+        );
+      }
+
       for (const step of CARGA_SEQUENCE) {
         await test.step(`${step.emoji} Crear ${step.display}`, async () => {
           const nombre = step.type === 'tipoRampla'
@@ -64,6 +86,17 @@ test.describe('Configuracion Admin: Carga Master Setup', () => {
 
           await allure.parameter(`${step.display} Nombre`, created.nombre);
           await allure.parameter(`${step.display} ID`, String(created.id ?? 'N/A'));
+          await allure.attachment(
+            `${step.display} Creada (JSON)`,
+            JSON.stringify({
+              tipo: step.type,
+              nombre: created.nombre,
+              id: created.id,
+              endpoint: created.endpoint,
+              createdAt: created.createdAt,
+            }, null, 2),
+            'application/json',
+          );
 
           expect(created.nombre).toBe(nombre);
         });
@@ -81,6 +114,11 @@ test.describe('Configuracion Admin: Carga Master Setup', () => {
         createdAt: new Date().toISOString(),
         source: 'tests/e2e/modules/01-entidades/config/carga-setup.test.ts',
         entities: createdEntities as Record<CargaEntityType, CargaEntitySeed>,
+        tipoOperacion: {
+          nombre: seededTipoOperacionNombre,
+          createdAt: workerData.seededTipoOperacion?.createdAt ?? new Date().toISOString(),
+          source: workerDataPath,
+        },
       };
 
       const canonicalPath = DataPathHelper.getCargaSetupDataPath();
@@ -90,12 +128,29 @@ test.describe('Configuracion Admin: Carga Master Setup', () => {
       fs.writeFileSync(scopedPath, JSON.stringify(payload, null, 2), 'utf-8');
 
       const durationSeconds = ((Date.now() - startTime) / 1000).toFixed(2);
+      const summaryMarkdown = [
+        '# Carga Setup - Entidades Creadas',
+        '',
+        `- Ambiente: ${env}`,
+        `- Tipo Operacion (seed): ${payload.tipoOperacion.nombre}`,
+        `- Archivo scoped: ${scopedPath}`,
+        '',
+        '## Entidades',
+        ...CARGA_SEQUENCE.map((step) => {
+          const data = payload.entities[step.type];
+          return `- ${step.display}: ${data.nombre} (ID: ${data.id ?? 'N/A'})`;
+        }),
+      ].join('\n');
+
       await allure.parameter('Duracion (s)', durationSeconds);
+      await allure.parameter('Entidades Creadas', String(CARGA_SEQUENCE.length));
       await allure.attachment('Carga Setup Data (JSON)', JSON.stringify(payload, null, 2), 'application/json');
+      await allure.attachment('Carga Setup Summary (Markdown)', summaryMarkdown, 'text/markdown');
 
       logger.info('='.repeat(90));
       logger.info('📋 RESUMEN CARGA MASTER SETUP');
       logger.info(`🌍 Ambiente: ${env}`);
+      logger.info(`🧩 Tipo Operacion (seed): ${payload.tipoOperacion.nombre}`);
       for (const step of CARGA_SEQUENCE) {
         const data = payload.entities[step.type];
         logger.info(`${step.emoji} ${step.display}: ${data.nombre} (ID: ${data.id ?? 'N/A'})`);
