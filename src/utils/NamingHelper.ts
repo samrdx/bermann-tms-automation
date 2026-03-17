@@ -1,11 +1,11 @@
-import { isDemoMode } from './env-helper.js';
+﻿import { isDemoMode } from './env-helper.js';
 
 /**
  * NamingHelper
  * 
  * Estandariza la nomenclatura de los datos de prueba en el TMS.
  * Permite trazabilidad en Allure Report y facilita la limpieza (ILIKE 'Qa_%').
- * Soporta múltiples ambientes, aunque usa 'Qa_' como estándar para ambos.
+ * Soporta multiples ambientes con prefijo por ambiente (QA=Qa_, DEMO=Demo_).
  */
 export class NamingHelper {
     private static getEnvPrefix(): string {
@@ -51,8 +51,8 @@ export class NamingHelper {
     }
 
     /**
-     * Genera un nombre estandarizado para Vehículo (Patente)
-     * Regla: Qa_veh_ + [PatenteReal] (Excepción: Permite mayúsculas)
+     * Genera un nombre estandarizado para VehÃ­culo (Patente)
+     * Regla: Qa_veh_ + [PatenteReal] (ExcepciÃ³n: Permite mayÃºsculas)
      * Ejemplo: Qa_veh_HJWT12
      */
     static getVehiculoPatente(patenteReal: string): string {
@@ -114,13 +114,13 @@ export class NamingHelper {
 
     /**
      * Genera nombre para maestros de Carga.
-     * Regla: Qa_<Tag>_<Random5>
-     * Ejemplo: Qa_Unidad_17102
-     *
-     * Nota: Se usa prefijo Qa_ tambien en Demo para mantener
-     * el contrato solicitado por el flujo de carga setup.
+     * Regla QA: Qa_<Tag>_<Random5>
+     * Regla DEMO: Demo_<Tag>_<Random5>
+     * Ejemplo QA: Qa_Unidad_17102
+     * Ejemplo DEMO: Demo_Unidad_17102
      */
     static getCargaMasterName(tag: string): string {
+        const prefix = this.getEnvPrefix();
         const safeTag = tag
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
@@ -128,16 +128,19 @@ export class NamingHelper {
             .replace(/^_+|_+$/g, '');
 
         const randomFiveDigits = Math.floor(10000 + Math.random() * 90000);
-        return `Qa_${safeTag}_${randomFiveDigits}`;
+        return `${prefix}${safeTag}_${randomFiveDigits}`;
     }
 
     /**
      * Nombre especifico para Tipo de Rampla.
-     * Regla solicitada: qa_tiporam_<5digitos>
-     * Ejemplo: qa_tiporam_12345
+     * Regla QA: qa_tiporam_<5digitos>
+     * Regla DEMO: Demo_tiporam_<5digitos>
      */
     static getTipoRamplaName(): string {
         const randomFiveDigits = Math.floor(10000 + Math.random() * 90000);
+        return isDemoMode()
+            ? `Demo_tiporam_${randomFiveDigits}`
+            : `qa_tiporam_${randomFiveDigits}`;
         return `qa_tiporam_${randomFiveDigits}`;
      * Genera datos estandarizados para Ruta
      * Nombre QA: Qa_RT_[Zona]_[4digitos]
@@ -158,4 +161,5 @@ export class NamingHelper {
         };
     }
 }
+
 
