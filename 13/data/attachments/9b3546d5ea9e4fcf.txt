@@ -1,0 +1,41 @@
+2026-03-18 14:02:36 [INFO]: ENTORNO: QA 🧪
+2026-03-18 14:02:36 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-18 14:02:36 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-18 14:02:39 [INFO]: ✅ Navegación exitosa
+2026-03-18 14:02:39 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-18 14:02:39 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_rutas_673
+2026-03-18 14:02:39 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_rutas_673
+2026-03-18 14:02:39 [INFO]: [TransportistaFormPage] Completando documento (RUT): 61528604-4
+2026-03-18 14:02:39 [INFO]: [BasePage] Ingresando RUT con verificación: [61528604-4] en #transportistas-documento
+2026-03-18 14:02:41 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 61.528.604-4
+2026-03-18 14:02:41 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-18 14:02:41 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-18 14:02:42 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 14:02:42 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 14:02:43 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Región de Ñuble
+2026-03-18 14:02:44 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Ñuble
+2026-03-18 14:02:45 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Quirihue
+2026-03-18 14:02:45 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Región de Ñuble → Ñuble → Quirihue
+2026-03-18 14:02:45 [INFO]: [TransportistaFormPage] Completando calle: Av. Apoquindo
+2026-03-18 14:02:45 [INFO]: [TransportistaFormPage] Completando altura: 219
+2026-03-18 14:02:45 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-18 14:02:46 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-18 14:02:46 [INFO]: ✅ Formulario completado
+2026-03-18 14:02:46 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-18 14:02:46 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:02:51 [INFO]: ✅ Guardado iniciado
+2026-03-18 14:02:51 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-18 14:02:53 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-18 14:02:53 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 14:02:53 [INFO]: 🔍 Buscando por nombre: Qa_tra_rutas_673
+2026-03-18 14:02:53 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-18 14:02:55 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 417
+2026-03-18 14:02:55 [INFO]: ✅ ID del Transportista [Qa_tra_rutas_673] extraído exitosamente: 417
+2026-03-18 14:02:55 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-qa.json
+2026-03-18 14:02:55 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_rutas_673]             | ID: 417
+====================================================================================================

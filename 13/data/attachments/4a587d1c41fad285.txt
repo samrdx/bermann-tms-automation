@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_horizonte_883]         | ID: 422
+🏢 Cliente       : [Qa_cli_comercial_906]         | ID: 348
+🚚 Vehiculo      : [Qa_veh_TL9312]                | Patente: Qa_veh_TL9312 | Asociado: Qa_tra_horizonte_883
+👤 Conductor     : [Qa_con_pedro Qa_con_lópez]    | Asociado: Qa_tra_horizonte_883
+🏭 Transportista : [Qa_tra_horizonte_883]        
+🏢 Cliente       : [Qa_cli_comercial_906]        
+🔹 Contrato Venta: [255536]                      
+🔹 Contrato Costo: [710196]                      
+🎫 Viaje         : [235817]                       | Asociado: Qa_cli_comercial_906 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 192 | Cliente: Qa_cli_comercial_906
+====================================================================================================

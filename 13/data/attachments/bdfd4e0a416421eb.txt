@@ -1,0 +1,17 @@
+2026-03-18 14:28:29 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 14:28:29 [INFO]: ================================================================================
+2026-03-18 14:28:29 [INFO]: Iniciando Paso 8: Creación de Prefactura (LEGACY)
+2026-03-18 14:28:29 [INFO]: ================================================================================
+2026-03-18 14:28:29 [INFO]: Fase 1: Cargando datos del JSON del trabajador...
+2026-03-18 14:28:29 [WARN]: ⚠️ El viaje 45435 no figura como FINALIZADO en el JSON. Status actual: PLANIFICADO. Intentando de todas formas...
+2026-03-18 14:28:29 [INFO]: Fase 2: Navegando a /prefactura/crear...
+2026-03-18 14:28:29 [INFO]: [PrefacturaPage] Navegando a /prefactura/crear
+2026-03-18 14:28:31 [INFO]: ✅ Pagina Crear Prefactura cargada
+2026-03-18 14:28:31 [INFO]: [PrefacturaPage] Buscando viajes para el cliente: Demo_cli_distribuidora spa_913
+2026-03-18 14:28:31 [INFO]: [PrefacturaPage] Asegurando rango de fechas...
+2026-03-18 14:28:35 [INFO]: [PrefacturaPage] Seleccionando opción: DEMO_CLI_DISTRIBUIDORA SPA_913
+2026-03-18 14:28:38 [INFO]: [PrefacturaPage] Seleccionando opción: Pesos Chilenos
+2026-03-18 14:28:43 [INFO]: [PrefacturaPage] Esperando resultados en la grilla (Firefox Robust Wait)...
+2026-03-18 14:29:13 [WARN]: [PrefacturaPage] ⚠️ Tiempo de espera agotado esperando resultados de la grilla
+2026-03-18 14:29:13 [ERROR]: [PrefacturaPage] ❌ ❌ No se encontraron viajes para prefacturar con los filtros aplicados (chromium).
+2026-03-18 14:29:13 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/error-no-viajes-chromium-1773844153584.png 📸

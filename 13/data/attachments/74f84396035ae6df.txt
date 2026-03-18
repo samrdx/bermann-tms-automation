@@ -1,0 +1,58 @@
+2026-03-18 14:09:09 [INFO]: ================================================================================
+2026-03-18 14:09:09 [INFO]: 🚀 Iniciando prueba de creación de Contrato Tipo Costo (Seeded Transportista)
+2026-03-18 14:09:09 [INFO]: ================================================================================
+2026-03-18 14:09:09 [INFO]: 📦 Transportista: "Qa_tra_horizonte_158" (ID: 420)
+2026-03-18 14:09:09 [INFO]: 📝 Nro Contrato: 949523
+2026-03-18 14:09:09 [INFO]: Fase 2: Completando el encabezado del contrato...
+2026-03-18 14:09:09 [INFO]: [ContratosFormPage] 📝 Completando información básica del contrato (Fase 1) - Tipo: Costo
+2026-03-18 14:09:09 [INFO]: [ContratosFormPage] Navegando a la página de creación de contrato: /contrato/crear
+2026-03-18 14:09:12 [INFO]: [ContratosFormPage] ✅ Página de creación de contrato cargada y campo Nro Contrato visible
+2026-03-18 14:09:12 [INFO]: [ContratosFormPage] Completando Nro Contrato: 949523
+2026-03-18 14:09:12 [INFO]: [ContratosFormPage] 🔽 Seleccionando Tipo Contrato = Costo...
+2026-03-18 14:09:18 [WARN]: [ContratosFormPage] ⚠️ ⚠️ fallback: clicking option via JS for "Costo"
+2026-03-18 14:09:22 [INFO]: [ContratosFormPage] ✅ Tipo Costo seleccionado
+2026-03-18 14:09:22 [INFO]: [ContratosFormPage] 🔽 Seleccionando transportista: "Qa_tra_horizonte_158"...
+2026-03-18 14:09:23 [INFO]: [ContratosFormPage] 🔍 El dropdown de transportista tiene caja de búsqueda — usando búsqueda
+2026-03-18 14:09:24 [INFO]: [ContratosFormPage] ✅ Transportista seleccionado
+2026-03-18 14:09:24 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier fondo de modal...
+2026-03-18 14:09:25 [INFO]: [ContratosFormPage] 💾 Guardando encabezado básico del contrato...
+2026-03-18 14:09:28 [INFO]: [ContratosFormPage] ✅ Encabezado del contrato creado exitosamente con ID: 702
+2026-03-18 14:09:28 [INFO]: [ContratosFormPage] 📍 Redirigido a: https://moveontruckqa.bermanntms.cl/contrato/editar/702
+2026-03-18 14:09:28 [INFO]: ✅ Header guardado — Contract ID: 702
+2026-03-18 14:09:28 [INFO]: ✅ URL después de guardar header: https://moveontruckqa.bermanntms.cl/contrato/editar/702
+2026-03-18 14:09:28 [INFO]: Fase 3: Agregando ruta 715 con tarifas 20000 / 50000...
+2026-03-18 14:09:28 [INFO]: [ContratosFormPage] 🛣️ Añadiendo Ruta 1413 (ambiente QA)
+2026-03-18 14:09:28 [INFO]: [ContratosFormPage] Haciendo clic en el botón "Añadir Ruta"
+2026-03-18 14:09:30 [INFO]: [ContratosFormPage] Esperando a que aparezca el modal de rutas...
+2026-03-18 14:09:30 [INFO]: [ContratosFormPage] ✅ Modal de rutas visible
+2026-03-18 14:09:31 [INFO]: [ContratosFormPage] Seleccionando Ruta 1413
+2026-03-18 14:09:32 [INFO]: [ContratosFormPage] Cerrando modal de rutas
+2026-03-18 14:09:33 [INFO]: [ContratosFormPage] Haciendo clic en "Añadir Carga" para la Ruta 1413
+2026-03-18 14:09:35 [INFO]: [ContratosFormPage] ✅ Modal de carga visible
+2026-03-18 14:09:35 [INFO]: [ContratosFormPage] Seleccionando Carga vía: a#btn_plus_ruta_1413_2
+2026-03-18 14:09:35 [INFO]: [ContratosFormPage] Cerrando modal de carga
+2026-03-18 14:09:36 [INFO]: [ContratosFormPage] Completando tarifas: Conductor=20000, Viaje=50000
+2026-03-18 14:09:39 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_extra_1413 establecido en "50000"
+2026-03-18 14:09:41 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_conductor_1413 establecido en "20000"
+2026-03-18 14:09:42 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier modal restante
+2026-03-18 14:09:42 [INFO]: [ContratosFormPage] ✅ Ruta 1413 y carga añadidas exitosamente
+2026-03-18 14:09:42 [INFO]: ✅ Ruta y tarifas agregadas
+2026-03-18 14:09:42 [INFO]: Fase 4: Guardando contrato final...
+2026-03-18 14:09:42 [INFO]: [ContratosFormPage] 💾 Guardando contrato y extrayendo ID
+2026-03-18 14:09:50 [INFO]: [ContratosFormPage] URL actual después de guardar: https://moveontruckqa.bermanntms.cl/contrato/index
+2026-03-18 14:09:50 [WARN]: [ContratosFormPage] ⚠️ ⚠️ Fallo al extraer el ID del contrato de la URL: https://moveontruckqa.bermanntms.cl/contrato/index, devolviendo cadena vacía para confiar en la búsqueda de índice
+2026-03-18 14:09:50 [INFO]:    URL después de guardar contrato final: https://moveontruckqa.bermanntms.cl/contrato/index
+2026-03-18 14:09:50 [INFO]:    Contrato ID Extraido: ""
+2026-03-18 14:09:50 [WARN]: ⚠️ ⚠️ No se pudo extraer el ID de la URL — se verificará a través de la búsqueda en el índice
+2026-03-18 14:09:50 [INFO]: Fase 5: Navegando a /contrato/index para verificar la creación...
+2026-03-18 14:09:50 [INFO]: 🔍 Intentos de verificación 1/3...
+2026-03-18 14:09:52 [INFO]: ⌨️ Buscando por transportista: Qa_tra_horizonte_158
+2026-03-18 14:09:54 [INFO]: ✅ Contrato 949523 encontrado en el índice!
+2026-03-18 14:09:54 [INFO]: ✅ Contrato ID extraido del índice: 702
+2026-03-18 14:09:54 [INFO]: ✅ Contrato 949523 verificado en el índice — Nro: 949523 | ID: 702
+2026-03-18 14:09:54 [INFO]: ================================================================================
+2026-03-18 14:09:54 [INFO]: ✅ Creación de Contrato - Costo COMPLETADO
+2026-03-18 14:09:54 [INFO]:    Nro Contrato : 949523
+2026-03-18 14:09:54 [INFO]:    Contrato ID  : 702
+2026-03-18 14:09:54 [INFO]:    Transportista: Qa_tra_horizonte_158
+2026-03-18 14:09:54 [INFO]: ================================================================================

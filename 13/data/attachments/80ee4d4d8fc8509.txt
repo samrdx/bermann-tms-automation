@@ -1,0 +1,14 @@
+2026-03-18 14:24:15 [INFO]: ✅ Transportista seeded cargado: Demo_tra_transportes_201 (ID: 305)
+2026-03-18 14:24:15 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-18 14:24:18 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_transportes_201
+2026-03-18 14:24:18 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_JWKI89
+2026-03-18 14:24:18 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_JWKI89
+2026-03-18 14:24:19 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_transportes_201
+2026-03-18 14:24:20 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_transportes_201" seleccionado
+2026-03-18 14:24:20 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-18 14:24:21 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-18 14:24:22 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-18 14:24:23 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-18 14:24:23 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:24:27 [INFO]: ✅ Vehículo [Demo_veh_JWKI89] guardado exitosamente
+2026-03-18 14:24:27 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_JWKI89

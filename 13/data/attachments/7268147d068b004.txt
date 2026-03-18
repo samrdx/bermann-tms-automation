@@ -1,0 +1,14 @@
+2026-03-18 14:02:57 [INFO]: ✅ Transportista seeded cargado: Qa_tra_rutas_673 (ID: 417)
+2026-03-18 14:02:57 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-18 14:02:59 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_rutas_673
+2026-03-18 14:02:59 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_FA8172
+2026-03-18 14:02:59 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_FA8172
+2026-03-18 14:03:00 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_rutas_673
+2026-03-18 14:03:02 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_rutas_673" seleccionado
+2026-03-18 14:03:02 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-18 14:03:03 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-18 14:03:04 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-18 14:03:04 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-18 14:03:04 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:03:08 [INFO]: ✅ Vehículo [Qa_veh_FA8172] guardado exitosamente
+2026-03-18 14:03:08 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_FA8172

@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_austral_596]         | ID: 308
+🏢 Cliente       : [Demo_cli_distribuidora_354]   | ID: 294
+🚚 Vehiculo      : [Demo_veh_BIMI12]              | Patente: Demo_veh_BIMI12 | Asociado: Demo_tra_austral_596
+👤 Conductor     : [Demo_con_valentina Demo_con_silva] | Asociado: Demo_tra_austral_596
+🏭 Transportista : [Demo_tra_austral_596]        
+🏢 Cliente       : [Demo_cli_distribuidora_354]  
+🔹 Contrato Venta: [228743]                      
+🔹 Contrato Costo: [813367]                      
+🎫 Viaje         : [398493]                       | Asociado: Demo_cli_distribuidora_354 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 122 | Cliente: Demo_cli_distribuidora_354
+====================================================================================================

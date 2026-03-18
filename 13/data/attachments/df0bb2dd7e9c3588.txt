@@ -1,0 +1,42 @@
+2026-03-18 14:02:13 [INFO]: ENTORNO: QA 🧪
+2026-03-18 14:02:13 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-18 14:02:13 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-18 14:02:16 [INFO]: ✅ Navegación correcta
+2026-03-18 14:02:16 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-18 14:02:16 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_comercial_662
+2026-03-18 14:02:16 [INFO]: [ClienteFormPage] Completando RUT: 21293595-6
+2026-03-18 14:02:16 [INFO]: [BasePage] Ingresando RUT con verificación: [21293595-6] en #clientes-rut
+2026-03-18 14:02:17 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 21.293.595-6
+2026-03-18 14:02:17 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_comercial spa_662
+2026-03-18 14:02:17 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-18 14:02:18 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-18 14:02:18 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 14:02:18 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 14:02:19 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region Aisen del Gral. Carlos Ibanez del Campo
+2026-03-18 14:02:20 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Capitán Pratt
+2026-03-18 14:02:22 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: O’Higgins
+2026-03-18 14:02:22 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region Aisen del Gral. Carlos Ibanez del Campo → Capitán Pratt → O’Higgins
+2026-03-18 14:02:22 [INFO]: [ClienteFormPage] Completando calle: Av. Libertador Bernardo O'Higgins
+2026-03-18 14:02:22 [INFO]: [ClienteFormPage] Completando altura: 885
+2026-03-18 14:02:22 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-18 14:02:22 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-18 14:02:22 [INFO]: ✅ Formulario Completado
+2026-03-18 14:02:22 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-18 14:02:22 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:02:27 [INFO]: ✅ Guardar iniciado
+2026-03-18 14:02:27 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-18 14:02:29 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-18 14:02:29 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 14:02:29 [INFO]: 🔍 Buscando por RUT: 21293595-6 (limpio: 212935956)
+2026-03-18 14:02:29 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-18 14:02:31 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-18 14:02:31 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 342
+2026-03-18 14:02:31 [INFO]: ✅ Cliente [Qa_cli_comercial_662] ID: 342 identificado exitosamente
+2026-03-18 14:02:31 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-qa.json
+2026-03-18 14:02:31 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_comercial_662]         | ID: 342
+====================================================================================================

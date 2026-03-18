@@ -1,0 +1,44 @@
+2026-03-18 14:29:18 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 14:29:18 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-18 14:29:18 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-18 14:29:21 [INFO]: ✅ Navegación correcta
+2026-03-18 14:29:21 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-18 14:29:21 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_logistica_227
+2026-03-18 14:29:21 [INFO]: [ClienteFormPage] Completando RUT: 59459908-K
+2026-03-18 14:29:21 [INFO]: [BasePage] Ingresando RUT con verificación: [59459908-K] en #clientes-rut
+2026-03-18 14:29:22 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 59459908K, Obtenido: 59459908. Usando JS para forzar valor...
+2026-03-18 14:29:23 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-18 14:29:23 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-18 14:29:23 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_logistica spa_227
+2026-03-18 14:29:23 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-18 14:29:24 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-18 14:29:24 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 14:29:24 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 14:29:25 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region del Libertador B. O'Higgins
+2026-03-18 14:29:27 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Cardenal Caro
+2026-03-18 14:29:28 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Navidad
+2026-03-18 14:29:28 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region del Libertador B. O'Higgins → Cardenal Caro → Navidad
+2026-03-18 14:29:28 [INFO]: [ClienteFormPage] Completando calle: Av. Las Condes
+2026-03-18 14:29:28 [INFO]: [ClienteFormPage] Completando altura: 299
+2026-03-18 14:29:28 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-18 14:29:29 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 840/840
+2026-03-18 14:29:29 [INFO]: ✅ Formulario Completado
+2026-03-18 14:29:29 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-18 14:29:29 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:29:34 [INFO]: ✅ Guardar iniciado
+2026-03-18 14:29:34 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-18 14:29:36 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-18 14:29:36 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 14:29:36 [INFO]: 🔍 Buscando por RUT: 59459908-K (limpio: 59459908K)
+2026-03-18 14:29:36 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-18 14:29:38 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-18 14:29:38 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 292
+2026-03-18 14:29:38 [INFO]: ✅ Cliente [Demo_cli_logistica_227] ID: 292 identificado exitosamente
+2026-03-18 14:29:38 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-firefox-demo.json
+2026-03-18 14:29:38 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_logistica_227]       | ID: 292
+====================================================================================================

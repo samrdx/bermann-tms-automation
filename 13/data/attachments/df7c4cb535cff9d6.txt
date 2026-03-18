@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_andes_117]             | ID: 421
+🏢 Cliente       : [Qa_cli_distribuidora_152]     | ID: 347
+🚚 Vehiculo      : [Qa_veh_RD1893]                | Patente: Qa_veh_RD1893 | Asociado: Qa_tra_andes_117
+👤 Conductor     : [Qa_con_pedro Qa_con_contreras] | Asociado: Qa_tra_andes_117
+🏭 Transportista : [Qa_tra_andes_117]            
+🏢 Cliente       : [Qa_cli_distribuidora_152]    
+🔹 Contrato Venta: [699892]                      
+🔹 Contrato Costo: [664433]                      
+🎫 Viaje         : [399787]                       | Asociado: Qa_cli_distribuidora_152 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 191 | Cliente: Qa_cli_distribuidora_152
+====================================================================================================

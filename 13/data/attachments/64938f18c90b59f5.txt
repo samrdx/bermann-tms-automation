@@ -1,0 +1,41 @@
+2026-03-18 14:23:55 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 14:23:55 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-18 14:23:55 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-18 14:23:58 [INFO]: ✅ Navegación exitosa
+2026-03-18 14:23:58 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-18 14:23:58 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_transportes_201
+2026-03-18 14:23:58 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_transportes_201
+2026-03-18 14:23:58 [INFO]: [TransportistaFormPage] Completando documento (RUT): 38861641-5
+2026-03-18 14:23:58 [INFO]: [BasePage] Ingresando RUT con verificación: [38861641-5] en #transportistas-documento
+2026-03-18 14:23:59 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 38.861.641-5
+2026-03-18 14:23:59 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-18 14:24:00 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-18 14:24:00 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 14:24:00 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 14:24:01 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Atacama
+2026-03-18 14:24:02 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Huasco
+2026-03-18 14:24:04 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Vallenar
+2026-03-18 14:24:04 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Atacama → Huasco → Vallenar
+2026-03-18 14:24:04 [INFO]: [TransportistaFormPage] Completando calle: Camino a Melipilla
+2026-03-18 14:24:04 [INFO]: [TransportistaFormPage] Completando altura: 722
+2026-03-18 14:24:04 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-18 14:24:05 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-18 14:24:05 [INFO]: ✅ Formulario completado
+2026-03-18 14:24:05 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-18 14:24:05 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:24:10 [INFO]: ✅ Guardado iniciado
+2026-03-18 14:24:10 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-18 14:24:12 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-18 14:24:12 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 14:24:12 [INFO]: 🔍 Buscando por nombre: Demo_tra_transportes_201
+2026-03-18 14:24:12 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-18 14:24:14 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 305
+2026-03-18 14:24:14 [INFO]: ✅ ID del Transportista [Demo_tra_transportes_201] extraído exitosamente: 305
+2026-03-18 14:24:14 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-demo.json
+2026-03-18 14:24:14 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_transportes_201]     | ID: 305
+====================================================================================================

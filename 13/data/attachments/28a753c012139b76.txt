@@ -1,0 +1,47 @@
+2026-03-18 14:23:27 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 14:23:27 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-18 14:23:27 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-18 14:23:29 [INFO]: ✅ Navegación correcta
+2026-03-18 14:23:29 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-18 14:23:29 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_distribuidora_913
+2026-03-18 14:23:29 [INFO]: [ClienteFormPage] Completando RUT: 88462381-2
+2026-03-18 14:23:29 [INFO]: [BasePage] Ingresando RUT con verificación: [88462381-2] en #clientes-rut
+2026-03-18 14:23:31 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 88.462.381-2
+2026-03-18 14:23:31 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_distribuidora spa_913
+2026-03-18 14:23:31 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-18 14:23:32 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-18 14:23:32 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 14:23:32 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 14:23:33 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Región de Ñuble
+2026-03-18 14:23:34 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Itata
+2026-03-18 14:23:36 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-18 14:23:36 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Itata" (región: "Región de Ñuble"), reintentando...
+2026-03-18 14:23:36 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 2/5
+2026-03-18 14:23:37 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Valparaiso
+2026-03-18 14:23:38 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: San Antonio
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Algarrobo
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Valparaiso → San Antonio → Algarrobo
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] Completando calle: Av. Apoquindo
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] Completando altura: 790
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 840/840
+2026-03-18 14:23:40 [INFO]: ✅ Formulario Completado
+2026-03-18 14:23:40 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-18 14:23:40 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-18 14:23:46 [INFO]: ✅ Guardar iniciado
+2026-03-18 14:23:46 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-18 14:23:48 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-18 14:23:48 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 14:23:48 [INFO]: 🔍 Buscando por RUT: 88462381-2 (limpio: 884623812)
+2026-03-18 14:23:48 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-18 14:23:50 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-18 14:23:50 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 291
+2026-03-18 14:23:50 [INFO]: ✅ Cliente [Demo_cli_distribuidora_913] ID: 291 identificado exitosamente
+2026-03-18 14:23:50 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-demo.json
+2026-03-18 14:23:50 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_distribuidora_913]   | ID: 291
+====================================================================================================
