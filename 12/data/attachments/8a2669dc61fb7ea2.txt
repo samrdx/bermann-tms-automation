@@ -1,0 +1,41 @@
+2026-03-18 04:55:39 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 04:55:39 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-18 04:55:39 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-18 04:55:42 [INFO]: ✅ Navegación exitosa
+2026-03-18 04:55:42 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-18 04:55:42 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_cargo_733
+2026-03-18 04:55:42 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_cargo_733
+2026-03-18 04:55:42 [INFO]: [TransportistaFormPage] Completando documento (RUT): 42193349-9
+2026-03-18 04:55:42 [INFO]: [BasePage] Ingresando RUT con verificación: [42193349-9] en #transportistas-documento
+2026-03-18 04:55:44 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 42.193.349-9
+2026-03-18 04:55:44 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-18 04:55:44 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-18 04:55:45 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 04:55:45 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 04:55:45 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Antofagasta
+2026-03-18 04:55:47 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: El Loa
+2026-03-18 04:55:48 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: San Pedro de Atacama
+2026-03-18 04:55:48 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Antofagasta → El Loa → San Pedro de Atacama
+2026-03-18 04:55:48 [INFO]: [TransportistaFormPage] Completando calle: Av. Vicuña Mackenna
+2026-03-18 04:55:48 [INFO]: [TransportistaFormPage] Completando altura: 376
+2026-03-18 04:55:48 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-18 04:55:49 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-18 04:55:49 [INFO]: ✅ Formulario completado
+2026-03-18 04:55:49 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-18 04:55:49 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-18 04:55:54 [INFO]: ✅ Guardado iniciado
+2026-03-18 04:55:54 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-18 04:55:56 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-18 04:55:56 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 04:55:56 [INFO]: 🔍 Buscando por nombre: Demo_tra_cargo_733
+2026-03-18 04:55:56 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-18 04:55:58 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 298
+2026-03-18 04:55:58 [INFO]: ✅ ID del Transportista [Demo_tra_cargo_733] extraído exitosamente: 298
+2026-03-18 04:55:58 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-demo.json
+2026-03-18 04:55:58 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_733]           | ID: 298
+====================================================================================================

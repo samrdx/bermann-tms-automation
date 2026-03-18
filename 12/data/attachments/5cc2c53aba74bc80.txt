@@ -1,0 +1,26 @@
+2026-03-18 04:58:07 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 04:58:07 [INFO]: ✅ Cargado seededTransportista: Demo_tra_cargo_733 (ID: 298)
+2026-03-18 04:58:07 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-18 04:58:10 [INFO]: 📝 Completando formulario de conductor para: Demo_con_valentina Demo_con_garcía
+2026-03-18 04:58:10 [INFO]: [ConductorFormPage] Llenando usuario: xcclsk50
+2026-03-18 04:58:10 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-18 04:58:10 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_valentina
+2026-03-18 04:58:10 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_garcía
+2026-03-18 04:58:11 [INFO]: [ConductorFormPage] Llenando documento: 12.536.827-1
+2026-03-18 04:58:11 [INFO]: [BasePage] Ingresando RUT con verificación: [12.536.827-1] en #conductores-documento
+2026-03-18 04:58:12 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 12.536.827-1
+2026-03-18 04:58:12 [INFO]: [ConductorFormPage] Llenando telefono: +56925470414
+2026-03-18 04:58:12 [INFO]: [ConductorFormPage] Llenando email: demo_con_valentinademo_con_garcia@hotmail.com
+2026-03-18 04:58:12 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-18 04:58:13 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-18 04:58:13 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_cargo_733]
+2026-03-18 04:58:15 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-18 04:58:17 [INFO]: ✅ Conductor [Demo_con_valentina Demo_con_garcía] guardado exitosamente
+2026-03-18 04:58:17 [INFO]: ✅ seededConductor guardado: Demo_con_valentina Demo_con_garcía
+2026-03-18 04:58:17 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_valentina Demo_con_garcía] | Asociado: Demo_tra_cargo_733
+====================================================================================================

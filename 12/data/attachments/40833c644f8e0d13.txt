@@ -1,0 +1,6 @@
+2026-03-18 04:55:12 [INFO]: ENTORNO: QA 🧪
+2026-03-18 04:55:12 [INFO]: [LoginPage] Logueandose con usuario: arivas
+2026-03-18 04:55:12 [INFO]: [BasePage] [PASO] 🟦 Navegando hacia: /login 🌐
+2026-03-18 04:55:13 [WARN]: [BasePage] ⚠️ Campo #login-usuario no visible, saltando interacción ⚠️
+2026-03-18 04:55:13 [WARN]: [BasePage] ⚠️ Campo #login-clave no visible, saltando interacción ⚠️
+2026-03-18 04:55:13 [WARN]: [BasePage] ⚠️ Elemento button[type="submit"].btn-success no visible, saltando click ⚠️

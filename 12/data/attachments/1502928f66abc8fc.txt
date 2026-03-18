@@ -1,0 +1,42 @@
+2026-03-18 04:56:33 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 04:56:33 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-18 04:56:33 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-18 04:56:37 [INFO]: ✅ Navegación correcta
+2026-03-18 04:56:37 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-18 04:56:37 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_comercial_139
+2026-03-18 04:56:37 [INFO]: [ClienteFormPage] Completando RUT: 88461949-1
+2026-03-18 04:56:37 [INFO]: [BasePage] Ingresando RUT con verificación: [88461949-1] en #clientes-rut
+2026-03-18 04:56:38 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 88.461.949-1
+2026-03-18 04:56:38 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_comercial spa_139
+2026-03-18 04:56:38 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-18 04:56:39 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-18 04:56:39 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 04:56:39 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 04:56:40 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region del Maule
+2026-03-18 04:56:42 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Cauquenes
+2026-03-18 04:56:43 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Pelluhue
+2026-03-18 04:56:43 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region del Maule → Cauquenes → Pelluhue
+2026-03-18 04:56:43 [INFO]: [ClienteFormPage] Completando calle: Av. Providencia
+2026-03-18 04:56:43 [INFO]: [ClienteFormPage] Completando altura: 183
+2026-03-18 04:56:43 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-18 04:56:44 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 840/840
+2026-03-18 04:56:44 [INFO]: ✅ Formulario Completado
+2026-03-18 04:56:44 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-18 04:56:44 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-18 04:56:49 [INFO]: ✅ Guardar iniciado
+2026-03-18 04:56:49 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-18 04:56:51 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-18 04:56:51 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 04:56:51 [INFO]: 🔍 Buscando por RUT: 88461949-1 (limpio: 884619491)
+2026-03-18 04:56:51 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-18 04:56:53 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-18 04:56:53 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 284
+2026-03-18 04:56:53 [INFO]: ✅ Cliente [Demo_cli_comercial_139] ID: 284 identificado exitosamente
+2026-03-18 04:56:53 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-demo.json
+2026-03-18 04:56:53 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_comercial_139]       | ID: 284
+====================================================================================================

@@ -1,0 +1,49 @@
+2026-03-18 05:03:48 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 05:03:48 [INFO]: ================================================================================
+2026-03-18 05:03:48 [INFO]: Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: DEMO]
+2026-03-18 05:03:48 [INFO]: ================================================================================
+2026-03-18 05:03:48 [INFO]: Fase 1: Cargando datos del JSON...
+2026-03-18 05:03:48 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-18 05:03:48 [INFO]:    Transportista : Demo_tra_cargo_733
+2026-03-18 05:03:48 [INFO]:    Vehículo      : Demo_veh_WGVX96
+2026-03-18 05:03:48 [INFO]:    Conductor     : Demo_con_valentina Demo_con_garcía
+2026-03-18 05:03:48 [INFO]:    Nro Viaje     : 42412
+2026-03-18 05:03:48 [INFO]:    Search ID     : 6690 (internal grid ID)
+2026-03-18 05:03:48 [INFO]: Fase 2: Navegando a /viajes/asignar... [isDemo=true]
+2026-03-18 05:03:48 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-18 05:03:52 [INFO]: 🔍 Buscando viaje "6690" y abriendo formulario de edición...
+2026-03-18 05:03:52 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 6690
+2026-03-18 05:03:52 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 6690 en la grilla de Asignación...
+2026-03-18 05:03:57 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 6690
+2026-03-18 05:03:59 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-18 05:03:59 [INFO]: ✅ Formulario de asignación de viaje cargado — URL: https://demo.bermanntms.cl/viajes/editar/6690
+2026-03-18 05:03:59 [INFO]: Fase 3: Seleccionando Transportista: Demo_tra_cargo_733
+2026-03-18 05:03:59 [INFO]: 🛡️ Robust Selection: Transportista "Demo_tra_cargo_733"
+2026-03-18 05:04:03 [INFO]: ✅ Transportista verified: Demo_tra_cargo_733
+2026-03-18 05:04:03 [INFO]: Fase 4: Esperando recarga de cascada...
+2026-03-18 05:04:04 [INFO]: Fase 5: Seleccionando Vehículo: Demo_veh_WGVX96
+2026-03-18 05:04:05 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "Demo_veh_WGVX96"
+2026-03-18 05:04:05 [INFO]: Fase 6: Seleccionando Conductor: Demo_con_valentina Demo_con_garcía
+2026-03-18 05:04:07 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Demo_con_valentina Demo_con_garcía"
+2026-03-18 05:04:07 [INFO]: Fase 7: Verificación final anti-reset para Transportista...
+2026-03-18 05:04:07 [INFO]: ✅ Transportista confirmado: "Demo_tra_cargo_733"
+2026-03-18 05:04:07 [INFO]: Fase 8: Guardar asignación...
+2026-03-18 05:04:07 [INFO]: 💾 Guardado completado
+2026-03-18 05:04:07 [INFO]: Fase 9: Verificando asignación en grilla /viajes/asignar...
+2026-03-18 05:04:11 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-18 05:04:13 [INFO]: ✅ Viaje [6690] confirmado en grilla. Estado Asignado: true
+2026-03-18 05:04:13 [INFO]: ✅ JSON actualizado: viaje.status = ASIGNADO
+2026-03-18 05:04:13 [INFO]: ================================================================================
+2026-03-18 05:04:13 [INFO]: PASO 6.5: ¡ASIGNAR VIAJE (LEGACY) COMPLETADO!
+2026-03-18 05:04:13 [INFO]:    Nro Viaje    : 42412
+2026-03-18 05:04:13 [INFO]:    Transportista: Demo_tra_cargo_733
+2026-03-18 05:04:13 [INFO]:    Vehículo     : Demo_veh_WGVX96
+2026-03-18 05:04:13 [INFO]:    Conductor    : Demo_con_valentina Demo_con_garcía
+2026-03-18 05:04:13 [INFO]:    Duration     : 25.21s
+2026-03-18 05:04:13 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🎫 Viaje         : [42412]                        | ID: 6690 | Patente: Demo_veh_WGVX96 | Asociado: Demo_tra_cargo_733 | Estado: ASIGNADO | Conductor: Demo_con_valentina Demo_con_garcía
+====================================================================================================

@@ -1,0 +1,26 @@
+2026-03-18 04:58:19 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 04:58:19 [INFO]: ✅ Cargado seededTransportista: Demo_tra_cargo_221 (ID: 299)
+2026-03-18 04:58:20 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-18 04:58:24 [INFO]: 📝 Completando formulario de conductor para: Demo_con_antonio Demo_con_lópez
+2026-03-18 04:58:24 [INFO]: [ConductorFormPage] Llenando usuario: mcgrlb58
+2026-03-18 04:58:24 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-18 04:58:24 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_antonio
+2026-03-18 04:58:24 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_lópez
+2026-03-18 04:58:24 [INFO]: [ConductorFormPage] Llenando documento: 77.417.486-9
+2026-03-18 04:58:24 [INFO]: [BasePage] Ingresando RUT con verificación: [77.417.486-9] en #conductores-documento
+2026-03-18 04:58:26 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 77.417.486-9
+2026-03-18 04:58:26 [INFO]: [ConductorFormPage] Llenando telefono: +56953174464
+2026-03-18 04:58:26 [INFO]: [ConductorFormPage] Llenando email: demo_con_antoniodemo_con_lopez@hotmail.com
+2026-03-18 04:58:26 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-18 04:58:27 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-18 04:58:27 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_cargo_221]
+2026-03-18 04:58:28 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-18 04:58:30 [INFO]: ✅ Conductor [Demo_con_antonio Demo_con_lópez] guardado exitosamente
+2026-03-18 04:58:31 [INFO]: ✅ seededConductor guardado: Demo_con_antonio Demo_con_lópez
+2026-03-18 04:58:31 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_antonio Demo_con_lópez] | Asociado: Demo_tra_cargo_221
+====================================================================================================

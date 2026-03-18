@@ -1,0 +1,41 @@
+2026-03-18 04:56:02 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 04:56:02 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-18 04:56:02 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-18 04:56:06 [INFO]: ✅ Navegación exitosa
+2026-03-18 04:56:06 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-18 04:56:06 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_cargo_221
+2026-03-18 04:56:06 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_cargo_221
+2026-03-18 04:56:06 [INFO]: [TransportistaFormPage] Completando documento (RUT): 82865266-4
+2026-03-18 04:56:06 [INFO]: [BasePage] Ingresando RUT con verificación: [82865266-4] en #transportistas-documento
+2026-03-18 04:56:07 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 82.865.266-4
+2026-03-18 04:56:07 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-18 04:56:08 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-18 04:56:08 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 04:56:08 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 04:56:09 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de los Lagos
+2026-03-18 04:56:11 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Osorno
+2026-03-18 04:56:12 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Puyehue
+2026-03-18 04:56:12 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de los Lagos → Osorno → Puyehue
+2026-03-18 04:56:12 [INFO]: [TransportistaFormPage] Completando calle: Calle Estado
+2026-03-18 04:56:12 [INFO]: [TransportistaFormPage] Completando altura: 950
+2026-03-18 04:56:12 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-18 04:56:13 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-18 04:56:13 [INFO]: ✅ Formulario completado
+2026-03-18 04:56:13 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-18 04:56:13 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-18 04:56:18 [INFO]: ✅ Guardado iniciado
+2026-03-18 04:56:18 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-18 04:56:20 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-18 04:56:20 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 04:56:20 [INFO]: 🔍 Buscando por nombre: Demo_tra_cargo_221
+2026-03-18 04:56:20 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-18 04:56:22 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 299
+2026-03-18 04:56:22 [INFO]: ✅ ID del Transportista [Demo_tra_cargo_221] extraído exitosamente: 299
+2026-03-18 04:56:22 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-firefox-demo.json
+2026-03-18 04:56:22 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_221]           | ID: 299
+====================================================================================================

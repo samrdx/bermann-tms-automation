@@ -1,0 +1,42 @@
+2026-03-18 04:56:57 [INFO]: ENTORNO: DEMO 🎭
+2026-03-18 04:56:57 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-18 04:56:57 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-18 04:57:00 [INFO]: ✅ Navegación correcta
+2026-03-18 04:57:00 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-18 04:57:00 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_industrial_987
+2026-03-18 04:57:00 [INFO]: [ClienteFormPage] Completando RUT: 27095773-0
+2026-03-18 04:57:00 [INFO]: [BasePage] Ingresando RUT con verificación: [27095773-0] en #clientes-rut
+2026-03-18 04:57:02 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 27.095.773-0
+2026-03-18 04:57:02 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_industrial spa_987
+2026-03-18 04:57:02 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-18 04:57:03 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-18 04:57:03 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-18 04:57:03 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-18 04:57:04 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region Aisen del Gral. Carlos Ibanez del Campo
+2026-03-18 04:57:06 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Aisén
+2026-03-18 04:57:07 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Guaitecas
+2026-03-18 04:57:07 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region Aisen del Gral. Carlos Ibanez del Campo → Aisén → Guaitecas
+2026-03-18 04:57:07 [INFO]: [ClienteFormPage] Completando calle: Calle Huérfanos
+2026-03-18 04:57:07 [INFO]: [ClienteFormPage] Completando altura: 392
+2026-03-18 04:57:07 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-18 04:57:08 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 840/840
+2026-03-18 04:57:08 [INFO]: ✅ Formulario Completado
+2026-03-18 04:57:08 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-18 04:57:08 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-18 04:57:13 [INFO]: ✅ Guardar iniciado
+2026-03-18 04:57:13 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-18 04:57:15 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-18 04:57:15 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-18 04:57:15 [INFO]: 🔍 Buscando por RUT: 27095773-0 (limpio: 270957730)
+2026-03-18 04:57:15 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-18 04:57:17 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-18 04:57:17 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 285
+2026-03-18 04:57:17 [INFO]: ✅ Cliente [Demo_cli_industrial_987] ID: 285 identificado exitosamente
+2026-03-18 04:57:17 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-firefox-demo.json
+2026-03-18 04:57:17 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_industrial_987]      | ID: 285
+====================================================================================================
