@@ -144,6 +144,37 @@ export class AsignarPage extends BasePage {
     return this.page.locator('.form-group, .row').filter({ has: this.page.locator(`label:has-text("${labelText}")`) }).locator('button.dropdown-toggle').first();
   }
 
+  private async waitForNativeSelectOptions(
+    selectId: string,
+    labelForLog: string,
+    minEnabledOptions: number = 1,
+    timeoutMs: number = 20000
+  ): Promise<boolean> {
+    logger.info(`⏳ Esperando opciones para ${labelForLog} (#${selectId})...`);
+    try {
+      await this.page.waitForFunction(
+        ({ id, min }) => {
+          const select = document.getElementById(id) as HTMLSelectElement | null;
+          if (!select) return false;
+          const enabledOptions = Array.from(select.options).filter(opt => !opt.disabled && opt.value !== '');
+          return enabledOptions.length >= min;
+        },
+        { id: selectId, min: minEnabledOptions },
+        { timeout: timeoutMs }
+      );
+      logger.info(`✅ Opciones de ${labelForLog} cargadas`);
+      return true;
+    } catch {
+      const snapshot = await this.page.evaluate((id) => {
+        const select = document.getElementById(id) as HTMLSelectElement | null;
+        if (!select) return [];
+        return Array.from(select.options).map(opt => `${opt.value}:${opt.text.trim()}`);
+      }, selectId).catch(() => [] as string[]);
+      logger.warn(`⚠️ Timeout esperando opciones de ${labelForLog}. Opciones detectadas: ${snapshot.join(' | ') || 'ninguna'}`);
+      return false;
+    }
+  }
+
   private async selectDropdownOption(buttonLocator: Locator, searchText: string, labelForLog: string): Promise<void> {
     logger.info(`🔎 Buscando y seleccionando en ${labelForLog}: "${searchText}"`);
 
@@ -163,6 +194,11 @@ export class AsignarPage extends BasePage {
 
     // 3. Find and select the option
     const optionsList = dropdownContainer.locator('ul.dropdown-menu.inner');
+    if (!(await optionsList.isVisible({ timeout: 1500 }).catch(() => false))) {
+      await buttonLocator.evaluate(el => (el as HTMLElement).click());
+      await this.page.waitForTimeout(500);
+    }
+
     const targetOption = optionsList.locator('li:not(.disabled) a').filter({ hasText: searchText }).first();
 
     if (await targetOption.isVisible({ timeout: 4000 }).catch(() => false)) {
@@ -180,8 +216,21 @@ export class AsignarPage extends BasePage {
         await searchBox.fill('');
         await this.page.waitForTimeout(500);
       }
-      const firstOption = optionsList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
-      await firstOption.waitFor({ state: 'attached', timeout: 5000 });
+      const enabledOptions = optionsList.locator('li:not(.disabled):not(.hidden) a');
+      const enabledCount = await enabledOptions.count();
+      if (enabledCount === 0) {
+        const dataId = await buttonLocator.getAttribute('data-id');
+        const nativeOptions = dataId
+          ? await this.page.evaluate((id) => {
+            const select = document.getElementById(id) as HTMLSelectElement | null;
+            if (!select) return [];
+            return Array.from(select.options).map(opt => `${opt.value}:${opt.text.trim()}`);
+          }, dataId).catch(() => [] as string[])
+          : [];
+        throw new Error(`No hay opciones habilitadas en ${labelForLog} después del fallback. data-id=${dataId || 'N/A'} nativeOptions=[${nativeOptions.join(' | ')}]`);
+      }
+      const firstOption = enabledOptions.first();
+      await firstOption.waitFor({ state: 'visible', timeout: 10000 });
       const fallbackText = await firstOption.textContent().catch(() => 'primera opción');
       await firstOption.evaluate(el => (el as HTMLElement).click());
       logger.info(`✅ ${labelForLog} FALLBACK seleccionado: ${fallbackText?.trim()}`);
@@ -236,12 +285,27 @@ export class AsignarPage extends BasePage {
     const transportistaBtn = this.page.locator('button[data-id="viajes-transportista_id"]');
     await this.selectDropdownOption(transportistaBtn, data.transportista, 'Transportista');
 
-    logger.info('⏳ Esperando cascada (cargando vehículos)...');
-    await this.page.waitForTimeout(6000); // Espera pasiva para que el backend cargue los vehículos
+    logger.info('⏳ Esperando cascada (transportista -> vehículos)...');
+    let vehiculoReady = await this.waitForNativeSelectOptions('viajes-vehiculo_uno_id', 'Vehículo Principal', 1, 25000);
+    if (!vehiculoReady) {
+      logger.warn('⚠️ Vehículos no cargados tras primera espera, reintentando selección de transportista...');
+      await this.selectDropdownOption(transportistaBtn, data.transportista, 'Transportista');
+      await this.page.waitForTimeout(2000);
+      vehiculoReady = await this.waitForNativeSelectOptions('viajes-vehiculo_uno_id', 'Vehículo Principal', 1, 15000);
+    }
+    if (!vehiculoReady) {
+      throw new Error('No se cargaron opciones de Vehículo Principal después de seleccionar Transportista');
+    }
 
     // 2. Seleccionar Vehículo (Funciona aunque el botón parezca disabled inicialmente)
     const vehiculoBtn = this.page.locator('button[data-id="viajes-vehiculo_uno_id"]');
     await this.selectDropdownOption(vehiculoBtn, data.vehiculoPrincipal, 'Vehículo Principal');
+
+    logger.info('⏳ Esperando cascada (vehículo -> conductor)...');
+    const conductorReady = await this.waitForNativeSelectOptions('viajes-conductor_id', 'Conductor', 1, 15000);
+    if (!conductorReady) {
+      throw new Error('No se cargaron opciones de Conductor después de seleccionar Vehículo Principal');
+    }
 
     // 3. Seleccionar Conductor
     const conductorBtn = this.page.locator('button[data-id="viajes-conductor_id"]');
