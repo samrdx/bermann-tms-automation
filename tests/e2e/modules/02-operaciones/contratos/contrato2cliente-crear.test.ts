@@ -11,8 +11,8 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Contract Creation - Tipo Venta (Uses Seeded Cliente)
  *
  * Prerequisites:
- * - Run `npm run test:qa:entity:cliente` first (writes seededCliente to JSON)
- *   OR run `npm run test:legacy:setup` (base-entities.setup.ts also writes seededCliente)
+ * - LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
+ * - LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
  *
  * This test:
  * - Loads seededCliente from worker-specific JSON
@@ -38,7 +38,7 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         // PHASE 1: Load Data
         // =================================================================
         logger.info('📋 Fase 1: Cargando datos del cliente sembrado...');
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
         if (!fs.existsSync(dataPath)) throw new Error(`Data file not found: ${dataPath}`);
         const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
@@ -46,7 +46,7 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         if (!cliente) {
             throw new Error(
                 `'seededCliente' or 'cliente' not found in ${dataPath}.\n` +
-                `Run 'npm run test:qa:legacy:setup' or 'npm run test:qa:entity:cliente'.`
+                `Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly.`
             );
         }
         const clienteNombre = cliente.nombreFantasia || cliente.nombre;
@@ -181,3 +181,4 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         logger.info('='.repeat(80));
     });
 });
+

@@ -25,15 +25,20 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
     let seededTransportista: Transportista;
 
     test.beforeAll(async ({ }, testInfo) => {
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyEntityDataPath(testInfo);
         if (!fs.existsSync(dataPath)) {
             throw new Error(`Data file not found: ${dataPath}. Make sure transportistas-crear.test.ts runs first.`);
         }
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-        seededTransportista = data.seededTransportista;
+        seededTransportista = data.seededTransportista || data.transportista;
 
         if (!seededTransportista || !seededTransportista.id) {
-            throw new Error('seededTransportista not found in data file. Make sure transportistas-crear.test.ts runs first and successfully seeds a Transportista.');
+            const availableKeys = Object.keys(data || {});
+            throw new Error(
+                `seededTransportista/transportista not found in ${dataPath}. ` +
+                `Available keys: [${availableKeys.join(', ')}]. ` +
+                'Make sure transportistas-crear.test.ts runs first and successfully seeds a Transportista.'
+            );
         }
         transportistaName = seededTransportista.nombre;
         logger.info(`✅ Cargado seededTransportista: ${transportistaName} (ID: ${seededTransportista.id})`);
@@ -121,7 +126,7 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
                     asociado: transportistaName 
                 });
 
-                const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+                const dataPath = DataPathHelper.getLegacyEntityDataPath(testInfo);
                 const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
                 data.seededConductor = {
                     nombre: expectedNombre,
@@ -141,3 +146,4 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
 
     });
 });
+

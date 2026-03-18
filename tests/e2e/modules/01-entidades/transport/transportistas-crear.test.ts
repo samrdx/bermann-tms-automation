@@ -100,7 +100,7 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
       });
 
       // Save data to worker-specific JSON
-      const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+      const dataPath = DataPathHelper.getLegacyEntityDataPath(testInfo);
       let currentData: any = {};
       if (fs.existsSync(dataPath)) {
         currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
@@ -116,3 +116,4 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
     });
   });
 });
+

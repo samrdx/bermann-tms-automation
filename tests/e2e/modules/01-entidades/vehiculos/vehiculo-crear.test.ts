@@ -16,7 +16,7 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
     let seededTransportista: Transportista;
 
     test.beforeAll(async ({ }, testInfo) => {
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyEntityDataPath(testInfo);
         if (!fs.existsSync(dataPath)) {
             throw new Error(`Archivo con data no encontrado: ${dataPath}. Asegurate de que transportistas-crear.test.ts se haya ejecutado primero.`);
         }
@@ -61,8 +61,29 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
 
             await page.waitForTimeout(1000);
 
-            const capacidad = isDemoMode() ? '1 a 12 TON' : '1 a 12 TON';
-            await vehiculoPage.selectCapacidad(capacidad);
+            const fallbackCapacidad = isDemoMode() ? '1 a 12 TON' : '1 a 12 TON';
+            let capacidad = fallbackCapacidad;
+            const setupConfigPath = DataPathHelper.getSetupConfigDataPath(testInfo);
+            if (fs.existsSync(setupConfigPath)) {
+                const setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, 'utf-8'));
+                if (setupConfig?.capacidad?.nombre) {
+                    capacidad = setupConfig.capacidad.nombre;
+                }
+            }
+
+            try {
+                await vehiculoPage.selectCapacidad(capacidad);
+                logger.info(`✅ Capacidad seleccionada: ${capacidad}`);
+            } catch (error) {
+                if (capacidad !== fallbackCapacidad) {
+                    logger.warn(
+                        `⚠️ Capacidad seeded "${capacidad}" no disponible. Fallback a "${fallbackCapacidad}".`,
+                    );
+                    await vehiculoPage.selectCapacidad(fallbackCapacidad);
+                } else {
+                    throw error;
+                }
+            }
         });
 
         await test.step('Guardar y verificar', async () => {
@@ -84,7 +105,7 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
                     patente: expectedPatente,
                     asociado: seededTransportista.nombre
                 });
-                const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+                const dataPath = DataPathHelper.getLegacyEntityDataPath(testInfo);
                 const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
                 data.seededVehiculo = {
                     patente: expectedPatente,
@@ -100,3 +121,4 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
         });
     });
 });
+

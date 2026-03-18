@@ -9,10 +9,9 @@ import { allure } from 'allure-playwright';
  * Finanzas - Prefactura (Legacy)
  * 
  * Prerequisites:
- *   1. npm run test:legacy:setup
- *   2. npm run test:legacy:planificar
- *   3. npm run test:legacy:asignar
- *   4. npm run test:legacy:finalizar
+ *   1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
+ *      o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
+ *   2. Correr viajes-planificar, viajes-asignar y viajes-monitoreo
  */
 test.describe('[V04] Finanzas - Prefacturar Viaje (Legacy)', () => {
     test.setTimeout(120000);
@@ -30,7 +29,7 @@ test.describe('[V04] Finanzas - Prefacturar Viaje (Legacy)', () => {
 
         // PHASE 1: Load Data
         logger.info('Fase 1: Cargando datos del JSON del trabajador...');
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(`Archivo de datos no encontrado en ${dataPath}. Por favor, ejecute los prerrequisitos.`);

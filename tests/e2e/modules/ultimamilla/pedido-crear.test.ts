@@ -23,7 +23,7 @@ test.describe('Última Milla - Creación de Pedido', () => {
 
         // EXTRAER DATOS SEEDED DESDE JSON ANTES DE NAVEGAR
         logger.info('Extrayendo data base guardada (Seeded Cliente)...');
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
         let clienteNombre = '';
         if (fs.existsSync(dataPath)) {
             const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
@@ -122,3 +122,4 @@ test.describe('Última Milla - Creación de Pedido', () => {
         logger.info('='.repeat(80));
     });
 });
+
