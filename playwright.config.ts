@@ -3,210 +3,185 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Reconstruir __filename y __dirname para ES Modules
+import {
+  buildPlaywrightRuntime,
+  getMainProjectNames,
+  getProjectDependencies,
+  PROJECT_NAMES,
+  resolveRunSetupProjects,
+} from './src/config/playwright-orchestration.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Cargar variables de entorno
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const ENV = process.env.ENV || 'QA';
-const envName = ENV.toLowerCase();
-const baseURL = ENV === 'DEMO'
-  ? 'https://demo.bermanntms.cl'
-  : 'https://moveontruckqa.bermanntms.cl';
+const runtime = buildPlaywrightRuntime(process.env);
+const mainProjects = getMainProjectNames(runtime.envName);
+const dependencies = getProjectDependencies(runtime.envName);
+const includeSetupProjects = resolveRunSetupProjects(process.env.RUN_SETUP_PROJECTS);
 
 export default defineConfig({
   testDir: './tests',
-  outputDir: `test-results-${envName}`,
+  outputDir: runtime.output.testResultsDir,
   testIgnore: ['**/examples/**'],
   fullyParallel: false,
-
-  /* * CRÍTICO PARA CI:
-   * - En CI usamos 1 worker para evitar colisiones en la DB legacy.
-   * - En Local usamos 3 para velocidad.
-   */
-  workers: process.env.CI ? 1 : 3,
-
-  /*
-   * RETRIES:
-   * - En CI reintentamos 2 veces si falla (para flakiness de red/UI).
-   * - En Local 0 para ver el fallo rápido.
-   */
-  retries: process.env.CI ? 2 : 0,
+  workers: runtime.workers,
+  retries: runtime.retries,
 
   reporter: [
-    ['html', {
-      outputFolder: `playwright-report-${ENV.toLowerCase()}`,
-      open: 'never'
-    }],
-    ['json', {
-      outputFile: `playwright-report-${ENV.toLowerCase()}/results.json`
-    }],
-    ['allure-playwright', {
-      detail: true,
-      resultsDir: `allure-results-${ENV.toLowerCase()}`,
-      suiteTitle: false
-    }],
-    ['list']
+    [
+      'html',
+      {
+        outputFolder: runtime.output.htmlReportDir,
+        open: 'never',
+      },
+    ],
+    [
+      'json',
+      {
+        outputFile: `${runtime.output.htmlReportDir}/results.json`,
+      },
+    ],
+    [
+      'allure-playwright',
+      {
+        detail: true,
+        resultsDir: runtime.output.allureResultsDir,
+        suiteTitle: false,
+      },
+    ],
+    ['list'],
   ],
 
-  /*
-   * TIMEOUTS (Optimizados para CI y ambiente Demo lento):
-   * - Global: 4 min en Demo/CI.
-   * - Expect/Action: 30s en Demo/CI.
-   */
-  timeout: (process.env.CI || ENV === 'DEMO') ? 240 * 1000 : 60 * 1000,
+  timeout: runtime.timeoutMs,
   expect: {
-    timeout: (process.env.CI || ENV === 'DEMO') ? 30 * 1000 : 10 * 1000,
+    timeout: runtime.expectTimeoutMs,
     toPass: {
-      timeout: (process.env.CI || ENV === 'DEMO') ? 45 * 1000 : 15 * 1000,
-      intervals: [500, 1000, 2000, 5000],
+      timeout: runtime.toPassTimeoutMs,
+      intervals: runtime.toPassIntervals,
     },
   },
 
   use: {
-    baseURL,
-    /* Headless: True en CI, o lo que diga la variable en local */
-    headless: process.env.CI ? true : (process.env.HEADLESS === 'true'),
-
-    /* * CORRECCIÓN DE PANTALLA:
-     * Usamos 1920x1080 para evitar que footers o menús responsivos tapen botones.
-     * Esto reemplaza el hack de --window-size que rompía Firefox.
-     */
+    baseURL: runtime.baseURL,
+    headless: runtime.headless,
     viewport: { width: 1920, height: 1080 },
-
-    actionTimeout: (process.env.CI || ENV === 'DEMO') ? 30 * 1000 : 10 * 1000,
-    navigationTimeout: (process.env.CI || ENV === 'DEMO') ? 60 * 1000 : 20 * 1000,
-
-    /* Artifacts: Solo guardamos evidencia si falla */
-    trace: 'retain-on-failure',
+    actionTimeout: runtime.actionTimeoutMs,
+    navigationTimeout: runtime.navigationTimeoutMs,
+    trace: runtime.trace,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-
     ignoreHTTPSErrors: true,
   },
 
   tsconfig: './tsconfig.tests.json',
 
-    projects: [
-    // --- AUTORIZACIÓN ---
+  projects: [
     {
-      name: 'Autorización',
+      name: PROJECT_NAMES.AUTH_SETUP,
       testMatch: /auth\.setup\.ts/,
     },
 
-    // --- CONFIGURACIÓN SETUP: Fase 1  ---
-    {
-      name: `config-fase1-chromium`,
-      testMatch: 'e2e/suites/01-config-master.setup.ts',
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
-    {
-      name: `config-fase1-firefox`,
-      testMatch: 'e2e/suites/01-config-master.setup.ts',
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
+    ...(includeSetupProjects
+      ? [
+          {
+            name: PROJECT_NAMES.CONFIG_SMOKE_CHROMIUM,
+            testMatch: 'e2e/modules/00-config/config/**/*.test.ts',
+            use: {
+              ...devices['Desktop Chrome'],
+              storageState: runtime.output.storageStatePath,
+            },
+            dependencies: dependencies[PROJECT_NAMES.CONFIG_SMOKE_CHROMIUM],
+          },
+          {
+            name: PROJECT_NAMES.CONFIG_SMOKE_FIREFOX,
+            testMatch: 'e2e/modules/00-config/config/**/*.test.ts',
+            use: {
+              ...devices['Desktop Firefox'],
+              storageState: runtime.output.storageStatePath,
+            },
+            dependencies: dependencies[PROJECT_NAMES.CONFIG_SMOKE_FIREFOX],
+          },
+          {
+            name: PROJECT_NAMES.CONFIG_PHASE1_CHROMIUM,
+            testMatch: 'e2e/suites/01-config-master.setup.ts',
+            use: {
+              ...devices['Desktop Chrome'],
+              storageState: runtime.output.storageStatePath,
+            },
+            dependencies: dependencies[PROJECT_NAMES.CONFIG_PHASE1_CHROMIUM],
+          },
+          {
+            name: PROJECT_NAMES.CONFIG_PHASE1_FIREFOX,
+            testMatch: 'e2e/suites/01-config-master.setup.ts',
+            use: {
+              ...devices['Desktop Firefox'],
+              storageState: runtime.output.storageStatePath,
+            },
+            dependencies: dependencies[PROJECT_NAMES.CONFIG_PHASE1_FIREFOX],
+          },
+          {
+            name: PROJECT_NAMES.CONFIG_PHASE2_CHROMIUM,
+            testMatch: 'e2e/suites/02-carga-master.setup.ts',
+            use: {
+              ...devices['Desktop Chrome'],
+              storageState: runtime.output.storageStatePath,
+            },
+            dependencies: dependencies[PROJECT_NAMES.CONFIG_PHASE2_CHROMIUM],
+          },
+          {
+            name: PROJECT_NAMES.CONFIG_PHASE2_FIREFOX,
+            testMatch: 'e2e/suites/02-carga-master.setup.ts',
+            use: {
+              ...devices['Desktop Firefox'],
+              storageState: runtime.output.storageStatePath,
+            },
+            dependencies: dependencies[PROJECT_NAMES.CONFIG_PHASE2_FIREFOX],
+          },
+          {
+            name: PROJECT_NAMES.BASE_ENTITIES_CHROMIUM,
+            testMatch: 'e2e/suites/base-entities.setup.ts',
+            use: devices['Desktop Chrome'],
+            dependencies: dependencies[PROJECT_NAMES.BASE_ENTITIES_CHROMIUM],
+          },
+          {
+            name: PROJECT_NAMES.BASE_ENTITIES_FIREFOX,
+            testMatch: 'e2e/suites/base-entities.setup.ts',
+            use: devices['Desktop Firefox'],
+            dependencies: dependencies[PROJECT_NAMES.BASE_ENTITIES_FIREFOX],
+          },
+        ]
+      : []),
 
-    // --- CONFIGURACIÓN SETUP: Fase 2 (Carga) ---
     {
-      name: `config-fase2-chromium`,
-      testMatch: 'e2e/suites/02-carga-master.setup.ts',
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
-    {
-      name: `config-fase2-firefox`,
-      testMatch: 'e2e/suites/02-carga-master.setup.ts',
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
-
-    // --- AUTH UTILS ---
-    {
-      name: 'auth-tests',
+      name: PROJECT_NAMES.AUTH_TESTS,
       testMatch: 'e2e/auth/**/*.test.ts',
       use: devices['Desktop Chrome'],
     },
 
-    // --- ENTIDADES BASE SETUP ---
     {
-      name: 'base-entities-chromium',
-      testMatch: 'e2e/suites/base-entities.setup.ts',
-      use: devices['Desktop Chrome'],
-      dependencies: ['Autorización'],
-    },
-    {
-      name: 'base-entities-firefox',
-      testMatch: 'e2e/suites/base-entities.setup.ts',
-      use: devices['Desktop Firefox'],
-      dependencies: ['Autorización'],
-    },
-
-    // --- MAIN TEST PROJECTS ---
-    {
-      name: `chromium-${envName}`,
-      testMatch: [
-        'e2e/modules/**/*.test.ts',
-        'e2e/suites/**/*.test.ts',
-      ],
-      testIgnore: [
-        '**/suites/*.setup.ts',
-        '**/modules/00-config/config/**',
-      ],
+      name: mainProjects.chromium,
+      testMatch: ['e2e/modules/**/*.test.ts', 'e2e/suites/**/*.test.ts'],
+      testIgnore: ['**/suites/*.setup.ts', '**/modules/00-config/config/**'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: `playwright/.auth/user-${envName}.json`,
+        storageState: runtime.output.storageStatePath,
         launchOptions: {
-          args: ['--disable-dev-shm-usage', '--no-sandbox']
-        }
+          args: ['--disable-dev-shm-usage', '--no-sandbox'],
+        },
       },
-      dependencies: ['Autorización'],
+      dependencies: dependencies[mainProjects.chromium],
     },
     {
-      name: `firefox-${envName}`,
-      testMatch: [
-        'e2e/modules/**/*.test.ts',
-        'e2e/suites/**/*.test.ts',
-      ],
-      testIgnore: [
-        '**/suites/*.setup.ts',
-        '**/modules/00-config/config/**',
-      ],
+      name: mainProjects.firefox,
+      testMatch: ['e2e/modules/**/*.test.ts', 'e2e/suites/**/*.test.ts'],
+      testIgnore: ['**/suites/*.setup.ts', '**/modules/00-config/config/**'],
       use: {
         ...devices['Desktop Firefox'],
-        storageState: `playwright/.auth/user-${envName}.json`,
+        storageState: runtime.output.storageStatePath,
       },
-      dependencies: ['Autorización'],
+      dependencies: dependencies[mainProjects.firefox],
     },
-
-    // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY
-    // Se mantiene comentado para referencia futura o debugging local puntual.
-    // {
-    //   name: 'webkit',
-    //   testMatch: [
-    //     'e2e/modules/**/*.test.ts',
-    //     'e2e/suites/**/*.test.ts',
-    //   ],
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     storageState: `playwright/.auth/user-${envName}.json`,
-    //   },
-    //   dependencies: ['setup'],
-    // },
   ],
 });

@@ -2,11 +2,12 @@
 import { test as setup, expect } from '@playwright/test';
 import { LoginPage } from '../../src/modules/auth/pages/LoginPage.js';
 import { getTestUser } from '../../src/config/credentials.js';
+import { getStorageStatePath, resolveEnvironment } from '../../src/config/playwright-orchestration.js';
 import path from 'path';
 import fs from 'fs';
 
-const envName = (process.env.ENV || 'QA').toLowerCase();
-const authFile = path.resolve(`playwright/.auth/user-${envName}.json`);
+const environment = resolveEnvironment(process.env.ENV);
+const authFile = path.resolve(getStorageStatePath(environment));
 
 setup('authenticate', async ({ page }) => {
     // Ensure the auth directory exists
