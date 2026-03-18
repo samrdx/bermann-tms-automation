@@ -38,13 +38,23 @@ jobs:
         env:
           ENV: QA
           CI: true
+          LEGACY_DATA_SOURCE: entities
+          LEGACY_RUN_ID: nightly-qa-${{ github.run_id }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
         continue-on-error: true
         run: |
+          rm -f "playwright/.data/legacy-entities-data-chromium-qa-${LEGACY_RUN_ID}.json"
+          rm -f "playwright/.data/legacy-entities-data-firefox-qa-${LEGACY_RUN_ID}.json"
+
+          # Fase 1 (seed): ejecutar transportista/cliente primero para poblar data compartida
           npx playwright test \
-            tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts \
             tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts \
+            tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts \
+            --workers=1 --trace on
+
+          # Fase 2 (dependientes): usa seededTransportista/seededCliente persistidos en Fase 1
+          npx playwright test \
             tests/e2e/modules/01-entidades/conductor/conductor-crear.test.ts \
             tests/e2e/modules/01-entidades/vehiculos/vehiculo-crear.test.ts \
             tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
@@ -73,13 +83,23 @@ jobs:
         env:
           ENV: DEMO
           CI: true
+          LEGACY_DATA_SOURCE: entities
+          LEGACY_RUN_ID: nightly-demo-${{ github.run_id }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
         continue-on-error: true
         run: |
+          rm -f "playwright/.data/legacy-entities-data-chromium-demo-${LEGACY_RUN_ID}.json"
+          rm -f "playwright/.data/legacy-entities-data-firefox-demo-${LEGACY_RUN_ID}.json"
+
+          # Fase 1 (seed): ejecutar transportista/cliente primero para poblar data compartida
           npx playwright test \
-            tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts \
             tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts \
+            tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts \
+            --workers=1 --trace on
+
+          # Fase 2 (dependientes): usa seededTransportista/seededCliente persistidos en Fase 1
+          npx playwright test \
             tests/e2e/modules/01-entidades/conductor/conductor-crear.test.ts \
             tests/e2e/modules/01-entidades/vehiculos/vehiculo-crear.test.ts \
             tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \

@@ -10,7 +10,8 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Contract Creation - Tipo Costo (Seeded Transportista)
  *
  * Prerequisites:
- *   npm run test:legacy:setup  →  seededTransportista in last-run-data-{browser}.json
+ *   LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
+ *   LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
  *
  * Anti-false-positive strategy:
  *   1. Fill header → save → assert redirect to /contrato/editar/ID
@@ -32,7 +33,7 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
     // ---------------------------------------------------------------
     // PHASE 1: Load seeded data
     // ---------------------------------------------------------------
-    const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+    const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
     if (!fs.existsSync(dataPath)) {
       throw new Error(`Archivo con data no encontrado: ${dataPath}. Asegurate de que transportistas-crear.test.ts se haya ejecutado primero.`);
     }
@@ -40,7 +41,7 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
 
     const transportista = operationalData.seededTransportista || operationalData.transportista;
     if (!transportista?.nombre) {
-      throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run: npm run test:qa:legacy:setup or test:qa:entity:transportista`);
+      throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly`);
     }
     const transportistaNombre = transportista.nombre as string;
     logger.info(`📦 Transportista: "${transportistaNombre}" (ID: ${transportista.id})`);
@@ -190,3 +191,4 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
     logger.info('='.repeat(80));
   });
 });
+

@@ -9,9 +9,9 @@ import { allure } from 'allure-playwright';
  * Operaciones - Monitoreo - Finalizar Viaje (Legacy)
  * 
  * Prerequisites:
- *   1. npm run test:legacy:setup
- *   2. npm run test:legacy:planificar
- *   3. npm run test:legacy:asignar
+ *   1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
+ *      o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
+ *   2. Correr viajes-planificar y viajes-asignar
  */
 test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
     test.setTimeout(120000);
@@ -29,7 +29,7 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
 
         // PHASE 1: Load Data
         logger.info('Fase 1: Cargando datos del JSON del trabajador...');
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(`Archivo de datos no encontrado en ${dataPath}. Por favor, ejecute los prerrequisitos.`);
@@ -39,7 +39,7 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
         const nroViaje = operationalData.viaje?.nroViaje;
 
         if (!nroViaje) {
-            throw new Error('❌ Missing: viaje.nroViaje in JSON. Run: npm run test:legacy:planificar/asignar');
+            throw new Error('❌ Missing: viaje.nroViaje in JSON. Run planificar/asignar first in the selected legacy data source');
         }
 
         logger.info(`✅ Viaje cargado: ${nroViaje}`);

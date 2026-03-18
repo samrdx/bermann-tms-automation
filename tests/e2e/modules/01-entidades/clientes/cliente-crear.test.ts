@@ -102,7 +102,7 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
       await allure.parameter('Cliente ID', String(createdCliente.id ?? 'N/A'));
 
       // Save data to worker-specific JSON
-      const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+      const dataPath = DataPathHelper.getLegacyEntityDataPath(testInfo);
       let currentData: any = {};
       if (fs.existsSync(dataPath)) {
         currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
@@ -115,3 +115,4 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
     });
   });
 });
+
