@@ -131,7 +131,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: [smoke-auth]
-    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.environment == matrix.environment }}
     strategy:
       fail-fast: false
       matrix:
@@ -165,8 +164,20 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve matrix execution
+        id: matrix_gate
+        shell: bash
+        run: |
+          RUN_SUITE="true"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.environment }}" != "${{ matrix.environment }}" ]]; then
+            RUN_SUITE="false"
+            echo "Skipping matrix environment ${{ matrix.environment }} for dispatch input ${{ github.event.inputs.environment }}."
+          fi
+          echo "run_suite=$RUN_SUITE" >> "$GITHUB_OUTPUT"
+
       - name: Resolve atomic environment metadata
         id: atomic_meta
+        if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
         shell: bash
         run: |
           ENV_UPPER="${{ matrix.environment }}"
@@ -177,10 +188,12 @@ jobs:
           echo "report_dir=allure-report-$ENV_LOWER" >> "$GITHUB_OUTPUT"
 
       - name: Install Playwright browsers
+        if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
         run: npx playwright install --with-deps chromium firefox
 
       - name: Run Atomic E2E (${{ matrix.environment }})
         id: atomic_e2e
+        if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
         env:
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
@@ -190,12 +203,12 @@ jobs:
         run: npx playwright test tests/e2e/suites/prefactura-crear-e2e.test.ts --trace on
 
       - name: Install Allure Commandline
-        if: always()
+        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
         run: npm install -g allure-commandline
 
       - name: Generate Allure Report (${{ matrix.environment }})
         id: atomic_allure_generate
-        if: always()
+        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
         shell: bash
         run: |
           RESULTS_DIR="${{ steps.atomic_meta.outputs.results_dir }}"
@@ -211,7 +224,7 @@ jobs:
 
       - name: Check Allure Report Directory (${{ matrix.environment }})
         id: atomic_report_check
-        if: always()
+        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
         shell: bash
         run: |
           REPORT_DIR="${{ steps.atomic_meta.outputs.report_dir }}"
@@ -224,7 +237,7 @@ jobs:
           fi
 
       - name: Upload Allure Report (${{ matrix.environment }})
-        if: always()
+        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: allure-report-${{ github.sha }}-${{ steps.atomic_meta.outputs.env_lower }}
@@ -234,7 +247,7 @@ jobs:
 
       - name: Final Atomic Gate (${{ matrix.environment }})
         id: final_atomic_gate
-        if: always()
+        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
         shell: bash
         run: |
           FAIL=0
