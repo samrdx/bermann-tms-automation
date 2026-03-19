@@ -9,12 +9,13 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Step 6: Planificar Viaje (Trip Planning)
  *
  * Prerequisites:
- * 1. Run base-entities.setup.ts to generate last-run-data.json
+ * 1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
+ *    o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
  * 2. Run contrato-crear.test.ts (Step 5) to create Transportista Contract
  * 3. Run contrato2cliente-crear.test.ts (Step 5.5) to create Cliente Contract
  *
  * This test:
- * - Loads existing entity data from last-run-data.json
+ * - Loads existing entity data from the selected legacy data source
  * - Uses dynamic cliente from JSON
  * - Creates a new viaje (trip) planning record
  * - Verifies trip appears in /viajes/asignar
@@ -41,13 +42,13 @@ test.describe('[V01] Viajes - Planificar', () => {
     // STEP 1: Load JSON Data
     // =================================================================
     logger.info('Cargando datos de entidades existentes del JSON específico del worker...');
-    const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+    const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
 
     if (!fs.existsSync(dataPath)) {
       throw new Error(
         'Archivo de datos específico del worker no encontrado!\n' +
         `Expected: ${dataPath}\n` +
-        'Please run base entities setup first: npm run test:base'
+        'Please run seed flow first and set LEGACY_DATA_SOURCE=base or LEGACY_DATA_SOURCE=entities.'
       );
     }
 
@@ -59,7 +60,7 @@ test.describe('[V01] Viajes - Planificar', () => {
     if (!clienteSource?.nombre) {
       throw new Error(
         '❌ Entidad no encontrada: Cliente.\n' +
-        'Run base entities setup OR run: npm run test:qa:entity:cliente'
+        'Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly'
       );
     }
 
@@ -87,7 +88,7 @@ test.describe('[V01] Viajes - Planificar', () => {
     // STEP 2: environment Configuration
     // =================================================================
     const isDemo = process.env.ENV === 'DEMO';
-    const config = {
+    const defaults = {
       tipoOperacion: isDemo ? 'Distribución' : 'defecto',
       tipoServicio: isDemo ? 'Lcl' : 'defecto',
       tipoViaje: isDemo ? 'DIRECTO' : 'Normal',
@@ -96,6 +97,26 @@ test.describe('[V01] Viajes - Planificar', () => {
       ruta: isDemo ? '47' : '( MINEDUC) BSF_PUDAHUEL-CXP_ANF',
       origenManual: isDemo ? '233_CD SuperZoo_Quilicura' : '405_LA FARFANA_Pudahuel',
       destinoManual: isDemo ? 'Divisa' : 'CXP ANTOFAGASTA'
+    };
+
+    const setupConfigPath = DataPathHelper.getSetupConfigDataPath(testInfo);
+    let setupConfig: any = {};
+    if (fs.existsSync(setupConfigPath)) {
+      setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, 'utf-8'));
+      logger.info(`📦 Setup config detectado: ${setupConfigPath}`);
+    } else {
+      logger.warn(`⚠️ Setup config no encontrado en ${setupConfigPath}. Se usarán defaults.`);
+    }
+
+    const config = {
+      tipoOperacion: setupConfig?.seededTipoOperacion?.nombre || defaults.tipoOperacion,
+      tipoServicio: setupConfig?.seededTipoServicio?.nombre || defaults.tipoServicio,
+      tipoViaje: defaults.tipoViaje,
+      unidadNegocio: setupConfig?.unidadNegocio?.nombre || defaults.unidadNegocio,
+      codigoCarga: setupConfig?.seededCarga?.codigo || defaults.codigoCarga,
+      ruta: setupConfig?.ruta?.nro || setupConfig?.ruta?.nombre || defaults.ruta,
+      origenManual: setupConfig?.ruta?.origen || defaults.origenManual,
+      destinoManual: setupConfig?.ruta?.destino || defaults.destinoManual
     };
 
     logger.info(`Environment: ${process.env.ENV || 'QA'}`);
@@ -291,3 +312,4 @@ test.describe('[V01] Viajes - Planificar', () => {
     logger.info('='.repeat(80));
   });
 });
+

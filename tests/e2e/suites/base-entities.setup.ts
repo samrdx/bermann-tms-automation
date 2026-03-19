@@ -15,7 +15,7 @@ import { ConductorHelper } from '../../api-helpers/ConductorHelper.js';
 /**
  * Base Operational Suite - Steps 1-4
  * Creates foundational entities: Transportista, Cliente, Vehiculo, Conductor
- * Exports data to worker-specific JSON (last-run-data-worker-N.json) for parallel execution
+ * Exports data to worker-specific JSON (legacy-base-entities-data-{browser}-{env}.json)
  * Target: Complete in under 90 seconds (increased from 60s for stability)
  */
 test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can take significantly longer due to strict actionability checks triggering JS fallbacks
@@ -32,7 +32,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         logger.info('='.repeat(80));
 
         // Clean stale data file for this worker to ensure fresh state
-        const staleDataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const staleDataPath = DataPathHelper.getLegacyBaseDataPath(testInfo);
         if (fs.existsSync(staleDataPath)) {
             fs.unlinkSync(staleDataPath);
             logger.info(`🗑️ Archivo de datos antiguo eliminado: ${staleDataPath}`);
@@ -160,7 +160,7 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         operationalData['workerIndex'] = workerIndex;
         operationalData['projectName'] = projectName;
 
-        const outputPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const outputPath = DataPathHelper.getLegacyBaseDataPath(testInfo);
         fs.writeFileSync(outputPath, JSON.stringify(operationalData, null, 2), 'utf-8');
 
         logger.info('='.repeat(80));
@@ -200,3 +200,4 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         }, null, 2), 'application/json');
     });
 });
+

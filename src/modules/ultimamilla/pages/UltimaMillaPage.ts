@@ -54,7 +54,7 @@ export class UltimaMillaFormPage extends BasePage {
 
     // 3. NAVIGATION
     async navigate(): Promise<void> {
-        await this.page.goto('https://moveontruckqa.bermanntms.cl/order/crear');
+        await this.page.goto('/order/crear');
         await this.page.waitForLoadState('domcontentloaded');
     }
 

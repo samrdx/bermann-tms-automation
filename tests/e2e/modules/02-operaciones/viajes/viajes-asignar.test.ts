@@ -10,8 +10,9 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Step 6.5: Asignar Viaje (Legacy - uses seeded data from JSON)
  *
  * Prerequisites (run in order):
- *   1. npm run test:legacy:setup      → seededTransportista, vehiculo, conductor
- *   2. npm run test:legacy:planificar → viaje.nroViaje
+ *   1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
+ *      o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
+ *   2. Correr viajes-planificar para poblar viaje.nroViaje
  *
  * Flow:
  *   1. Navigate to /viajes/asignar
@@ -39,12 +40,12 @@ test.describe('[V02] Viajes - Asignar', () => {
         // PHASE 1: Load JSON Data
         // =================================================================
         logger.info('Fase 1: Cargando datos del JSON...');
-        const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
+        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
 
         if (!fs.existsSync(dataPath)) {
             throw new Error(
                 `Archivo de datos no encontrado!\nExpected: ${dataPath}\n` +
-                'Please run: npm run test:legacy:setup'
+                'Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first'
             );
         }
 
@@ -52,23 +53,23 @@ test.describe('[V02] Viajes - Asignar', () => {
 
         const seededTransportista = operationalData.seededTransportista;
         if (!seededTransportista?.nombre) {
-            throw new Error('❌ Missing: seededTransportista. Run: npm run test:legacy:setup');
+            throw new Error('❌ Missing: seededTransportista. Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first');
         }
 
         // Prioritize seededVehiculo/seededConductor associated with seededTransportista
         const vehiculo = operationalData.seededVehiculo || operationalData.vehiculo;
         if (!vehiculo?.patente) {
-            throw new Error('❌ Missing: vehiculo/seededVehiculo. Run: npm run test:legacy:setup');
+            throw new Error('❌ Missing: vehiculo/seededVehiculo. Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first');
         }
 
         const conductor = operationalData.seededConductor || operationalData.conductor;
         if (!conductor?.nombre) {
-            throw new Error('❌ Missing: conductor/seededConductor. Run: npm run test:legacy:setup');
+            throw new Error('❌ Missing: conductor/seededConductor. Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first');
         }
 
         const viaje = operationalData.viaje;
         if (!viaje?.nroViaje) {
-            throw new Error('❌ Missing: viaje.nroViaje. Run: npm run test:demo:legacy:planificar (Demo) or test:qa:legacy:planificar (QA)');
+            throw new Error('❌ Missing: viaje.nroViaje. Run planificar first in the selected legacy data source');
         }
 
         const transNombre = seededTransportista.nombre as string;
