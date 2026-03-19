@@ -1,18 +1,12 @@
 import { test, expect } from '../../../../src/fixtures/base.js';
 import { createLogger } from '../../../../src/utils/logger.js';
-import { isQaMode } from '../../../../src/utils/env-helper.js';
-import { getTestUser } from '../../../../src/config/credentials.js';
-import { LoginPage } from '../../../../src/modules/auth/pages/LoginPage.js';
 import { DataPathHelper } from '../../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 
 const logger = createLogger('UltimaMilla-CrearPedido');
 
 test.describe('Última Milla - Creación de Pedido', () => {
-    // Test exclusivo para QA
-    test.skip(!isQaMode(), 'Este test es exclusivo para el ambiente de QA por configuración de negocio.');
-
-    test.setTimeout(90000); // 90 segundos para pruebas E2E completas
+    // Smoke E2E para QA y DEMO
 
     test.setTimeout(90000); // 90 segundos para pruebas E2E completas
 
