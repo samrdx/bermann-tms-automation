@@ -1,0 +1,26 @@
+2026-03-19 05:12:19 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:12:19 [INFO]: ✅ Cargado seededTransportista: Demo_tra_andes_498 (ID: 319)
+2026-03-19 05:12:19 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-19 05:12:21 [INFO]: 📝 Completando formulario de conductor para: Demo_con_francisco Demo_con_soto
+2026-03-19 05:12:21 [INFO]: [ConductorFormPage] Llenando usuario: wfjdzm65
+2026-03-19 05:12:22 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-19 05:12:22 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_francisco
+2026-03-19 05:12:22 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_soto
+2026-03-19 05:12:22 [INFO]: [ConductorFormPage] Llenando documento: 14.322.643-3
+2026-03-19 05:12:22 [INFO]: [BasePage] Ingresando RUT con verificación: [14.322.643-3] en #conductores-documento
+2026-03-19 05:12:23 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 14.322.643-3
+2026-03-19 05:12:23 [INFO]: [ConductorFormPage] Llenando telefono: +56977449088
+2026-03-19 05:12:23 [INFO]: [ConductorFormPage] Llenando email: demo_con_franciscodemo_con_soto@gmail.com
+2026-03-19 05:12:23 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-19 05:12:25 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-19 05:12:25 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_andes_498]
+2026-03-19 05:12:26 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-19 05:12:28 [INFO]: ✅ Conductor [Demo_con_francisco Demo_con_soto] guardado exitosamente
+2026-03-19 05:12:28 [INFO]: ✅ seededConductor guardado: Demo_con_francisco Demo_con_soto
+2026-03-19 05:12:28 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_francisco Demo_con_soto] | Asociado: Demo_tra_andes_498
+====================================================================================================

@@ -1,0 +1,31 @@
+2026-03-19 04:56:37 [INFO]: ENTORNO: QA 🧪
+2026-03-19 04:56:37 [INFO]: ================================================================================
+2026-03-19 04:56:37 [INFO]: 🚀 Iniciando prueba de creación de Contrato Tipo Costo (Seeded Transportista)
+2026-03-19 04:56:37 [INFO]: ================================================================================
+2026-03-19 04:56:37 [INFO]: 📦 Transportista: "Qa_tra_rutas_516" (ID: 259)
+2026-03-19 04:56:37 [INFO]: 📝 Nro Contrato: 197576
+2026-03-19 04:56:37 [INFO]: Fase 2: Completando el encabezado del contrato...
+2026-03-19 04:56:37 [INFO]: [ContratosFormPage] 📝 Completando información básica del contrato (Fase 1) - Tipo: Costo
+2026-03-19 04:56:37 [INFO]: [ContratosFormPage] Navegando a la página de creación de contrato: /contrato/crear
+2026-03-19 04:56:40 [INFO]: [ContratosFormPage] ✅ Página de creación de contrato cargada y campo Nro Contrato visible
+2026-03-19 04:56:40 [INFO]: [ContratosFormPage] Completando Nro Contrato: 197576
+2026-03-19 04:56:40 [INFO]: [ContratosFormPage] 🔽 Seleccionando Tipo Contrato = Costo...
+2026-03-19 04:56:47 [WARN]: [ContratosFormPage] ⚠️ ⚠️ fallback: clicking option via JS for "Costo"
+2026-03-19 04:56:50 [INFO]: [ContratosFormPage] ✅ Tipo Costo seleccionado
+2026-03-19 04:56:50 [INFO]: [ContratosFormPage] 🔽 Seleccionando transportista: "Qa_tra_rutas_516"...
+2026-03-19 04:56:51 [INFO]: [ContratosFormPage] 🔍 El dropdown de transportista tiene caja de búsqueda — usando búsqueda
+2026-03-19 04:56:52 [INFO]: [ContratosFormPage] ✅ Transportista seleccionado
+2026-03-19 04:56:52 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier fondo de modal...
+2026-03-19 04:56:53 [INFO]: [ContratosFormPage] 💾 Guardando encabezado básico del contrato...
+2026-03-19 04:57:23 [ERROR]: [ContratosFormPage] ❌ FALLO CRÍTICO en fillBasicContractInfo page.waitForURL: Timeout 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+page.waitForURL: Timeout 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at ContratosFormPage.fillBasicContractInfo (/home/runner/work/bermann-tms-automation/bermann-tms-automation/src/modules/contracts/pages/ContratosPage.ts:219:23)
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts:70:26
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts:65:5
+2026-03-19 04:57:23 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/fill-basic-contract-error-1773896243454.png 📸

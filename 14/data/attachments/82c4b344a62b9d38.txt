@@ -1,0 +1,42 @@
+2026-03-19 05:10:50 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:10:50 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-19 05:10:50 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-19 05:10:53 [INFO]: ✅ Navegación correcta
+2026-03-19 05:10:53 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-19 05:10:53 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_central_886
+2026-03-19 05:10:53 [INFO]: [ClienteFormPage] Completando RUT: 93475394-1
+2026-03-19 05:10:53 [INFO]: [BasePage] Ingresando RUT con verificación: [93475394-1] en #clientes-rut
+2026-03-19 05:10:54 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 93.475.394-1
+2026-03-19 05:10:54 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_central spa_886
+2026-03-19 05:10:54 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-19 05:10:55 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-19 05:10:55 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-19 05:10:55 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-19 05:10:56 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Antofagasta
+2026-03-19 05:10:58 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Tocopilla
+2026-03-19 05:10:59 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: María Elena
+2026-03-19 05:10:59 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Antofagasta → Tocopilla → María Elena
+2026-03-19 05:10:59 [INFO]: [ClienteFormPage] Completando calle: Calle Ahumada
+2026-03-19 05:10:59 [INFO]: [ClienteFormPage] Completando altura: 626
+2026-03-19 05:10:59 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-19 05:10:59 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 840/840
+2026-03-19 05:11:00 [INFO]: ✅ Formulario Completado
+2026-03-19 05:11:00 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-19 05:11:00 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-19 05:11:05 [INFO]: ✅ Guardar iniciado
+2026-03-19 05:11:05 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-19 05:11:07 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-19 05:11:07 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-19 05:11:07 [INFO]: 🔍 Buscando por RUT: 93475394-1 (limpio: 934753941)
+2026-03-19 05:11:07 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-19 05:11:09 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-19 05:11:09 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 305
+2026-03-19 05:11:09 [INFO]: ✅ Cliente [Demo_cli_central_886] ID: 305 identificado exitosamente
+2026-03-19 05:11:09 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-demo.json
+2026-03-19 05:11:09 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_central_886]         | ID: 305
+====================================================================================================

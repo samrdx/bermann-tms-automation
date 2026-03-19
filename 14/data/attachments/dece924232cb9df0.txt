@@ -1,0 +1,21 @@
+2026-03-19 04:53:50 [INFO]: ENTORNO: QA 🧪
+2026-03-19 04:53:50 [INFO]: ✅ Transportista seeded cargado: Qa_tra_horizonte_914 (ID: 443)
+2026-03-19 04:53:50 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-19 04:53:52 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_horizonte_914
+2026-03-19 04:53:52 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_MWDM21
+2026-03-19 04:53:52 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_MWDM21
+2026-03-19 04:53:53 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_horizonte_914
+2026-03-19 04:53:55 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_horizonte_914" seleccionado
+2026-03-19 04:53:55 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-19 04:53:56 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-19 04:53:57 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-19 04:53:57 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-19 04:53:57 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-19 04:54:02 [INFO]: ✅ Vehículo [Qa_veh_MWDM21] guardado exitosamente
+2026-03-19 04:54:02 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_MWDM21
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🚚 Vehiculo      : [Qa_veh_MWDM21]                | Patente: Qa_veh_MWDM21 | Asociado: Qa_tra_horizonte_914
+====================================================================================================

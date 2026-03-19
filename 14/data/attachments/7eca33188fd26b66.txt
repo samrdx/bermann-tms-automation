@@ -1,0 +1,42 @@
+2026-03-19 04:52:58 [INFO]: ENTORNO: QA 🧪
+2026-03-19 04:52:58 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-19 04:52:58 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-19 04:53:00 [INFO]: ✅ Navegación correcta
+2026-03-19 04:53:00 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-19 04:53:00 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_central_655
+2026-03-19 04:53:00 [INFO]: [ClienteFormPage] Completando RUT: 21240132-3
+2026-03-19 04:53:00 [INFO]: [BasePage] Ingresando RUT con verificación: [21240132-3] en #clientes-rut
+2026-03-19 04:53:02 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 21.240.132-3
+2026-03-19 04:53:02 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_central spa_655
+2026-03-19 04:53:02 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-19 04:53:03 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-19 04:53:03 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-19 04:53:03 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-19 04:53:04 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de los Rios
+2026-03-19 04:53:05 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Ranco
+2026-03-19 04:53:07 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Futrono
+2026-03-19 04:53:07 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de los Rios → Ranco → Futrono
+2026-03-19 04:53:07 [INFO]: [ClienteFormPage] Completando calle: Av. Pajaritos
+2026-03-19 04:53:07 [INFO]: [ClienteFormPage] Completando altura: 785
+2026-03-19 04:53:07 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-19 04:53:07 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-19 04:53:07 [INFO]: ✅ Formulario Completado
+2026-03-19 04:53:07 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-19 04:53:07 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-19 04:53:12 [INFO]: ✅ Guardar iniciado
+2026-03-19 04:53:12 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-19 04:53:14 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-19 04:53:14 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-19 04:53:14 [INFO]: 🔍 Buscando por RUT: 21240132-3 (limpio: 212401323)
+2026-03-19 04:53:14 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-19 04:53:16 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-19 04:53:16 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 369
+2026-03-19 04:53:16 [INFO]: ✅ Cliente [Qa_cli_central_655] ID: 369 identificado exitosamente
+2026-03-19 04:53:16 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-qa.json
+2026-03-19 04:53:16 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_central_655]           | ID: 369
+====================================================================================================

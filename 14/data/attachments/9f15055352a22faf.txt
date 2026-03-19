@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_rutas_853]           | ID: 322
+🏢 Cliente       : [Demo_cli_central_792]         | ID: 308
+🚚 Vehiculo      : [Demo_veh_ZQBP77]              | Patente: Demo_veh_ZQBP77 | Asociado: Demo_tra_rutas_853
+👤 Conductor     : [Demo_con_juan Demo_con_pérez] | Asociado: Demo_tra_rutas_853
+🏭 Transportista : [Demo_tra_rutas_853]          
+🏢 Cliente       : [Demo_cli_central_792]        
+🔹 Contrato Venta: [934855]                      
+🔹 Contrato Costo: [572605]                      
+🎫 Viaje         : [875898]                       | Asociado: Demo_cli_central_792 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 136 | Cliente: Demo_cli_central_792
+====================================================================================================

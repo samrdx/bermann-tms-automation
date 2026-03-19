@@ -1,0 +1,72 @@
+2026-03-19 05:16:15 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:16:15 [INFO]: ================================================================================
+2026-03-19 05:16:15 [INFO]: Iniciando Paso 6: Planificar Viaje
+2026-03-19 05:16:15 [INFO]: ================================================================================
+2026-03-19 05:16:15 [INFO]: Cargando datos de entidades existentes del JSON específico del worker...
+2026-03-19 05:16:15 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-19 05:16:15 [INFO]: Entidades cargadas:
+2026-03-19 05:16:15 [INFO]:    Cliente source: seededCliente ✅
+2026-03-19 05:16:15 [INFO]:    Cliente: Demo_cli_central_886
+2026-03-19 05:16:15 [INFO]: 
+2026-03-19 05:16:15 [INFO]: Environment: DEMO
+2026-03-19 05:16:15 [INFO]: Configuration: {
+  "tipoOperacion": "Distribución",
+  "tipoServicio": "Lcl",
+  "tipoViaje": "DIRECTO",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "CONTENEDOR DRY",
+  "ruta": "47",
+  "origenManual": "233_CD SuperZoo_Quilicura",
+  "destinoManual": "Divisa"
+}
+2026-03-19 05:16:15 [INFO]: Fase 1: Navegar a Planificar Viajes
+2026-03-19 05:16:15 [INFO]: [PlanificarViajesPage] Navegando a la página de Planificar Viajes
+2026-03-19 05:16:19 [INFO]: Navegación exitosa
+2026-03-19 05:16:19 [INFO]: Fase 2: Completar formulario de viaje
+2026-03-19 05:16:19 [INFO]: [PlanificarViajesPage] Completando Nro Viaje: 38460
+2026-03-19 05:16:19 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Operacion: [Distribución]
+2026-03-19 05:16:22 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Servicio: [Lcl]
+2026-03-19 05:16:25 [INFO]: Seleccionando Cliente: Demo_cli_central spa_886
+2026-03-19 05:16:25 [INFO]: [PlanificarViajesPage] Seleccionando Cliente: [Demo_cli_central spa_886]
+2026-03-19 05:16:29 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Viaje: [DIRECTO]
+2026-03-19 05:16:33 [INFO]: [PlanificarViajesPage] Seleccionando Unidad Negocio: [Defecto]
+2026-03-19 05:16:37 [INFO]: [PlanificarViajesPage] Seleccionando Codigo Carga: [CONTENEDOR DRY]
+2026-03-19 05:16:37 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-19 05:16:41 [INFO]: Intentando agregar Ruta: 47...
+2026-03-19 05:16:41 [INFO]: [PlanificarViajesPage] Añadiendo ruta: 47
+2026-03-19 05:16:45 [INFO]: [PlanificarViajesPage] Ruta [47] encontrada en la fila 1
+2026-03-19 05:16:45 [INFO]: [PlanificarViajesPage] Esperando a que Origen/Destino se completen...
+2026-03-19 05:16:45 [INFO]: Formulario completado
+2026-03-19 05:16:45 [INFO]: Fase 3: Guardar Viaje
+2026-03-19 05:16:45 [INFO]: [PlanificarViajesPage] Haciendo clic en Guardar...
+2026-03-19 05:16:45 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-19 05:16:48 [INFO]: URL post-guardado: https://demo.bermanntms.cl/viajes/crear
+2026-03-19 05:16:48 [WARN]: ⚠️ ⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.
+2026-03-19 05:16:48 [INFO]: Boton guardar clickeado y navegacion completada
+2026-03-19 05:16:48 [INFO]: Fase 4: Verificación
+2026-03-19 05:16:48 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-19 05:16:50 [INFO]: ✅ ID interno de la grilla capturado en Demo: 6710
+2026-03-19 05:16:50 [INFO]: Buscando en la grilla de Asignar usando: 6710
+2026-03-19 05:16:50 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 6710 en la grilla de Asignación...
+2026-03-19 05:16:55 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 6710
+2026-03-19 05:16:55 [INFO]: ✅ Viaje encontrado en /viajes/asignar usando búsqueda: 6710
+2026-03-19 05:16:55 [INFO]: ✅ ID interno de la grilla guardado en JSON: viaje.id = 6710
+2026-03-19 05:16:55 [INFO]: Actualizando JSON del worker con la información del viaje...
+2026-03-19 05:16:55 [INFO]: Saved viaje.nroViaje: 38460
+2026-03-19 05:16:55 [INFO]: ================================================================================
+2026-03-19 05:16:55 [INFO]: PASO 6: ¡PLANIFICAR VIAJE COMPLETADO!
+2026-03-19 05:16:55 [INFO]: ================================================================================
+2026-03-19 05:16:55 [INFO]: Tiempo de ejecución: 40.14s
+2026-03-19 05:16:55 [INFO]: 
+2026-03-19 05:16:55 [INFO]: Detalles del viaje:
+2026-03-19 05:16:55 [INFO]:    Nro Viaje: 38460
+2026-03-19 05:16:55 [INFO]:    Cliente: Demo_cli_central spa_886
+2026-03-19 05:16:55 [INFO]:    Ruta: 47
+2026-03-19 05:16:55 [INFO]:    Status: PLANIFICADO
+2026-03-19 05:16:55 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🎫 Viaje         : [38460]                        | ID: 6710 | Asociado: Demo_cli_central spa_886 | Estado: PLANIFICADO
+====================================================================================================

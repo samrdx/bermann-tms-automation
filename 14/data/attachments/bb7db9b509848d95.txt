@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_horizonte_934]         | ID: 445
+🏢 Cliente       : [Qa_cli_central_441]           | ID: 371
+🚚 Vehiculo      : [Qa_veh_WFNN48]                | Patente: Qa_veh_WFNN48 | Asociado: Qa_tra_horizonte_934
+👤 Conductor     : [Qa_con_sofía Qa_con_martínez] | Asociado: Qa_tra_horizonte_934
+🏭 Transportista : [Qa_tra_horizonte_934]        
+🏢 Cliente       : [Qa_cli_central_441]          
+🔹 Contrato Venta: [569125]                      
+🔹 Contrato Costo: [540822]                      
+🎫 Viaje         : [430029]                       | Asociado: Qa_cli_central_441 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 205 | Cliente: Qa_cli_central_441
+====================================================================================================

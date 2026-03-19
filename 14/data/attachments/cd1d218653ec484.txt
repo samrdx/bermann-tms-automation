@@ -1,0 +1,49 @@
+2026-03-19 05:18:20 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:18:20 [INFO]: ================================================================================
+2026-03-19 05:18:20 [INFO]: Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: DEMO]
+2026-03-19 05:18:20 [INFO]: ================================================================================
+2026-03-19 05:18:20 [INFO]: Fase 1: Cargando datos del JSON...
+2026-03-19 05:18:20 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-19 05:18:20 [INFO]:    Transportista : Demo_tra_andes_218
+2026-03-19 05:18:20 [INFO]:    Vehículo      : Demo_veh_GRUF55
+2026-03-19 05:18:20 [INFO]:    Conductor     : Demo_con_pedro Demo_con_garcía
+2026-03-19 05:18:20 [INFO]:    Nro Viaje     : 48743
+2026-03-19 05:18:20 [INFO]:    Search ID     : 6711 (internal grid ID)
+2026-03-19 05:18:20 [INFO]: Fase 2: Navegando a /viajes/asignar... [isDemo=true]
+2026-03-19 05:18:20 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-19 05:18:23 [INFO]: 🔍 Buscando viaje "6711" y abriendo formulario de edición...
+2026-03-19 05:18:23 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 6711
+2026-03-19 05:18:24 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 6711 en la grilla de Asignación...
+2026-03-19 05:18:28 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 6711
+2026-03-19 05:18:30 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-19 05:18:30 [INFO]: ✅ Formulario de asignación de viaje cargado — URL: https://demo.bermanntms.cl/viajes/editar/6711
+2026-03-19 05:18:30 [INFO]: Fase 3: Seleccionando Transportista: Demo_tra_andes_218
+2026-03-19 05:18:30 [INFO]: 🛡️ Robust Selection: Transportista "Demo_tra_andes_218"
+2026-03-19 05:18:35 [INFO]: ✅ Transportista verified: Demo_tra_andes_218
+2026-03-19 05:18:35 [INFO]: Fase 4: Esperando recarga de cascada...
+2026-03-19 05:18:35 [INFO]: Fase 5: Seleccionando Vehículo: Demo_veh_GRUF55
+2026-03-19 05:18:37 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "Demo_veh_GRUF55"
+2026-03-19 05:18:37 [INFO]: Fase 6: Seleccionando Conductor: Demo_con_pedro Demo_con_garcía
+2026-03-19 05:18:38 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Demo_con_pedro Demo_con_garcía"
+2026-03-19 05:18:38 [INFO]: Fase 7: Verificación final anti-reset para Transportista...
+2026-03-19 05:18:38 [INFO]: ✅ Transportista confirmado: "Demo_tra_andes_218"
+2026-03-19 05:18:38 [INFO]: Fase 8: Guardar asignación...
+2026-03-19 05:18:39 [INFO]: 💾 Guardado completado
+2026-03-19 05:18:39 [INFO]: Fase 9: Verificando asignación en grilla /viajes/asignar...
+2026-03-19 05:18:43 [INFO]: ✅ Clicked a#buscar to trigger search
+2026-03-19 05:18:45 [INFO]: ✅ Viaje [6711] confirmado en grilla. Estado Asignado: true
+2026-03-19 05:18:45 [INFO]: ✅ JSON actualizado: viaje.status = ASIGNADO
+2026-03-19 05:18:45 [INFO]: ================================================================================
+2026-03-19 05:18:45 [INFO]: PASO 6.5: ¡ASIGNAR VIAJE (LEGACY) COMPLETADO!
+2026-03-19 05:18:45 [INFO]:    Nro Viaje    : 48743
+2026-03-19 05:18:45 [INFO]:    Transportista: Demo_tra_andes_218
+2026-03-19 05:18:45 [INFO]:    Vehículo     : Demo_veh_GRUF55
+2026-03-19 05:18:45 [INFO]:    Conductor    : Demo_con_pedro Demo_con_garcía
+2026-03-19 05:18:45 [INFO]:    Duration     : 24.31s
+2026-03-19 05:18:45 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🎫 Viaje         : [48743]                        | ID: 6711 | Patente: Demo_veh_GRUF55 | Asociado: Demo_tra_andes_218 | Estado: ASIGNADO | Conductor: Demo_con_pedro Demo_con_garcía
+====================================================================================================

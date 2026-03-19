@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_austral_706]           | ID: 446
+🏢 Cliente       : [Qa_cli_comercial_506]         | ID: 372
+🚚 Vehiculo      : [Qa_veh_XQES11]                | Patente: Qa_veh_XQES11 | Asociado: Qa_tra_austral_706
+👤 Conductor     : [Qa_con_valentina Qa_con_díaz] | Asociado: Qa_tra_austral_706
+🏭 Transportista : [Qa_tra_austral_706]          
+🏢 Cliente       : [Qa_cli_comercial_506]        
+🔹 Contrato Venta: [761280]                      
+🔹 Contrato Costo: [342680]                      
+🎫 Viaje         : [383378]                       | Asociado: Qa_cli_comercial_506 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 206 | Cliente: Qa_cli_comercial_506
+====================================================================================================

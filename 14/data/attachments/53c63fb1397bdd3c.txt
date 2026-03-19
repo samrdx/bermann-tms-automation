@@ -1,0 +1,21 @@
+2026-03-19 04:54:04 [INFO]: ENTORNO: QA 🧪
+2026-03-19 04:54:04 [INFO]: ✅ Transportista seeded cargado: Qa_tra_rutas_516 (ID: 259)
+2026-03-19 04:54:05 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-19 04:54:08 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_rutas_516
+2026-03-19 04:54:08 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_ZN1872
+2026-03-19 04:54:08 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_ZN1872
+2026-03-19 04:54:09 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_rutas_516
+2026-03-19 04:54:11 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_rutas_516" seleccionado
+2026-03-19 04:54:11 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-19 04:54:11 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-19 04:54:12 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-19 04:54:13 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-19 04:54:13 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-19 04:54:17 [INFO]: ✅ Vehículo [Qa_veh_ZN1872] guardado exitosamente
+2026-03-19 04:54:17 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_ZN1872
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🚚 Vehiculo      : [Qa_veh_ZN1872]                | Patente: Qa_veh_ZN1872 | Asociado: Qa_tra_rutas_516
+====================================================================================================

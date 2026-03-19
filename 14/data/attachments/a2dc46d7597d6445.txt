@@ -1,0 +1,21 @@
+2026-03-19 05:11:43 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:11:43 [INFO]: ✅ Transportista seeded cargado: Demo_tra_andes_498 (ID: 319)
+2026-03-19 05:11:43 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-19 05:11:45 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_andes_498
+2026-03-19 05:11:45 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_RA8581
+2026-03-19 05:11:45 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_RA8581
+2026-03-19 05:11:46 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_andes_498
+2026-03-19 05:11:48 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_andes_498" seleccionado
+2026-03-19 05:11:48 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-19 05:11:49 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-19 05:11:50 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-19 05:11:50 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-19 05:11:50 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-19 05:11:54 [INFO]: ✅ Vehículo [Demo_veh_RA8581] guardado exitosamente
+2026-03-19 05:11:54 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_RA8581
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🚚 Vehiculo      : [Demo_veh_RA8581]              | Patente: Demo_veh_RA8581 | Asociado: Demo_tra_andes_498
+====================================================================================================

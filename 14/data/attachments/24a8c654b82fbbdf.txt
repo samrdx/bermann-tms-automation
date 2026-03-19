@@ -1,0 +1,26 @@
+2026-03-19 05:12:30 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:12:30 [INFO]: ✅ Cargado seededTransportista: Demo_tra_andes_218 (ID: 320)
+2026-03-19 05:12:31 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-19 05:12:34 [INFO]: 📝 Completando formulario de conductor para: Demo_con_pedro Demo_con_garcía
+2026-03-19 05:12:34 [INFO]: [ConductorFormPage] Llenando usuario: kgfghg79
+2026-03-19 05:12:34 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-19 05:12:34 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_pedro
+2026-03-19 05:12:34 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_garcía
+2026-03-19 05:12:34 [INFO]: [ConductorFormPage] Llenando documento: 75.714.623-1
+2026-03-19 05:12:34 [INFO]: [BasePage] Ingresando RUT con verificación: [75.714.623-1] en #conductores-documento
+2026-03-19 05:12:36 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 75.714.623-1
+2026-03-19 05:12:36 [INFO]: [ConductorFormPage] Llenando telefono: +56939371167
+2026-03-19 05:12:36 [INFO]: [ConductorFormPage] Llenando email: demo_con_pedrodemo_con_garcia@hotmail.com
+2026-03-19 05:12:36 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-19 05:12:37 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-19 05:12:37 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_andes_218]
+2026-03-19 05:12:39 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-19 05:12:41 [INFO]: ✅ Conductor [Demo_con_pedro Demo_con_garcía] guardado exitosamente
+2026-03-19 05:12:41 [INFO]: ✅ seededConductor guardado: Demo_con_pedro Demo_con_garcía
+2026-03-19 05:12:41 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_pedro Demo_con_garcía] | Asociado: Demo_tra_andes_218
+====================================================================================================

@@ -1,0 +1,43 @@
+2026-03-19 05:10:19 [INFO]: ENTORNO: DEMO 🎭
+2026-03-19 05:10:19 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-19 05:10:19 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-19 05:10:22 [INFO]: ✅ Navegación exitosa
+2026-03-19 05:10:22 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-19 05:10:22 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_andes_218
+2026-03-19 05:10:22 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_andes_218
+2026-03-19 05:10:22 [INFO]: [TransportistaFormPage] Completando documento (RUT): 35948769-K
+2026-03-19 05:10:22 [INFO]: [BasePage] Ingresando RUT con verificación: [35948769-K] en #transportistas-documento
+2026-03-19 05:10:23 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 35948769K, Obtenido: 35948769. Usando JS para forzar valor...
+2026-03-19 05:10:24 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-19 05:10:24 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-19 05:10:24 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-19 05:10:25 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-19 05:10:25 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-19 05:10:25 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-19 05:10:26 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Región de Arica y Parinacota
+2026-03-19 05:10:27 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Parinacota
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Putre
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Región de Arica y Parinacota → Parinacota → Putre
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] Completando calle: Gran Avenida
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] Completando altura: 779
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-19 05:10:29 [INFO]: ✅ Formulario completado
+2026-03-19 05:10:29 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-19 05:10:29 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-19 05:10:35 [INFO]: ✅ Guardado iniciado
+2026-03-19 05:10:35 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-19 05:10:37 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-19 05:10:37 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-19 05:10:37 [INFO]: 🔍 Buscando por nombre: Demo_tra_andes_218
+2026-03-19 05:10:37 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-19 05:10:39 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 320
+2026-03-19 05:10:39 [INFO]: ✅ ID del Transportista [Demo_tra_andes_218] extraído exitosamente: 320
+2026-03-19 05:10:39 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-firefox-demo.json
+2026-03-19 05:10:39 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_andes_218]           | ID: 320
+====================================================================================================
