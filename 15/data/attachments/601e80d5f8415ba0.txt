@@ -1,0 +1,15 @@
+2026-03-20 05:08:07 [INFO]: ✅ Transportista seeded cargado: Demo_tra_express_816 (ID: 327)
+2026-03-20 05:08:07 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-20 05:08:09 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_express_816
+2026-03-20 05:08:09 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_YW4770
+2026-03-20 05:08:09 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_YW4770
+2026-03-20 05:08:10 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_express_816
+2026-03-20 05:08:12 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_express_816" seleccionado
+2026-03-20 05:08:12 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-20 05:08:13 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-20 05:08:14 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-20 05:08:14 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-20 05:08:14 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-20 05:08:14 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-20 05:08:18 [INFO]: ✅ Vehículo [Demo_veh_YW4770] guardado exitosamente
+2026-03-20 05:08:18 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_YW4770

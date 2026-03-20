@@ -1,0 +1,15 @@
+2026-03-20 04:46:33 [INFO]: ✅ Transportista seeded cargado: Qa_tra_logistica_411 (ID: 451)
+2026-03-20 04:46:33 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-20 04:46:35 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_logistica_411
+2026-03-20 04:46:35 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_WEVD71
+2026-03-20 04:46:35 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_WEVD71
+2026-03-20 04:46:36 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_logistica_411
+2026-03-20 04:46:38 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_logistica_411" seleccionado
+2026-03-20 04:46:38 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-20 04:46:39 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-20 04:46:40 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-20 04:46:40 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-20 04:46:40 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-20 04:46:40 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-20 04:46:45 [INFO]: ✅ Vehículo [Qa_veh_WEVD71] guardado exitosamente
+2026-03-20 04:46:45 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_WEVD71

@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_transportes_115]     | ID: 330
+🏢 Cliente       : [Demo_cli_global_529]          | ID: 316
+🚚 Vehiculo      : [Demo_veh_YR3910]              | Patente: Demo_veh_YR3910 | Asociado: Demo_tra_transportes_115
+👤 Conductor     : [Demo_con_rosa Demo_con_pérez] | Asociado: Demo_tra_transportes_115
+🏭 Transportista : [Demo_tra_transportes_115]    
+🏢 Cliente       : [Demo_cli_global_529]         
+🔹 Contrato Venta: [471285]                      
+🔹 Contrato Costo: [760077]                      
+🎫 Viaje         : [713777]                       | Asociado: Demo_cli_global_529 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 142 | Cliente: Demo_cli_global_529
+====================================================================================================

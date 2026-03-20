@@ -1,0 +1,47 @@
+2026-03-20 04:44:40 [INFO]: ENTORNO: QA 🧪
+2026-03-20 04:44:40 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-20 04:44:40 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-20 04:44:43 [INFO]: ✅ Navegación correcta
+2026-03-20 04:44:43 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-20 04:44:43 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_importadora_714
+2026-03-20 04:44:43 [INFO]: [ClienteFormPage] Completando RUT: 68010637-1
+2026-03-20 04:44:43 [INFO]: [BasePage] Ingresando RUT con verificación: [68010637-1] en #clientes-rut
+2026-03-20 04:44:44 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 68.010.637-1
+2026-03-20 04:44:44 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_importadora spa_714
+2026-03-20 04:44:45 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-20 04:44:45 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-20 04:44:46 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-20 04:44:46 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-20 04:44:46 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de los Lagos
+2026-03-20 04:44:48 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Chonchi
+2026-03-20 04:44:50 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-20 04:44:50 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Chonchi" (región: "Region de los Lagos"), reintentando...
+2026-03-20 04:44:50 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 2/5
+2026-03-20 04:44:50 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de los Lagos
+2026-03-20 04:44:52 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Osorno
+2026-03-20 04:44:53 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: San Juan de la Costa
+2026-03-20 04:44:53 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de los Lagos → Osorno → San Juan de la Costa
+2026-03-20 04:44:53 [INFO]: [ClienteFormPage] Completando calle: Av. Libertador Bernardo O'Higgins
+2026-03-20 04:44:53 [INFO]: [ClienteFormPage] Completando altura: 328
+2026-03-20 04:44:53 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-20 04:44:53 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-20 04:44:53 [INFO]: ✅ Formulario Completado
+2026-03-20 04:44:53 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-20 04:44:53 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-20 04:44:58 [INFO]: ✅ Guardar iniciado
+2026-03-20 04:44:58 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-20 04:45:00 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-20 04:45:00 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-20 04:45:00 [INFO]: 🔍 Buscando por RUT: 68010637-1 (limpio: 680106371)
+2026-03-20 04:45:00 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-20 04:45:02 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-20 04:45:03 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 377
+2026-03-20 04:45:03 [INFO]: ✅ Cliente [Qa_cli_importadora_714] ID: 377 identificado exitosamente
+2026-03-20 04:45:03 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23329415689.json
+2026-03-20 04:45:03 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_importadora_714]       | ID: 377
+====================================================================================================

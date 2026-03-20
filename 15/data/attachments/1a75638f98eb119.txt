@@ -1,0 +1,34 @@
+2026-03-20 04:45:04 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-20 04:45:04 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-20 04:45:07 [INFO]: ✅ Navegación exitosa
+2026-03-20 04:45:07 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-20 04:45:07 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_logistica_411
+2026-03-20 04:45:07 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_logistica_411
+2026-03-20 04:45:07 [INFO]: [TransportistaFormPage] Completando documento (RUT): 59597817-3
+2026-03-20 04:45:07 [INFO]: [BasePage] Ingresando RUT con verificación: [59597817-3] en #transportistas-documento
+2026-03-20 04:45:08 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 59.597.817-3
+2026-03-20 04:45:08 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-20 04:45:09 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-20 04:45:09 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-20 04:45:09 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-20 04:45:10 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Región de Arica y Parinacota
+2026-03-20 04:45:11 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Parinacota
+2026-03-20 04:45:13 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Putre
+2026-03-20 04:45:13 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Región de Arica y Parinacota → Parinacota → Putre
+2026-03-20 04:45:13 [INFO]: [TransportistaFormPage] Completando calle: Camino a Melipilla
+2026-03-20 04:45:13 [INFO]: [TransportistaFormPage] Completando altura: 528
+2026-03-20 04:45:13 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-20 04:45:14 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-20 04:45:14 [INFO]: ✅ Formulario completado
+2026-03-20 04:45:14 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-20 04:45:14 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-20 04:45:19 [INFO]: ✅ Guardado iniciado
+2026-03-20 04:45:19 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-20 04:45:21 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-20 04:45:21 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-20 04:45:21 [INFO]: 🔍 Buscando por nombre: Qa_tra_logistica_411
+2026-03-20 04:45:21 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-20 04:45:23 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 451
+2026-03-20 04:45:23 [INFO]: ✅ ID del Transportista [Qa_tra_logistica_411] extraído exitosamente: 451
+2026-03-20 04:45:23 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23329415689.json
+2026-03-20 04:45:23 [INFO]: ✅ Prueba exitosa

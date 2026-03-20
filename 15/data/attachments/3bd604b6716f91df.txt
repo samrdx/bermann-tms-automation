@@ -1,0 +1,15 @@
+2026-03-20 05:13:23 [INFO]: ✅ Transportista seeded cargado: Demo_tra_horizonte_661 (ID: 328)
+2026-03-20 05:13:23 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-20 05:13:25 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_horizonte_661
+2026-03-20 05:13:25 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_HU8949
+2026-03-20 05:13:26 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_HU8949
+2026-03-20 05:13:27 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_horizonte_661
+2026-03-20 05:13:28 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_horizonte_661" seleccionado
+2026-03-20 05:13:28 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-20 05:13:29 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-20 05:13:30 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-20 05:13:31 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-20 05:13:31 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-20 05:13:31 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-20 05:13:35 [INFO]: ✅ Vehículo [Demo_veh_HU8949] guardado exitosamente
+2026-03-20 05:13:35 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_HU8949

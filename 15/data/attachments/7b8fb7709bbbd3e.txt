@@ -1,0 +1,36 @@
+2026-03-20 04:45:52 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-20 04:45:52 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-20 04:45:55 [INFO]: ✅ Navegación exitosa
+2026-03-20 04:45:55 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-20 04:45:55 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_transportes_764
+2026-03-20 04:45:55 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_transportes_764
+2026-03-20 04:45:55 [INFO]: [TransportistaFormPage] Completando documento (RUT): 55035599-K
+2026-03-20 04:45:55 [INFO]: [BasePage] Ingresando RUT con verificación: [55035599-K] en #transportistas-documento
+2026-03-20 04:45:56 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 55035599K, Obtenido: 55035599. Usando JS para forzar valor...
+2026-03-20 04:45:57 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-20 04:45:57 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-20 04:45:57 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-20 04:45:58 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-20 04:45:58 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-20 04:45:58 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-20 04:45:59 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Antofagasta
+2026-03-20 04:46:00 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Tocopilla
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Tocopilla
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Antofagasta → Tocopilla → Tocopilla
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] Completando calle: Camino a Melipilla
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] Completando altura: 220
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-20 04:46:02 [INFO]: ✅ Formulario completado
+2026-03-20 04:46:02 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-20 04:46:02 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-20 04:46:08 [INFO]: ✅ Guardado iniciado
+2026-03-20 04:46:08 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-20 04:46:10 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-20 04:46:10 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-20 04:46:10 [INFO]: 🔍 Buscando por nombre: Qa_tra_transportes_764
+2026-03-20 04:46:10 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-20 04:46:12 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 452
+2026-03-20 04:46:12 [INFO]: ✅ ID del Transportista [Qa_tra_transportes_764] extraído exitosamente: 452
+2026-03-20 04:46:12 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-qa-nightly-qa-23329415689.json
+2026-03-20 04:46:12 [INFO]: ✅ Prueba exitosa

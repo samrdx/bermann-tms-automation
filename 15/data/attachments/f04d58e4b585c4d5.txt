@@ -1,0 +1,26 @@
+2026-03-20 05:07:56 [INFO]: ENTORNO: DEMO 🎭
+2026-03-20 05:07:56 [INFO]: ✅ Cargado seededTransportista: Demo_tra_express_816 (ID: 327)
+2026-03-20 05:07:56 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-20 05:07:59 [INFO]: 📝 Completando formulario de conductor para: Demo_con_juan Demo_con_pérez
+2026-03-20 05:07:59 [INFO]: [ConductorFormPage] Llenando usuario: thlgph86
+2026-03-20 05:07:59 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-20 05:07:59 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_juan
+2026-03-20 05:07:59 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_pérez
+2026-03-20 05:07:59 [INFO]: [ConductorFormPage] Llenando documento: 65.804.778-7
+2026-03-20 05:07:59 [INFO]: [BasePage] Ingresando RUT con verificación: [65.804.778-7] en #conductores-documento
+2026-03-20 05:08:01 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 65.804.778-7
+2026-03-20 05:08:01 [INFO]: [ConductorFormPage] Llenando telefono: +56960204312
+2026-03-20 05:08:01 [INFO]: [ConductorFormPage] Llenando email: demo_con_juandemo_con_perez@hotmail.com
+2026-03-20 05:08:01 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-20 05:08:02 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-20 05:08:02 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_express_816]
+2026-03-20 05:08:03 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-20 05:08:06 [INFO]: ✅ Conductor [Demo_con_juan Demo_con_pérez] guardado exitosamente
+2026-03-20 05:08:06 [INFO]: ✅ seededConductor guardado: Demo_con_juan Demo_con_pérez
+2026-03-20 05:08:06 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_juan Demo_con_pérez] | Asociado: Demo_tra_express_816
+====================================================================================================

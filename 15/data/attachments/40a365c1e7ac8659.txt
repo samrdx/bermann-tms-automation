@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_logistica_627]         | ID: 454
+🏢 Cliente       : [Qa_cli_logistica_840]         | ID: 380
+🚚 Vehiculo      : [Qa_veh_MDSV65]                | Patente: Qa_veh_MDSV65 | Asociado: Qa_tra_logistica_627
+👤 Conductor     : [Qa_con_carlos Qa_con_díaz]    | Asociado: Qa_tra_logistica_627
+🏭 Transportista : [Qa_tra_logistica_627]        
+🏢 Cliente       : [Qa_cli_logistica_840]        
+🔹 Contrato Venta: [422146]                      
+🔹 Contrato Costo: [475517]                      
+🎫 Viaje         : [600986]                       | Asociado: Qa_cli_logistica_840 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 212 | Cliente: Qa_cli_logistica_840
+====================================================================================================

@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_logistica_875]         | ID: 453
+🏢 Cliente       : [Qa_cli_importadora_906]       | ID: 379
+🚚 Vehiculo      : [Qa_veh_MS4031]                | Patente: Qa_veh_MS4031 | Asociado: Qa_tra_logistica_875
+👤 Conductor     : [Qa_con_ana Qa_con_garcía]     | Asociado: Qa_tra_logistica_875
+🏭 Transportista : [Qa_tra_logistica_875]        
+🏢 Cliente       : [Qa_cli_importadora_906]      
+🔹 Contrato Venta: [456462]                      
+🔹 Contrato Costo: [631005]                      
+🎫 Viaje         : [561473]                       | Asociado: Qa_cli_importadora_906 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 211 | Cliente: Qa_cli_importadora_906
+====================================================================================================

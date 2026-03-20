@@ -1,0 +1,42 @@
+2026-03-20 05:06:20 [INFO]: ENTORNO: DEMO 🎭
+2026-03-20 05:06:20 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-20 05:06:20 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-20 05:06:23 [INFO]: ✅ Navegación correcta
+2026-03-20 05:06:23 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-20 05:06:23 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_comercial_923
+2026-03-20 05:06:23 [INFO]: [ClienteFormPage] Completando RUT: 23766527-9
+2026-03-20 05:06:23 [INFO]: [BasePage] Ingresando RUT con verificación: [23766527-9] en #clientes-rut
+2026-03-20 05:06:24 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 23.766.527-9
+2026-03-20 05:06:24 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_comercial spa_923
+2026-03-20 05:06:24 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-20 05:06:25 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-20 05:06:25 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-20 05:06:25 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-20 05:06:26 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region Metropolitana
+2026-03-20 05:06:28 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Cordillera
+2026-03-20 05:06:29 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: San José de Maipo
+2026-03-20 05:06:29 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region Metropolitana → Cordillera → San José de Maipo
+2026-03-20 05:06:29 [INFO]: [ClienteFormPage] Completando calle: Av. Apoquindo
+2026-03-20 05:06:29 [INFO]: [ClienteFormPage] Completando altura: 650
+2026-03-20 05:06:29 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-20 05:06:30 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 843/843
+2026-03-20 05:06:30 [INFO]: ✅ Formulario Completado
+2026-03-20 05:06:30 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-20 05:06:30 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-20 05:06:35 [INFO]: ✅ Guardar iniciado
+2026-03-20 05:06:35 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-20 05:06:37 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-20 05:06:37 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-20 05:06:37 [INFO]: 🔍 Buscando por RUT: 23766527-9 (limpio: 237665279)
+2026-03-20 05:06:37 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-20 05:06:39 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-20 05:06:39 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 313
+2026-03-20 05:06:39 [INFO]: ✅ Cliente [Demo_cli_comercial_923] ID: 313 identificado exitosamente
+2026-03-20 05:06:39 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-demo-nightly-demo-23329415689.json
+2026-03-20 05:06:39 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_comercial_923]       | ID: 313
+====================================================================================================

@@ -1,0 +1,42 @@
+2026-03-20 05:07:04 [INFO]: ENTORNO: DEMO 🎭
+2026-03-20 05:07:04 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-20 05:07:04 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-20 05:07:07 [INFO]: ✅ Navegación correcta
+2026-03-20 05:07:07 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-20 05:07:07 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_global_641
+2026-03-20 05:07:07 [INFO]: [ClienteFormPage] Completando RUT: 30146818-0
+2026-03-20 05:07:07 [INFO]: [BasePage] Ingresando RUT con verificación: [30146818-0] en #clientes-rut
+2026-03-20 05:07:09 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 30.146.818-0
+2026-03-20 05:07:09 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_global spa_641
+2026-03-20 05:07:09 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-20 05:07:09 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-20 05:07:10 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-20 05:07:10 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-20 05:07:11 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Antofagasta
+2026-03-20 05:07:12 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: El Loa
+2026-03-20 05:07:14 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: San Pedro de Atacama
+2026-03-20 05:07:14 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Antofagasta → El Loa → San Pedro de Atacama
+2026-03-20 05:07:14 [INFO]: [ClienteFormPage] Completando calle: Av. Libertador Bernardo O'Higgins
+2026-03-20 05:07:14 [INFO]: [ClienteFormPage] Completando altura: 287
+2026-03-20 05:07:14 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-20 05:07:14 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 843/843
+2026-03-20 05:07:15 [INFO]: ✅ Formulario Completado
+2026-03-20 05:07:15 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-20 05:07:15 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-20 05:07:20 [INFO]: ✅ Guardar iniciado
+2026-03-20 05:07:20 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-20 05:07:22 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-20 05:07:22 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-20 05:07:22 [INFO]: 🔍 Buscando por RUT: 30146818-0 (limpio: 301468180)
+2026-03-20 05:07:22 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-20 05:07:24 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-20 05:07:24 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 314
+2026-03-20 05:07:24 [INFO]: ✅ Cliente [Demo_cli_global_641] ID: 314 identificado exitosamente
+2026-03-20 05:07:24 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-23329415689.json
+2026-03-20 05:07:24 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_global_641]          | ID: 314
+====================================================================================================
