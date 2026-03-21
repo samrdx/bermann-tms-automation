@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_707]           | ID: 336
+🏢 Cliente       : [Demo_cli_industrial_598]      | ID: 322
+🚚 Vehiculo      : [Demo_veh_TTKK78]              | Patente: Demo_veh_TTKK78 | Asociado: Demo_tra_cargo_707
+👤 Conductor     : [Demo_con_pedro Demo_con_araya] | Asociado: Demo_tra_cargo_707
+🏭 Transportista : [Demo_tra_cargo_707]          
+🏢 Cliente       : [Demo_cli_industrial_598]     
+🔹 Contrato Venta: [380297]                      
+🔹 Contrato Costo: [184449]                      
+🎫 Viaje         : [498133]                       | Asociado: Demo_cli_industrial_598 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 146 | Cliente: Demo_cli_industrial_598
+====================================================================================================

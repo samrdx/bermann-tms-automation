@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_transportes_724]       | ID: 475
+🏢 Cliente       : [Qa_cli_distribuidora_302]     | ID: 403
+🚚 Vehiculo      : [Qa_veh_LT6692]                | Patente: Qa_veh_LT6692 | Asociado: Qa_tra_transportes_724
+👤 Conductor     : [Qa_con_luis Qa_con_muñoz]     | Asociado: Qa_tra_transportes_724
+🏭 Transportista : [Qa_tra_transportes_724]      
+🏢 Cliente       : [Qa_cli_distribuidora_302]    
+🔹 Contrato Venta: [711033]                      
+🔹 Contrato Costo: [134621]                      
+🎫 Viaje         : [893741]                       | Asociado: Qa_cli_distribuidora_302 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 217 | Cliente: Qa_cli_distribuidora_302
+====================================================================================================

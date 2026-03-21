@@ -1,0 +1,26 @@
+2026-03-21 04:32:04 [INFO]: ENTORNO: QA 🧪
+2026-03-21 04:32:04 [INFO]: ✅ Cargado seededTransportista: Qa_tra_express_581 (ID: 473)
+2026-03-21 04:32:06 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-21 04:32:08 [INFO]: 📝 Completando formulario de conductor para: Qa_con_pedro Qa_con_rodríguez
+2026-03-21 04:32:08 [INFO]: [ConductorFormPage] Llenando usuario: repzvn12
+2026-03-21 04:32:08 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-21 04:32:08 [INFO]: [ConductorFormPage] Llenando nombre: Qa_con_pedro
+2026-03-21 04:32:08 [INFO]: [ConductorFormPage] Llenando apellido: Qa_con_rodríguez
+2026-03-21 04:32:08 [INFO]: [ConductorFormPage] Llenando documento: 95.874.802-7
+2026-03-21 04:32:08 [INFO]: [BasePage] Ingresando RUT con verificación: [95.874.802-7] en #conductores-documento
+2026-03-21 04:32:10 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 95.874.802-7
+2026-03-21 04:32:10 [INFO]: [ConductorFormPage] Llenando telefono: +56929890259
+2026-03-21 04:32:10 [INFO]: [ConductorFormPage] Llenando email: qa_con_pedroqa_con_rodriguez@hotmail.com
+2026-03-21 04:32:10 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-21 04:32:11 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-21 04:32:11 [INFO]: [ConductorFormPage] Seleccionando transportista: [Qa_tra_express_581]
+2026-03-21 04:32:13 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-21 04:32:15 [INFO]: ✅ Conductor [Qa_con_pedro Qa_con_rodríguez] guardado exitosamente
+2026-03-21 04:32:15 [INFO]: ✅ seededConductor guardado: Qa_con_pedro Qa_con_rodríguez
+2026-03-21 04:32:15 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+👤 Conductor     : [Qa_con_pedro Qa_con_rodríguez] | Asociado: Qa_tra_express_581
+====================================================================================================

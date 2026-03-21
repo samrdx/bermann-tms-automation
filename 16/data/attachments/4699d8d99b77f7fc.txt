@@ -1,0 +1,15 @@
+2026-03-21 04:51:02 [INFO]: ✅ Transportista seeded cargado: Demo_tra_logistica_752 (ID: 333)
+2026-03-21 04:51:02 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-21 04:51:04 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_logistica_752
+2026-03-21 04:51:04 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_GBLH66
+2026-03-21 04:51:04 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_GBLH66
+2026-03-21 04:51:05 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_logistica_752
+2026-03-21 04:51:07 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_logistica_752" seleccionado
+2026-03-21 04:51:07 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-21 04:51:08 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-21 04:51:09 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-21 04:51:09 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-21 04:51:09 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-21 04:51:09 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-21 04:51:13 [INFO]: ✅ Vehículo [Demo_veh_GBLH66] guardado exitosamente
+2026-03-21 04:51:13 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_GBLH66

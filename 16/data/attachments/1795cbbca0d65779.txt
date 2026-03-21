@@ -1,0 +1,39 @@
+2026-03-21 04:25:25 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-21 04:25:25 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-21 04:25:28 [INFO]: ✅ Navegación exitosa
+2026-03-21 04:25:28 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-21 04:25:28 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_horizonte_219
+2026-03-21 04:25:28 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_horizonte_219
+2026-03-21 04:25:28 [INFO]: [TransportistaFormPage] Completando documento (RUT): 90310658-1
+2026-03-21 04:25:28 [INFO]: [BasePage] Ingresando RUT con verificación: [90310658-1] en #transportistas-documento
+2026-03-21 04:25:30 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 90.310.658-1
+2026-03-21 04:25:30 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-21 04:25:30 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-21 04:25:31 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-21 04:25:31 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-21 04:25:31 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region del Libertador B. O'Higgins
+2026-03-21 04:25:33 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: San Felipe
+2026-03-21 04:25:34 [WARN]: [TransportistaFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=0)
+2026-03-21 04:25:34 [WARN]: [TransportistaFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "San Felipe" (región: "Region del Libertador B. O'Higgins"), reintentando...
+2026-03-21 04:25:34 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 2/5
+2026-03-21 04:25:35 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region Metropolitana
+2026-03-21 04:25:36 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Santiago
+2026-03-21 04:25:38 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Quinta Normal
+2026-03-21 04:25:38 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region Metropolitana → Santiago → Quinta Normal
+2026-03-21 04:25:38 [INFO]: [TransportistaFormPage] Completando calle: Av. Pajaritos
+2026-03-21 04:25:38 [INFO]: [TransportistaFormPage] Completando altura: 247
+2026-03-21 04:25:38 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-21 04:25:39 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-21 04:25:39 [INFO]: ✅ Formulario completado
+2026-03-21 04:25:39 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-21 04:25:39 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-21 04:25:44 [INFO]: ✅ Guardado iniciado
+2026-03-21 04:25:44 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-21 04:25:46 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-21 04:25:46 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-21 04:25:46 [INFO]: 🔍 Buscando por nombre: Qa_tra_horizonte_219
+2026-03-21 04:25:46 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-21 04:25:48 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 472
+2026-03-21 04:25:48 [INFO]: ✅ ID del Transportista [Qa_tra_horizonte_219] extraído exitosamente: 472
+2026-03-21 04:25:48 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23371927413.json
+2026-03-21 04:25:48 [INFO]: ✅ Prueba exitosa

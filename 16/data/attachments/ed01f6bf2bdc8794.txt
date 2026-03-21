@@ -1,0 +1,28 @@
+2026-03-21 04:26:44 [INFO]: ENTORNO: QA 🧪
+2026-03-21 04:26:44 [INFO]: ✅ Cargado seededTransportista: Qa_tra_horizonte_219 (ID: 472)
+2026-03-21 04:26:44 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-21 04:26:47 [INFO]: 📝 Completando formulario de conductor para: Qa_con_elena Qa_con_muñoz
+2026-03-21 04:26:47 [INFO]: [ConductorFormPage] Llenando usuario: tvdzel62
+2026-03-21 04:26:47 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-21 04:26:47 [INFO]: [ConductorFormPage] Llenando nombre: Qa_con_elena
+2026-03-21 04:26:47 [INFO]: [ConductorFormPage] Llenando apellido: Qa_con_muñoz
+2026-03-21 04:26:47 [INFO]: [ConductorFormPage] Llenando documento: 81.183.209-K
+2026-03-21 04:26:47 [INFO]: [BasePage] Ingresando RUT con verificación: [81.183.209-K] en #conductores-documento
+2026-03-21 04:26:48 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 81183209K, Obtenido: 81183209. Usando JS para forzar valor...
+2026-03-21 04:26:49 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-21 04:26:49 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-21 04:26:49 [INFO]: [ConductorFormPage] Llenando telefono: +56966561535
+2026-03-21 04:26:49 [INFO]: [ConductorFormPage] Llenando email: qa_con_elenaqa_con_munoz@hotmail.com
+2026-03-21 04:26:49 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-21 04:26:50 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-21 04:26:50 [INFO]: [ConductorFormPage] Seleccionando transportista: [Qa_tra_horizonte_219]
+2026-03-21 04:26:52 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-21 04:27:00 [INFO]: ✅ Conductor [Qa_con_elena Qa_con_muñoz] guardado exitosamente
+2026-03-21 04:27:00 [INFO]: ✅ seededConductor guardado: Qa_con_elena Qa_con_muñoz
+2026-03-21 04:27:00 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+👤 Conductor     : [Qa_con_elena Qa_con_muñoz]    | Asociado: Qa_tra_horizonte_219
+====================================================================================================

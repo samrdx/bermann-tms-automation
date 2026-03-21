@@ -1,0 +1,225 @@
+2026-03-21 05:06:00 [INFO]: ENTORNO: DEMO 🎭
+2026-03-21 05:06:00 [INFO]: 
+2026-03-21 05:06:00 [INFO]: ================================================================================
+2026-03-21 05:06:00 [INFO]: [PrefacturaCrearE2ETest] [FASE 1] 🚀 PREPARACIÓN DE DATOS (API)
+2026-03-21 05:06:00 [INFO]: ================================================================================
+2026-03-21 05:06:00 [INFO]: ✅ TmsApiClient inicializado
+2026-03-21 05:06:00 [INFO]: [PrefacturaCrearE2ETest] [SUBPASO] 🔸 Setup: Transportista=[Demo_tra_cargo_707] Cliente=[Demo_cli_industrial_598] Viaje=[498133]
+2026-03-21 05:06:00 [INFO]: 🚀 UI: Creando Transportista [Demo_tra_cargo_707] RUT: [22545516-3]
+2026-03-21 05:06:03 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [22545516-3] en input[name="Transportistas[documento]"]
+2026-03-21 05:06:05 [INFO]: ✅ RUT verificado (intento 1): 22.545.516-3
+2026-03-21 05:06:06 [INFO]: ⚙️ Manteniendo "Permite Tercearizar viajes" en NO...
+2026-03-21 05:06:07 [INFO]: 💾 Guardando Transportista vía Inyección JS...
+2026-03-21 05:06:09 [INFO]: ✅ Transportista [Demo_tra_cargo_707] creado exitosamente
+2026-03-21 05:06:09 [INFO]: 📍 URL después de guardar: https://demo.bermanntms.cl/transportistas/index
+2026-03-21 05:06:09 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla...
+2026-03-21 05:06:12 [INFO]: 🔍 Buscando por RUT: 22545516-3
+2026-03-21 05:06:12 [WARN]: ⚠️ ⚠️ La búsqueda por RUT falló, recurriendo a la búsqueda por nombre...
+2026-03-21 05:06:12 [INFO]: 🔎 Búsqueda completada con: Demo_tra_cargo_707
+2026-03-21 05:06:14 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-21 05:06:14 [INFO]: ✅ ID de Transportista desde el link: 336
+2026-03-21 05:06:14 [INFO]: ✅ Transportista creado: Demo_tra_cargo_707 | ID: 336
+2026-03-21 05:06:14 [INFO]: 🚀 UI: Creando Cliente [Demo_cli_industrial_598] RUT: [60350392-9]
+2026-03-21 05:06:16 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [60350392-9] en #clientes-rut
+2026-03-21 05:06:17 [INFO]: ✅ RUT verificado (intento 1): 60.350.392-9
+2026-03-21 05:06:17 [INFO]: ⚡ JS Click: button[data-id="clientes-tipo_cliente_id"]
+2026-03-21 05:06:18 [INFO]: ⚡ JS Click: button[data-id="clientes-region_id"]
+2026-03-21 05:06:20 [INFO]: ⚡ JS Click: button[data-id="clientes-ciudad_id"]
+2026-03-21 05:06:22 [INFO]: ⚡ JS Click: button[data-id="clientes-comuna_id"]
+2026-03-21 05:06:22 [INFO]: 📍 Seleccionando Polígonos (drop_zones)...
+2026-03-21 05:06:23 [INFO]: ✅ Polígonos: Seleccionar Todos clickeado
+2026-03-21 05:06:24 [INFO]: ⚡ JS Click: #btn_guardar
+2026-03-21 05:06:32 [WARN]: ⚠️ ⚠️ waitForURL (ver/editar) no completó en 8s para Cliente (Demo_cli_industrial_598) — continuando con URL actual
+2026-03-21 05:06:32 [INFO]: 📍 URL después de guardar (Cliente): https://demo.bermanntms.cl/clientes/index
+2026-03-21 05:06:32 [INFO]: 🔄 URL no contiene ID todavía, esperando 2s y reintentando...
+2026-03-21 05:06:34 [INFO]: 🔍 Usando filtro de búsqueda para encontrar Cliente: Demo_cli_industrial_598
+2026-03-21 05:06:35 [INFO]: 🔎 Búsqueda completada con: Demo_cli_industrial_598
+2026-03-21 05:06:35 [INFO]: 🔎 Activando búsqueda con Enter y clic en Buscar...
+2026-03-21 05:06:35 [INFO]: ⚡ JS Click: #buscar
+2026-03-21 05:06:39 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-21 05:06:40 [INFO]: ✅ Cliente ID desde el link: 322
+2026-03-21 05:06:40 [INFO]: 🚛 UI: Creando Vehículo [Demo_veh_TTKK78] para Transportista: Demo_tra_cargo_707
+2026-03-21 05:06:43 [INFO]: 🚛 Seleccionando Tipo Vehículo: TRACTO
+2026-03-21 05:06:45 [INFO]: 📦 Seleccionando Capacidad: 1 a 12 TON
+2026-03-21 05:06:50 [INFO]: ✅ Vehículo creado: Demo_veh_TTKK78
+2026-03-21 05:06:50 [INFO]: 👨‍✈️ UI: Creando Conductor [Demo_con_pedro] para Transportista: Demo_tra_cargo_707
+2026-03-21 05:06:52 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [73178361-6] en input[name="Conductores[documento]"]
+2026-03-21 05:06:53 [INFO]: ✅ RUT verificado (intento 1): 73.178.361-6
+2026-03-21 05:06:54 [INFO]: 📅 Estableciendo fecha vencimiento licencia: 21-03-2027
+2026-03-21 05:06:59 [INFO]: ✅ Conductor guardado. URL actual: https://demo.bermanntms.cl/conductores/index
+2026-03-21 05:06:59 [INFO]: 📝 Creando contrato [380297] tipo=VENTA para: Demo_cli_industrial_598
+2026-03-21 05:07:02 [INFO]: 📋 Estableciendo tipo de contrato a: VENTA
+2026-03-21 05:07:02 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-21 05:07:17 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-21 05:07:18 [INFO]: 📋 Estableciendo subtipo para contrato de VENTA...
+2026-03-21 05:07:18 [INFO]: 📋 Intentando seleccionar Cliente: "Demo_cli_industrial_598" (intento 1/5)...
+2026-03-21 05:07:18 [INFO]: ✅ Seleccionado: DEMO_CLI_INDUSTRIAL_598 (valor: 322)
+2026-03-21 05:07:19 [INFO]: 📅 [DEMO] Estableciendo Fecha vencimiento vía JS con Eventos...
+2026-03-21 05:07:19 [INFO]: 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto...
+2026-03-21 05:07:19 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-21 05:07:24 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-21 05:07:24 [INFO]: 🛣️ Añadiendo Ruta 47 y Carga 47_6 con entrada de tarifa LENTA...
+2026-03-21 05:07:25 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-21 05:07:25 [INFO]: ✅ Modal de carga oculto
+2026-03-21 05:07:27 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-21 05:07:28 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-21 05:07:29 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-21 05:07:32 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-21 05:07:35 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-21 05:07:36 [INFO]: 📝 Creando contrato [184449] tipo=COSTO para: Demo_tra_cargo_707
+2026-03-21 05:07:38 [INFO]: 📋 Estableciendo tipo de contrato a: COSTO
+2026-03-21 05:07:38 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-21 05:07:53 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-21 05:07:54 [INFO]: 📋 Intentando seleccionar Transportista: "Demo_tra_cargo_707" (intento 1/5)...
+2026-03-21 05:07:55 [INFO]: ✅ Seleccionado: DEMO_TRA_CARGO_707 (valor: 336)
+2026-03-21 05:07:55 [INFO]: 📅 [DEMO] Estableciendo Fecha vencimiento vía JS con Eventos...
+2026-03-21 05:07:55 [INFO]: 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto...
+2026-03-21 05:07:55 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-21 05:08:00 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-21 05:08:00 [INFO]: 🛣️ Añadiendo Ruta 47 y Carga 47_6 con entrada de tarifa LENTA...
+2026-03-21 05:08:01 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-21 05:08:01 [INFO]: ✅ Modal de carga oculto
+2026-03-21 05:08:03 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-21 05:08:04 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-21 05:08:06 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-21 05:08:09 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-21 05:08:12 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-21 05:08:13 [INFO]: [PrefacturaCrearE2ETest] Estabilizando navegador...
+2026-03-21 05:08:15 [INFO]: 🚚 UI: Creando Viaje [498133] para Cliente [Demo_cli_industrial_598]
+2026-03-21 05:08:17 [INFO]: 📝 Llenando formulario (Reintento: false)...
+2026-03-21 05:08:17 [INFO]: 📋 Seleccionando Tipo Operación: "Distribución"
+2026-03-21 05:08:17 [INFO]: ✅ Tipo Operación seleccionado
+2026-03-21 05:08:17 [INFO]: 📋 Seleccionando Tipo Servicio: "Lcl"
+2026-03-21 05:08:18 [INFO]: ✅ Tipo Servicio seleccionado
+2026-03-21 05:08:18 [INFO]: 📋 Seleccionando Cliente: "Demo_cli_industrial_598"
+2026-03-21 05:08:19 [INFO]: ✅ Cliente seleccionado
+2026-03-21 05:08:21 [INFO]: 📋 Seleccionando Tipo Viaje: "DIRECTO"
+2026-03-21 05:08:22 [INFO]: ✅ Tipo Viaje seleccionado
+2026-03-21 05:08:22 [INFO]: 📋 Seleccionando Unidad Negocio: "Defecto"
+2026-03-21 05:08:23 [INFO]: ✅ Unidad Negocio seleccionado
+2026-03-21 05:08:23 [INFO]: 📍 PASO 1: Abriendo dropdown Origen...
+2026-03-21 05:08:24 [INFO]: 📍 PASO 2: Seleccionando Origen "233_CD SuperZoo_Quilicura"...
+2026-03-21 05:08:25 [INFO]: ✅ Origen seleccionado: 233_CD SuperZoo_Quilicura
+2026-03-21 05:08:26 [INFO]: 📍 PASO 3: Abriendo dropdown Destino...
+2026-03-21 05:08:27 [INFO]: 📍 PASO 4: Seleccionando Destino "Divisa"...
+2026-03-21 05:08:27 [INFO]: ✅ Destino seleccionado: Divisa
+2026-03-21 05:08:28 [INFO]: ✅ Origen/Destino configurados correctamente
+2026-03-21 05:08:30 [INFO]: 📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que viajes-carga_id tenga la opción CONTENEDOR DRY)...
+2026-03-21 05:08:31 [INFO]: 📋 Estado del formulario antes de guardar: viajes-nro_viaje="498133" | tipo_operacion_form="Distribución" (opts:42) | viajes-tipo_servicio_id="Lcl" (opts:2) | viajes-cliente_id="Demo_cli_industrial_598" (opts:318) | viajes-tipo_viaje_id="DIRECTO" (opts:4) | viajes-unidad_negocio_id="Defecto" (opts:9) | viajes-carga_id="CONTENEDOR DRY" (opts:2) | _origendestinoform-origen="233_CD SuperZoo_Quilicura" (opts:844) | _origendestinoform-destino="Divisa" (opts:844)
+2026-03-21 05:08:32 [INFO]: 💾 Haciendo clic en Guardar...
+2026-03-21 05:08:35 [INFO]: ⏳ Verificando creación del viaje...
+2026-03-21 05:08:35 [INFO]: ✅ Viaje [498133] creado exitosamente (toast exacto)
+2026-03-21 05:08:35 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [498133] planificado.
+2026-03-21 05:08:35 [INFO]: 
+2026-03-21 05:08:35 [INFO]: ================================================================================
+2026-03-21 05:08:35 [INFO]: [PrefacturaCrearE2ETest] [FASE 2] 🚀 ASIGNACIÓN DEL VIAJE [498133]
+2026-03-21 05:08:35 [INFO]: ================================================================================
+2026-03-21 05:08:35 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-21 05:08:37 [INFO]: [AsignarViajesPage] === Iniciando Asignación para 498133 (Modo Inyección) ===
+2026-03-21 05:08:37 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 498133
+2026-03-21 05:08:37 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 498133 en la grilla de Asignación...
+2026-03-21 05:08:41 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 498133
+2026-03-21 05:08:43 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-21 05:08:43 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Transportista: "Demo_tra_cargo_707"
+2026-03-21 05:08:46 [INFO]: [AsignarViajesPage] ✅ Transportista seleccionado exitosamente: Demo_tra_cargo_707
+2026-03-21 05:08:47 [INFO]: [AsignarViajesPage] ⏳ Esperando cascada (transportista -> vehículos)...
+2026-03-21 05:08:47 [INFO]: [AsignarViajesPage] ⏳ Esperando opciones para Vehículo Principal (#viajes-vehiculo_uno_id)...
+2026-03-21 05:08:47 [INFO]: [AsignarViajesPage] ✅ Opciones de Vehículo Principal cargadas
+2026-03-21 05:08:47 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Vehículo Principal: "Demo_veh_TTKK78"
+2026-03-21 05:08:49 [INFO]: [AsignarViajesPage] ✅ Vehículo Principal seleccionado exitosamente: Demo_veh_TTKK78
+2026-03-21 05:08:50 [INFO]: [AsignarViajesPage] ⏳ Esperando cascada (vehículo -> conductor)...
+2026-03-21 05:08:50 [INFO]: [AsignarViajesPage] ⏳ Esperando opciones para Conductor (#viajes-conductor_id)...
+2026-03-21 05:08:50 [INFO]: [AsignarViajesPage] ✅ Opciones de Conductor cargadas
+2026-03-21 05:08:50 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Conductor: "Demo_con_pedro"
+2026-03-21 05:08:52 [INFO]: [AsignarViajesPage] ✅ Conductor seleccionado exitosamente: Demo_con_pedro
+2026-03-21 05:08:58 [INFO]: [AsignarViajesPage] ✅ Flujo de asignación completo
+2026-03-21 05:09:00 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [498133] asignado.
+2026-03-21 05:09:00 [INFO]: 
+2026-03-21 05:09:00 [INFO]: ================================================================================
+2026-03-21 05:09:00 [INFO]: [PrefacturaCrearE2ETest] [FASE 3] 🚀 FINALIZAR VIAJE
+2026-03-21 05:09:00 [INFO]: ================================================================================
+2026-03-21 05:09:00 [INFO]: [MonitoreoPage] 📍 Navegando a: /viajes/monitoreo
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 📍 URL Actual: https://demo.bermanntms.cl/viajes/monitoreo
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] ✅ Página de Monitoreo cargada exitosamente
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 🚀 UI: === Iniciando Finalización para el Viaje [498133] ===
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 🔎 UI: Paso 1: Buscando Viaje...
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 🔎 UI: Buscando Viaje [498133]...
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] ⏳ UI: Esperando input #id...
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 👁️ UI: Input #id visible
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 📝 UI: Filtro de ID completado con: "498133"
+2026-03-21 05:09:04 [INFO]: [MonitoreoPage] 🔎 UI: Disparando búsqueda (multi-estrategia)...
+2026-03-21 05:09:05 [INFO]: [MonitoreoPage] ✅ UI: Buscar disparado combinando JS y tecla Enter
+2026-03-21 05:09:08 [INFO]: [MonitoreoPage] ✅ UI: Estabilización post-búsqueda completa
+2026-03-21 05:09:08 [INFO]: [MonitoreoPage] ⏳ UI: Esperando a que la fila del viaje aparezca dentro de #registros...
+2026-03-21 05:09:08 [INFO]: [MonitoreoPage] ✅ UI: Fila de viaje reconocida dentro de #registros
+2026-03-21 05:09:08 [INFO]: [MonitoreoPage] 📜 UI: Scrolleando a la fila del viaje...
+2026-03-21 05:09:09 [INFO]: [MonitoreoPage] ✅ UI: Fila de Viaje confirmada y visible
+2026-03-21 05:09:09 [INFO]: [MonitoreoPage] 🕰️ UI: Paso 2: Haciendo clic en Horario GPS (Agregar)...
+2026-03-21 05:09:09 [INFO]: [MonitoreoPage] 🕰️ UI: Accediendo a "Horario GPS" (Agregar)...
+2026-03-21 05:09:09 [INFO]: [MonitoreoPage] 🔎 UI: Haciendo clic en Agregar (showModalEditTripWithoutGPSManually) vía JS...
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] ✅ UI: Clic en Agregar vía JS (showModalEditTripWithoutGPSManually)
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] ⏳ UI: Esperando modal #modalCambioEstadoSinGps (display: block)...
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] ✅ UI: Modal #modalCambioEstadoSinGps abierto
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] 📝 UI: Paso 3: Confirmando Finalización...
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] 📝 UI: Procesando modal #modalCambioEstadoSinGps...
+2026-03-21 05:09:10 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/modal-horario-gps-contenido-1774069750515.png 📸
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] 🔎 UI: Seleccionando "Finalizado" en #drop_state_without_gps...
+2026-03-21 05:09:10 [INFO]: [MonitoreoPage] ✅ UI: Finalizado seleccionado
+2026-03-21 05:09:11 [INFO]: [MonitoreoPage] 💾 UI: Haciendo clic en Guardar (#modificarEstadoViaje_sinGps)...
+2026-03-21 05:09:11 [INFO]: [MonitoreoPage] ✅ UI: Guardar clicado
+2026-03-21 05:09:13 [INFO]: [MonitoreoPage] 🧹 UI: Cerrando modales Bootstrap...
+2026-03-21 05:09:14 [INFO]: [MonitoreoPage] ✅ UI: Modales cerrados
+2026-03-21 05:09:14 [INFO]: [MonitoreoPage] 🏁 UI: Finalización confirmada exitosamente
+2026-03-21 05:09:14 [INFO]: [MonitoreoPage] 🏁 UI: === Viaje [498133] Finalizado Exitosamente ===
+2026-03-21 05:09:14 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [498133] finalizado.
+2026-03-21 05:09:14 [INFO]: 
+2026-03-21 05:09:14 [INFO]: ================================================================================
+2026-03-21 05:09:14 [INFO]: [PrefacturaCrearE2ETest] [FASE 4] 🚀 GENERACIÓN DE PREFACTURA
+2026-03-21 05:09:14 [INFO]: ================================================================================
+2026-03-21 05:09:14 [INFO]: [PrefacturaPage] Navegando a /prefactura/crear
+2026-03-21 05:09:15 [INFO]: [PrefacturaPage] Buscando viajes para el cliente: Demo_cli_industrial_598
+2026-03-21 05:09:15 [INFO]: [PrefacturaPage] Asegurando rango de fechas...
+2026-03-21 05:09:19 [INFO]: [PrefacturaPage] Seleccionando opción: DEMO_CLI_INDUSTRIAL_598
+2026-03-21 05:09:22 [INFO]: [PrefacturaPage] Seleccionando opción: Pesos Chilenos
+2026-03-21 05:09:27 [INFO]: [PrefacturaPage] Esperando resultados en la grilla (Firefox Robust Wait)...
+2026-03-21 05:09:57 [WARN]: [PrefacturaPage] ⚠️ Tiempo de espera agotado esperando resultados de la grilla
+2026-03-21 05:09:57 [INFO]: [PrefacturaPage] Generando prefactura para el viaje cargado...
+2026-03-21 05:09:57 [INFO]: [PrefacturaPage] Haciendo clic en "btn agregar"
+2026-03-21 05:09:57 [INFO]: [PrefacturaPage] Haciendo clic en Guardar
+2026-03-21 05:09:57 [INFO]: [PrefacturaPage] Esperando redirección automática a /prefactura/index y mensaje de éxito
+2026-03-21 05:09:59 [INFO]: [PrefacturaPage] Buscando prefacturas para el cliente: Demo_cli_industrial_598 en /index
+2026-03-21 05:10:01 [INFO]: [PrefacturaPage] Seleccionando opción: DEMO_CLI_INDUSTRIAL_598
+2026-03-21 05:10:01 [INFO]: [PrefacturaPage] Haciendo clic en botón Buscar (Index)
+2026-03-21 05:10:05 [INFO]: [PrefacturaPage] Se encontraron 1 registros. ID de la primera prefactura: [146]
+2026-03-21 05:10:05 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Proceso de Prefactura Finalizado Correctamente
+2026-03-21 05:10:05 [INFO]: [PrefacturaCrearE2ETest] 
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_707]           | ID: 336
+🏢 Cliente       : [Demo_cli_industrial_598]      | ID: 322
+🚚 Vehiculo      : [Demo_veh_TTKK78]              | Patente: Demo_veh_TTKK78 | Asociado: Demo_tra_cargo_707
+👤 Conductor     : [Demo_con_pedro Demo_con_araya] | Asociado: Demo_tra_cargo_707
+🏭 Transportista : [Demo_tra_cargo_707]          
+🏢 Cliente       : [Demo_cli_industrial_598]     
+🔹 Contrato Venta: [380297]                      
+🔹 Contrato Costo: [184449]                      
+🎫 Viaje         : [498133]                       | Asociado: Demo_cli_industrial_598 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 146 | Cliente: Demo_cli_industrial_598
+====================================================================================================
+2026-03-21 05:10:05 [INFO]: [PrefacturaCrearE2ETest] ⏱️ Tiempo total: 244.09s
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_707]           | ID: 336
+🏢 Cliente       : [Demo_cli_industrial_598]      | ID: 322
+🚚 Vehiculo      : [Demo_veh_TTKK78]              | Patente: Demo_veh_TTKK78 | Asociado: Demo_tra_cargo_707
+👤 Conductor     : [Demo_con_pedro Demo_con_araya] | Asociado: Demo_tra_cargo_707
+🏭 Transportista : [Demo_tra_cargo_707]          
+🏢 Cliente       : [Demo_cli_industrial_598]     
+🔹 Contrato Venta: [380297]                      
+🔹 Contrato Costo: [184449]                      
+🎫 Viaje         : [498133]                       | Asociado: Demo_cli_industrial_598 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 146 | Cliente: Demo_cli_industrial_598
+====================================================================================================

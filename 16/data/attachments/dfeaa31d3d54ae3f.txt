@@ -1,0 +1,28 @@
+2026-03-21 04:56:03 [INFO]: ENTORNO: DEMO 🎭
+2026-03-21 04:56:03 [INFO]: ✅ Cargado seededTransportista: Demo_tra_transportes_857 (ID: 334)
+2026-03-21 04:56:05 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-21 04:56:08 [INFO]: 📝 Completando formulario de conductor para: Demo_con_juan Demo_con_pérez
+2026-03-21 04:56:08 [INFO]: [ConductorFormPage] Llenando usuario: setxmp75
+2026-03-21 04:56:08 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-21 04:56:08 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_juan
+2026-03-21 04:56:08 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_pérez
+2026-03-21 04:56:08 [INFO]: [ConductorFormPage] Llenando documento: 79.544.291-K
+2026-03-21 04:56:08 [INFO]: [BasePage] Ingresando RUT con verificación: [79.544.291-K] en #conductores-documento
+2026-03-21 04:56:09 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 79544291K, Obtenido: 79544291. Usando JS para forzar valor...
+2026-03-21 04:56:10 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-21 04:56:10 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-21 04:56:10 [INFO]: [ConductorFormPage] Llenando telefono: +56935897148
+2026-03-21 04:56:10 [INFO]: [ConductorFormPage] Llenando email: demo_con_juandemo_con_perez@gmail.com
+2026-03-21 04:56:10 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-21 04:56:11 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-21 04:56:12 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_transportes_857]
+2026-03-21 04:56:13 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-21 04:56:15 [INFO]: ✅ Conductor [Demo_con_juan Demo_con_pérez] guardado exitosamente
+2026-03-21 04:56:15 [INFO]: ✅ seededConductor guardado: Demo_con_juan Demo_con_pérez
+2026-03-21 04:56:15 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_juan Demo_con_pérez] | Asociado: Demo_tra_transportes_857
+====================================================================================================

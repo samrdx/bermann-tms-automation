@@ -1,0 +1,28 @@
+2026-03-21 04:50:51 [INFO]: ENTORNO: DEMO 🎭
+2026-03-21 04:50:51 [INFO]: ✅ Cargado seededTransportista: Demo_tra_logistica_752 (ID: 333)
+2026-03-21 04:50:51 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-21 04:50:54 [INFO]: 📝 Completando formulario de conductor para: Demo_con_valentina Demo_con_torres
+2026-03-21 04:50:54 [INFO]: [ConductorFormPage] Llenando usuario: oiclid71
+2026-03-21 04:50:54 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-21 04:50:54 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_valentina
+2026-03-21 04:50:54 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_torres
+2026-03-21 04:50:54 [INFO]: [ConductorFormPage] Llenando documento: 14.249.793-K
+2026-03-21 04:50:54 [INFO]: [BasePage] Ingresando RUT con verificación: [14.249.793-K] en #conductores-documento
+2026-03-21 04:50:55 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 14249793K, Obtenido: 14249793. Usando JS para forzar valor...
+2026-03-21 04:50:56 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-21 04:50:56 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-21 04:50:56 [INFO]: [ConductorFormPage] Llenando telefono: +56999171510
+2026-03-21 04:50:56 [INFO]: [ConductorFormPage] Llenando email: demo_con_valentinademo_con_torres@hotmail.com
+2026-03-21 04:50:56 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-21 04:50:58 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-21 04:50:58 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_logistica_752]
+2026-03-21 04:50:59 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-21 04:51:01 [INFO]: ✅ Conductor [Demo_con_valentina Demo_con_torres] guardado exitosamente
+2026-03-21 04:51:01 [INFO]: ✅ seededConductor guardado: Demo_con_valentina Demo_con_torres
+2026-03-21 04:51:01 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_valentina Demo_con_torres] | Asociado: Demo_tra_logistica_752
+====================================================================================================

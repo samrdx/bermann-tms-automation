@@ -1,0 +1,15 @@
+2026-03-21 04:32:16 [INFO]: ✅ Transportista seeded cargado: Qa_tra_express_581 (ID: 473)
+2026-03-21 04:32:16 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-21 04:32:19 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_express_581
+2026-03-21 04:32:19 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_VJ3209
+2026-03-21 04:32:19 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_VJ3209
+2026-03-21 04:32:20 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_express_581
+2026-03-21 04:32:22 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_express_581" seleccionado
+2026-03-21 04:32:22 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-21 04:32:22 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-21 04:32:23 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-21 04:32:24 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-21 04:32:24 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-21 04:32:24 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-21 04:32:28 [INFO]: ✅ Vehículo [Qa_veh_VJ3209] guardado exitosamente
+2026-03-21 04:32:28 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_VJ3209

@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_cargo_666]           | ID: 335
+🏢 Cliente       : [Demo_cli_industrial_283]      | ID: 321
+🚚 Vehiculo      : [Demo_veh_LE9852]              | Patente: Demo_veh_LE9852 | Asociado: Demo_tra_cargo_666
+👤 Conductor     : [Demo_con_maría Demo_con_díaz] | Asociado: Demo_tra_cargo_666
+🏭 Transportista : [Demo_tra_cargo_666]          
+🏢 Cliente       : [Demo_cli_industrial_283]     
+🔹 Contrato Venta: [139299]                      
+🔹 Contrato Costo: [890862]                      
+🎫 Viaje         : [106654]                       | Asociado: Demo_cli_industrial_283 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 145 | Cliente: Demo_cli_industrial_283
+====================================================================================================

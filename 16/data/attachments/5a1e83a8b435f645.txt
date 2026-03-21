@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_logistica_680]         | ID: 476
+🏢 Cliente       : [Qa_cli_servicios_447]         | ID: 404
+🚚 Vehiculo      : [Qa_veh_UA6820]                | Patente: Qa_veh_UA6820 | Asociado: Qa_tra_logistica_680
+👤 Conductor     : [Qa_con_diego Qa_con_pérez]    | Asociado: Qa_tra_logistica_680
+🏭 Transportista : [Qa_tra_logistica_680]        
+🏢 Cliente       : [Qa_cli_servicios_447]        
+🔹 Contrato Venta: [314933]                      
+🔹 Contrato Costo: [983610]                      
+🎫 Viaje         : [951432]                       | Asociado: Qa_cli_servicios_447 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 218 | Cliente: Qa_cli_servicios_447
+====================================================================================================
