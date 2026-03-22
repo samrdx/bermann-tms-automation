@@ -6,6 +6,7 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "npm run qa:e2e:all",
+    "prepw:run": "npm run clean:reports",
     "pw:run": "node scripts/run-playwright-suite.mjs",
     "ci:validate:workflow-scripts": "node scripts/ci/validate-workflow-scripts.mjs",
     "// === QA | CONFIG SMOKE (1 VEZ POR SPRINT) ===": "",
@@ -80,7 +81,13 @@
     "show-report:qa": "playwright show-report playwright-report-qa",
     "show-report:demo": "playwright show-report playwright-report-demo",
     "codegen:qa": "playwright codegen https://moveontruckqa.bermanntms.cl",
-    "codegen:demo": "playwright codegen https://demo.bermanntms.cl"
+    "codegen:demo": "playwright codegen https://demo.bermanntms.cl",
+    "// === STORAGE MAINTENANCE ===": "",
+    "storage:clean:reports": "npm run clean:reports",
+    "storage:clean:npm": "npm cache verify && npm cache clean --force && npm cache verify",
+    "storage:pw:browsers:list": "playwright install --list",
+    "storage:pw:browsers:refresh": "playwright uninstall && playwright install chromium firefox && playwright install --list",
+    "storage:maintenance": "npm run storage:clean:reports && npm run storage:clean:npm && npm run storage:pw:browsers:list"
   },
   "dependencies": {
     "dotenv": "^16.6.1",
