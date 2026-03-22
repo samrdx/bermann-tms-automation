@@ -20,6 +20,7 @@ interface CreatedEntities {
 }
 
 const logger = createLogger('ProformaCrearE2ETest');
+const PROFORMA_ID_REGEX = /^\d+$/;
 let proformaId = 'N/A';
 let createdEntities: CreatedEntities;
 
@@ -44,8 +45,8 @@ test.describe('[E2E] Finanzas - Proforma (Atomico)', () => {
 
     logger.subpaso(`📦 Setup: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
 
-    await api.createTransportista(transName, generateValidChileanRUT());
-    await api.createCliente(cliName);
+    const transportistaId = await api.createTransportista(transName, generateValidChileanRUT());
+    const clienteId = await api.createCliente(cliName);
     const patente = await api.createVehiculo(transName);
     const conductor = await api.createConductor(transName);
 
@@ -54,6 +55,15 @@ test.describe('[E2E] Finanzas - Proforma (Atomico)', () => {
 
     const contratoVenta = await api.createContratoVenta(cliName);
     const contratoCosto = await api.createContratoCosto(transName);
+
+    await test.step('Validar entidades base creadas antes del flujo Proforma', async () => {
+      expect(transportistaId, `Transportista no creado correctamente para ${transName}`).toMatch(/^\d+$/);
+      expect(clienteId, `Cliente no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
+      expect(contratoVenta, `Contrato venta no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
+      expect(contratoCosto, `Contrato costo no creado correctamente para ${transName}`).toMatch(/^\d+$/);
+      expect(patente, `Patente de vehiculo inválida para ${transName}`).toBeTruthy();
+      expect(conductor, `Conductor inválido para ${transName}`).toBeTruthy();
+    });
 
     createdEntities = {
       transportista: transName,
@@ -125,7 +135,10 @@ test.describe('[E2E] Finanzas - Proforma (Atomico)', () => {
         id: proformaId,
         extra: `Transportista: ${transName}`,
       });
-      expect(proformaId).not.toBe('N/A');
+      expect(
+        proformaId,
+        `ID de proforma invalido para transportista ${transName}. Debe cumplir ${PROFORMA_ID_REGEX}`,
+      ).toMatch(PROFORMA_ID_REGEX);
     });
 
     const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);

@@ -4,6 +4,22 @@ import { createLogger } from '../../utils/logger.js';
 
 const logger = createLogger('PrefacturaPage');
 
+const PROFORMA_ID_REGEX = /^\d+$/;
+const PROFORMA_INDEX_LOOKUP_TIMEOUT_MS = 25000;
+
+interface ProformaLookupContext {
+  transportista: string;
+  matchedBy: 'transportista' | 'fallback-first-row';
+  rowText: string;
+}
+
+interface ProformaResolvedRow {
+  matchedBy: ProformaLookupContext['matchedBy'];
+  rowText: string;
+  rawId: string;
+  totalRows: number;
+}
+
 export class PrefacturaPage extends BasePage {
   private readonly selectors = {
     crear: {
@@ -61,7 +77,7 @@ export class PrefacturaPage extends BasePage {
     logger.info('🧾 Navegando a /proforma/index');
     await this.page.goto('/proforma/index');
     await this.page.waitForSelector('text=/Listado Proforma/i', { state: 'visible', timeout: 15000 });
-    await this.page.waitForSelector('div.dataTables_wrapper table', { state: 'visible', timeout: 15000 });
+    await this.waitForProformaIndexGridLoaded({ timeoutMs: 20000 });
   }
 
   // ==========================================
@@ -350,13 +366,18 @@ export class PrefacturaPage extends BasePage {
   async buscarProformaEnIndexPorTransportista(transportistaName: string): Promise<string> {
     logger.info(`🔎 Buscando proformas para transportista: ${transportistaName}`);
 
+    const normalizedTransportista = transportistaName.trim();
+    if (!normalizedTransportista) {
+      throw new Error('Nombre de transportista requerido para buscar proforma en index.');
+    }
+
     if (!/\/proforma\/index/i.test(this.page.url())) {
       await this.navigateToProformaIndex();
     }
 
     await this.selectBootstrapDropdownByDataIdsWithSearch(
       ['proforma-transportista_id', 'prefactura-transportista_id', 'transportista', 'cliente'],
-      transportistaName,
+      normalizedTransportista,
       false,
     );
 
@@ -366,22 +387,72 @@ export class PrefacturaPage extends BasePage {
     }
 
     await this.page.waitForLoadState('networkidle').catch(() => {});
-    await this.waitForProformaIndexGridLoaded({ timeoutMs: 15000 });
 
-    const rows = this.page.locator(this.selectors.index.filasPrefactura).filter({ hasNotText: /Ningún dato disponible/i });
-    const count = await rows.count();
-    if (count === 0) {
-      throw new Error(`No se encontraron proformas para transportista ${transportistaName}`);
+    const selectedRow = await this.resolveProformaIndexRowByTransportista(
+      normalizedTransportista,
+      PROFORMA_INDEX_LOOKUP_TIMEOUT_MS,
+    );
+
+    const lookupContext: ProformaLookupContext = {
+      transportista: normalizedTransportista,
+      matchedBy: selectedRow.matchedBy,
+      rowText: selectedRow.rowText,
+    };
+
+    const id = this.validateProformaIdOrThrow(selectedRow.rawId, lookupContext);
+    logger.success(`Proforma encontrada. ID: ${id} (matchedBy=${selectedRow.matchedBy})`);
+    return id;
+  }
+
+  private async resolveProformaIndexRowByTransportista(
+    transportista: string,
+    timeoutMs: number,
+  ): Promise<ProformaResolvedRow> {
+    const deadline = Date.now() + timeoutMs;
+    let lastRowText = '';
+    let lastTotalRows = 0;
+
+    while (Date.now() < deadline) {
+      const remainingMs = Math.max(1000, deadline - Date.now());
+      await this.waitForProformaIndexGridLoaded({ timeoutMs: Math.min(remainingMs, 10000) }).catch(() => {});
+
+      const rows = this.page.locator(this.selectors.index.filasPrefactura).filter({ hasNotText: /Ningún dato disponible/i });
+      const totalRows = await rows.count();
+
+      if (totalRows > 0) {
+        const rowWithTransportista = rows
+          .filter({ hasText: new RegExp(this.escapeForRegExp(transportista), 'i') })
+          .first();
+
+        const hasExactRow = (await rowWithTransportista.count()) > 0;
+        const selectedRow = hasExactRow ? rowWithTransportista : rows.first();
+
+        const rowText = (await selectedRow.textContent())?.trim() || '';
+        const rawId = (await selectedRow.locator('td').first().textContent())?.trim() || '';
+
+        return {
+          matchedBy: hasExactRow ? 'transportista' : 'fallback-first-row',
+          rowText,
+          rawId,
+          totalRows,
+        };
+      }
+
+      lastTotalRows = totalRows;
+      const firstRow = this.page.locator(this.selectors.index.filasPrefactura).first();
+      lastRowText = ((await firstRow.textContent().catch(() => '')) || '').trim();
+      await this.page.waitForTimeout(700);
     }
 
-    const rowWithTransportista = rows.filter({ hasText: new RegExp(transportistaName, 'i') }).first();
-    const selectedRow = (await rowWithTransportista.count()) > 0 ? rowWithTransportista : rows.first();
-
-    const firstRowId = await selectedRow.locator('td').first().textContent();
-    const id = firstRowId?.trim() || 'N/A';
-
-    logger.success(`Proforma encontrada. ID: ${id}`);
-    return id;
+    const context = this.buildProformaLookupErrorContext({
+      transportista,
+      matchedBy: 'transportista',
+      rowText: lastRowText,
+    });
+    throw new Error(
+      `No se encontraron filas de proforma para transportista ${transportista} dentro de ${timeoutMs}ms. ` +
+      `totalRows=${lastTotalRows}. ${context}`,
+    );
   }
 
   // ==========================================
@@ -765,7 +836,7 @@ export class PrefacturaPage extends BasePage {
     logger.success('Sección de viajes proforma visible');
   }
 
-  private async waitForProformaIndexGridLoaded(options?: { timeoutMs?: number }): Promise<void> {
+  async waitForProformaIndexGridLoaded(options?: { timeoutMs?: number }): Promise<void> {
     const timeoutMs = options?.timeoutMs ?? 15000;
     logger.info('⏳ Esperando carga de DataTable en /proforma/index...');
 
@@ -788,13 +859,41 @@ export class PrefacturaPage extends BasePage {
         document.querySelectorAll('div.dataTables_wrapper table tbody tr, table#tabla-prefactura tbody tr'),
       );
 
-      if (rows.length === 0) {
-        return false;
-      }
+      if (rows.length === 0) return false;
 
-      return true;
+      const hasDataRows = rows.some((row) => {
+        const rowText = (row.textContent || '').trim();
+        return rowText.length > 0 && !/Ningún dato disponible/i.test(rowText);
+      });
+      const hasNoDataRow = rows.some((row) => /Ningún dato disponible/i.test((row.textContent || '').trim()));
+
+      return hasDataRows || hasNoDataRow;
     }, { timeout: timeoutMs });
 
     logger.success('DataTable de proforma cargada en index');
+  }
+
+  private validateProformaIdOrThrow(rawId: string, lookupContext: ProformaLookupContext): string {
+    const id = rawId.trim();
+    if (PROFORMA_ID_REGEX.test(id)) {
+      return id;
+    }
+
+    const context = this.buildProformaLookupErrorContext(lookupContext);
+    throw new Error(
+      `ID proforma invalido extraido desde /proforma/index: "${id || '<empty>'}". Debe cumplir ${PROFORMA_ID_REGEX}. ${context}`,
+    );
+  }
+
+  private buildProformaLookupErrorContext(context: ProformaLookupContext): string {
+    return `Lookup context: ${JSON.stringify({
+      transportista: context.transportista,
+      matchedBy: context.matchedBy,
+      rowText: context.rowText,
+    })}`;
+  }
+
+  private escapeForRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }

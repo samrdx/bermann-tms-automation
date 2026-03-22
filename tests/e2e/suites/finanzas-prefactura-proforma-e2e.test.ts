@@ -10,6 +10,7 @@ import { entityTracker } from '../../../src/utils/entityTracker.js';
 import { NamingHelper } from '../../../src/utils/NamingHelper.js';
 
 const logger = createLogger('FinanzasPrefacturaProformaE2E');
+const PROFORMA_ID_REGEX = /^\d+$/;
 
 test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
   test.setTimeout(720000);
@@ -30,12 +31,21 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     const cliName = NamingHelper.getClienteName().nombre;
     const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
 
-    await api.createTransportista(transName, generateValidChileanRUT());
-    await api.createCliente(cliName);
+    const transportistaId = await api.createTransportista(transName, generateValidChileanRUT());
+    const clienteId = await api.createCliente(cliName);
     const patente = await api.createVehiculo(transName);
     const conductor = await api.createConductor(transName);
     const contratoVenta = await api.createContratoVenta(cliName);
     const contratoCosto = await api.createContratoCosto(transName);
+
+    await test.step('Validar entidades base creadas antes del flujo encadenado', async () => {
+      expect(transportistaId, `Transportista no creado correctamente para ${transName}`).toMatch(/^\d+$/);
+      expect(clienteId, `Cliente no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
+      expect(contratoVenta, `Contrato venta no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
+      expect(contratoCosto, `Contrato costo no creado correctamente para ${transName}`).toMatch(/^\d+$/);
+      expect(patente, `Patente de vehiculo inválida para ${transName}`).toBeTruthy();
+      expect(conductor, `Conductor inválido para ${transName}`).toBeTruthy();
+    });
 
     await api.createViaje(cliName, nroViaje);
     logger.success(`Viaje [${nroViaje}] planificado.`);
@@ -69,7 +79,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       await finanzasPage.filtrarViajesPorCliente(cliName);
       await finanzasPage.generarPrefactura();
       prefacturaId = await finanzasPage.buscarPrefacturaEnIndex(cliName);
-      expect(prefacturaId).not.toBe('N/A');
+      expect(prefacturaId, `ID de prefactura invalido para cliente ${cliName}`).toMatch(/^\d+$/);
     });
 
     logger.fase(4, 'Crear Proforma del mismo viaje');
@@ -79,7 +89,10 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       await finanzasPage.assertGuardarDisabledWithoutViajes();
       await finanzasPage.generarProforma();
       proformaId = await finanzasPage.buscarProformaEnIndexPorTransportista(transName);
-      expect(proformaId).not.toBe('N/A');
+      expect(
+        proformaId,
+        `ID de proforma invalido para transportista ${transName}. Debe cumplir ${PROFORMA_ID_REGEX}`,
+      ).toMatch(PROFORMA_ID_REGEX);
     });
 
     entityTracker.register({ type: 'Prefactura', name: 'Creada', id: prefacturaId, extra: `Viaje: ${nroViaje}` });
