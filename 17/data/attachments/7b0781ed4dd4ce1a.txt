@@ -1,0 +1,47 @@
+2026-03-22 05:17:38 [INFO]: ENTORNO: DEMO 🎭
+2026-03-22 05:17:38 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-22 05:17:38 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-22 05:17:40 [INFO]: ✅ Navegación correcta
+2026-03-22 05:17:40 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-22 05:17:40 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_central_726
+2026-03-22 05:17:41 [INFO]: [ClienteFormPage] Completando RUT: 84267454-9
+2026-03-22 05:17:41 [INFO]: [BasePage] Ingresando RUT con verificación: [84267454-9] en #clientes-rut
+2026-03-22 05:17:42 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 84.267.454-9
+2026-03-22 05:17:42 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_central spa_726
+2026-03-22 05:17:42 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-22 05:17:43 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-22 05:17:43 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-22 05:17:43 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-22 05:17:44 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Región de Ñuble
+2026-03-22 05:17:46 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Itata
+2026-03-22 05:17:47 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-22 05:17:47 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Itata" (región: "Región de Ñuble"), reintentando...
+2026-03-22 05:17:47 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 2/5
+2026-03-22 05:17:48 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Coquimbo
+2026-03-22 05:17:50 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Limarí
+2026-03-22 05:17:51 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Monte Patria
+2026-03-22 05:17:51 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Coquimbo → Limarí → Monte Patria
+2026-03-22 05:17:51 [INFO]: [ClienteFormPage] Completando calle: Av. Kennedy
+2026-03-22 05:17:51 [INFO]: [ClienteFormPage] Completando altura: 890
+2026-03-22 05:17:51 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-22 05:17:52 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 843/843
+2026-03-22 05:17:52 [INFO]: ✅ Formulario Completado
+2026-03-22 05:17:52 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-22 05:17:52 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-22 05:17:57 [INFO]: ✅ Guardar iniciado
+2026-03-22 05:17:57 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-22 05:17:59 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-22 05:17:59 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-22 05:17:59 [INFO]: 🔍 Buscando por RUT: 84267454-9 (limpio: 842674549)
+2026-03-22 05:17:59 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-22 05:18:01 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-22 05:18:01 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 328
+2026-03-22 05:18:01 [INFO]: ✅ Cliente [Demo_cli_central_726] ID: 328 identificado exitosamente
+2026-03-22 05:18:01 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-23395932464.json
+2026-03-22 05:18:01 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_central_726]         | ID: 328
+====================================================================================================

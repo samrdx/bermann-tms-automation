@@ -1,0 +1,26 @@
+2026-03-22 04:51:13 [INFO]: ENTORNO: QA 🧪
+2026-03-22 04:51:13 [INFO]: ✅ Cargado seededTransportista: Qa_tra_rutas_720 (ID: 508)
+2026-03-22 04:51:13 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-22 04:51:16 [INFO]: 📝 Completando formulario de conductor para: Qa_con_antonio Qa_con_díaz
+2026-03-22 04:51:16 [INFO]: [ConductorFormPage] Llenando usuario: rmxkjd71
+2026-03-22 04:51:16 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-22 04:51:16 [INFO]: [ConductorFormPage] Llenando nombre: Qa_con_antonio
+2026-03-22 04:51:16 [INFO]: [ConductorFormPage] Llenando apellido: Qa_con_díaz
+2026-03-22 04:51:16 [INFO]: [ConductorFormPage] Llenando documento: 54.762.270-7
+2026-03-22 04:51:16 [INFO]: [BasePage] Ingresando RUT con verificación: [54.762.270-7] en #conductores-documento
+2026-03-22 04:51:17 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 54.762.270-7
+2026-03-22 04:51:17 [INFO]: [ConductorFormPage] Llenando telefono: +56937768458
+2026-03-22 04:51:17 [INFO]: [ConductorFormPage] Llenando email: qa_con_antonioqa_con_diaz@hotmail.com
+2026-03-22 04:51:17 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-22 04:51:19 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-22 04:51:19 [INFO]: [ConductorFormPage] Seleccionando transportista: [Qa_tra_rutas_720]
+2026-03-22 04:51:20 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-22 04:51:22 [INFO]: ✅ Conductor [Qa_con_antonio Qa_con_díaz] guardado exitosamente
+2026-03-22 04:51:22 [INFO]: ✅ seededConductor guardado: Qa_con_antonio Qa_con_díaz
+2026-03-22 04:51:22 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+👤 Conductor     : [Qa_con_antonio Qa_con_díaz]   | Asociado: Qa_tra_rutas_720
+====================================================================================================

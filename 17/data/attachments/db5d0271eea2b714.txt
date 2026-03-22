@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_horizonte_738]       | ID: 344
+🏢 Cliente       : [Demo_cli_comercial_832]       | ID: 330
+🚚 Vehiculo      : [Demo_veh_CP7383]              | Patente: Demo_veh_CP7383 | Asociado: Demo_tra_horizonte_738
+👤 Conductor     : [Demo_con_ana Demo_con_soto]   | Asociado: Demo_tra_horizonte_738
+🏭 Transportista : [Demo_tra_horizonte_738]      
+🏢 Cliente       : [Demo_cli_comercial_832]      
+🔹 Contrato Venta: [348501]                      
+🔹 Contrato Costo: [376963]                      
+🎫 Viaje         : [968123]                       | Asociado: Demo_cli_comercial_832 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 152 | Cliente: Demo_cli_comercial_832
+====================================================================================================

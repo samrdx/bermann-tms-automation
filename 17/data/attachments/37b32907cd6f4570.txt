@@ -1,0 +1,34 @@
+2026-03-22 05:17:15 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-22 05:17:15 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-22 05:17:18 [INFO]: ✅ Navegación exitosa
+2026-03-22 05:17:18 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-22 05:17:18 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_horizonte_808
+2026-03-22 05:17:18 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_horizonte_808
+2026-03-22 05:17:18 [INFO]: [TransportistaFormPage] Completando documento (RUT): 54999001-0
+2026-03-22 05:17:18 [INFO]: [BasePage] Ingresando RUT con verificación: [54999001-0] en #transportistas-documento
+2026-03-22 05:17:20 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 54.999.001-0
+2026-03-22 05:17:20 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-22 05:17:20 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-22 05:17:21 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-22 05:17:21 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-22 05:17:21 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region Metropolitana
+2026-03-22 05:17:23 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Maipo
+2026-03-22 05:17:24 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Paine
+2026-03-22 05:17:24 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region Metropolitana → Maipo → Paine
+2026-03-22 05:17:24 [INFO]: [TransportistaFormPage] Completando calle: Calle Ahumada
+2026-03-22 05:17:24 [INFO]: [TransportistaFormPage] Completando altura: 379
+2026-03-22 05:17:24 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-22 05:17:25 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-22 05:17:25 [INFO]: ✅ Formulario completado
+2026-03-22 05:17:25 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-22 05:17:25 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-22 05:17:30 [INFO]: ✅ Guardado iniciado
+2026-03-22 05:17:30 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-22 05:17:32 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-22 05:17:32 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-22 05:17:32 [INFO]: 🔍 Buscando por nombre: Demo_tra_horizonte_808
+2026-03-22 05:17:32 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-22 05:17:34 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 341
+2026-03-22 05:17:34 [INFO]: ✅ ID del Transportista [Demo_tra_horizonte_808] extraído exitosamente: 341
+2026-03-22 05:17:34 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-demo-nightly-demo-23395932464.json
+2026-03-22 05:17:34 [INFO]: ✅ Prueba exitosa

@@ -1,0 +1,67 @@
+2026-03-22 05:25:04 [INFO]: ================================================================================
+2026-03-22 05:25:04 [INFO]: 🚀 Iniciando creación de Contrato Tipo Venta (Seeded Cliente Mode)
+2026-03-22 05:25:04 [INFO]: ================================================================================
+2026-03-22 05:25:04 [INFO]: 📋 Fase 1: Cargando datos del cliente sembrado...
+2026-03-22 05:25:04 [INFO]: 📦 Usando cliente: "Demo_cli_central spa_726" (ID: 328)
+2026-03-22 05:25:04 [INFO]: 📋 Fase 2: Navegando al formulario de creación de contratos...
+2026-03-22 05:25:04 [INFO]: [ContratosFormPage] Navegando a la página de creación de contrato: /contrato/crear
+2026-03-22 05:25:07 [INFO]: [ContratosFormPage] ✅ Página de creación de contrato cargada y campo Nro Contrato visible
+2026-03-22 05:25:07 [INFO]: ✅ Formulario cargado
+2026-03-22 05:25:07 [INFO]: 📋 Fase 3-4: Completando el encabezado del contrato y guardando...
+2026-03-22 05:25:07 [INFO]: [ContratosFormPage] 📝 Completando información básica del contrato (Fase 1) - Tipo: Venta
+2026-03-22 05:25:07 [INFO]: [ContratosFormPage] Completando Nro Contrato: 107213
+2026-03-22 05:25:07 [INFO]: [ContratosFormPage] 🔽 Seleccionando Tipo Contrato = Venta...
+2026-03-22 05:25:13 [WARN]: [ContratosFormPage] ⚠️ ⚠️ fallback: clicking option via JS for "Venta"
+2026-03-22 05:25:14 [WARN]: [ContratosFormPage] ⚠️ ⚠️ No se detectó la respuesta esperada de rendersubview, pero se registraron todos los XHR
+2026-03-22 05:25:14 [INFO]: [ContratosFormPage] ⏳ Esperando AJAX...
+2026-03-22 05:25:16 [INFO]: [ContratosFormPage] ✅ Tipo Venta seleccionado
+2026-03-22 05:25:16 [INFO]: [ContratosFormPage] Seleccionando Subtipo: 1...
+2026-03-22 05:25:17 [INFO]: [ContratosFormPage] ✅ Subtipo 1 seleccionado
+2026-03-22 05:25:17 [INFO]: [ContratosFormPage] 🔽 Seleccionando cliente: "Demo_cli_central spa_726"...
+2026-03-22 05:25:17 [INFO]: [ContratosFormPage] Seleccionando Cliente: "Demo_cli_central spa_726"...
+2026-03-22 05:25:17 [INFO]: [ContratosFormPage] ✅ Cliente seleccionado: "DEMO_CLI_CENTRAL SPA_726" (val: 328)
+2026-03-22 05:25:18 [INFO]: [ContratosFormPage] 📅 [DEMO] Seleccionando Fecha de vencimiento: 31/12/2026
+2026-03-22 05:25:19 [INFO]: [ContratosFormPage] ✅ Fecha de vencimiento establecida en 31/12/2026 vía daypicker
+2026-03-22 05:25:19 [INFO]: [ContratosFormPage] 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto
+2026-03-22 05:25:20 [INFO]: [ContratosFormPage] ✅ Unidad de negocio establecida en "Defecto"
+2026-03-22 05:25:20 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier fondo de modal...
+2026-03-22 05:25:21 [INFO]: [ContratosFormPage] 💾 Guardando encabezado básico del contrato...
+2026-03-22 05:25:25 [INFO]: [ContratosFormPage] ✅ Encabezado del contrato creado exitosamente con ID: 592
+2026-03-22 05:25:25 [INFO]: [ContratosFormPage] 📍 Redirigido a: https://demo.bermanntms.cl/contrato/editar/592
+2026-03-22 05:25:25 [INFO]: ✅ Encabezado del contrato guardado! ID: 592
+2026-03-22 05:25:25 [INFO]: 📋 Fase 5: Agregando ruta 715 + carga 715_19 con tarifas...
+2026-03-22 05:25:25 [INFO]: [ContratosFormPage] 🛣️ Añadiendo Ruta 47 (ambiente DEMO)
+2026-03-22 05:25:25 [INFO]: [ContratosFormPage] Haciendo clic en el botón "Añadir Ruta"
+2026-03-22 05:25:27 [INFO]: [ContratosFormPage] Esperando a que aparezca el modal de rutas...
+2026-03-22 05:25:27 [INFO]: [ContratosFormPage] ✅ Modal de rutas visible
+2026-03-22 05:25:28 [INFO]: [ContratosFormPage] Seleccionando Ruta 47
+2026-03-22 05:25:29 [INFO]: [ContratosFormPage] Cerrando modal de rutas
+2026-03-22 05:25:30 [INFO]: [ContratosFormPage] Haciendo clic en "Añadir Carga" para la Ruta 47
+2026-03-22 05:25:31 [INFO]: [ContratosFormPage] ✅ Modal de carga visible
+2026-03-22 05:25:31 [INFO]: [ContratosFormPage] Seleccionando Carga vía: //a[@id='btn_plus_ruta_47_6']//i[@class='fa fa-plus']
+2026-03-22 05:25:32 [INFO]: [ContratosFormPage] Cerrando modal de carga
+2026-03-22 05:25:33 [INFO]: [ContratosFormPage] Completando tarifas: Conductor=20000, Viaje=50000
+2026-03-22 05:25:35 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_extra_47 establecido en "50000"
+2026-03-22 05:25:37 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_conductor_47 establecido en "20000"
+2026-03-22 05:25:38 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier modal restante
+2026-03-22 05:25:39 [INFO]: [ContratosFormPage] ✅ Ruta 47 y carga añadidas exitosamente
+2026-03-22 05:25:39 [INFO]: ✅ Ruta y tarifas agregadas
+2026-03-22 05:25:39 [INFO]: 📋 Fase 6: Guardando contrato completo (con tarifas)...
+2026-03-22 05:25:39 [INFO]: [ContratosFormPage] 💾 Guardando contrato y extrayendo ID
+2026-03-22 05:25:44 [INFO]: [ContratosFormPage] URL actual después de guardar: https://demo.bermanntms.cl/contrato/index
+2026-03-22 05:25:44 [WARN]: [ContratosFormPage] ⚠️ ⚠️ Fallo al extraer el ID del contrato de la URL: https://demo.bermanntms.cl/contrato/index, devolviendo cadena vacía para confiar en la búsqueda de índice
+2026-03-22 05:25:44 [INFO]: ✅ Contrato completo guardado! ID: 
+2026-03-22 05:25:44 [INFO]: 📋 Fase 7: Verificando contrato en el índice...
+2026-03-22 05:25:44 [INFO]: 🔍 Intentando verificar el contrato 1/3...
+2026-03-22 05:25:46 [INFO]: ⌨️ Buscando por cliente: Demo_cli_central spa_726
+2026-03-22 05:25:48 [INFO]: ✅ Contrato 107213 encontrado en el índice!
+2026-03-22 05:25:48 [INFO]: 📋 Fase 8: Persistiendo datos del contrato en JSON...
+2026-03-22 05:25:48 [INFO]: ✅ Datos de contratoCliente guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-23395932464.json
+2026-03-22 05:25:48 [INFO]: ================================================================================
+2026-03-22 05:25:48 [INFO]: ✅ CREACIÓN DE CONTRATO TIPO VENTA COMPLETADA!
+2026-03-22 05:25:48 [INFO]: ================================================================================
+2026-03-22 05:25:48 [INFO]:    Nro Contrato: 107213
+2026-03-22 05:25:48 [INFO]:    Contract ID: 592
+2026-03-22 05:25:48 [INFO]:    Cliente: Demo_cli_central spa_726
+2026-03-22 05:25:48 [INFO]:    Tiempo de ejecución: 43.79s
+2026-03-22 05:25:48 [INFO]: ================================================================================

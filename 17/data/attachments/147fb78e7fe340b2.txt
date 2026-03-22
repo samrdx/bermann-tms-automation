@@ -1,0 +1,26 @@
+2026-03-22 05:18:34 [INFO]: ENTORNO: DEMO 🎭
+2026-03-22 05:18:34 [INFO]: ✅ Cargado seededTransportista: Demo_tra_horizonte_808 (ID: 341)
+2026-03-22 05:18:34 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-22 05:18:37 [INFO]: 📝 Completando formulario de conductor para: Demo_con_francisco Demo_con_contreras
+2026-03-22 05:18:37 [INFO]: [ConductorFormPage] Llenando usuario: gtwzye24
+2026-03-22 05:18:37 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-22 05:18:37 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_francisco
+2026-03-22 05:18:37 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_contreras
+2026-03-22 05:18:37 [INFO]: [ConductorFormPage] Llenando documento: 20.483.276-5
+2026-03-22 05:18:37 [INFO]: [BasePage] Ingresando RUT con verificación: [20.483.276-5] en #conductores-documento
+2026-03-22 05:18:38 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 20.483.276-5
+2026-03-22 05:18:38 [INFO]: [ConductorFormPage] Llenando telefono: +56949433949
+2026-03-22 05:18:39 [INFO]: [ConductorFormPage] Llenando email: demo_con_franciscodemo_con_contreras@gmail.com
+2026-03-22 05:18:39 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-22 05:18:40 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-22 05:18:40 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_horizonte_808]
+2026-03-22 05:18:41 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-22 05:18:43 [INFO]: ✅ Conductor [Demo_con_francisco Demo_con_contreras] guardado exitosamente
+2026-03-22 05:18:43 [INFO]: ✅ seededConductor guardado: Demo_con_francisco Demo_con_contreras
+2026-03-22 05:18:43 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_francisco Demo_con_contreras] | Asociado: Demo_tra_horizonte_808
+====================================================================================================

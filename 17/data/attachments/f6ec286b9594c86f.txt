@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_andes_524]             | ID: 512
+🏢 Cliente       : [Qa_cli_logistica_534]         | ID: 440
+🚚 Vehiculo      : [Qa_veh_IYSR50]                | Patente: Qa_veh_IYSR50 | Asociado: Qa_tra_andes_524
+👤 Conductor     : [Qa_con_pedro Qa_con_torres]   | Asociado: Qa_tra_andes_524
+🏭 Transportista : [Qa_tra_andes_524]            
+🏢 Cliente       : [Qa_cli_logistica_534]        
+🔹 Contrato Venta: [413603]                      
+🔹 Contrato Costo: [362064]                      
+🎫 Viaje         : [604402]                       | Asociado: Qa_cli_logistica_534 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 230 | Cliente: Qa_cli_logistica_534
+====================================================================================================

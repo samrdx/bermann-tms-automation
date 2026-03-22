@@ -1,0 +1,71 @@
+2026-03-22 04:53:18 [INFO]: ENTORNO: QA 🧪
+2026-03-22 04:53:18 [INFO]: ================================================================================
+2026-03-22 04:53:18 [INFO]: Iniciando Paso 6: Planificar Viaje
+2026-03-22 04:53:18 [INFO]: ================================================================================
+2026-03-22 04:53:18 [INFO]: Cargando datos de entidades existentes del JSON específico del worker...
+2026-03-22 04:53:18 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-22 04:53:18 [INFO]: Entidades cargadas:
+2026-03-22 04:53:18 [INFO]:    Cliente source: seededCliente ✅
+2026-03-22 04:53:18 [INFO]:    Cliente: Qa_cli_distribuidora_914
+2026-03-22 04:53:18 [INFO]: 
+2026-03-22 04:53:18 [WARN]: ⚠️ ⚠️ Setup config no encontrado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-qa.json. Se usarán defaults.
+2026-03-22 04:53:18 [INFO]: Environment: QA
+2026-03-22 04:53:18 [INFO]: Configuration: {
+  "tipoOperacion": "defecto",
+  "tipoServicio": "defecto",
+  "tipoViaje": "Normal",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "Test 1",
+  "ruta": "( MINEDUC) BSF_PUDAHUEL-CXP_ANF",
+  "origenManual": "405_LA FARFANA_Pudahuel",
+  "destinoManual": "CXP ANTOFAGASTA"
+}
+2026-03-22 04:53:18 [INFO]: Fase 1: Navegar a Planificar Viajes
+2026-03-22 04:53:18 [INFO]: [PlanificarViajesPage] Navegando a la página de Planificar Viajes
+2026-03-22 04:53:23 [INFO]: Navegación exitosa
+2026-03-22 04:53:23 [INFO]: Fase 2: Completar formulario de viaje
+2026-03-22 04:53:23 [INFO]: [PlanificarViajesPage] Completando Nro Viaje: 80305
+2026-03-22 04:53:23 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Operacion: [defecto]
+2026-03-22 04:53:25 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Servicio: [defecto]
+2026-03-22 04:53:26 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-22 04:53:30 [INFO]: Seleccionando Cliente: Qa_cli_distribuidora spa_914
+2026-03-22 04:53:30 [INFO]: [PlanificarViajesPage] Seleccionando Cliente: [Qa_cli_distribuidora spa_914]
+2026-03-22 04:53:34 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Viaje: [Normal]
+2026-03-22 04:53:37 [INFO]: [PlanificarViajesPage] Seleccionando Unidad Negocio: [Defecto]
+2026-03-22 04:53:41 [INFO]: [PlanificarViajesPage] Seleccionando Codigo Carga: [Test 1]
+2026-03-22 04:53:45 [INFO]: Intentando agregar Ruta: ( MINEDUC) BSF_PUDAHUEL-CXP_ANF...
+2026-03-22 04:53:45 [INFO]: [PlanificarViajesPage] Añadiendo ruta: ( MINEDUC) BSF_PUDAHUEL-CXP_ANF
+2026-03-22 04:53:49 [INFO]: [PlanificarViajesPage] Ruta [( MINEDUC) BSF_PUDAHUEL-CXP_ANF] encontrada en la fila 1
+2026-03-22 04:53:49 [INFO]: [PlanificarViajesPage] Esperando a que Origen/Destino se completen...
+2026-03-22 04:53:49 [INFO]: Formulario completado
+2026-03-22 04:53:49 [INFO]: Fase 3: Guardar Viaje
+2026-03-22 04:53:49 [INFO]: [PlanificarViajesPage] Haciendo clic en Guardar...
+2026-03-22 04:53:49 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-22 04:53:52 [INFO]: URL post-guardado: https://moveontruckqa.bermanntms.cl/viajes/crear
+2026-03-22 04:53:52 [WARN]: ⚠️ ⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.
+2026-03-22 04:53:52 [INFO]: Boton guardar clickeado y navegacion completada
+2026-03-22 04:53:52 [INFO]: Fase 4: Verificación
+2026-03-22 04:53:52 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-22 04:53:57 [INFO]: Buscando en la grilla de Asignar usando: 80305
+2026-03-22 04:53:57 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 80305 en la grilla de Asignación...
+2026-03-22 04:54:02 [INFO]: [AsignarViajesPage] ✅ Viaje 80305 encontrado por coincidencia de texto en la fila 1
+2026-03-22 04:54:02 [INFO]: ✅ Viaje encontrado en /viajes/asignar usando búsqueda: 80305
+2026-03-22 04:54:02 [INFO]: Actualizando JSON del worker con la información del viaje...
+2026-03-22 04:54:02 [INFO]: Saved viaje.nroViaje: 80305
+2026-03-22 04:54:02 [INFO]: ================================================================================
+2026-03-22 04:54:02 [INFO]: PASO 6: ¡PLANIFICAR VIAJE COMPLETADO!
+2026-03-22 04:54:02 [INFO]: ================================================================================
+2026-03-22 04:54:02 [INFO]: Tiempo de ejecución: 43.34s
+2026-03-22 04:54:02 [INFO]: 
+2026-03-22 04:54:02 [INFO]: Detalles del viaje:
+2026-03-22 04:54:02 [INFO]:    Nro Viaje: 80305
+2026-03-22 04:54:02 [INFO]:    Cliente: Qa_cli_distribuidora spa_914
+2026-03-22 04:54:02 [INFO]:    Ruta: ( MINEDUC) BSF_PUDAHUEL-CXP_ANF
+2026-03-22 04:54:02 [INFO]:    Status: PLANIFICADO
+2026-03-22 04:54:02 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🎫 Viaje         : [80305]                        | ID: N/A | Asociado: Qa_cli_distribuidora spa_914 | Estado: PLANIFICADO
+====================================================================================================
