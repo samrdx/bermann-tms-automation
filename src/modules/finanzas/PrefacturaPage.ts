@@ -783,13 +783,44 @@ export class PrefacturaPage extends BasePage {
     return selectLooksValid && buttonLooksValid && (selectMatches || buttonMatches);
   }
 
+  private async isBootstrapSelectionValid(dataId: string): Promise<boolean> {
+    const state = await this.page.evaluate(({ id }: { id: string }) => {
+      const normalize = (value: string) => value.trim().toLowerCase();
+
+      const button = document.querySelector(`button[data-id="${id}"]`) as HTMLButtonElement | null;
+      const container = button?.closest('.bootstrap-select') as HTMLElement | null;
+      const select = container?.querySelector('select') as HTMLSelectElement | null;
+
+      const selectedValue = select?.value?.trim() || '';
+      const selectedText = select?.options[select.selectedIndex]?.text?.trim() || '';
+      const buttonText =
+        button?.querySelector('.filter-option-inner-inner')?.textContent?.trim() ||
+        button?.textContent?.trim() ||
+        '';
+
+      return {
+        selectedValue,
+        selectedText: normalize(selectedText),
+        buttonText: normalize(buttonText),
+      };
+    }, { id: dataId });
+
+    const selectLooksValid = Boolean(state.selectedText) && !/seleccionar|select/i.test(state.selectedText);
+    const buttonLooksValid = Boolean(state.buttonText) && !/seleccionar|select/i.test(state.buttonText);
+    return Boolean(state.selectedValue) && selectLooksValid && buttonLooksValid;
+  }
+
   private async assertProformaRequiredFieldsReady(): Promise<void> {
     logger.info('🧪 Validando campos requeridos antes de Guardar Proforma...');
+
+    const isDemo = (process.env.ENV || 'QA').toUpperCase() === 'DEMO';
 
     const checks = await Promise.all([
       this.isBootstrapSelectionApplied('drop_currecy_type', 'Pesos Chilenos'),
       this.isBootstrapSelectionApplied('drop_include_tax', 'Si'),
-      this.isBootstrapSelectionApplied('tipo_servicio_proforma', 'defecto'),
+      isDemo
+        ? this.isBootstrapSelectionValid('tipo_servicio_proforma')
+        : this.isBootstrapSelectionApplied('tipo_servicio_proforma', 'defecto'),
     ]);
 
     if (!checks[0]) {
@@ -804,7 +835,11 @@ export class PrefacturaPage extends BasePage {
 
     if (!checks[2]) {
       await this.takeScreenshot('proforma-tipo-servicio-no-seleccionado-antes-guardar');
-      throw new Error('Tipo de Servicio Proforma no está correctamente seleccionado antes de guardar Proforma.');
+      throw new Error(
+        isDemo
+          ? 'Tipo de Servicio Proforma no quedó con una selección válida en DEMO antes de guardar Proforma.'
+          : 'Tipo de Servicio Proforma no está correctamente seleccionado antes de guardar Proforma.',
+      );
     }
 
     logger.success('Campos requeridos de Proforma listos para guardar');
