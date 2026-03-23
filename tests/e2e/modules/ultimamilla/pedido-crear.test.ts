@@ -1,6 +1,7 @@
 import { test, expect } from '../../../../src/fixtures/base.js';
 import { createLogger } from '../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../api-helpers/DataPathHelper.js';
+import { ClientResolver } from '../../../api-helpers/ClientResolver.js';
 import fs from 'fs';
 
 const logger = createLogger('UltimaMilla-CrearPedido');
@@ -16,18 +17,28 @@ test.describe('Última Milla - Creación de Pedido', () => {
         logger.info('='.repeat(80));
 
         // EXTRAER DATOS SEEDED DESDE JSON ANTES DE NAVEGAR
-        logger.info('Extrayendo data base guardada (Seeded Cliente)...');
+        logger.info('Extrayendo data base guardada para resolver cliente determinístico...');
         const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-        let clienteNombre = '';
+        let operationalData: Record<string, any> | undefined;
         if (fs.existsSync(dataPath)) {
-            const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-            if (operationalData.seededCliente?.nombre) {
-                clienteNombre = operationalData.seededCliente.nombre;
-                logger.info(`Cliente encontrado en JSON: ${clienteNombre}`);
+            try {
+                operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8')) as Record<string, any>;
+            } catch (error) {
+                logger.warn(`No se pudo parsear el JSON operacional en ${dataPath}. El flujo fallará de forma explícita si no puede resolver candidatos válidos.`, error);
             }
         } else {
-            logger.warn(`El archivo dataPath no se encontró: ${dataPath}. Verifique si base-entities.setup.ts se ejecutó.`);
+            logger.warn(`El archivo dataPath no se encontró: ${dataPath}. El flujo fallará de forma explícita si no puede resolver candidatos válidos. Verifique si base-entities.setup.ts se ejecutó.`);
         }
+
+        const clienteDropdownCandidates = ClientResolver.getDropdownCandidates(operationalData);
+        const fallbackClientName = ClientResolver.resolveClientName(operationalData);
+        const currentEnvironment = (process.env.ENV || 'QA').trim().toUpperCase();
+
+        if (clienteDropdownCandidates.length === 0) {
+            throw new Error(`No se encontraron candidatos válidos para cliente en Última Milla. ambiente=${currentEnvironment}; dataPath=${dataPath}; fallbackResolver=${fallbackClientName}`);
+        }
+
+        logger.info(`Candidatos resueltos para dropdown de cliente: ${clienteDropdownCandidates.join(' | ')}`);
 
         // EL LOGIN ES MANEJADO AUTOMÁTICAMENTE POR EL GLOBAL SETUP (auth.setup.ts)
         // Por lo tanto, empezamos directamente desde la navegación.
@@ -40,15 +51,17 @@ test.describe('Última Milla - Creación de Pedido', () => {
 
         // Generamos data para la prueba, inyectando el clienteDropdown
         const orderData = ultimaMillaFactory.generateDefaultData();
-        if (clienteNombre) {
-            orderData.clienteDropdown = clienteNombre;
-        }
+        orderData.clienteDropdown = clienteDropdownCandidates[0];
+        logger.info(`Cliente objetivo para dropdown: ${orderData.clienteDropdown}`);
 
         // PHASE 3: Llenado del Formulario Completo
         logger.info('FASE 3: Llenando formulario de pedido completo...');
         // Fill the entire form from the start, we no longer trigger intentional validation errors
         // that reload the page and break the JS selectors.
-        await ultimaMillaPage.fillCompleteForm(orderData as any);
+        await ultimaMillaPage.fillCompleteForm(orderData as any, {
+            clienteDropdownCandidates,
+            environment: currentEnvironment
+        });
 
         // Wait mechanically for standard UI rehydration
         await page.waitForTimeout(1000);

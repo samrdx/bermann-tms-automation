@@ -52,6 +52,14 @@ export class UltimaMillaFormPage extends BasePage {
         super(page);
     }
 
+    private buildClienteSelectionErrorMessage(environment: string | undefined, candidates: string[], availableOptions: string[], attempts: string[]): string {
+        const resolvedEnvironment = (environment || process.env.ENV || 'UNKNOWN').trim().toUpperCase() || 'UNKNOWN';
+        const attemptsSummary = attempts.length > 0 ? attempts.join(' | ') : 'sin intentos registrados';
+        const availableSummary = availableOptions.length > 0 ? availableOptions.join(' | ') : 'sin opciones visibles/cargadas';
+
+        return `No se pudo seleccionar cliente en Última Milla. ambiente=${resolvedEnvironment}; candidatos=[${candidates.join(' | ')}]; opcionesDisponibles=[${availableSummary}]; intentos=[${attemptsSummary}]`;
+    }
+
     // 3. NAVIGATION
     async navigate(): Promise<void> {
         await this.page.goto('/order/crear');
@@ -59,7 +67,13 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     // 4. ACTION METHODS
-    async fillCompleteForm(data: UltimaMillaOrderData): Promise<void> {
+    async fillCompleteForm(
+        data: UltimaMillaOrderData,
+        options?: {
+            clienteDropdownCandidates?: string[];
+            environment?: string;
+        }
+    ): Promise<void> {
         logger.info(`Llenando formulario de Pedido: ${data.codigoPedido}`);
 
         await this.fill(this.selectors.codigoPedido, data.codigoPedido);
@@ -75,7 +89,13 @@ export class UltimaMillaFormPage extends BasePage {
         }
 
         await this.selectUnidadNegocio();
-        await this.selectCliente(data.clienteDropdown);
+        if (options?.clienteDropdownCandidates && options.clienteDropdownCandidates.length > 0) {
+            await this.selectClienteFromCandidates(options.clienteDropdownCandidates, {
+                environment: options.environment
+            });
+        } else {
+            await this.selectCliente(data.clienteDropdown);
+        }
         await this.selectVentanaHoraria('Todo El Dia');
 
         // Seleccionar embalaje y llenar cantidad y peso revelados
@@ -129,9 +149,9 @@ export class UltimaMillaFormPage extends BasePage {
         } catch (e) {
             logger.warn(`⚠️ selectBootstrapDropdown falló para "${buttonSelector}": ${e}. Usando JS Fallback...`);
             if (dataId && textToSelect) {
-                await this.page.evaluate(({ selectId, text }: { selectId: string; text: string }) => {
+                const matchedOption = await this.page.evaluate(({ selectId, text }: { selectId: string; text: string }) => {
                     const select = document.getElementById(selectId) as HTMLSelectElement;
-                    if (!select) return;
+                    if (!select) return null;
                     const opt = Array.from(select.options)
                         .find(o => o.text.toUpperCase().includes(text.toUpperCase()));
                     if (opt) {
@@ -142,8 +162,14 @@ export class UltimaMillaFormPage extends BasePage {
                             // @ts-ignore
                             window.jQuery(select).selectpicker('refresh');
                         }
+                        return opt.text;
                     }
+                    return null;
                 }, { selectId: dataId, text: textToSelect });
+
+                if (!matchedOption) {
+                    throw new Error(`No se encontró la opción "${textToSelect}" para el dropdown ${buttonSelector}`);
+                }
             } else {
                 throw new Error(`Select Helper Fallback failed: Couldn't extract dataId or no Text Provided. CSS: ${buttonSelector}`);
             }
@@ -159,6 +185,50 @@ export class UltimaMillaFormPage extends BasePage {
     async selectCliente(nombreCliente?: string): Promise<void> {
         logger.info(`Seleccionando Cliente: ${nombreCliente || 'El primero disponible'}`);
         await this.selectBootstrapDropdown(this.selectors.clienteButton, nombreCliente);
+    }
+
+    async selectClienteFromCandidates(
+        candidates: string[],
+        context?: {
+            environment?: string;
+        }
+    ): Promise<string> {
+        const normalizedCandidates = candidates
+            .map(candidate => candidate?.trim())
+            .filter((candidate): candidate is string => Boolean(candidate));
+
+        if (normalizedCandidates.length === 0) {
+            throw new Error(this.buildClienteSelectionErrorMessage(context?.environment, [], [], ['sin candidatos válidos']));
+        }
+
+        const attempts: string[] = [];
+
+        for (const candidate of normalizedCandidates) {
+            try {
+                logger.info(`Intentando seleccionar cliente candidato: ${candidate}`);
+                await this.selectCliente(candidate);
+                logger.info(`✅ Cliente seleccionado con candidato: ${candidate}`);
+                return candidate;
+            } catch (error) {
+                const reason = error instanceof Error ? error.message : String(error);
+                attempts.push(`${candidate}: ${reason}`);
+                logger.warn(`No se pudo seleccionar cliente con candidato "${candidate}". Intentando fallback si existe...`, error);
+            }
+        }
+
+        const availableOptions = await this.page.evaluate((selectId: string) => {
+            const select = document.getElementById(selectId) as HTMLSelectElement | null;
+            if (!select) {
+                return [] as string[];
+            }
+
+            return Array.from(select.options)
+                .map(option => option.text.trim())
+                .filter(option => option.length > 0)
+                .slice(0, 20);
+        }, 'pedido-cliente_id').catch(() => [] as string[]);
+
+        throw new Error(this.buildClienteSelectionErrorMessage(context?.environment, normalizedCandidates, availableOptions, attempts));
     }
 
     async selectVentanaHoraria(ventana: string): Promise<void> {
