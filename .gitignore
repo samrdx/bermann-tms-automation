@@ -71,3 +71,7 @@ engram/
 .gemini/
 .codex/
 .cursor/
+
+# Keep Engram helper scripts tracked
+!scripts/engram/
+!scripts/engram/*.mjs

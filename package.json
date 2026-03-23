@@ -91,7 +91,9 @@
     "storage:clean:npm": "npm cache verify && npm cache clean --force && npm cache verify",
     "storage:pw:browsers:list": "playwright install --list",
     "storage:pw:browsers:refresh": "playwright uninstall && playwright install chromium firefox && playwright install --list",
-    "storage:maintenance": "npm run storage:clean:reports && npm run storage:clean:npm && npm run storage:pw:browsers:list"
+    "storage:maintenance": "npm run storage:clean:reports && npm run storage:clean:npm && npm run storage:pw:browsers:list",
+    "engram:preflight": "node scripts/engram/preflight.mjs",
+    "engram:topic-key": "node scripts/engram/topic-key.mjs"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

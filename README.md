@@ -205,6 +205,16 @@ This project uses a skills system to ensure consistent, correct AI-generated cod
 - **Skills:** [skills/](skills/) - 5 TMS-specific skills (selectors, dropdowns, page objects, tests, data)
 - **Context docs:** [CLAUDE.md](CLAUDE.md) (Claude), [GEMINI.md](GEMINI.md) (Agent prompts)
 
+### Engram (Persistent Memory)
+
+This repository supports hybrid SDD persistence (OpenSpec + Engram).
+
+- Setup guide: `docs/ENGRAM_INTEGRATION.md`
+- Preflight check: `npm run engram:preflight`
+- Topic key helper: `npm run engram:topic-key -- <change-name> <artifact>`
+
+Recommended mode is `hybrid`, configured in `openspec/config.yaml`.
+
 ## Logs and Reports
 
 | Artifact | Location |

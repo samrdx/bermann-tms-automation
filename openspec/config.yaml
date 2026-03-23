@@ -1,6 +1,18 @@
 # openspec/config.yaml
 schema: spec-driven
 
+artifact_store:
+  mode: hybrid
+  engram:
+    project: bermann-tms-automation
+    base_url_env: ENGRAM_BASE_URL
+    api_key_env: ENGRAM_API_KEY
+    health_path: /health
+    topic_key_pattern: sdd/{change-name}/{artifact}
+  openspec:
+    root: openspec/
+    archive_root: openspec/changes/archive/
+
 context: |
   Tech stack: TypeScript ^5.9.3, Playwright ^1.58.0, Node.js 20, Winston ^3.19.0
   Architecture: Page Object Model (POM), Domain-Driven Modules, Skills System
