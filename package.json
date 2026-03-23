@@ -92,6 +92,9 @@
     "storage:pw:browsers:list": "playwright install --list",
     "storage:pw:browsers:refresh": "playwright uninstall && playwright install chromium firefox && playwright install --list",
     "storage:maintenance": "npm run storage:clean:reports && npm run storage:clean:npm && npm run storage:pw:browsers:list",
+    "// === SDD | ARTIFACT SYNC ===": "",
+    "sdd:sync:pull": "git pull --ff-only origin main",
+    "sdd:sync:push": "node scripts/sdd/sync-push.mjs",
     "engram:preflight": "node scripts/engram/preflight.mjs",
     "engram:topic-key": "node scripts/engram/topic-key.mjs"
   },

@@ -212,8 +212,31 @@ This repository supports hybrid SDD persistence (OpenSpec + Engram).
 - Setup guide: `docs/ENGRAM_INTEGRATION.md`
 - Preflight check: `npm run engram:preflight`
 - Topic key helper: `npm run engram:topic-key -- <change-name> <artifact>`
+- Canonical OpenSpec pull: `npm run sdd:sync:pull`
+- Canonical OpenSpec push: `SDD_SYNC_MESSAGE="chore(openspec): sync change-x" npm run sdd:sync:push`
 
 Recommended mode is `hybrid`, configured in `openspec/config.yaml`.
+
+### SDD Artifact Sync (OpenSpec via Git)
+
+Use these scripts when you want the repository copy of `openspec/` to stay aligned across PCs without manual Git steps.
+
+- `npm run sdd:sync:pull` runs a fast-forward pull from `origin main` to bring the canonical SDD artifacts.
+- `npm run sdd:sync:push` stages only `openspec/`, skips the commit when there are no OpenSpec changes, and pushes the canonical branch without opening an editor.
+- `SDD_SYNC_MESSAGE` lets you override the commit message; default is `chore(openspec): sync SDD artifacts`.
+
+Examples:
+
+```bash
+# Bring the latest canonical artifacts from main
+npm run sdd:sync:pull
+
+# Persist current openspec/ changes with the default message
+npm run sdd:sync:push
+
+# Persist with an explicit message for the current change
+SDD_SYNC_MESSAGE="chore(openspec): sync engram hybrid docs" npm run sdd:sync:push
+```
 
 ## Logs and Reports
 
