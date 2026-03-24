@@ -105,7 +105,7 @@
     "test:demo:ultimamilla": "npm run demo:smoke:ultimamilla",
     "test:demo:trip:full-flow": "npm run demo:e2e:prefactura",
     "// === UTILIDADES ===": "",
-    "clean:reports": "rm -rf playwright-report playwright-report-* test-results test-results-* allure-results allure-results-* allure-report allure-report-*",
+    "clean:reports": "node scripts/clean.mjs",
     "allure:generate:qa": "allure generate allure-results-qa --clean -o allure-report-qa",
     "allure:open:qa": "allure open allure-report-qa",
     "allure:serve:qa": "allure serve allure-results-qa",
