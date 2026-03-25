@@ -7,6 +7,13 @@ import fs from 'fs';
 const logger = createLogger('UltimaMilla-AsignarPedido');
 
 type OperationalData = Record<string, any> | undefined;
+type ExecutionSummary = {
+  cliente: string;
+  pedido: string;
+  vehiculo: string;
+  transportista: string;
+  conductor: string;
+};
 
 test.describe('Última Milla - Asignación de Pedido', () => {
   test.setTimeout(180000);
@@ -35,16 +42,20 @@ test.describe('Última Milla - Asignación de Pedido', () => {
     const orderData = ultimaMillaFactory.generateDefaultData();
     orderData.clienteDropdown = clienteObjetivo;
     orderData.fechaEntrega = undefined;
+    const executionSummary: ExecutionSummary = {
+      cliente: clienteObjetivo,
+      pedido: orderData.codigoPedido || 'N/A',
+      vehiculo: 'N/A',
+      transportista: 'N/A',
+      conductor: 'N/A',
+    };
 
-    logger.info('='.repeat(80));
-    logger.info('🚀 Iniciando happy path de asignación de pedido Última Milla');
-    logger.info(`Cliente objetivo: ${clienteObjetivo}`);
-    logger.info(`Fecha entrega objetivo: ${orderData.fechaEntrega ?? 'UI default date'}`);
-    logger.info(`Mutation guard: ${process.env.ULTIMAMILLA_ENABLE_MUTATION}`);
+    logger.info('🚀 Inicio — Última Milla asignación de pedido');
+    logger.info(`🧾 Contexto: cliente=${clienteObjetivo} | pedido=${executionSummary.pedido} | fecha=${orderData.fechaEntrega ?? 'UI default date'}`);
 
     try {
       await test.step('Fase 1: Crear pedido elegible', async () => {
-        logger.info('📝 FASE 1: Crear pedido elegible para asignación');
+        logPhaseHeader(1, '📝', 'Crear pedido elegible');
         await ultimaMillaPage.navigate();
         await expect(page).toHaveURL(/.*\/order\/crear/);
 
@@ -63,11 +74,11 @@ test.describe('Última Milla - Asignación de Pedido', () => {
         }
 
         await expect(page.getByText('Pedido creado Correctamente', { exact: true })).toBeVisible({ timeout: 10000 });
-        logger.info('✅ Pedido elegible creado correctamente');
+        logger.success(`Pedido elegible creado: ${executionSummary.pedido}`);
       });
 
       await test.step('Fase 2: Buscar y seleccionar pedido asignable', async () => {
-        logger.info('🔎 FASE 2: Buscar y seleccionar pedido asignable');
+        logPhaseHeader(2, '🔎', 'Buscar y seleccionar pedido');
         await ultimaMillaAsignarPage.navigate();
         await expect(page).toHaveURL(/.*\/order\/asignar/);
 
@@ -78,24 +89,27 @@ test.describe('Última Milla - Asignación de Pedido', () => {
 
         const rowId = await ultimaMillaAsignarPage.selectFirstOrderRow();
         expect(rowId).not.toBe('');
-        logger.info(`✅ Pedido seleccionable detectado. rowId=${rowId}`);
+        executionSummary.pedido = `${executionSummary.pedido} / ${rowId}`;
+        logger.success(`Pedido seleccionable detectado: ${executionSummary.pedido}`);
       });
 
       await test.step('Fase 3: Configurar optimización determinística', async () => {
-        logger.info('⚙️ FASE 3: Configurar optimización determinística');
+        logPhaseHeader(3, '⚙️', 'Configurar optimización');
         const selection = await ultimaMillaAsignarPage.configureOptimization();
 
         expect(selection.carrierLabel.length).toBeGreaterThan(0);
         expect(selection.vehicleLabel.length).toBeGreaterThan(0);
         await expect.poll(async () => ultimaMillaAsignarPage.hasSingleSelectedCarrier()).toBe(true);
+        executionSummary.transportista = selection.carrierLabel || 'N/A';
+        executionSummary.vehiculo = selection.vehicleLabel || 'N/A';
 
-        logger.info(
-          `Carrier/Vehicle final: transportista=${selection.carrierLabel} | vehiculo=${selection.vehicleLabel} | fallback=${selection.usedFallbackCarrier}`
+        logger.success(
+          `Optimización preparada: transportista=${executionSummary.transportista} | vehiculo=${executionSummary.vehiculo}${selection.usedFallbackCarrier ? ' | fallback=si' : ''}`
         );
       });
 
       await test.step('Fase 4: Optimizar y configurar viaje', async () => {
-        logger.info('🗺️ FASE 4: Optimizar y configurar viaje');
+        logPhaseHeader(4, '🗺️', 'Optimizar y configurar viaje');
         await ultimaMillaAsignarPage.executeOptimization();
         await expect.poll(async () => ultimaMillaAsignarPage.isOptimizationResultVisible()).toBe(true);
         await expect.poll(async () => ultimaMillaAsignarPage.isMapVisible()).toBe(true);
@@ -104,36 +118,73 @@ test.describe('Última Milla - Asignación de Pedido', () => {
         expect(tripConfig.operationValue.toLowerCase()).toContain('defecto');
         expect(tripConfig.serviceValue.toLowerCase()).toContain('defecto');
         expect(tripConfig.driverSelections.length).toBeGreaterThan(0);
-        logger.info(`✅ Viaje post-optimización configurado. conductores=${tripConfig.driverSelections.join(' | ')}`);
+        executionSummary.conductor = tripConfig.driverSelections.join(' | ') || 'N/A';
+        logger.success(`Viaje configurado: conductor=${executionSummary.conductor}`);
       });
 
       await test.step('Fase 5: Crear viaje y verificar mutación', async () => {
-        logger.info('🚚 FASE 5: Crear viaje y verificar mutación');
+        logPhaseHeader(5, '🚚', 'Crear viaje y verificar mutación');
         await ultimaMillaAsignarPage.createTrip();
         await expect.poll(async () => ultimaMillaAsignarPage.isOptimizationResultVisible()).toBe(false);
-        logger.info('✅ createTrip ejecutado y panel de optimización oculto');
+        logger.success('createTrip ejecutado y panel de optimización oculto');
       });
 
-      logger.info(`✅ Happy path completado en ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
+      logger.success(`Happy path completado en ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
     } catch (error) {
       logger.error('Falló el happy path de asignación de pedido', error);
-      await ultimaMillaAsignarPage.takeScreenshot('pedido-asignar-happy-path-failure');
+      const screenshotPath = await ultimaMillaAsignarPage.takeScreenshot('pedido-asignar-happy-path-failure');
+      logger.error(`Screenshot de falla: ${screenshotPath}`);
       throw error;
+    } finally {
+      logExecutionSummary(executionSummary);
     }
   });
 });
 
+function logPhaseHeader(phaseNumber: number, emoji: string, title: string): void {
+  logger.info('');
+  logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  logger.info(`${emoji} Fase ${phaseNumber} — ${title}`);
+}
+
+function logExecutionSummary(summary: ExecutionSummary): void {
+  logger.info('');
+  logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  logger.info('📊 Resumen de ejecución');
+  logger.info(`• Cliente: ${formatSummaryValue(summary.cliente)}`);
+  logger.info(`• Pedido id/código: ${formatSummaryValue(summary.pedido)}`);
+  logger.info(`• Vehículo: ${formatSummaryValue(summary.vehiculo)}`);
+  logger.info(`• Transportista: ${formatSummaryValue(summary.transportista)}`);
+  logger.info(`• Conductor: ${formatSummaryValue(summary.conductor)}`);
+}
+
+function formatSummaryValue(value: string | undefined): string {
+  return value?.trim() ? value : 'N/A';
+}
+
 function loadOperationalData(testInfo: Parameters<typeof DataPathHelper.getLegacyOperationalDataPath>[0]): OperationalData {
-  const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-  if (!fs.existsSync(dataPath)) {
-    logger.warn(`No existe data operacional en ${dataPath}. Se usará fallback diagnóstico.`);
-    return undefined;
+  const candidatePaths = DataPathHelper.getLegacyOperationalDataCandidatePaths(testInfo);
+
+  for (const [index, dataPath] of candidatePaths.entries()) {
+    if (!fs.existsSync(dataPath)) {
+      logger.warn(`No existe data operacional en ${dataPath}.`);
+      continue;
+    }
+
+    try {
+      const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8')) as Record<string, any>;
+      if (index > 0) {
+        logger.warn(`Usando fallback determinístico de data operacional: ${dataPath}`);
+      } else {
+        logger.info(`Usando data operacional primaria: ${dataPath}`);
+      }
+
+      return operationalData;
+    } catch (error) {
+      logger.warn(`No se pudo parsear data operacional en ${dataPath}.`, error);
+    }
   }
 
-  try {
-    return JSON.parse(fs.readFileSync(dataPath, 'utf-8')) as Record<string, any>;
-  } catch (error) {
-    logger.warn(`No se pudo parsear data operacional en ${dataPath}.`, error);
-    return undefined;
-  }
+  logger.warn(`No se encontró data operacional válida en ninguna ruta candidata. rutas=[${candidatePaths.join(' | ')}]`);
+  return undefined;
 }

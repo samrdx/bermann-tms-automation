@@ -218,7 +218,7 @@ export class UltimaMillaAsignarPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    logger.info('Navegando a Última Milla > Asignar pedidos');
+    logger.debug('Navegando a Última Milla > Asignar pedidos');
     await this.page.goto('/order/asignar');
     await this.page.waitForLoadState('domcontentloaded');
     await this.page.waitForSelector(this.selectors.filters.btnSearch, {
@@ -278,7 +278,7 @@ export class UltimaMillaAsignarPage extends BasePage {
       ] as const satisfies readonly RowSelectionStrategy[];
 
       for (const strategy of clickStrategies) {
-        logger.info(
+        logger.debug(
           `Intentando seleccionar fila de asignación. data-id=${rowId || 'sin data-id'} | estrategia=${strategy}`
         );
 
@@ -294,10 +294,7 @@ export class UltimaMillaAsignarPage extends BasePage {
           return rowId;
         }
 
-        const diagnostics = await this.getRowSelectionDiagnostics(firstRow, rowId);
-        logger.warn(
-          `La estrategia ${strategy} no dejó la fila seleccionada. data-id=${rowId || 'sin data-id'} | diagnostics=${JSON.stringify(diagnostics)}`
-        );
+        logger.debug(`La estrategia ${strategy} no dejó la fila seleccionada. data-id=${rowId || 'sin data-id'}`);
       }
 
       const diagnostics = await this.getRowSelectionDiagnostics(firstRow, rowId);
@@ -361,8 +358,9 @@ export class UltimaMillaAsignarPage extends BasePage {
         );
       }
 
-      logger.info(
-        `✅ Prerrequisitos de optimización validados. pedidosSeleccionados=${selectedOrderCount} | tipo=${tipoSelector} (${tipoOptions.length} opciones, seleccionado=${tipoSelected.join(', ') || 'ninguno'}) | modo=${modoSelector} (${modoOptions.length} opciones, seleccionado=${modoSelected.join(', ') || 'ninguno'}) | transportista=${transportistaSelector} (${transportistaOptions.length} opciones, seleccionado=${transportistaSelected.join(', ') || 'ninguno'}) | vehiculo=${vehiculoSelector} (${vehiculoOptions.length} opciones, seleccionado=${vehiculoSelected.join(', ') || 'ninguno'}) | zonaValida=${hasZoneConfiguration}${subtipoSelector ? ` | subtipo=${subtipoSelector} (${subtipoOptions?.length || 0} opciones)` : ' | subtipo=opcional-no-detectado'}`
+      logger.info(`✅ Prerrequisitos validados. pedidos=${selectedOrderCount} | zonaValida=${hasZoneConfiguration}`);
+      logger.debug(
+        `Detalle prerrequisitos. tipo=${tipoSelector} (${tipoOptions.length} opciones, seleccionado=${tipoSelected.join(', ') || 'ninguno'}) | modo=${modoSelector} (${modoOptions.length} opciones, seleccionado=${modoSelected.join(', ') || 'ninguno'}) | transportista=${transportistaSelector} (${transportistaOptions.length} opciones, seleccionado=${transportistaSelected.join(', ') || 'ninguno'}) | vehiculo=${vehiculoSelector} (${vehiculoOptions.length} opciones, seleccionado=${vehiculoSelected.join(', ') || 'ninguno'})${subtipoSelector ? ` | subtipo=${subtipoSelector} (${subtipoOptions?.length || 0} opciones)` : ' | subtipo=opcional-no-detectado'}`
       );
 
       return {
@@ -428,7 +426,7 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   async configurePostOptimizationTrip(): Promise<TripConfigurationResult> {
     return this.withActionScreenshot('ultimamilla-asignar-post-optimization-trip-error', async () => {
-      logger.info('Configurando operación, servicio y conductores post-optimización');
+      logger.info('Configurando operación, servicio y conductores');
 
       await this.page.locator(this.selectors.optimization.result).waitFor({ state: 'visible', timeout: 30000 });
       await this.page.locator(this.selectors.optimization.map).waitFor({ state: 'visible', timeout: 30000 });
@@ -506,7 +504,22 @@ export class UltimaMillaAsignarPage extends BasePage {
         );
       });
 
-      await this.page.locator(this.selectors.table.wrapper).waitFor({ state: 'visible', timeout: 15000 });
+      await this.page.waitForFunction(
+        ({ tableWrapperSelector, noDataSelector }) => {
+          const tableWrapper = document.querySelector(tableWrapperSelector) as HTMLElement | null;
+          const noData = document.querySelector(noDataSelector) as HTMLElement | null;
+
+          const tableVisible = Boolean(tableWrapper && tableWrapper.offsetParent !== null);
+          const noDataVisible = Boolean(noData && noData.offsetParent !== null);
+
+          return tableVisible || noDataVisible;
+        },
+        {
+          tableWrapperSelector: this.selectors.table.wrapper,
+          noDataSelector: this.selectors.states.noData,
+        },
+        { timeout: 15000 }
+      );
 
       const gridAfterCreate = await this.getAssignmentGridSnapshot();
       if (gridAfterCreate.checkedRowIds.length > 0) {
@@ -581,9 +594,9 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   private async withCreateTripStage<T>(stageName: string, screenshotName: string, action: () => Promise<T>): Promise<T> {
     return this.withActionScreenshot(screenshotName, async () => {
-      logger.info(`CreateTrip stage start: ${stageName}`);
+      logger.debug(`CreateTrip stage start: ${stageName}`);
       const result = await action();
-      logger.info(`CreateTrip stage done: ${stageName}`);
+      logger.debug(`CreateTrip stage done: ${stageName}`);
       return result;
     });
   }
@@ -600,7 +613,7 @@ export class UltimaMillaAsignarPage extends BasePage {
   }
 
   private async clearTextSearch(): Promise<void> {
-    logger.info('Asegurando flujo base sin filtro textual activo');
+    logger.debug('Asegurando flujo base sin filtro textual activo');
     const searchInput = this.page.locator(this.selectors.filters.textSearch);
     if (await searchInput.isVisible().catch(() => false)) {
       await searchInput.fill('');
@@ -608,7 +621,7 @@ export class UltimaMillaAsignarPage extends BasePage {
   }
 
   private async selectCliente(cliente: string): Promise<void> {
-    logger.info(`Seleccionando cliente exacto: ${cliente}`);
+    logger.debug(`Seleccionando cliente exacto: ${cliente}`);
     await this.selectExactOption({
       selectSelector: this.selectors.filters.clienteSelect,
       buttonSelector: this.selectors.filters.clienteButton,
@@ -618,7 +631,7 @@ export class UltimaMillaAsignarPage extends BasePage {
   }
 
   private async selectUnidadNegocio(unidadNegocio: string): Promise<void> {
-    logger.info(`Seleccionando unidad de negocio exacta: ${unidadNegocio}`);
+    logger.debug(`Seleccionando unidad de negocio exacta: ${unidadNegocio}`);
     await this.selectExactOption({
       selectSelector: this.selectors.filters.unidadNegocioSelect,
       buttonSelector: this.selectors.filters.unidadNegocioButton,
@@ -628,7 +641,7 @@ export class UltimaMillaAsignarPage extends BasePage {
   }
 
   private async setFechaEntrega(fecha: string): Promise<void> {
-    logger.info(`Configurando fecha exacta de entrega: ${fecha}`);
+    logger.debug(`Configurando fecha exacta de entrega: ${fecha}`);
 
     await this.page.evaluate(
       ({ selector, value }) => {
@@ -1025,7 +1038,7 @@ export class UltimaMillaAsignarPage extends BasePage {
       const isQaCarrier = /^qa_tra_/i.test(carrier.text);
       attemptedFallback = attemptedFallback || !isQaCarrier;
 
-      logger.info(
+      logger.debug(
         `Probing transportista. text=${carrier.text} | value=${carrier.value} | preferredQa=${isQaCarrier}`
       );
 
@@ -1045,7 +1058,7 @@ export class UltimaMillaAsignarPage extends BasePage {
         : null;
 
       if (vehicleResponse) {
-        logger.info(
+        logger.debug(
           `Respuesta /vehiculos/findvehicles capturada. status=${vehicleResponseDiagnostics?.status} ok=${vehicleResponseDiagnostics?.ok} snippet=${vehicleResponseDiagnostics?.bodySnippet || 'sin-body'}`
         );
       } else {
@@ -1132,7 +1145,7 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   private async selectDefaultOperationType(previousServiceSignature: string): Promise<void> {
     await this.withActionScreenshot('ultimamilla-asignar-operation-type-error', async () => {
-      logger.info('Seleccionando Tipo de Operación = defecto');
+      logger.debug('Seleccionando Tipo de Operación = defecto');
       await this.waitForOptionalResponseAfterAction('/getServiceType', async () => {
         await this.selectByVisibleText(
           this.selectors.optimization.operationTypeSelect,
@@ -1151,7 +1164,7 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   private async waitForServiceTypeReload(previousSignature: string): Promise<void> {
     await this.withActionScreenshot('ultimamilla-asignar-service-reload-error', async () => {
-      logger.info(
+      logger.debug(
         `Esperando recarga de Tipo de Servicio tras seleccionar operación. firmaPrevia=${previousSignature || 'sin-opciones'}`
       );
 
@@ -1181,7 +1194,7 @@ export class UltimaMillaAsignarPage extends BasePage {
 
       const currentSignature = await this.getOptionSignature(this.selectors.optimization.serviceTypeSelect);
       const serviceOptions = await this.getUsableOptions(this.selectors.optimization.serviceTypeSelect);
-      logger.info(
+      logger.debug(
         `✅ Tipo de Servicio recargado. firmaActual=${currentSignature || 'sin-opciones'} | opciones=${serviceOptions.map(option => option.text).join(' | ') || 'sin-opciones'}`
       );
     });
@@ -1189,7 +1202,7 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   private async selectDefaultServiceType(): Promise<void> {
     await this.withActionScreenshot('ultimamilla-asignar-service-type-error', async () => {
-      logger.info('Seleccionando Tipo de Servicio = defecto');
+      logger.debug('Seleccionando Tipo de Servicio = defecto');
       await this.ensureSelectHasUsableOptions(this.selectors.optimization.serviceTypeSelect, 'Tipo de Servicio');
       await this.selectByVisibleText(
         this.selectors.optimization.serviceTypeSelect,
@@ -1223,7 +1236,7 @@ export class UltimaMillaAsignarPage extends BasePage {
       return;
     }
 
-    logger.info(`Respuesta detectada para ${endpointFragment}. status=${response.status()} url=${response.url()}`);
+    logger.debug(`Respuesta detectada para ${endpointFragment}. status=${response.status()} url=${response.url()}`);
     await this.page.waitForTimeout(1000);
   }
 
@@ -1252,7 +1265,7 @@ export class UltimaMillaAsignarPage extends BasePage {
         throw new UltimaMillaAssignmentConfigurationError('No se detectaron selects de conductores para las rutas optimizadas.');
       }
 
-      logger.info(
+      logger.debug(
         `Detectados ${routeContexts.length} select(s) dinámicos de conductor: ${routeContexts.map(route => `${route.selector}=>${route.vehicle}`).join(' | ')}`
       );
 
@@ -1277,7 +1290,7 @@ export class UltimaMillaAsignarPage extends BasePage {
           );
         }
 
-        logger.info(
+        logger.debug(
           `Seleccionando conductor determinístico para ruta ${routeContext.routeIndex}. vehiculo=${routeContext.vehicle} | selector=${routeContext.selector} | opciones=${options.map(option => option.text).join(' | ')}`
         );
 

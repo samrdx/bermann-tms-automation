@@ -74,7 +74,7 @@ export class UltimaMillaFormPage extends BasePage {
             environment?: string;
         }
     ): Promise<void> {
-        logger.info(`Llenando formulario de Pedido: ${data.codigoPedido}`);
+        logger.debug(`Llenando formulario de Pedido: ${data.codigoPedido}`);
 
         await this.fill(this.selectors.codigoPedido, data.codigoPedido);
         await this.fill(this.selectors.nombreCliente, data.nombreCliente);
@@ -178,12 +178,12 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async selectUnidadNegocio(): Promise<void> {
-        logger.info('Seleccionando primera Unidad de Negocio disponible');
+        logger.debug('Seleccionando primera Unidad de Negocio disponible');
         await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton);
     }
 
     async selectCliente(nombreCliente?: string): Promise<void> {
-        logger.info(`Seleccionando Cliente: ${nombreCliente || 'El primero disponible'}`);
+        logger.debug(`Seleccionando Cliente: ${nombreCliente || 'El primero disponible'}`);
         await this.selectBootstrapDropdown(this.selectors.clienteButton, nombreCliente);
     }
 
@@ -205,9 +205,9 @@ export class UltimaMillaFormPage extends BasePage {
 
         for (const candidate of normalizedCandidates) {
             try {
-                logger.info(`Intentando seleccionar cliente candidato: ${candidate}`);
+                logger.debug(`Intentando seleccionar cliente candidato: ${candidate}`);
                 await this.selectCliente(candidate);
-                logger.info(`✅ Cliente seleccionado con candidato: ${candidate}`);
+                logger.debug(`✅ Cliente seleccionado con candidato: ${candidate}`);
                 return candidate;
             } catch (error) {
                 const reason = error instanceof Error ? error.message : String(error);
@@ -232,22 +232,22 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async selectVentanaHoraria(ventana: string): Promise<void> {
-        logger.info(`Seleccionando Ventana Horaria: ${ventana}`);
+        logger.debug(`Seleccionando Ventana Horaria: ${ventana}`);
         await this.selectBootstrapDropdown(this.selectors.ventanaHorariaButton, ventana);
     }
 
     async selectTipoPedido(tipo: string): Promise<void> {
-        logger.info(`Seleccionando Tipo Pedido: ${tipo}`);
+        logger.debug(`Seleccionando Tipo Pedido: ${tipo}`);
         await this.selectBootstrapDropdown(this.selectors.tipoPedidoButton, tipo);
     }
 
     async selectTipoEmbalaje(tipo: string): Promise<void> {
-        logger.info(`Seleccionando Tipo de Embalaje: ${tipo}`);
+        logger.debug(`Seleccionando Tipo de Embalaje: ${tipo}`);
         await this.selectBootstrapDropdown(this.selectors.tipoEmbalajeButton, tipo);
     }
 
     async selectVolumen(tipo: string): Promise<void> {
-        logger.info(`Seleccionando Tipo de Volumen: ${tipo}`);
+        logger.debug(`Seleccionando Tipo de Volumen: ${tipo}`);
         await this.selectBootstrapDropdown(this.selectors.volumenButton, tipo);
     }
 
@@ -262,7 +262,7 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async fillDireccion(direccion: string): Promise<void> {
-        logger.info(`Buscando dirección y georreferenciando: ${direccion}`);
+        logger.debug(`Buscando dirección y georreferenciando: ${direccion}`);
         await this.fill(this.selectors.direccionBusqueda, direccion);
         // Clic en el botón buscar por indicación (lupa) para accionar la API directamente
         await this.page.locator('i.fas.fa-search-location').click();
@@ -322,7 +322,7 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async clickGuardar(): Promise<void> {
-        logger.info('Haciendo clic en el botón guardar');
+        logger.debug('Haciendo clic en el botón guardar');
         try {
             await this.click(this.selectors.btnGuardar);
         } catch (error) {

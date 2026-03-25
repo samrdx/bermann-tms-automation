@@ -18,17 +18,28 @@ test.describe('Última Milla - Creación de Pedido', () => {
 
         // EXTRAER DATOS SEEDED DESDE JSON ANTES DE NAVEGAR
         logger.info('Extrayendo data base guardada para resolver cliente determinístico...');
-        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
         let operationalData: Record<string, any> | undefined;
-        if (fs.existsSync(dataPath)) {
+        const candidatePaths = DataPathHelper.getLegacyOperationalDataCandidatePaths(testInfo);
+        for (const [index, dataPath] of candidatePaths.entries()) {
+            if (!fs.existsSync(dataPath)) {
+                logger.warn(`El archivo dataPath no se encontró: ${dataPath}.`);
+                continue;
+            }
+
             try {
                 operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8')) as Record<string, any>;
+                if (index > 0) {
+                    logger.warn(`Usando fallback determinístico de data operacional: ${dataPath}`);
+                } else {
+                    logger.info(`Usando data operacional primaria: ${dataPath}`);
+                }
+                break;
             } catch (error) {
-                logger.warn(`No se pudo parsear el JSON operacional en ${dataPath}. El flujo fallará de forma explícita si no puede resolver candidatos válidos.`, error);
+                logger.warn(`No se pudo parsear el JSON operacional en ${dataPath}. El flujo continuará probando otras rutas candidatas.`, error);
             }
-        } else {
-            logger.warn(`El archivo dataPath no se encontró: ${dataPath}. El flujo fallará de forma explícita si no puede resolver candidatos válidos. Verifique si base-entities.setup.ts se ejecutó.`);
         }
+
+        const dataPath = candidatePaths[0];
 
         const clienteDropdownCandidates = ClientResolver.getDropdownCandidates(operationalData);
         const fallbackClientName = ClientResolver.resolveClientName(operationalData);

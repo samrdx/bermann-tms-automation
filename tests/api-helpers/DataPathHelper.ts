@@ -133,6 +133,25 @@ export class DataPathHelper {
     }
 
     /**
+     * Candidate paths for operational data, prioritizing the configured source
+     * and then falling back to the alternate legacy source.
+     *
+     * This keeps deterministic source selection while still allowing operational
+     * smoke flows to recover explicitly when the preferred seed artifact was not
+     * generated for the current browser/environment.
+     */
+    static getLegacyOperationalDataCandidatePaths(testInfo: TestInfo): string[] {
+        const preferredPath = this.getLegacyOperationalDataPath(testInfo);
+        const entityPath = this.getLegacyEntityDataPath(testInfo);
+        const basePath = this.getLegacyBaseDataPath(testInfo);
+
+        return Array.from(new Set([
+            preferredPath,
+            preferredPath === basePath ? entityPath : basePath,
+        ]));
+    }
+
+    /**
      * Canonical setup artifact path requested by the Carga seeding flow.
      * Output filename is fixed as "carga_setup_data.json".
      */
