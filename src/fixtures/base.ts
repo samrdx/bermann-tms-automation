@@ -45,6 +45,7 @@ import { ClienteFactory } from '../modules/commercial/factories/ClienteFactory.j
 
 // Ultima Milla Module
 import { UltimaMillaFormPage } from '../modules/ultimamilla/pages/UltimaMillaPage.js';
+import { UltimaMillaAsignarPage } from '../modules/ultimamilla/pages/UltimaMillaAsignarPage.js';
 import { UltimaMillaFactory } from '../modules/ultimamilla/factories/UltimaMillaFactory.js';
 
 // Utils
@@ -87,6 +88,7 @@ type MyFixtures = {
 
   // Ultima Milla
   ultimaMillaPage: UltimaMillaFormPage;
+  ultimaMillaAsignarPage: UltimaMillaAsignarPage;
   ultimaMillaFactory: UltimaMillaFactory;
 };
 
@@ -174,6 +176,9 @@ export const test = base.extend<MyFixtures>({
   // Ultima Milla
   ultimaMillaPage: async ({ page }: { page: Page }, use: (r: UltimaMillaFormPage) => Promise<void>) => {
     await use(new UltimaMillaFormPage(page));
+  },
+  ultimaMillaAsignarPage: async ({ page }: { page: Page }, use: (r: UltimaMillaAsignarPage) => Promise<void>) => {
+    await use(new UltimaMillaAsignarPage(page));
   },
   ultimaMillaFactory: async ({ page }: { page: Page }, use: (r: UltimaMillaFactory) => Promise<void>) => {
     await use(new UltimaMillaFactory(page));
