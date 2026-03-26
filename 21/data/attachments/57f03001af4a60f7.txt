@@ -1,0 +1,26 @@
+2026-03-26 05:09:22 [INFO]: ENTORNO: QA 🧪
+2026-03-26 05:09:22 [INFO]: ✅ Cargado seededTransportista: Qa_tra_express_850 (ID: 597)
+2026-03-26 05:09:24 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-26 05:09:26 [INFO]: 📝 Completando formulario de conductor para: Qa_con_antonio Qa_con_gonzález
+2026-03-26 05:09:26 [INFO]: [ConductorFormPage] Llenando usuario: ixlkwo90
+2026-03-26 05:09:26 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-26 05:09:27 [INFO]: [ConductorFormPage] Llenando nombre: Qa_con_antonio
+2026-03-26 05:09:27 [INFO]: [ConductorFormPage] Llenando apellido: Qa_con_gonzález
+2026-03-26 05:09:27 [INFO]: [ConductorFormPage] Llenando documento: 67.199.100-1
+2026-03-26 05:09:27 [INFO]: [BasePage] Ingresando RUT con verificación: [67.199.100-1] en #conductores-documento
+2026-03-26 05:09:28 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 67.199.100-1
+2026-03-26 05:09:28 [INFO]: [ConductorFormPage] Llenando telefono: +56924873710
+2026-03-26 05:09:28 [INFO]: [ConductorFormPage] Llenando email: qa_con_antonioqa_con_gonzalez@gmail.com
+2026-03-26 05:09:28 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-26 05:09:30 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-26 05:09:30 [INFO]: [ConductorFormPage] Seleccionando transportista: [Qa_tra_express_850]
+2026-03-26 05:09:31 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-26 05:09:33 [INFO]: ✅ Conductor [Qa_con_antonio Qa_con_gonzález] guardado exitosamente
+2026-03-26 05:09:33 [INFO]: ✅ seededConductor guardado: Qa_con_antonio Qa_con_gonzález
+2026-03-26 05:09:33 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+👤 Conductor     : [Qa_con_antonio Qa_con_gonzález] | Asociado: Qa_tra_express_850
+====================================================================================================

@@ -1,0 +1,26 @@
+2026-03-26 05:32:27 [INFO]: ENTORNO: DEMO 🎭
+2026-03-26 05:32:27 [INFO]: ✅ Cargado seededTransportista: Demo_tra_logistica_989 (ID: 390)
+2026-03-26 05:32:28 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-26 05:32:31 [INFO]: 📝 Completando formulario de conductor para: Demo_con_maría Demo_con_muñoz
+2026-03-26 05:32:31 [INFO]: [ConductorFormPage] Llenando usuario: ylznue96
+2026-03-26 05:32:31 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-26 05:32:31 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_maría
+2026-03-26 05:32:31 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_muñoz
+2026-03-26 05:32:31 [INFO]: [ConductorFormPage] Llenando documento: 98.857.253-5
+2026-03-26 05:32:31 [INFO]: [BasePage] Ingresando RUT con verificación: [98.857.253-5] en #conductores-documento
+2026-03-26 05:32:33 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 98.857.253-5
+2026-03-26 05:32:33 [INFO]: [ConductorFormPage] Llenando telefono: +56983470976
+2026-03-26 05:32:33 [INFO]: [ConductorFormPage] Llenando email: demo_con_mariademo_con_munoz@gmail.com
+2026-03-26 05:32:33 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-26 05:32:34 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-26 05:32:34 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_logistica_989]
+2026-03-26 05:32:36 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-26 05:32:38 [INFO]: ✅ Conductor [Demo_con_maría Demo_con_muñoz] guardado exitosamente
+2026-03-26 05:32:38 [INFO]: ✅ seededConductor guardado: Demo_con_maría Demo_con_muñoz
+2026-03-26 05:32:38 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_maría Demo_con_muñoz] | Asociado: Demo_tra_logistica_989
+====================================================================================================

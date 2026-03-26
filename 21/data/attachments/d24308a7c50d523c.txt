@@ -1,0 +1,73 @@
+2026-03-26 05:34:53 [INFO]: ENTORNO: DEMO 🎭
+2026-03-26 05:34:53 [INFO]: ================================================================================
+2026-03-26 05:34:53 [INFO]: Iniciando Paso 6: Planificar Viaje
+2026-03-26 05:34:53 [INFO]: ================================================================================
+2026-03-26 05:34:53 [INFO]: Cargando datos de entidades existentes del JSON específico del worker...
+2026-03-26 05:34:53 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-26 05:34:53 [INFO]: Entidades cargadas:
+2026-03-26 05:34:53 [INFO]:    Cliente source: seededCliente ✅
+2026-03-26 05:34:53 [INFO]:    Cliente: Demo_cli_importadora_161
+2026-03-26 05:34:53 [INFO]: 
+2026-03-26 05:34:53 [WARN]: ⚠️ ⚠️ Setup config no encontrado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-firefox-demo.json. Se usarán defaults.
+2026-03-26 05:34:53 [INFO]: Environment: DEMO
+2026-03-26 05:34:53 [INFO]: Configuration: {
+  "tipoOperacion": "Distribución",
+  "tipoServicio": "Lcl",
+  "tipoViaje": "DIRECTO",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "CONTENEDOR DRY",
+  "ruta": "47",
+  "origenManual": "233_CD SuperZoo_Quilicura",
+  "destinoManual": "Divisa"
+}
+2026-03-26 05:34:53 [INFO]: Fase 1: Navegar a Planificar Viajes
+2026-03-26 05:34:53 [INFO]: [PlanificarViajesPage] Navegando a la página de Planificar Viajes
+2026-03-26 05:34:57 [INFO]: Navegación exitosa
+2026-03-26 05:34:57 [INFO]: Fase 2: Completar formulario de viaje
+2026-03-26 05:34:57 [INFO]: [PlanificarViajesPage] Completando Nro Viaje: 84626
+2026-03-26 05:34:58 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Operacion: [Distribución]
+2026-03-26 05:35:00 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Servicio: [Lcl]
+2026-03-26 05:35:04 [INFO]: Seleccionando Cliente: Demo_cli_importadora spa_161
+2026-03-26 05:35:04 [INFO]: [PlanificarViajesPage] Seleccionando Cliente: [Demo_cli_importadora spa_161]
+2026-03-26 05:35:08 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Viaje: [DIRECTO]
+2026-03-26 05:35:12 [INFO]: [PlanificarViajesPage] Seleccionando Unidad Negocio: [Defecto]
+2026-03-26 05:35:12 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-26 05:35:16 [INFO]: [PlanificarViajesPage] Seleccionando Codigo Carga: [CONTENEDOR DRY]
+2026-03-26 05:35:20 [INFO]: Intentando agregar Ruta: 47...
+2026-03-26 05:35:20 [INFO]: [PlanificarViajesPage] Añadiendo ruta: 47
+2026-03-26 05:35:24 [INFO]: [PlanificarViajesPage] Ruta [47] encontrada en la fila 1
+2026-03-26 05:35:24 [INFO]: [PlanificarViajesPage] Esperando a que Origen/Destino se completen...
+2026-03-26 05:35:24 [INFO]: Formulario completado
+2026-03-26 05:35:24 [INFO]: Fase 3: Guardar Viaje
+2026-03-26 05:35:24 [INFO]: [PlanificarViajesPage] Haciendo clic en Guardar...
+2026-03-26 05:35:24 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-26 05:35:27 [INFO]: URL post-guardado: https://demo.bermanntms.cl/viajes/crear
+2026-03-26 05:35:27 [WARN]: ⚠️ ⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.
+2026-03-26 05:35:27 [INFO]: Boton guardar clickeado y navegacion completada
+2026-03-26 05:35:27 [INFO]: Fase 4: Verificación
+2026-03-26 05:35:27 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-26 05:35:30 [INFO]: ✅ ID interno de la grilla capturado en Demo: 6781
+2026-03-26 05:35:30 [INFO]: Buscando en la grilla de Asignar usando: 6781
+2026-03-26 05:35:30 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 6781 en la grilla de Asignación...
+2026-03-26 05:35:34 [INFO]: [AsignarViajesPage] ✅ Se encontraron 1 filas después de la búsqueda en Demo, asumiendo que la primera es el Viaje 6781
+2026-03-26 05:35:34 [INFO]: ✅ Viaje encontrado en /viajes/asignar usando búsqueda: 6781
+2026-03-26 05:35:34 [INFO]: ✅ ID interno de la grilla guardado en JSON: viaje.id = 6781
+2026-03-26 05:35:34 [INFO]: Actualizando JSON del worker con la información del viaje...
+2026-03-26 05:35:34 [INFO]: Saved viaje.nroViaje: 84626
+2026-03-26 05:35:34 [INFO]: ================================================================================
+2026-03-26 05:35:34 [INFO]: PASO 6: ¡PLANIFICAR VIAJE COMPLETADO!
+2026-03-26 05:35:34 [INFO]: ================================================================================
+2026-03-26 05:35:34 [INFO]: Tiempo de ejecución: 40.96s
+2026-03-26 05:35:34 [INFO]: 
+2026-03-26 05:35:34 [INFO]: Detalles del viaje:
+2026-03-26 05:35:34 [INFO]:    Nro Viaje: 84626
+2026-03-26 05:35:34 [INFO]:    Cliente: Demo_cli_importadora spa_161
+2026-03-26 05:35:34 [INFO]:    Ruta: 47
+2026-03-26 05:35:34 [INFO]:    Status: PLANIFICADO
+2026-03-26 05:35:34 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🎫 Viaje         : [84626]                        | ID: 6781 | Asociado: Demo_cli_importadora spa_161 | Estado: PLANIFICADO
+====================================================================================================

@@ -1,0 +1,26 @@
+2026-03-26 05:26:52 [INFO]: ENTORNO: DEMO 🎭
+2026-03-26 05:26:52 [INFO]: ✅ Cargado seededTransportista: Demo_tra_andes_763 (ID: 389)
+2026-03-26 05:26:52 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-26 05:26:55 [INFO]: 📝 Completando formulario de conductor para: Demo_con_francisco Demo_con_fernández
+2026-03-26 05:26:55 [INFO]: [ConductorFormPage] Llenando usuario: wfafki84
+2026-03-26 05:26:55 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-26 05:26:55 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_francisco
+2026-03-26 05:26:55 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_fernández
+2026-03-26 05:26:55 [INFO]: [ConductorFormPage] Llenando documento: 54.509.848-2
+2026-03-26 05:26:55 [INFO]: [BasePage] Ingresando RUT con verificación: [54.509.848-2] en #conductores-documento
+2026-03-26 05:26:56 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 54.509.848-2
+2026-03-26 05:26:56 [INFO]: [ConductorFormPage] Llenando telefono: +56938535850
+2026-03-26 05:26:56 [INFO]: [ConductorFormPage] Llenando email: demo_con_franciscodemo_con_fernandez@gmail.com
+2026-03-26 05:26:56 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-26 05:26:58 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-26 05:26:58 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_andes_763]
+2026-03-26 05:26:59 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-26 05:27:01 [INFO]: ✅ Conductor [Demo_con_francisco Demo_con_fernández] guardado exitosamente
+2026-03-26 05:27:01 [INFO]: ✅ seededConductor guardado: Demo_con_francisco Demo_con_fernández
+2026-03-26 05:27:01 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_francisco Demo_con_fernández] | Asociado: Demo_tra_andes_763
+====================================================================================================

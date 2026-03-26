@@ -1,0 +1,245 @@
+2026-03-26 05:20:12 [INFO]: ENTORNO: QA 🧪
+2026-03-26 05:20:12 [INFO]: 
+2026-03-26 05:20:12 [INFO]: ================================================================================
+2026-03-26 05:20:12 [INFO]: [PrefacturaCrearE2ETest] [FASE 1] 🚀 PREPARACIÓN DE DATOS (API)
+2026-03-26 05:20:12 [INFO]: ================================================================================
+2026-03-26 05:20:12 [INFO]: ✅ TmsApiClient inicializado
+2026-03-26 05:20:12 [INFO]: [PrefacturaCrearE2ETest] [SUBPASO] 🔸 Setup: Transportista=[Qa_tra_andes_832] Cliente=[Qa_cli_distribuidora_401] Viaje=[756096]
+2026-03-26 05:20:12 [INFO]: 🚀 UI: Creando Transportista [Qa_tra_andes_832] RUT: [81049143-4]
+2026-03-26 05:20:15 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [81049143-4] en input[name="Transportistas[documento]"]
+2026-03-26 05:20:17 [INFO]: ✅ RUT verificado (intento 1): 81.049.143-4
+2026-03-26 05:20:18 [INFO]: ⚙️ Manteniendo "Permite Tercearizar viajes" en NO...
+2026-03-26 05:20:19 [INFO]: 💾 Guardando Transportista vía Inyección JS...
+2026-03-26 05:20:21 [INFO]: ✅ Transportista [Qa_tra_andes_832] creado exitosamente
+2026-03-26 05:20:21 [INFO]: 📍 URL después de guardar: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-26 05:20:21 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla...
+2026-03-26 05:20:24 [INFO]: 🔍 Buscando por RUT: 81049143-4
+2026-03-26 05:20:24 [WARN]: ⚠️ ⚠️ La búsqueda por RUT falló, recurriendo a la búsqueda por nombre...
+2026-03-26 05:20:24 [INFO]: 🔎 Búsqueda completada con: Qa_tra_andes_832
+2026-03-26 05:20:26 [INFO]: 🔎 Probando búsqueda alternativa en la tabla...
+2026-03-26 05:20:26 [INFO]: ✅ ID de Transportista desde el link: 599
+2026-03-26 05:20:26 [INFO]: ✅ Transportista creado: Qa_tra_andes_832 | ID: 599
+2026-03-26 05:20:26 [INFO]: 🚀 UI: Creando Cliente [Qa_cli_distribuidora_401] RUT: [81177916-4]
+2026-03-26 05:20:28 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [81177916-4] en #clientes-rut
+2026-03-26 05:20:29 [INFO]: ✅ RUT verificado (intento 1): 81.177.916-4
+2026-03-26 05:20:29 [INFO]: ⚡ JS Click: button[data-id="clientes-tipo_cliente_id"]
+2026-03-26 05:20:30 [INFO]: ⚡ JS Click: button[data-id="clientes-region_id"]
+2026-03-26 05:20:32 [INFO]: ⚡ JS Click: button[data-id="clientes-ciudad_id"]
+2026-03-26 05:20:34 [INFO]: ⚡ JS Click: button[data-id="clientes-comuna_id"]
+2026-03-26 05:20:34 [INFO]: 📍 Seleccionando Polígonos (drop_zones)...
+2026-03-26 05:20:34 [WARN]: ⚠️ ⚠️ Dropdown de polígonos no visible
+2026-03-26 05:20:34 [INFO]: ⚡ JS Click: #btn_guardar
+2026-03-26 05:20:42 [WARN]: ⚠️ ⚠️ waitForURL (ver/editar) no completó en 8s para Cliente (Qa_cli_distribuidora_401) — continuando con URL actual
+2026-03-26 05:20:42 [INFO]: 📍 URL después de guardar (Cliente): https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-26 05:20:42 [INFO]: 🔄 URL no contiene ID todavía, esperando 2s y reintentando...
+2026-03-26 05:20:44 [INFO]: 🔍 [lookup-inicial] Buscando Cliente "Qa_cli_distribuidora_401" (intento 1/3)
+2026-03-26 05:20:44 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:20:47 [INFO]: ✅ Cliente ID desde action-link: 527
+2026-03-26 05:20:47 [INFO]: 🚛 UI: Creando Vehículo [Qa_veh_HAPC16] para Transportista: Qa_tra_andes_832
+2026-03-26 05:20:49 [INFO]: 📋 Seleccionando Transportista Vehiculo: "Qa_tra_andes_832"
+2026-03-26 05:20:50 [INFO]: ✅ Transportista Vehiculo seleccionado
+2026-03-26 05:20:50 [INFO]: 🚛 Seleccionando Tipo Vehículo: TRACTO
+2026-03-26 05:20:53 [INFO]: 📦 Seleccionando Capacidad: 1 a 12 TON
+2026-03-26 05:21:05 [WARN]: ⚠️ ⚠️ waitForURL (ver/editar) no completó en 8s para Vehiculo (Qa_veh_HAPC16) — continuando con URL actual
+2026-03-26 05:21:05 [INFO]: 📍 URL después de guardar (Vehiculo): https://moveontruckqa.bermanntms.cl/vehiculos/index
+2026-03-26 05:21:05 [INFO]: 🔄 URL no contiene ID todavía, esperando 2s y reintentando...
+2026-03-26 05:21:07 [INFO]: 🔍 [lookup-inicial] Buscando Vehiculo "Qa_veh_HAPC16" (intento 1/3)
+2026-03-26 05:21:07 [INFO]: ✅ Filtro transportista aplicado desde button[data-id='transportista']: Qa_tra_andes_832
+2026-03-26 05:21:07 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:21:08 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:21:11 [INFO]: ✅ Vehiculo ID desde action-link: 100761
+2026-03-26 05:21:13 [INFO]: ✅ Filtro transportista aplicado desde button[data-id='transportista']: Qa_tra_andes_832
+2026-03-26 05:21:13 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:21:14 [INFO]: ✅ [Vehiculo] Verificado en /vehiculos/index intento 1/4 (filtro transportista + buscar) ID=Qa_veh_HAPC16 - SIN GPS
+2026-03-26 05:21:14 [INFO]: ✅ Vehículo creado: Qa_veh_HAPC16 | ID: 100761
+2026-03-26 05:21:14 [INFO]: 👨‍✈️ UI: Creando Conductor [Qa_con_ana] para Transportista: Qa_tra_andes_832
+2026-03-26 05:21:16 [INFO]: 🔑 typeRutSlowly: Escribiendo RUT [51710600-3] en input[name="Conductores[documento]"]
+2026-03-26 05:21:18 [INFO]: ✅ RUT verificado (intento 1): 51.710.600-3
+2026-03-26 05:21:19 [INFO]: 📅 Estableciendo fecha vencimiento licencia: 26-03-2027
+2026-03-26 05:21:19 [INFO]: 📋 Seleccionando Transportista Conductor: "Qa_tra_andes_832"
+2026-03-26 05:21:20 [INFO]: ✅ Transportista Conductor seleccionado
+2026-03-26 05:21:31 [WARN]: ⚠️ ⚠️ waitForURL (ver/editar) no completó en 8s para Conductor (51.710.600-3) — continuando con URL actual
+2026-03-26 05:21:31 [INFO]: 📍 URL después de guardar (Conductor): https://moveontruckqa.bermanntms.cl/conductores/index
+2026-03-26 05:21:31 [INFO]: 🔄 URL no contiene ID todavía, esperando 2s y reintentando...
+2026-03-26 05:21:33 [INFO]: 🔍 [lookup-inicial] Buscando Conductor "51.710.600-3" (intento 1/3)
+2026-03-26 05:21:33 [INFO]: ✅ Filtro transportista aplicado desde button[data-id='transportista']: Qa_tra_andes_832
+2026-03-26 05:21:33 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:21:34 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:21:37 [INFO]: ✅ Conductor ID desde action-link: 1257
+2026-03-26 05:21:37 [INFO]: ✅ Conductor verificado por extracción de ID en index con filtro transportista. ID=1257 Transportista=Qa_tra_andes_832
+2026-03-26 05:21:39 [INFO]: ✅ Filtro transportista aplicado desde button[data-id='transportista']: Qa_tra_andes_832
+2026-03-26 05:21:39 [INFO]: ⚡ JS Click: #buscar
+2026-03-26 05:21:40 [INFO]: ✅ [Conductor] Verificado en /conductores/index intento 1/4 (filtro transportista + buscar) ID=
+2026-03-26 05:21:40 [INFO]: ✅ Conductor guardado. URL actual: https://moveontruckqa.bermanntms.cl/conductores/index#. ID: 1257
+2026-03-26 05:21:40 [INFO]: 📝 Creando contrato [618467] tipo=VENTA para: Qa_cli_distribuidora_401
+2026-03-26 05:21:43 [INFO]: 📋 Estableciendo tipo de contrato a: VENTA
+2026-03-26 05:21:43 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-26 05:21:58 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-26 05:21:59 [INFO]: 📋 Estableciendo subtipo para contrato de VENTA...
+2026-03-26 05:22:00 [INFO]: 📋 Intentando seleccionar Cliente: "Qa_cli_distribuidora_401" (intento 1/5)...
+2026-03-26 05:22:00 [INFO]: ✅ Seleccionado: QA_CLI_DISTRIBUIDORA_401 (valor: 527)
+2026-03-26 05:22:00 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-26 05:22:05 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-26 05:22:05 [INFO]: 🛣️ Añadiendo Ruta 1413 y Carga 1413_2 con entrada de tarifa LENTA...
+2026-03-26 05:22:07 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-26 05:22:07 [INFO]: ✅ Modal de carga oculto
+2026-03-26 05:22:09 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-26 05:22:10 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-26 05:22:11 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-26 05:22:14 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-26 05:22:18 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-26 05:22:19 [INFO]: 📝 Creando contrato [199999] tipo=COSTO para: Qa_tra_andes_832
+2026-03-26 05:22:21 [INFO]: 📋 Estableciendo tipo de contrato a: COSTO
+2026-03-26 05:22:21 [INFO]: ⏳ Esperando que el formulario se reconfigure...
+2026-03-26 05:22:36 [WARN]: ⚠️ ⚠️ Respuesta rendersubview no detectada, usando espera de respaldo
+2026-03-26 05:22:37 [INFO]: 📋 Intentando seleccionar Transportista: "Qa_tra_andes_832" (intento 1/5)...
+2026-03-26 05:22:37 [INFO]: ✅ Seleccionado: QA_TRA_ANDES_832 (valor: 599)
+2026-03-26 05:22:37 [INFO]: 💾 Guardando encabezado del contrato...
+2026-03-26 05:22:43 [INFO]: ✅ ¡Encabezado del contrato guardado! Añadiendo rutas...
+2026-03-26 05:22:43 [INFO]: 🛣️ Añadiendo Ruta 1413 y Carga 1413_2 con entrada de tarifa LENTA...
+2026-03-26 05:22:44 [INFO]: ⏳ Esperando que el modal de carga desaparezca...
+2026-03-26 05:22:44 [INFO]: ✅ Modal de carga oculto
+2026-03-26 05:22:46 [INFO]: ⏳ Esperando que el modal de carga desaparezca después de la tarifa de ruta...
+2026-03-26 05:22:47 [INFO]: 💰 Llenando tarifa conductor LENTAMENTE: 20000
+2026-03-26 05:22:49 [INFO]: 💰 Llenando tarifa viaje LENTAMENTE: 50000
+2026-03-26 05:22:52 [INFO]: 💾 Guardando contrato con rutas...
+2026-03-26 05:22:55 [INFO]: ✅ Contrato con rutas guardado exitosamente
+2026-03-26 05:22:56 [INFO]: [PrefacturaCrearE2ETest] Estabilizando navegador...
+2026-03-26 05:22:58 [INFO]: 🚚 UI: Creando Viaje [756096] para Cliente [Qa_cli_distribuidora_401]
+2026-03-26 05:23:00 [INFO]: 📝 Llenando formulario (Reintento: false)...
+2026-03-26 05:23:01 [INFO]: 📋 Seleccionando Tipo Operación: "defecto"
+2026-03-26 05:23:01 [INFO]: ✅ Tipo Operación seleccionado
+2026-03-26 05:23:01 [INFO]: 📋 Seleccionando Tipo Servicio: "defecto"
+2026-03-26 05:23:02 [INFO]: ✅ Tipo Servicio seleccionado
+2026-03-26 05:23:02 [INFO]: 📋 Seleccionando Cliente: "Qa_cli_distribuidora_401"
+2026-03-26 05:23:03 [INFO]: ✅ Cliente seleccionado
+2026-03-26 05:23:04 [INFO]: 📋 Seleccionando Tipo Viaje: "Normal"
+2026-03-26 05:23:06 [INFO]: ✅ Tipo Viaje seleccionado
+2026-03-26 05:23:06 [INFO]: 📋 Seleccionando Unidad Negocio: "Defecto"
+2026-03-26 05:23:07 [INFO]: ✅ Unidad Negocio seleccionado
+2026-03-26 05:23:07 [INFO]: 📍 PASO 1: Abriendo dropdown Origen...
+2026-03-26 05:23:08 [INFO]: 📍 PASO 2: Seleccionando Origen "405_LA FARFANA_Pudahuel"...
+2026-03-26 05:23:09 [INFO]: ✅ Origen seleccionado: 405_LA FARFANA_Pudahuel
+2026-03-26 05:23:10 [INFO]: 📍 PASO 3: Abriendo dropdown Destino...
+2026-03-26 05:23:11 [INFO]: 📍 PASO 4: Seleccionando Destino "CXP ANTOFAGASTA"...
+2026-03-26 05:23:11 [INFO]: ✅ Destino seleccionado: CXP ANTOFAGASTA
+2026-03-26 05:23:12 [INFO]: ✅ Origen/Destino configurados correctamente
+2026-03-26 05:23:14 [INFO]: 📦 SELECCIONANDO CARGA AL FINAL (Sondeando el DOM para que viajes-carga_id tenga la opción Test 1)...
+2026-03-26 05:23:15 [INFO]: 📋 Estado del formulario antes de guardar: viajes-nro_viaje="756096" | tipo_operacion_form="defecto" (opts:83) | viajes-tipo_servicio_id="defecto" (opts:2) | viajes-cliente_id="Qa_cli_distribuidora_401" (opts:474) | viajes-tipo_viaje_id="Normal" (opts:9) | viajes-unidad_negocio_id="Defecto" (opts:70) | viajes-carga_id="Test 1" (opts:2) | _origendestinoform-origen="405_LA FARFANA_Pudahuel" (opts:725) | _origendestinoform-destino="CXP ANTOFAGASTA" (opts:725)
+2026-03-26 05:23:16 [INFO]: 💾 Haciendo clic en Guardar...
+2026-03-26 05:23:19 [INFO]: ⏳ Verificando creación del viaje...
+2026-03-26 05:23:19 [INFO]: ✅ Viaje [756096] creado exitosamente (toast exacto)
+2026-03-26 05:23:19 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [756096] planificado.
+2026-03-26 05:23:19 [INFO]: 
+2026-03-26 05:23:19 [INFO]: ================================================================================
+2026-03-26 05:23:19 [INFO]: [PrefacturaCrearE2ETest] [FASE 2] 🚀 ASIGNACIÓN DEL VIAJE [756096]
+2026-03-26 05:23:19 [INFO]: ================================================================================
+2026-03-26 05:23:19 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-26 05:23:23 [INFO]: [AsignarViajesPage] === Iniciando Asignación para 756096 (Modo Inyección) ===
+2026-03-26 05:23:23 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 756096
+2026-03-26 05:23:24 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 756096 en la grilla de Asignación...
+2026-03-26 05:23:28 [INFO]: [AsignarViajesPage] ✅ Viaje 756096 encontrado por coincidencia de texto en la fila 1
+2026-03-26 05:23:30 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-03-26 05:23:30 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Transportista: "Qa_tra_andes_832"
+2026-03-26 05:23:33 [INFO]: [AsignarViajesPage] ✅ Transportista seleccionado exitosamente: Qa_tra_andes_832
+2026-03-26 05:23:34 [INFO]: [AsignarViajesPage] ⏳ Esperando cascada (transportista -> vehículos)...
+2026-03-26 05:23:34 [INFO]: [AsignarViajesPage] ⏳ Esperando opciones para Vehículo Principal (#viajes-vehiculo_uno_id)...
+2026-03-26 05:23:34 [INFO]: [AsignarViajesPage] ✅ Opciones de Vehículo Principal cargadas
+2026-03-26 05:23:34 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Vehículo Principal: "Qa_veh_HAPC16"
+2026-03-26 05:23:36 [INFO]: [AsignarViajesPage] ✅ Vehículo Principal seleccionado exitosamente: Qa_veh_HAPC16
+2026-03-26 05:23:37 [INFO]: [AsignarViajesPage] ⏳ Esperando cascada (vehículo -> conductor)...
+2026-03-26 05:23:37 [INFO]: [AsignarViajesPage] ⏳ Esperando opciones para Conductor (#viajes-conductor_id)...
+2026-03-26 05:23:37 [INFO]: [AsignarViajesPage] ✅ Opciones de Conductor cargadas
+2026-03-26 05:23:37 [INFO]: [AsignarViajesPage] 🔎 Buscando y seleccionando en Conductor: "Qa_con_ana Qa_con_rodríguez"
+2026-03-26 05:23:40 [INFO]: [AsignarViajesPage] ✅ Conductor seleccionado exitosamente: Qa_con_ana Qa_con_rodríguez
+2026-03-26 05:23:48 [INFO]: [AsignarViajesPage] ✅ Flujo de asignación completo
+2026-03-26 05:23:50 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [756096] asignado.
+2026-03-26 05:23:50 [INFO]: 
+2026-03-26 05:23:50 [INFO]: ================================================================================
+2026-03-26 05:23:50 [INFO]: [PrefacturaCrearE2ETest] [FASE 3] 🚀 FINALIZAR VIAJE
+2026-03-26 05:23:50 [INFO]: ================================================================================
+2026-03-26 05:23:50 [INFO]: [MonitoreoPage] 📍 Navegando a: /viajes/monitoreo
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 📍 URL Actual: https://moveontruckqa.bermanntms.cl/viajes/monitoreo
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] ✅ Página de Monitoreo cargada exitosamente
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 🚀 UI: === Iniciando Finalización para el Viaje [756096] ===
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 🔎 UI: Paso 1: Buscando Viaje...
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 🔎 UI: Buscando Viaje [756096]...
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] ⏳ UI: Esperando input #id...
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 👁️ UI: Input #id visible
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 📝 UI: Filtro de ID completado con: "756096"
+2026-03-26 05:23:54 [INFO]: [MonitoreoPage] 🔎 UI: Disparando búsqueda (multi-estrategia)...
+2026-03-26 05:23:55 [INFO]: [MonitoreoPage] ✅ UI: Buscar disparado combinando JS y tecla Enter
+2026-03-26 05:23:58 [INFO]: [MonitoreoPage] ✅ UI: Estabilización post-búsqueda completa
+2026-03-26 05:23:58 [INFO]: [MonitoreoPage] ⏳ UI: Esperando a que la fila del viaje aparezca dentro de #registros...
+2026-03-26 05:23:58 [INFO]: [MonitoreoPage] ✅ UI: Fila de viaje reconocida dentro de #registros
+2026-03-26 05:23:58 [INFO]: [MonitoreoPage] 📜 UI: Scrolleando a la fila del viaje...
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] ✅ UI: Fila de Viaje confirmada y visible
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] 🕰️ UI: Paso 2: Haciendo clic en Horario GPS (Agregar)...
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] 🕰️ UI: Accediendo a "Horario GPS" (Agregar)...
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] 🔎 UI: Haciendo clic en Agregar (showModalEditTripWithoutGPSManually) vía JS...
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] ✅ UI: Clic en Agregar vía JS (showModalEditTripWithoutGPSManually)
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] ⏳ UI: Esperando modal #modalCambioEstadoSinGps (display: block)...
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] ✅ UI: Modal #modalCambioEstadoSinGps abierto
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] 📝 UI: Paso 3: Confirmando Finalización...
+2026-03-26 05:24:00 [INFO]: [MonitoreoPage] 📝 UI: Procesando modal #modalCambioEstadoSinGps...
+2026-03-26 05:24:01 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/modal-horario-gps-contenido-1774502640988.png 📸
+2026-03-26 05:24:01 [INFO]: [MonitoreoPage] 🔎 UI: Seleccionando "Finalizado" en #drop_state_without_gps...
+2026-03-26 05:24:01 [INFO]: [MonitoreoPage] ✅ UI: Finalizado seleccionado
+2026-03-26 05:24:01 [INFO]: [MonitoreoPage] 💾 UI: Haciendo clic en Guardar (#modificarEstadoViaje_sinGps)...
+2026-03-26 05:24:01 [INFO]: [MonitoreoPage] ✅ UI: Guardar clicado
+2026-03-26 05:24:04 [INFO]: [MonitoreoPage] 🧹 UI: Cerrando modales Bootstrap...
+2026-03-26 05:24:04 [INFO]: [MonitoreoPage] ✅ UI: Modales cerrados
+2026-03-26 05:24:04 [INFO]: [MonitoreoPage] 🏁 UI: Finalización confirmada exitosamente
+2026-03-26 05:24:04 [INFO]: [MonitoreoPage] 🏁 UI: === Viaje [756096] Finalizado Exitosamente ===
+2026-03-26 05:24:04 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Viaje [756096] finalizado.
+2026-03-26 05:24:04 [INFO]: 
+2026-03-26 05:24:04 [INFO]: ================================================================================
+2026-03-26 05:24:04 [INFO]: [PrefacturaCrearE2ETest] [FASE 4] 🚀 GENERACIÓN DE PREFACTURA
+2026-03-26 05:24:04 [INFO]: ================================================================================
+2026-03-26 05:24:04 [INFO]: [PrefacturaPage] Navegando a /prefactura/crear
+2026-03-26 05:24:05 [INFO]: [PrefacturaPage] Buscando viajes para el cliente: Qa_cli_distribuidora_401
+2026-03-26 05:24:05 [INFO]: [PrefacturaPage] Asegurando rango de fechas...
+2026-03-26 05:24:09 [INFO]: [PrefacturaPage] Seleccionando opción: QA_CLI_DISTRIBUIDORA_401
+2026-03-26 05:24:13 [INFO]: [PrefacturaPage] Seleccionando opción: Pesos Chilenos
+2026-03-26 05:24:18 [INFO]: [PrefacturaPage] Esperando resultados en la grilla (Firefox Robust Wait)...
+2026-03-26 05:24:48 [WARN]: [PrefacturaPage] ⚠️ Tiempo de espera agotado esperando resultados de la grilla
+2026-03-26 05:24:49 [INFO]: [PrefacturaPage] Generando prefactura para el viaje cargado...
+2026-03-26 05:24:49 [INFO]: [PrefacturaPage] Haciendo clic en "btn agregar"
+2026-03-26 05:24:49 [INFO]: [PrefacturaPage] Haciendo clic en Guardar
+2026-03-26 05:24:49 [INFO]: [PrefacturaPage] Esperando redirección automática a /prefactura/index y mensaje de éxito
+2026-03-26 05:24:51 [INFO]: [PrefacturaPage] Buscando prefacturas para el cliente: Qa_cli_distribuidora_401 en /index
+2026-03-26 05:24:54 [INFO]: [PrefacturaPage] Seleccionando opción: QA_CLI_DISTRIBUIDORA_401
+2026-03-26 05:24:54 [INFO]: [PrefacturaPage] Haciendo clic en botón Buscar (Index)
+2026-03-26 05:24:57 [INFO]: [PrefacturaPage] Se encontraron 1 registros. ID de la primera prefactura: [266]
+2026-03-26 05:24:57 [INFO]: [PrefacturaCrearE2ETest] [OK] ✅ Proceso de Prefactura Finalizado Correctamente
+2026-03-26 05:24:57 [INFO]: [PrefacturaCrearE2ETest] 
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_andes_832]             | ID: 599
+🏢 Cliente       : [Qa_cli_distribuidora_401]     | ID: 527
+🚚 Vehiculo      : [Qa_veh_HAPC16]                | ID: 100761 | Patente: Qa_veh_HAPC16 | Asociado: Qa_tra_andes_832
+👤 Conductor     : [Qa_con_ana Qa_con_rodríguez Qa_con_rodríguez] | ID: 1257 | Asociado: Qa_tra_andes_832
+🏭 Transportista : [Qa_tra_andes_832]            
+🏢 Cliente       : [Qa_cli_distribuidora_401]    
+🔹 Contrato Venta: [618467]                      
+🔹 Contrato Costo: [199999]                      
+🎫 Viaje         : [756096]                       | Asociado: Qa_cli_distribuidora_401 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 266 | Cliente: Qa_cli_distribuidora_401
+====================================================================================================
+2026-03-26 05:24:57 [INFO]: [PrefacturaCrearE2ETest] ⏱️ Tiempo total: 285.25s
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_andes_832]             | ID: 599
+🏢 Cliente       : [Qa_cli_distribuidora_401]     | ID: 527
+🚚 Vehiculo      : [Qa_veh_HAPC16]                | ID: 100761 | Patente: Qa_veh_HAPC16 | Asociado: Qa_tra_andes_832
+👤 Conductor     : [Qa_con_ana Qa_con_rodríguez Qa_con_rodríguez] | ID: 1257 | Asociado: Qa_tra_andes_832
+🏭 Transportista : [Qa_tra_andes_832]            
+🏢 Cliente       : [Qa_cli_distribuidora_401]    
+🔹 Contrato Venta: [618467]                      
+🔹 Contrato Costo: [199999]                      
+🎫 Viaje         : [756096]                       | Asociado: Qa_cli_distribuidora_401 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 266 | Cliente: Qa_cli_distribuidora_401
+====================================================================================================

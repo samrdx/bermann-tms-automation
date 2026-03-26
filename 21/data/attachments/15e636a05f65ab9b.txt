@@ -1,0 +1,42 @@
+2026-03-26 05:26:01 [INFO]: ENTORNO: DEMO 🎭
+2026-03-26 05:26:01 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-26 05:26:01 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-26 05:26:03 [INFO]: ✅ Navegación correcta
+2026-03-26 05:26:03 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-26 05:26:03 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_importadora_161
+2026-03-26 05:26:03 [INFO]: [ClienteFormPage] Completando RUT: 81163949-4
+2026-03-26 05:26:03 [INFO]: [BasePage] Ingresando RUT con verificación: [81163949-4] en #clientes-rut
+2026-03-26 05:26:05 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 81.163.949-4
+2026-03-26 05:26:05 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_importadora spa_161
+2026-03-26 05:26:05 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-26 05:26:06 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-26 05:26:06 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-26 05:26:06 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-26 05:26:07 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Antofagasta
+2026-03-26 05:26:09 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Tocopilla
+2026-03-26 05:26:10 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: María Elena
+2026-03-26 05:26:10 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Antofagasta → Tocopilla → María Elena
+2026-03-26 05:26:10 [INFO]: [ClienteFormPage] Completando calle: Av. Vicuña Mackenna
+2026-03-26 05:26:10 [INFO]: [ClienteFormPage] Completando altura: 126
+2026-03-26 05:26:10 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-26 05:26:11 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 844/844
+2026-03-26 05:26:11 [INFO]: ✅ Formulario Completado
+2026-03-26 05:26:11 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-26 05:26:11 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-26 05:26:16 [INFO]: ✅ Guardar iniciado
+2026-03-26 05:26:16 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-26 05:26:18 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-26 05:26:18 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-26 05:26:18 [INFO]: 🔍 Buscando por RUT: 81163949-4 (limpio: 811639494)
+2026-03-26 05:26:18 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-26 05:26:20 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-26 05:26:20 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 376
+2026-03-26 05:26:20 [INFO]: ✅ Cliente [Demo_cli_importadora_161] ID: 376 identificado exitosamente
+2026-03-26 05:26:20 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-23578361794.json
+2026-03-26 05:26:20 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_importadora_161]     | ID: 376
+====================================================================================================

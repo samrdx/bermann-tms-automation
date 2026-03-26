@@ -1,0 +1,34 @@
+2026-03-26 05:02:48 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-26 05:02:48 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-26 05:02:51 [INFO]: ✅ Navegación exitosa
+2026-03-26 05:02:51 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-26 05:02:51 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_transportes_898
+2026-03-26 05:02:51 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_transportes_898
+2026-03-26 05:02:51 [INFO]: [TransportistaFormPage] Completando documento (RUT): 55169725-8
+2026-03-26 05:02:51 [INFO]: [BasePage] Ingresando RUT con verificación: [55169725-8] en #transportistas-documento
+2026-03-26 05:02:52 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 55.169.725-8
+2026-03-26 05:02:52 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-26 05:02:53 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-26 05:02:53 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-26 05:02:53 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-26 05:02:54 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region del Maule
+2026-03-26 05:02:55 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Talca
+2026-03-26 05:02:57 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Río Claro
+2026-03-26 05:02:57 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region del Maule → Talca → Río Claro
+2026-03-26 05:02:57 [INFO]: [TransportistaFormPage] Completando calle: Av. Pajaritos
+2026-03-26 05:02:57 [INFO]: [TransportistaFormPage] Completando altura: 945
+2026-03-26 05:02:57 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-26 05:02:58 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-26 05:02:58 [INFO]: ✅ Formulario completado
+2026-03-26 05:02:58 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-26 05:02:58 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-26 05:03:03 [INFO]: ✅ Guardado iniciado
+2026-03-26 05:03:03 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-26 05:03:05 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-26 05:03:05 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-26 05:03:05 [INFO]: 🔍 Buscando por nombre: Qa_tra_transportes_898
+2026-03-26 05:03:05 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-26 05:03:07 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 596
+2026-03-26 05:03:07 [INFO]: ✅ ID del Transportista [Qa_tra_transportes_898] extraído exitosamente: 596
+2026-03-26 05:03:07 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23578361794.json
+2026-03-26 05:03:07 [INFO]: ✅ Prueba exitosa

@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_andes_832]             | ID: 599
+🏢 Cliente       : [Qa_cli_distribuidora_401]     | ID: 527
+🚚 Vehiculo      : [Qa_veh_HAPC16]                | ID: 100761 | Patente: Qa_veh_HAPC16 | Asociado: Qa_tra_andes_832
+👤 Conductor     : [Qa_con_ana Qa_con_rodríguez Qa_con_rodríguez] | ID: 1257 | Asociado: Qa_tra_andes_832
+🏭 Transportista : [Qa_tra_andes_832]            
+🏢 Cliente       : [Qa_cli_distribuidora_401]    
+🔹 Contrato Venta: [618467]                      
+🔹 Contrato Costo: [199999]                      
+🎫 Viaje         : [756096]                       | Asociado: Qa_cli_distribuidora_401 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 266 | Cliente: Qa_cli_distribuidora_401
+====================================================================================================

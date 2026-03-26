@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_andes_234]           | ID: 392
+🏢 Cliente       : [Demo_cli_global_258]          | ID: 378
+🚚 Vehiculo      : [Demo_veh_MN5302]              | ID: 100443 | Patente: Demo_veh_MN5302 | Asociado: Demo_tra_andes_234
+👤 Conductor     : [Demo_con_antonio Demo_con_díaz Demo_con_díaz] | ID: 444 | Asociado: Demo_tra_andes_234
+🏭 Transportista : [Demo_tra_andes_234]          
+🏢 Cliente       : [Demo_cli_global_258]         
+🔹 Contrato Venta: [146225]                      
+🔹 Contrato Costo: [131337]                      
+🎫 Viaje         : [663574]                       | Asociado: Demo_cli_global_258 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 187 | Cliente: Demo_cli_global_258
+====================================================================================================
