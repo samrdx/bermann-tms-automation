@@ -1,0 +1,125 @@
+name: Ultima Milla Batch (Allure Pages)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        default: "DEMO"
+        type: choice
+        options:
+          - QA
+          - DEMO
+      batch_size:
+        description: "Batch size"
+        required: true
+        default: "8"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  ultimamilla-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preflight - Validate workflow script references
+        run: npm run ci:validate:workflow-scripts
+
+      - name: Resolve metadata
+        id: meta
+        shell: bash
+        run: |
+          ENV_UPPER="${{ inputs.environment }}"
+          ENV_LOWER=$(echo "$ENV_UPPER" | tr '[:upper:]' '[:lower:]')
+          if [[ "$ENV_UPPER" == "DEMO" ]]; then
+            PROJECT_ONE="chromium-demo"
+            PROJECT_TWO="firefox-demo"
+            SEED_CMD="npm run demo:seed:legacy"
+          else
+            PROJECT_ONE="chromium-qa"
+            PROJECT_TWO="firefox-qa"
+            SEED_CMD="npm run qa:seed:legacy"
+          fi
+
+          echo "env_upper=$ENV_UPPER" >> "$GITHUB_OUTPUT"
+          echo "env_lower=$ENV_LOWER" >> "$GITHUB_OUTPUT"
+          echo "project_one=$PROJECT_ONE" >> "$GITHUB_OUTPUT"
+          echo "project_two=$PROJECT_TWO" >> "$GITHUB_OUTPUT"
+          echo "seed_cmd=$SEED_CMD" >> "$GITHUB_OUTPUT"
+          echo "report_dir=allure-report-$ENV_LOWER" >> "$GITHUB_OUTPUT"
+          echo "results_dir=allure-results-$ENV_LOWER" >> "$GITHUB_OUTPUT"
+          echo "pages_dir=ultimamilla-batch/$ENV_LOWER" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Seed legacy data (${{ steps.meta.outputs.env_upper }})
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          CI: true
+        run: ${{ steps.meta.outputs.seed_cmd }}
+
+      - name: Run Ultima Milla batch test (multi-browser serial)
+        env:
+          ENV: ${{ steps.meta.outputs.env_upper }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          ULTIMAMILLA_ENABLE_MUTATION: 'true'
+          ULTIMAMILLA_BATCH_SIZE: ${{ inputs.batch_size }}
+          CI: true
+        run: |
+          npx playwright test tests/e2e/modules/ultimamilla/pedido-asignar-batch.test.ts \
+            --project ${{ steps.meta.outputs.project_one }} \
+            --project ${{ steps.meta.outputs.project_two }} \
+            --workers 1 --trace on
+
+      - name: Install Allure CLI
+        if: always()
+        run: npm install -g allure-commandline
+
+      - name: Generate Allure report
+        if: always()
+        shell: bash
+        run: |
+          RESULTS_DIR="${{ steps.meta.outputs.results_dir }}"
+          REPORT_DIR="${{ steps.meta.outputs.report_dir }}"
+          if [[ ! -d "$RESULTS_DIR" ]] || [[ -z "$(ls -A "$RESULTS_DIR" 2>/dev/null)" ]]; then
+            echo "Missing or empty Allure results directory: $RESULTS_DIR"
+            exit 1
+          fi
+          allure generate "$RESULTS_DIR" -o "$REPORT_DIR" --clean
+
+      - name: Upload Allure report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-ultimamilla-batch-${{ steps.meta.outputs.env_lower }}-${{ github.run_id }}
+          path: ${{ steps.meta.outputs.report_dir }}/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Deploy Allure report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ${{ steps.meta.outputs.report_dir }}
+          destination_dir: ${{ steps.meta.outputs.pages_dir }}
