@@ -18,6 +18,12 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
 
 jobs:
   ultimamilla-batch:
@@ -122,3 +128,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ${{ steps.meta.outputs.report_dir }}
           destination_dir: ${{ steps.meta.outputs.pages_dir }}
+          keep_files: true
