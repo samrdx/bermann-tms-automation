@@ -333,7 +333,7 @@ export class UltimaMillaAsignarPage extends BasePage {
         );
       }
 
-      const visibleRows = await this.getVisibleOrderRows();
+      const visibleRows = await this.waitForRequestedOrderCodesInGrid(requestedOrderCodes);
       const selectedRowIds: string[] = [];
       const matchedOrderCodes: string[] = [];
       const missingOrderCodes: string[] = [];
@@ -367,7 +367,24 @@ export class UltimaMillaAsignarPage extends BasePage {
         );
       }
 
-      const selectedCount = await this.getSelectedOrderCount();
+      let selectedCount = await this.getSelectedOrderCount();
+      if (selectedCount < requestedOrderCodes.length) {
+        logger.warn(
+          `Selección batch parcial detectada tras primer intento. selected=${selectedCount}/${requestedOrderCodes.length}. Reintentando filas no chequeadas.`
+        );
+
+        for (const rowId of selectedRowIds) {
+          const rowLocator = this.page.locator(this.getRowInputSelector(rowId)).first();
+          const isChecked = await rowLocator.isChecked().catch(() => false);
+          if (!isChecked) {
+            await rowLocator.waitFor({ state: 'visible', timeout: 10000 });
+            await this.selectOrderRow(rowLocator, rowId);
+          }
+        }
+
+        selectedCount = await this.getSelectedOrderCount();
+      }
+
       logger.info(
         `✅ Selección batch completada. pedidos=${matchedOrderCodes.join(' | ')} | rowIds=${selectedRowIds.join(' | ')} | seleccionados=${selectedCount}`
       );
@@ -380,6 +397,74 @@ export class UltimaMillaAsignarPage extends BasePage {
         selectedCount,
       };
     });
+  }
+
+  private async waitForRequestedOrderCodesInGrid(orderCodes: string[]): Promise<AssignmentVisibleOrderRow[]> {
+    const timeoutMs = this.getBatchOrderVisibilityTimeoutMs();
+    const startedAt = Date.now();
+    let attempts = 0;
+    let lastVisibleRows: AssignmentVisibleOrderRow[] = [];
+
+    while (Date.now() - startedAt < timeoutMs) {
+      attempts += 1;
+
+      if (attempts > 1) {
+        await this.refreshAssignmentSearchResults();
+      }
+
+      const visibleRows = await this.getVisibleOrderRows();
+      lastVisibleRows = visibleRows;
+      const missingOrderCodes = orderCodes.filter(orderCode =>
+        !visibleRows.some(row => this.rowContainsOrderCode(row.rowText, orderCode))
+      );
+
+      if (missingOrderCodes.length === 0) {
+        if (attempts > 1) {
+          logger.info(`Pedidos batch visibles tras reintento. intentos=${attempts}`);
+        }
+        return visibleRows;
+      }
+
+      logger.warn(
+        `Aún faltan pedidos batch en grilla de asignación. intento=${attempts} missing=[${missingOrderCodes.join(' | ')}] visibles=${visibleRows.length}`
+      );
+
+      await this.page.waitForTimeout(2500);
+    }
+
+    const stillMissing = orderCodes.filter(orderCode =>
+      !lastVisibleRows.some(row => this.rowContainsOrderCode(row.rowText, orderCode))
+    );
+
+    throw new UltimaMillaAssignmentConfigurationError(
+      `No se encontraron todos los pedidos esperados en la grilla de asignación tras ${Math.ceil(timeoutMs / 1000)}s. missing=[${stillMissing.join(' | ')}] visibleRows=${JSON.stringify(lastVisibleRows.slice(0, 20))}`
+    );
+  }
+
+  private async refreshAssignmentSearchResults(): Promise<void> {
+    logger.debug('Reejecutando búsqueda de asignación para refrescar grilla batch');
+
+    const searchResponsePromise = this.page
+      .waitForResponse(
+        response => response.request().method() === 'POST' && response.url().includes('/order/searchassign'),
+        { timeout: 20000 }
+      )
+      .catch(() => null);
+
+    await this.click(this.selectors.filters.btnSearch);
+    const response = await searchResponsePromise;
+    if (response) {
+      logger.debug(`Refresh búsqueda asignación capturado. status=${response.status()} url=${response.url()}`);
+    } else {
+      logger.warn('No se capturó respuesta /order/searchassign durante refresh batch; continúo con verificación visual.');
+    }
+
+    await this.waitForSearchSettled();
+  }
+
+  private getBatchOrderVisibilityTimeoutMs(): number {
+    const environment = (process.env.ENV || 'QA').trim().toUpperCase();
+    return environment === 'DEMO' ? 180000 : 60000;
   }
 
   async validateOptimizationPrerequisites(): Promise<OptimizationDiagnostics> {
@@ -402,7 +487,7 @@ export class UltimaMillaAsignarPage extends BasePage {
       const transportistaSelector = await this.resolveSelectSelector(
         this.selectors.optimization.carrierSelectCandidates,
         'Transportista',
-        /qa_tra_/i
+        this.getPreferredCarrierPattern()
       );
       const vehiculoSelector = await this.resolveVehicleSelectSelector();
       const subtipoSelector = await this.tryResolveSelectSelector(this.selectors.optimization.subtypeSelectCandidates);
@@ -659,7 +744,7 @@ export class UltimaMillaAsignarPage extends BasePage {
     const selector = await this.resolveSelectSelector(
       this.selectors.optimization.carrierSelectCandidates,
       'Transportista',
-      /qa_tra_/i
+      this.getPreferredCarrierPattern()
     );
       return this.getSelectedOptionText(selector);
   }
@@ -673,7 +758,7 @@ export class UltimaMillaAsignarPage extends BasePage {
     const selector = await this.resolveSelectSelector(
       this.selectors.optimization.carrierSelectCandidates,
       'Transportista',
-      /qa_tra_/i
+      this.getPreferredCarrierPattern()
     );
     const selected = await this.getSelectedOptions(selector);
     return selected.length === 1;
@@ -1114,16 +1199,39 @@ export class UltimaMillaAsignarPage extends BasePage {
     return value.replace(/\s+/g, ' ').trim().toLowerCase();
   }
 
+  private getPreferredCarrierPattern(): RegExp {
+    return /^(qa|demo)_tra_/i;
+  }
+
+  private getPreferredVehiclePattern(): RegExp {
+    return /^(qa|demo)_veh_/i;
+  }
+
+  private isDemoEnvironment(): boolean {
+    return (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
+  }
+
+  private getTargetOperationTypeLabel(): string {
+    return this.isDemoEnvironment() ? 'Cristales' : 'defecto';
+  }
+
+  private getTargetServiceTypeLabel(): string {
+    return this.isDemoEnvironment() ? 'Roundtrip' : 'defecto';
+  }
+
   private async probeCarrierAndVehicle(
     carrierSelector: string,
     vehicleSelector: string
   ): Promise<CarrierVehicleSelection> {
+    const preferredCarrierPattern = this.getPreferredCarrierPattern();
+    const preferredVehiclePattern = this.getPreferredVehiclePattern();
+
     const carrierOptions = await this.getUsableOptions(carrierSelector);
     const prioritizedCarriers = [...carrierOptions].sort((left, right) => {
-      const leftIsQa = /^qa_tra_/i.test(left.text);
-      const rightIsQa = /^qa_tra_/i.test(right.text);
-      if (leftIsQa !== rightIsQa) {
-        return leftIsQa ? -1 : 1;
+      const leftIsPreferred = preferredCarrierPattern.test(left.text);
+      const rightIsPreferred = preferredCarrierPattern.test(right.text);
+      if (leftIsPreferred !== rightIsPreferred) {
+        return leftIsPreferred ? -1 : 1;
       }
       return left.text.localeCompare(right.text) || left.value.localeCompare(right.value);
     });
@@ -1132,11 +1240,11 @@ export class UltimaMillaAsignarPage extends BasePage {
     const probeDiagnostics: string[] = [];
 
     for (const carrier of prioritizedCarriers) {
-      const isQaCarrier = /^qa_tra_/i.test(carrier.text);
-      attemptedFallback = attemptedFallback || !isQaCarrier;
+      const isPreferredCarrier = preferredCarrierPattern.test(carrier.text);
+      attemptedFallback = attemptedFallback || !isPreferredCarrier;
 
       logger.debug(
-        `Probing transportista. text=${carrier.text} | value=${carrier.value} | preferredQa=${isQaCarrier}`
+        `Probing transportista. text=${carrier.text} | value=${carrier.value} | preferredByEnv=${isPreferredCarrier}`
       );
 
       const vehicleResponsePromise = this.page
@@ -1176,10 +1284,10 @@ export class UltimaMillaAsignarPage extends BasePage {
       }
 
       const selectedVehicle = [...vehicleOptions].sort((left, right) => {
-        const leftIsQa = /^qa_veh_/i.test(left.text);
-        const rightIsQa = /^qa_veh_/i.test(right.text);
-        if (leftIsQa !== rightIsQa) {
-          return leftIsQa ? -1 : 1;
+        const leftIsPreferred = preferredVehiclePattern.test(left.text);
+        const rightIsPreferred = preferredVehiclePattern.test(right.text);
+        if (leftIsPreferred !== rightIsPreferred) {
+          return leftIsPreferred ? -1 : 1;
         }
         return left.text.localeCompare(right.text) || left.value.localeCompare(right.value);
       })[0];
@@ -1197,7 +1305,7 @@ export class UltimaMillaAsignarPage extends BasePage {
         carrierLabel: carrier.text,
         vehicleValue: selectedVehicle.value,
         vehicleLabel: selectedVehicle.text,
-        usedFallbackCarrier: !isQaCarrier,
+        usedFallbackCarrier: !isPreferredCarrier,
       };
 
       if (result.usedFallbackCarrier) {
@@ -1242,31 +1350,32 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   private async selectDefaultOperationType(previousServiceSignature: string): Promise<void> {
     await this.withActionScreenshot('ultimamilla-asignar-operation-type-error', async () => {
-      logger.debug('Seleccionando Tipo de Operación = defecto');
+      const targetOperationType = this.getTargetOperationTypeLabel();
+      logger.debug(`Seleccionando Tipo de Operación = ${targetOperationType}`);
       await this.waitForOptionalResponseAfterAction('/getServiceType', async () => {
         await this.selectByVisibleText(
           this.selectors.optimization.operationTypeSelect,
           ['button[data-id="text_operatio_type"]'],
-          'defecto',
+          targetOperationType,
           'Tipo de Operación'
         );
       });
 
-      await this.waitForServiceTypeReload(previousServiceSignature);
+      await this.waitForServiceTypeReload(previousServiceSignature, this.getTargetServiceTypeLabel());
 
       const operationValue = await this.getSelectedOptionText(this.selectors.optimization.operationTypeSelect);
       logger.info(`✅ Tipo de Operación configurado: ${operationValue || 'sin-seleccion'}`);
     });
   }
 
-  private async waitForServiceTypeReload(previousSignature: string): Promise<void> {
+  private async waitForServiceTypeReload(previousSignature: string, expectedServiceLabel: string): Promise<void> {
     await this.withActionScreenshot('ultimamilla-asignar-service-reload-error', async () => {
       logger.debug(
-        `Esperando recarga de Tipo de Servicio tras seleccionar operación. firmaPrevia=${previousSignature || 'sin-opciones'}`
+        `Esperando recarga de Tipo de Servicio tras seleccionar operación. firmaPrevia=${previousSignature || 'sin-opciones'} | esperado=${expectedServiceLabel}`
       );
 
       await this.page.waitForFunction(
-        ({ selector, oldSignature }) => {
+        ({ selector, oldSignature, expectedService }) => {
           const normalize = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
           const select = document.querySelector(selector) as HTMLSelectElement | null;
           if (!select || select.disabled) {
@@ -1282,10 +1391,15 @@ export class UltimaMillaAsignarPage extends BasePage {
           }
 
           const signature = options.join('|');
-          const hasDefecto = options.some(option => option.includes('::defecto'));
-          return hasDefecto && (signature !== oldSignature || oldSignature.length === 0 || select.selectedIndex <= 0);
+          const expectedNeedle = `::${normalize(expectedService)}`;
+          const hasExpectedService = options.some(option => option.includes(expectedNeedle));
+          return hasExpectedService && (signature !== oldSignature || oldSignature.length === 0 || select.selectedIndex <= 0);
         },
-        { selector: this.selectors.optimization.serviceTypeSelect, oldSignature: previousSignature },
+        {
+          selector: this.selectors.optimization.serviceTypeSelect,
+          oldSignature: previousSignature,
+          expectedService: expectedServiceLabel,
+        },
         { timeout: 15000 }
       );
 
@@ -1299,12 +1413,13 @@ export class UltimaMillaAsignarPage extends BasePage {
 
   private async selectDefaultServiceType(): Promise<void> {
     await this.withActionScreenshot('ultimamilla-asignar-service-type-error', async () => {
-      logger.debug('Seleccionando Tipo de Servicio = defecto');
+      const targetServiceType = this.getTargetServiceTypeLabel();
+      logger.debug(`Seleccionando Tipo de Servicio = ${targetServiceType}`);
       await this.ensureSelectHasUsableOptions(this.selectors.optimization.serviceTypeSelect, 'Tipo de Servicio');
       await this.selectByVisibleText(
         this.selectors.optimization.serviceTypeSelect,
         ['button[data-id="text_service_type"]'],
-        'defecto',
+        targetServiceType,
         'Tipo de Servicio'
       );
 

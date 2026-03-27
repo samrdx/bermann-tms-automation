@@ -40,7 +40,7 @@ test.describe('Última Milla - Asignación de Pedido', () => {
     const fallbackClientName = ClientResolver.resolveClientName(operationalData);
     const clienteObjetivo = clienteDropdownCandidates[0] || fallbackClientName;
 
-    if (!clienteObjetivo || /^qa_$/i.test(clienteObjetivo)) {
+    if (!clienteObjetivo || /^(qa|demo)_$/i.test(clienteObjetivo)) {
       throw new Error('No se pudo resolver un cliente determinístico para el happy path de asignación.');
     }
 
@@ -58,6 +58,8 @@ test.describe('Última Milla - Asignación de Pedido', () => {
       statusAplicado: 'N/A',
     };
     const targetTerminalStatus = resolveTerminalStatus(process.env.ULTIMAMILLA_TERMINAL_STATUS);
+    const expectedTripConfig = resolveExpectedTripConfiguration();
+    const unidadNegocioObjetivo = resolveAssignmentBusinessUnit();
     let createTripResult: Awaited<ReturnType<typeof ultimaMillaAsignarPage.createTrip>> | null = null;
 
     logger.info('🚀 Inicio — Última Milla asignación de pedido');
@@ -94,7 +96,7 @@ test.describe('Última Milla - Asignación de Pedido', () => {
 
         await ultimaMillaAsignarPage.searchOrders({
           cliente: clienteObjetivo,
-          unidadNegocio: 'Defecto',
+          unidadNegocio: unidadNegocioObjetivo,
         });
 
         const rowId = await ultimaMillaAsignarPage.selectFirstOrderRow();
@@ -125,8 +127,8 @@ test.describe('Última Milla - Asignación de Pedido', () => {
         await expect.poll(async () => ultimaMillaAsignarPage.isMapVisible()).toBe(true);
 
         const tripConfig = await ultimaMillaAsignarPage.configurePostOptimizationTrip();
-        expect(tripConfig.operationValue.toLowerCase()).toContain('defecto');
-        expect(tripConfig.serviceValue.toLowerCase()).toContain('defecto');
+        expect(tripConfig.operationValue.toLowerCase()).toContain(expectedTripConfig.operation.toLowerCase());
+        expect(tripConfig.serviceValue.toLowerCase()).toContain(expectedTripConfig.service.toLowerCase());
         expect(tripConfig.driverSelections.length).toBeGreaterThan(0);
         executionSummary.conductor = tripConfig.driverSelections.join(' | ') || 'N/A';
         logger.success(`Viaje configurado: conductor=${executionSummary.conductor}`);
@@ -266,4 +268,22 @@ function resolveTerminalStatus(rawStatus: string | undefined): 'Entregado' | 'En
   }
 
   return resolvedStatus;
+}
+
+function resolveExpectedTripConfiguration(): { operation: string; service: string } {
+  const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
+  return {
+    operation: isDemo ? 'Cristales' : 'defecto',
+    service: isDemo ? 'Roundtrip' : 'defecto',
+  };
+}
+
+function resolveAssignmentBusinessUnit(): string {
+  const override = process.env.ULTIMAMILLA_UNIDAD_NEGOCIO?.trim();
+  if (override) {
+    return override;
+  }
+
+  const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
+  return isDemo ? '123' : 'Defecto';
 }

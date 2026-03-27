@@ -65,12 +65,14 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
 
     const startTime = Date.now();
     const batchSize = resolveBatchSize(process.env.ULTIMAMILLA_BATCH_SIZE);
+    const expectedTripConfig = resolveExpectedTripConfiguration();
+    const unidadNegocioObjetivo = resolveAssignmentBusinessUnit();
     const operationalData = loadOperationalData(testInfo);
     const clienteDropdownCandidates = ClientResolver.getDropdownCandidates(operationalData);
     const fallbackClientName = ClientResolver.resolveClientName(operationalData);
     const clienteObjetivo = clienteDropdownCandidates[0] || fallbackClientName;
 
-    if (!clienteObjetivo || /^qa_$/i.test(clienteObjetivo)) {
+    if (!clienteObjetivo || /^(qa|demo)_$/i.test(clienteObjetivo)) {
       throw new Error('No se pudo resolver un cliente determinístico para el batch de asignación de Última Milla.');
     }
 
@@ -172,7 +174,7 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
 
         await ultimaMillaAsignarPage.searchOrders({
           cliente: clienteObjetivo,
-          unidadNegocio: 'Defecto',
+          unidadNegocio: unidadNegocioObjetivo,
         });
 
         const selectionResult = await ultimaMillaAsignarPage.selectOrderRowsByCodes(
@@ -214,8 +216,8 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
         await expect.poll(async () => ultimaMillaAsignarPage.isMapVisible()).toBe(true);
 
         const tripConfig = await ultimaMillaAsignarPage.configurePostOptimizationTrip();
-        expect(tripConfig.operationValue.toLowerCase()).toContain('defecto');
-        expect(tripConfig.serviceValue.toLowerCase()).toContain('defecto');
+        expect(tripConfig.operationValue.toLowerCase()).toContain(expectedTripConfig.operation.toLowerCase());
+        expect(tripConfig.serviceValue.toLowerCase()).toContain(expectedTripConfig.service.toLowerCase());
         expect(tripConfig.driverSelections.length).toBeGreaterThan(0);
 
         executionSummary.conductor = tripConfig.driverSelections.join(' | ') || 'N/A';
@@ -388,6 +390,24 @@ function resolveBatchSize(rawValue: string | undefined): number {
 function pickRandomTerminalStatus(): TerminalStatus {
   const randomIndex = Math.floor(Math.random() * TERMINAL_STATUSES.length);
   return TERMINAL_STATUSES[randomIndex];
+}
+
+function resolveExpectedTripConfiguration(): { operation: string; service: string } {
+  const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
+  return {
+    operation: isDemo ? 'Cristales' : 'defecto',
+    service: isDemo ? 'Roundtrip' : 'defecto',
+  };
+}
+
+function resolveAssignmentBusinessUnit(): string {
+  const override = process.env.ULTIMAMILLA_UNIDAD_NEGOCIO?.trim();
+  if (override) {
+    return override;
+  }
+
+  const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
+  return isDemo ? '123' : 'Defecto';
 }
 
 function loadOperationalData(testInfo: Parameters<typeof DataPathHelper.getLegacyOperationalDataPath>[0]): OperationalData {
