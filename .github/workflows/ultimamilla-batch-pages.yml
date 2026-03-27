@@ -15,7 +15,6 @@ on:
         description: "Batch size"
         required: true
         default: "8"
-        type: string
 
 permissions:
   contents: write
