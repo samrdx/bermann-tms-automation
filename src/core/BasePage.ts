@@ -271,4 +271,14 @@ export abstract class BasePage {
   getCurrentUrl(): string {
     return this.page.url();
   }
+
+  protected async withActionScreenshot<T>(screenshotName: string, action: () => Promise<T>): Promise<T> {
+    try {
+      return await action();
+    } catch (error) {
+      logger.error(`Falló acción en BasePage: ${screenshotName}.`, error);
+      await this.takeScreenshot(screenshotName);
+      throw error;
+    }
+  }
 }

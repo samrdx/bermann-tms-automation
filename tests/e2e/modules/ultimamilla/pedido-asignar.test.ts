@@ -10,9 +10,12 @@ type OperationalData = Record<string, any> | undefined;
 type ExecutionSummary = {
   cliente: string;
   pedido: string;
+  rowId: string;
+  tripId: string;
   vehiculo: string;
   transportista: string;
   conductor: string;
+  statusAplicado: string;
 };
 
 test.describe('Última Milla - Asignación de Pedido', () => {
@@ -22,6 +25,8 @@ test.describe('Última Milla - Asignación de Pedido', () => {
     page,
     ultimaMillaPage,
     ultimaMillaAsignarPage,
+    ultimaMillaMonitoreoPage,
+    ultimaMillaPedidoIndexPage,
     ultimaMillaFactory,
   }, testInfo) => {
     test.skip(
@@ -45,10 +50,15 @@ test.describe('Última Milla - Asignación de Pedido', () => {
     const executionSummary: ExecutionSummary = {
       cliente: clienteObjetivo,
       pedido: orderData.codigoPedido || 'N/A',
+      rowId: 'N/A',
+      tripId: 'N/A',
       vehiculo: 'N/A',
       transportista: 'N/A',
       conductor: 'N/A',
+      statusAplicado: 'N/A',
     };
+    const targetTerminalStatus = resolveTerminalStatus(process.env.ULTIMAMILLA_TERMINAL_STATUS);
+    let createTripResult: Awaited<ReturnType<typeof ultimaMillaAsignarPage.createTrip>> | null = null;
 
     logger.info('🚀 Inicio — Última Milla asignación de pedido');
     logger.info(`🧾 Contexto: cliente=${clienteObjetivo} | pedido=${executionSummary.pedido} | fecha=${orderData.fechaEntrega ?? 'UI default date'}`);
@@ -89,8 +99,8 @@ test.describe('Última Milla - Asignación de Pedido', () => {
 
         const rowId = await ultimaMillaAsignarPage.selectFirstOrderRow();
         expect(rowId).not.toBe('');
-        executionSummary.pedido = `${executionSummary.pedido} / ${rowId}`;
-        logger.success(`Pedido seleccionable detectado: ${executionSummary.pedido}`);
+        executionSummary.rowId = rowId;
+        logger.success(`Pedido seleccionable detectado: codigo=${executionSummary.pedido} | rowId=${executionSummary.rowId}`);
       });
 
       await test.step('Fase 3: Configurar optimización determinística', async () => {
@@ -124,9 +134,56 @@ test.describe('Última Milla - Asignación de Pedido', () => {
 
       await test.step('Fase 5: Crear viaje y verificar mutación', async () => {
         logPhaseHeader(5, '🚚', 'Crear viaje y verificar mutación');
-        await ultimaMillaAsignarPage.createTrip();
+        createTripResult = await ultimaMillaAsignarPage.createTrip();
         await expect.poll(async () => ultimaMillaAsignarPage.isOptimizationResultVisible()).toBe(false);
-        logger.success('createTrip ejecutado y panel de optimización oculto');
+        logger.success(
+          `createTrip ejecutado y panel de optimización oculto${createTripResult.tripId ? ` | fallbackTripId=${createTripResult.tripId} (${createTripResult.tripIdSource})` : ''}`
+        );
+      });
+
+      await test.step('Fase 6: Resolver Trip ID desde /order/index', async () => {
+        logPhaseHeader(6, '🧾', 'Resolver Trip ID');
+        await ultimaMillaPedidoIndexPage.navigate();
+        await expect(page).toHaveURL(/.*\/order\/index/);
+
+        let tripId: string | null = null;
+
+        try {
+          tripId = await ultimaMillaPedidoIndexPage.extractTripIdFromResults(executionSummary.pedido);
+          logger.success(`Trip ID resuelto desde UI /order/index: ${tripId}`);
+        } catch (error) {
+          logger.warn('No se pudo resolver Trip ID desde /order/index; evaluando fallback de createTrip.', error);
+          tripId = createTripResult?.tripId ?? null;
+          if (!tripId) {
+            throw error;
+          }
+
+          logger.warn(`Usando fallback de createTrip para tripId=${tripId} | source=${createTripResult?.tripIdSource}`);
+        }
+
+        expect(tripId).toBeTruthy();
+        executionSummary.tripId = tripId || 'N/A';
+      });
+
+      await test.step('Fase 7: Finalizar viaje desde monitoreo UM', async () => {
+        logPhaseHeader(7, '📍', 'Finalizar viaje desde monitoreo');
+        await ultimaMillaMonitoreoPage.navigate();
+        await expect(page).toHaveURL(/.*\/viajes\/monitoreo/);
+
+        await ultimaMillaMonitoreoPage.setCategoryUltimaMilla();
+
+        const statusUpdate = await ultimaMillaMonitoreoPage.updateOrderStatusViaHorarioGps({
+          tripId: executionSummary.tripId,
+          orderCode: executionSummary.pedido,
+          status: targetTerminalStatus,
+        });
+
+        expect(statusUpdate.transitionDetected).toBe(true);
+        executionSummary.statusAplicado = statusUpdate.status;
+
+        logger.success(
+          `Viaje monitoreado/finalizado. tripId=${statusUpdate.tripId} | pedido=${statusUpdate.orderCode} | estado=${statusUpdate.status} | accionesPendientes=${statusUpdate.pendingStatusActions}`
+        );
       });
 
       logger.success(`Happy path completado en ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
@@ -152,10 +209,13 @@ function logExecutionSummary(summary: ExecutionSummary): void {
   logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   logger.info('📊 Resumen de ejecución');
   logger.info(`• Cliente: ${formatSummaryValue(summary.cliente)}`);
-  logger.info(`• Pedido id/código: ${formatSummaryValue(summary.pedido)}`);
+  logger.info(`• Pedido código: ${formatSummaryValue(summary.pedido)}`);
+  logger.info(`• Row id asignación: ${formatSummaryValue(summary.rowId)}`);
+  logger.info(`• Trip ID: ${formatSummaryValue(summary.tripId)}`);
   logger.info(`• Vehículo: ${formatSummaryValue(summary.vehiculo)}`);
   logger.info(`• Transportista: ${formatSummaryValue(summary.transportista)}`);
   logger.info(`• Conductor: ${formatSummaryValue(summary.conductor)}`);
+  logger.info(`• Estado aplicado: ${formatSummaryValue(summary.statusAplicado)}`);
 }
 
 function formatSummaryValue(value: string | undefined): string {
@@ -187,4 +247,23 @@ function loadOperationalData(testInfo: Parameters<typeof DataPathHelper.getLegac
 
   logger.warn(`No se encontró data operacional válida en ninguna ruta candidata. rutas=[${candidatePaths.join(' | ')}]`);
   return undefined;
+}
+
+function resolveTerminalStatus(rawStatus: string | undefined): 'Entregado' | 'Entregado Parcial' | 'No Entregado' | 'Rechazado' {
+  const normalized = (rawStatus || 'Entregado').replace(/\s+/g, ' ').trim().toLowerCase();
+  const supportedStatuses = {
+    entregado: 'Entregado',
+    'entregado parcial': 'Entregado Parcial',
+    'no entregado': 'No Entregado',
+    rechazado: 'Rechazado',
+  } as const;
+
+  const resolvedStatus = supportedStatuses[normalized as keyof typeof supportedStatuses];
+  if (!resolvedStatus) {
+    throw new Error(
+      `ULTIMAMILLA_TERMINAL_STATUS inválido: ${rawStatus}. Valores soportados=[${Object.keys(supportedStatuses).join(' | ')}]`
+    );
+  }
+
+  return resolvedStatus;
 }

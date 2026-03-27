@@ -46,6 +46,8 @@ import { ClienteFactory } from '../modules/commercial/factories/ClienteFactory.j
 // Ultima Milla Module
 import { UltimaMillaFormPage } from '../modules/ultimamilla/pages/UltimaMillaPage.js';
 import { UltimaMillaAsignarPage } from '../modules/ultimamilla/pages/UltimaMillaAsignarPage.js';
+import { UltimaMillaMonitoreoPage } from '../modules/ultimamilla/pages/UltimaMillaMonitoreoPage.js';
+import { UltimaMillaPedidoIndexPage } from '../modules/ultimamilla/pages/UltimaMillaPedidoIndexPage.js';
 import { UltimaMillaFactory } from '../modules/ultimamilla/factories/UltimaMillaFactory.js';
 
 // Utils
@@ -89,6 +91,8 @@ type MyFixtures = {
   // Ultima Milla
   ultimaMillaPage: UltimaMillaFormPage;
   ultimaMillaAsignarPage: UltimaMillaAsignarPage;
+  ultimaMillaMonitoreoPage: UltimaMillaMonitoreoPage;
+  ultimaMillaPedidoIndexPage: UltimaMillaPedidoIndexPage;
   ultimaMillaFactory: UltimaMillaFactory;
 };
 
@@ -179,6 +183,12 @@ export const test = base.extend<MyFixtures>({
   },
   ultimaMillaAsignarPage: async ({ page }: { page: Page }, use: (r: UltimaMillaAsignarPage) => Promise<void>) => {
     await use(new UltimaMillaAsignarPage(page));
+  },
+  ultimaMillaMonitoreoPage: async ({ page }: { page: Page }, use: (r: UltimaMillaMonitoreoPage) => Promise<void>) => {
+    await use(new UltimaMillaMonitoreoPage(page));
+  },
+  ultimaMillaPedidoIndexPage: async ({ page }: { page: Page }, use: (r: UltimaMillaPedidoIndexPage) => Promise<void>) => {
+    await use(new UltimaMillaPedidoIndexPage(page));
   },
   ultimaMillaFactory: async ({ page }: { page: Page }, use: (r: UltimaMillaFactory) => Promise<void>) => {
     await use(new UltimaMillaFactory(page));

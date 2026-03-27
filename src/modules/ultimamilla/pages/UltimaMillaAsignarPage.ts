@@ -1,5 +1,5 @@
 import { BasePage } from '../../../core/BasePage.js';
-import type { Locator, Page } from 'playwright';
+import type { Locator, Page, Response } from 'playwright';
 import { createLogger } from '../../../utils/logger.js';
 
 const logger = createLogger('UltimaMillaAsignarPage');
@@ -35,6 +35,19 @@ export interface OptimizationDiagnostics {
   subtipoOptionCount?: number;
 }
 
+export interface AssignmentVisibleOrderRow {
+  rowId: string;
+  rowText: string;
+}
+
+export interface BatchOrderSelectionResult {
+  requestedOrderCodes: string[];
+  matchedOrderCodes: string[];
+  missingOrderCodes: string[];
+  selectedRowIds: string[];
+  selectedCount: number;
+}
+
 export interface CarrierVehicleSelection {
   carrierValue: string;
   carrierLabel: string;
@@ -53,6 +66,17 @@ export interface CreateTripPreflightResult {
   operationValue: string;
   serviceValue: string;
   driverSelections: string[];
+}
+
+export interface CreateTripResult extends CreateTripPreflightResult {
+  tripId: string | null;
+  tripIdSource: 'response-body' | 'response-header' | 'request-body' | 'none';
+  responseStatus: number;
+  responseUrl: string;
+  refreshDetected: boolean;
+  gridMutated: boolean;
+  responseSnippet: string;
+  requestSnippet: string;
 }
 
 type DriverRouteContext = {
@@ -263,46 +287,98 @@ export class UltimaMillaAsignarPage extends BasePage {
     return this.withActionScreenshot('ultimamilla-asignar-select-row-error', async () => {
       const firstRow = this.page.locator(this.selectors.table.firstRow).first();
       await firstRow.waitFor({ state: 'visible', timeout: 10000 });
-      await firstRow.scrollIntoViewIfNeeded();
-
       const rowId = (await firstRow.getAttribute('data-id')) || '';
-      const beforeSelection = await this.getAssignmentGridSnapshot();
-      const clickStrategies = [
-        'label-for',
-        'ancestor-label',
-        'checkbox-cell',
-        'checkbox-wrapper',
-        'table-row',
-        'native-checkbox-click',
-        'native-checkbox-dispatch',
-      ] as const satisfies readonly RowSelectionStrategy[];
+      await this.selectOrderRow(firstRow, rowId);
+      return rowId;
+    });
+  }
 
-      for (const strategy of clickStrategies) {
-        logger.debug(
-          `Intentando seleccionar fila de asignación. data-id=${rowId || 'sin data-id'} | estrategia=${strategy}`
-        );
+  async getSelectedOrderCount(): Promise<number> {
+    return this.page.locator(this.selectors.table.checkedRows).count();
+  }
 
-        await this.page.waitForTimeout(200);
-        const clicked = await this.tryClickRowSelectionTarget(firstRow, strategy);
-        const selected = clicked
-          ? await this.waitForRowSelectionEffect(firstRow, rowId, beforeSelection.checkedRowIds.length)
-          : false;
-        if (clicked && selected) {
-          logger.info(
-            `✅ Fila seleccionada correctamente. data-id=${rowId || 'sin data-id'} | estrategia=${strategy}`
-          );
-          return rowId;
-        }
+  async getVisibleOrderRows(): Promise<AssignmentVisibleOrderRow[]> {
+    return this.page.evaluate(rowsSelector => {
+      return Array.from(document.querySelectorAll(rowsSelector))
+        .map(row => {
+          const input = row as HTMLInputElement;
+          const tableRow = input.closest('tr');
+          const rowId = input.getAttribute('data-id')?.trim() || '';
+          const rowText = (tableRow?.textContent || '')
+            .replace(/\s+/g, ' ')
+            .trim();
 
-        logger.debug(`La estrategia ${strategy} no dejó la fila seleccionada. data-id=${rowId || 'sin data-id'}`);
-      }
+          if (!rowId || !rowText) {
+            return null;
+          }
 
-      const diagnostics = await this.getRowSelectionDiagnostics(firstRow, rowId);
-      await this.takeScreenshot('ultimamilla-asignar-select-row-diagnostic');
-      throw new UltimaMillaAssignmentConfigurationError(
-        `No se pudo seleccionar la fila de asignación. data-id=${rowId || 'sin data-id'} diagnostics=${JSON.stringify(diagnostics)}`
+          return {
+            rowId,
+            rowText,
+          } satisfies AssignmentVisibleOrderRow;
+        })
+        .filter((value): value is AssignmentVisibleOrderRow => value !== null);
+    }, this.selectors.table.rows);
+  }
+
+  async selectOrderRowsByCodes(orderCodes: string[]): Promise<BatchOrderSelectionResult> {
+    return this.withActionScreenshot('ultimamilla-asignar-select-batch-rows-error', async () => {
+      const requestedOrderCodes = Array.from(
+        new Set(orderCodes.map(code => code?.trim()).filter((code): code is string => Boolean(code)))
       );
 
+      if (requestedOrderCodes.length === 0) {
+        throw new UltimaMillaAssignmentConfigurationError(
+          'No se recibieron códigos de pedido válidos para seleccionar en la grilla de asignación.'
+        );
+      }
+
+      const visibleRows = await this.getVisibleOrderRows();
+      const selectedRowIds: string[] = [];
+      const matchedOrderCodes: string[] = [];
+      const missingOrderCodes: string[] = [];
+
+      for (const orderCode of requestedOrderCodes) {
+        const matches = visibleRows.filter(row => this.rowContainsOrderCode(row.rowText, orderCode));
+
+        if (matches.length === 0) {
+          missingOrderCodes.push(orderCode);
+          continue;
+        }
+
+        if (matches.length > 1) {
+          throw new UltimaMillaAssignmentConfigurationError(
+            `El pedido ${orderCode} apareció en múltiples filas de asignación. coincidencias=${JSON.stringify(matches)}`
+          );
+        }
+
+        const match = matches[0];
+        const rowLocator = this.page.locator(this.getRowInputSelector(match.rowId)).first();
+        await rowLocator.waitFor({ state: 'visible', timeout: 10000 });
+        await this.selectOrderRow(rowLocator, match.rowId);
+
+        selectedRowIds.push(match.rowId);
+        matchedOrderCodes.push(orderCode);
+      }
+
+      if (missingOrderCodes.length > 0) {
+        throw new UltimaMillaAssignmentConfigurationError(
+          `No se encontraron todos los pedidos esperados en la grilla de asignación. missing=[${missingOrderCodes.join(' | ')}] visibleRows=${JSON.stringify(visibleRows.slice(0, 20))}`
+        );
+      }
+
+      const selectedCount = await this.getSelectedOrderCount();
+      logger.info(
+        `✅ Selección batch completada. pedidos=${matchedOrderCodes.join(' | ')} | rowIds=${selectedRowIds.join(' | ')} | seleccionados=${selectedCount}`
+      );
+
+      return {
+        requestedOrderCodes,
+        matchedOrderCodes,
+        missingOrderCodes,
+        selectedRowIds,
+        selectedCount,
+      };
     });
   }
 
@@ -452,7 +528,7 @@ export class UltimaMillaAsignarPage extends BasePage {
     });
   }
 
-  async createTrip(): Promise<void> {
+  async createTrip(): Promise<CreateTripResult> {
     return this.withActionScreenshot('ultimamilla-asignar-create-trip-error', async () => {
       const preflight = await this.validateCreateTripPreflight();
       const gridBeforeCreate = await this.getAssignmentGridSnapshot();
@@ -481,7 +557,16 @@ export class UltimaMillaAsignarPage extends BasePage {
           `POST /order/createtrip falló. status=${response.status()} url=${response.url()}`
         );
       }
+
+      const extractedTripData = await this.extractTripIdFromCreateTripResponse(response);
       logger.info(`✅ POST /order/createtrip OK. status=${response.status()} url=${response.url()}`);
+      if (extractedTripData.tripId) {
+        logger.info(
+          `Fallback Trip ID detectado desde createTrip. tripId=${extractedTripData.tripId} | source=${extractedTripData.tripIdSource}`
+        );
+      } else {
+        logger.warn('POST /order/createtrip no expuso Trip ID utilizable en body/headers/request.');
+      }
 
       const refreshResponse = await refreshResponsePromise;
       if (refreshResponse) {
@@ -547,6 +632,18 @@ export class UltimaMillaAsignarPage extends BasePage {
       logger.info(
         `✅ Viaje creado correctamente. panelOptimizadoOculto=true | refreshHttp=${Boolean(refreshResponse)} | gridMutated=${gridMutated} | filasAntes=${gridBeforeCreate.rowIds.length} | filasDespues=${gridAfterCreate.rowIds.length}`
       );
+
+      return {
+        ...preflight,
+        tripId: extractedTripData.tripId,
+        tripIdSource: extractedTripData.tripIdSource,
+        responseStatus: response.status(),
+        responseUrl: response.url(),
+        refreshDetected: Boolean(refreshResponse),
+        gridMutated,
+        responseSnippet: extractedTripData.responseSnippet,
+        requestSnippet: extractedTripData.requestSnippet,
+      };
     });
   }
 
@@ -582,7 +679,7 @@ export class UltimaMillaAsignarPage extends BasePage {
     return selected.length === 1;
   }
 
-  private async withActionScreenshot<T>(screenshotName: string, action: () => Promise<T>): Promise<T> {
+  protected async withActionScreenshot<T>(screenshotName: string, action: () => Promise<T>): Promise<T> {
     try {
       return await action();
     } catch (error) {
@@ -1360,6 +1457,53 @@ export class UltimaMillaAsignarPage extends BasePage {
     return selected[0]?.text || '';
   }
 
+  private async selectOrderRow(rowLocator: Locator, rowId: string): Promise<void> {
+    await rowLocator.scrollIntoViewIfNeeded();
+
+    const beforeSelection = await this.getAssignmentGridSnapshot();
+    const clickStrategies = [
+      'label-for',
+      'ancestor-label',
+      'checkbox-cell',
+      'checkbox-wrapper',
+      'table-row',
+      'native-checkbox-click',
+      'native-checkbox-dispatch',
+    ] as const satisfies readonly RowSelectionStrategy[];
+
+    for (const strategy of clickStrategies) {
+      logger.debug(
+        `Intentando seleccionar fila de asignación. data-id=${rowId || 'sin data-id'} | estrategia=${strategy}`
+      );
+
+      await this.page.waitForTimeout(200);
+      const clicked = await this.tryClickRowSelectionTarget(rowLocator, strategy);
+      const selected = clicked
+        ? await this.waitForRowSelectionEffect(rowLocator, rowId, beforeSelection.checkedRowIds.length)
+        : false;
+
+      if (clicked && selected) {
+        logger.info(`✅ Fila seleccionada correctamente. data-id=${rowId || 'sin data-id'} | estrategia=${strategy}`);
+        return;
+      }
+
+      logger.debug(`La estrategia ${strategy} no dejó la fila seleccionada. data-id=${rowId || 'sin data-id'}`);
+    }
+
+    const diagnostics = await this.getRowSelectionDiagnostics(rowLocator, rowId);
+    await this.takeScreenshot('ultimamilla-asignar-select-row-diagnostic');
+    throw new UltimaMillaAssignmentConfigurationError(
+      `No se pudo seleccionar la fila de asignación. data-id=${rowId || 'sin data-id'} diagnostics=${JSON.stringify(diagnostics)}`
+    );
+  }
+
+  private rowContainsOrderCode(rowText: string, orderCode: string): boolean {
+    const normalizedRowText = rowText.replace(/\s+/g, ' ').trim();
+    const escapedOrderCode = orderCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const orderCodeRegex = new RegExp(`(?:^|\\D)${escapedOrderCode}(?:\\D|$)`);
+    return orderCodeRegex.test(normalizedRowText);
+  }
+
   private async tryClickRowSelectionTarget(
     rowLocator: Locator,
     strategy: RowSelectionStrategy
@@ -1544,6 +1688,184 @@ export class UltimaMillaAsignarPage extends BasePage {
   private async getOptionSignature(selectSelector: string): Promise<string> {
     const options = await this.getUsableOptions(selectSelector);
     return options.map(option => `${option.value}::${this.normalizeValue(option.text)}`).join('|');
+  }
+
+  private async extractTripIdFromCreateTripResponse(response: Response): Promise<{
+    tripId: string | null;
+    tripIdSource: CreateTripResult['tripIdSource'];
+    responseSnippet: string;
+    requestSnippet: string;
+  }> {
+    const responseText = await response.text().catch(() => '');
+    const requestBody = response.request().postData() || '';
+    const responseSnippet = this.createSnippet(responseText);
+    const requestSnippet = this.createSnippet(requestBody);
+
+    const responseBodyTripId = this.extractTripIdFromUnknownPayload(this.safeParsePayload(responseText));
+    if (responseBodyTripId) {
+      return {
+        tripId: responseBodyTripId,
+        tripIdSource: 'response-body',
+        responseSnippet,
+        requestSnippet,
+      };
+    }
+
+    const headerTripId = this.extractTripIdFromHeaders(response);
+    if (headerTripId) {
+      return {
+        tripId: headerTripId,
+        tripIdSource: 'response-header',
+        responseSnippet,
+        requestSnippet,
+      };
+    }
+
+    const requestBodyTripId = this.extractTripIdFromUnknownPayload(this.safeParsePayload(requestBody));
+    if (requestBodyTripId) {
+      return {
+        tripId: requestBodyTripId,
+        tripIdSource: 'request-body',
+        responseSnippet,
+        requestSnippet,
+      };
+    }
+
+    return {
+      tripId: null,
+      tripIdSource: 'none',
+      responseSnippet,
+      requestSnippet,
+    };
+  }
+
+  private extractTripIdFromHeaders(response: Response): string | null {
+    const headers = response.headers();
+    const headerKeys = [
+      'x-trip-id',
+      'x-tripid',
+      'trip-id',
+      'tripid',
+      'x-viaje-id',
+      'viaje-id',
+    ];
+
+    for (const key of headerKeys) {
+      const value = headers[key];
+      const normalized = this.normalizeTripIdCandidate(value);
+      if (normalized) {
+        return normalized;
+      }
+    }
+
+    return null;
+  }
+
+  private safeParsePayload(payload: string): unknown {
+    const trimmed = payload.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      try {
+        return Object.fromEntries(new URLSearchParams(trimmed).entries());
+      } catch {
+        return trimmed;
+      }
+    }
+  }
+
+  private extractTripIdFromUnknownPayload(payload: unknown): string | null {
+    const prioritizedKeys = ['tripId', 'trip_id', 'viajeId', 'viaje_id', 'idViaje', 'nro_viaje', 'trip'];
+
+    const visited = new Set<unknown>();
+
+    const walk = (value: unknown, path: string[] = []): string | null => {
+      if (!value || typeof value === 'boolean') {
+        return null;
+      }
+
+      if (typeof value === 'string' || typeof value === 'number') {
+        const key = path[path.length - 1] || '';
+        if (prioritizedKeys.includes(key)) {
+          return this.normalizeTripIdCandidate(String(value));
+        }
+
+        if (typeof value === 'string') {
+          const regexMatch = value.match(/(?:trip(?:_id)?|viaje(?:_id)?|nro(?:\s+)?viaje)[^0-9]{0,20}(\d{3,})/i);
+          if (regexMatch?.[1]) {
+            return regexMatch[1];
+          }
+        }
+
+        return null;
+      }
+
+      if (visited.has(value)) {
+        return null;
+      }
+      visited.add(value);
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const nested = walk(item, path);
+          if (nested) {
+            return nested;
+          }
+        }
+        return null;
+      }
+
+      if (typeof value === 'object') {
+        const entries = Object.entries(value as Record<string, unknown>);
+
+        for (const [key, nestedValue] of entries) {
+          if (prioritizedKeys.includes(key)) {
+            const nested = walk(nestedValue, [...path, key]);
+            if (nested) {
+              return nested;
+            }
+          }
+        }
+
+        for (const [key, nestedValue] of entries) {
+          const nested = walk(nestedValue, [...path, key]);
+          if (nested) {
+            return nested;
+          }
+        }
+      }
+
+      return null;
+    };
+
+    return walk(payload);
+  }
+
+  private normalizeTripIdCandidate(value: string | undefined): string | null {
+    const trimmed = value?.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const numericMatch = trimmed.match(/^(\d{3,})$/);
+    if (numericMatch?.[1]) {
+      return numericMatch[1];
+    }
+
+    const embeddedMatch = trimmed.match(/(?:trip(?:_id)?|viaje(?:_id)?|nro(?:\s+)?viaje)[^0-9]{0,20}(\d{3,})/i);
+    if (embeddedMatch?.[1]) {
+      return embeddedMatch[1];
+    }
+
+    return null;
+  }
+
+  private createSnippet(value: string, maxLength = 240): string {
+    return value.replace(/\s+/g, ' ').trim().slice(0, maxLength);
   }
 
   private async validateCreateTripPreflight(): Promise<CreateTripPreflightResult> {
