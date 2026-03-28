@@ -93,7 +93,17 @@ jobs:
           npx playwright test tests/e2e/modules/ultimamilla/pedido-asignar-batch.test.ts \
             --project ${{ steps.meta.outputs.project_one }} \
             --project ${{ steps.meta.outputs.project_two }} \
-            --workers 1 --trace on
+            --workers 1 --trace retain-on-failure
+
+      - name: Prune oversized Allure attachments
+        if: always()
+        shell: bash
+        run: |
+          RESULTS_DIR="${{ steps.meta.outputs.results_dir }}"
+          if [[ -d "$RESULTS_DIR" ]]; then
+            echo "Pruning oversized attachments in $RESULTS_DIR"
+            find "$RESULTS_DIR" -type f \( -name '*.zip' -o -name '*.webm' -o -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' \) -size +40M -print -delete || true
+          fi
 
       - name: Install Allure CLI
         if: always()
