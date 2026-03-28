@@ -1,0 +1,134 @@
+2026-03-28 21:36:16 [INFO]: ENTORNO: DEMO 🎭
+2026-03-28 21:36:16 [INFO]: 🚀 Iniciando Suite Operacional Base - Pasos 1-4
+2026-03-28 21:36:16 [INFO]: 🔧 Worker 1 | Navegador: chromium | Proyecto: base-entities-chromium
+2026-03-28 21:36:16 [INFO]: ================================================================================
+2026-03-28 21:36:16 [INFO]: 🔐 PASO 0: Autenticando...
+2026-03-28 21:36:16 [INFO]: [LoginPage] Intentando loguearse con usuario: arivas y esperando el dashboard...
+2026-03-28 21:36:16 [INFO]: [LoginPage] Logueandose con usuario: arivas
+2026-03-28 21:36:16 [INFO]: [BasePage] [PASO] 🟦 Navegando hacia: /login 🌐
+2026-03-28 21:36:20 [INFO]: [LoginPage] Inicio de sesión confirmado: Usuario se encuentra en Dashboard
+2026-03-28 21:36:20 [INFO]: ✅ Paso 0 Completado - Autenticado como arivas
+2026-03-28 21:36:20 [INFO]: 
+2026-03-28 21:36:20 [INFO]: 📦 PASO 1/4: Creando Transportista...
+2026-03-28 21:36:20 [INFO]: 🌱 UI Seeding Transportista: [Demo_tra_austral_938] RUT: 61160183-2...
+2026-03-28 21:36:20 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-28 21:36:22 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_austral_938
+2026-03-28 21:36:22 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_austral_938
+2026-03-28 21:36:22 [INFO]: [TransportistaFormPage] Completando documento (RUT): 61160183-2
+2026-03-28 21:36:22 [INFO]: [BasePage] Ingresando RUT con verificación: [61160183-2] en #transportistas-documento
+2026-03-28 21:36:23 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 61.160.183-2
+2026-03-28 21:36:23 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-28 21:36:24 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-28 21:36:24 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 21:36:24 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 21:36:25 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de los Lagos
+2026-03-28 21:36:26 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Puerto Montt
+2026-03-28 21:36:28 [WARN]: [TransportistaFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-28 21:36:28 [WARN]: [TransportistaFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Puerto Montt" (región: "Region de los Lagos"), reintentando...
+2026-03-28 21:36:28 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 2/5
+2026-03-28 21:36:29 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Valparaiso
+2026-03-28 21:36:30 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Petorca
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Papudo
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Valparaiso → Petorca → Papudo
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] Completando calle: Calle Ahumada
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] Completando altura: 3810
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] Seleccionando tercerizar viajes: No
+2026-03-28 21:36:32 [INFO]: 💾 Guardando Transportista vía UI...
+2026-03-28 21:36:32 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-28 21:36:33 [INFO]: ⏳ Esperando que finalice el guardado/redirección...
+2026-03-28 21:36:34 [INFO]: 📍 URL posterior al guardado: https://demo.bermanntms.cl/transportistas/index
+2026-03-28 21:36:34 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla basado en #search...
+2026-03-28 21:36:34 [INFO]: 🔍 Buscando vía #search global: Demo_tra_austral_938
+2026-03-28 21:36:34 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-28 21:36:37 [WARN]: ⚠️ ⚠️ No se encontró fila que coincida con: Demo_tra_austral_938
+2026-03-28 21:36:37 [WARN]: ⚠️ ⚠️ Rescate de Grilla: No se pudo determinar el ID del Transportista creado.
+2026-03-28 21:36:37 [WARN]: ⚠️ ⚠️ Sembrado UI: No se pudo determinar el ID del Transportista creado. Devolviendo solo los datos básicos.
+2026-03-28 21:36:37 [INFO]: ✅ Paso 1/4 Completado - Transportista: Demo_tra_austral_938
+2026-03-28 21:36:37 [INFO]:    RUT: 61160183-2, ID: 
+2026-03-28 21:36:37 [INFO]: 
+2026-03-28 21:36:37 [INFO]: 👤 Paso 2/4: Creando Cliente...
+2026-03-28 21:36:37 [INFO]: 🌱 Sembrado UI Cliente: [Demo_cli_servicios_541] RUT: 26081449-4...
+2026-03-28 21:36:37 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-28 21:36:38 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_servicios_541
+2026-03-28 21:36:39 [INFO]: [ClienteFormPage] Completando RUT: 26081449-4
+2026-03-28 21:36:39 [INFO]: [BasePage] Ingresando RUT con verificación: [26081449-4] en #clientes-rut
+2026-03-28 21:36:40 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 26.081.449-4
+2026-03-28 21:36:40 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_servicios spa_541
+2026-03-28 21:36:40 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-28 21:36:41 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-28 21:36:41 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 21:36:41 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 21:36:42 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region Aisen del Gral. Carlos Ibanez del Campo
+2026-03-28 21:36:43 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Capitán Pratt
+2026-03-28 21:36:45 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: O’Higgins
+2026-03-28 21:36:45 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region Aisen del Gral. Carlos Ibanez del Campo → Capitán Pratt → O’Higgins
+2026-03-28 21:36:45 [INFO]: [ClienteFormPage] Completando calle: Av. Apoquindo
+2026-03-28 21:36:45 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-28 21:36:46 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 844/844
+2026-03-28 21:36:46 [INFO]: 💾 Guardando Cliente vía UI...
+2026-03-28 21:36:46 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-28 21:36:46 [INFO]: ⏳ Esperando la finalización del guardado/redirección...
+2026-03-28 21:36:49 [INFO]: 📍 URL Post-guardado: https://demo.bermanntms.cl/clientes/index
+2026-03-28 21:36:51 [INFO]: 🔍 Buscando por RUT: 26081449-4
+2026-03-28 21:36:51 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-28 21:36:51 [WARN]: ⚠️ ⚠️ Sembrado UI: No se pudo determinar el ID del Cliente creado. Devolviendo solo los datos básicos.
+2026-03-28 21:36:51 [INFO]: ✅ Paso 2/4 Completado - Cliente: Demo_cli_servicios_541
+2026-03-28 21:36:51 [INFO]:    RUT: 26081449-4
+2026-03-28 21:36:51 [INFO]: 
+2026-03-28 21:36:51 [INFO]: 🚛 Paso 3/4: Creando Vehiculo...
+2026-03-28 21:36:51 [INFO]: 🌱 Sembrado UI Vehículo: Patente [Demo_veh_FEFY57] para Transportista: Demo_tra_austral_938
+2026-03-28 21:36:51 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-28 21:36:52 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_FEFY57
+2026-03-28 21:36:52 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_FEFY57
+2026-03-28 21:36:53 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_austral_938
+2026-03-28 21:36:54 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_austral_938" seleccionado
+2026-03-28 21:36:54 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: RAMPLA
+2026-03-28 21:36:55 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "RAMPLA" seleccionado
+2026-03-28 21:36:56 [INFO]: [VehiculoFormPage] Seleccionando tipo de rampla: Plana
+2026-03-28 21:36:56 [WARN]: [VehiculoFormPage] ⚠️ ⚠️ Dropdown de Tipo Rampla no visible — saltando
+2026-03-28 21:36:56 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-28 21:36:57 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-28 21:36:57 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-28 21:37:01 [INFO]: ✅ Vehículo creado exitosamente
+2026-03-28 21:37:01 [INFO]: ✅ Paso 3/4 Completado - Vehiculo: Demo_veh_FEFY57
+2026-03-28 21:37:01 [INFO]:    Capacidad: 1 a 12 TON
+2026-03-28 21:37:01 [INFO]: 
+2026-03-28 21:37:01 [INFO]: 👨‍✈️ Paso 4/4: Creando Conductor...
+2026-03-28 21:37:01 [INFO]: 🌱 Sembrado UI Conductor: [Demo_con_pedro Demo_con_rojas] RUT: 77.458.958-9 vinculado a: Demo_tra_austral_938
+2026-03-28 21:37:01 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-28 21:37:03 [INFO]: [ConductorFormPage] Llenando usuario: qapedrorojas31
+2026-03-28 21:37:03 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-28 21:37:03 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_pedro
+2026-03-28 21:37:03 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_rojas
+2026-03-28 21:37:03 [INFO]: [ConductorFormPage] Llenando documento: 77.458.958-9
+2026-03-28 21:37:03 [INFO]: [BasePage] Ingresando RUT con verificación: [77.458.958-9] en #conductores-documento
+2026-03-28 21:37:05 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 77.458.958-9
+2026-03-28 21:37:05 [INFO]: [ConductorFormPage] Llenando telefono: +56942816535
+2026-03-28 21:37:05 [INFO]: [ConductorFormPage] Llenando email: pedrorojas@hotmail.com
+2026-03-28 21:37:05 [INFO]: [ConductorFormPage] Seleccionando licencia: [A4]
+2026-03-28 21:37:06 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-28 21:37:06 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_austral_938]
+2026-03-28 21:37:08 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-28 21:37:10 [INFO]: ✅ Conductor creado exitosamente
+2026-03-28 21:37:10 [INFO]: ✅ Paso 4/4 Completado - Conductor: Demo_con_pedro Demo_con_rojas
+2026-03-28 21:37:10 [INFO]:    RUT: 77.458.958-9
+2026-03-28 21:37:10 [INFO]: 
+2026-03-28 21:37:10 [INFO]: ================================================================================
+2026-03-28 21:37:10 [INFO]: 💾 DATA OPERACIONAL EXPORTADA (Browser-Isolated)
+2026-03-28 21:37:10 [INFO]: ================================================================================
+2026-03-28 21:37:10 [INFO]: 📁 Navegador: chromium | Archivo: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-base-entities-data-chromium-demo.json
+2026-03-28 21:37:10 [INFO]: 🌐 Worker 1 | Projecto: base-entities-chromium
+2026-03-28 21:37:10 [INFO]: 
+2026-03-28 21:37:10 [INFO]: 📦 Resumen:
+2026-03-28 21:37:10 [INFO]:    Transportista: Demo_tra_austral_938 (61160183-2)
+2026-03-28 21:37:10 [INFO]:    Cliente: Demo_cli_servicios_541 (26081449-4)
+2026-03-28 21:37:10 [INFO]:    Vehiculo: Demo_veh_FEFY57 (1 a 12 TON)
+2026-03-28 21:37:10 [INFO]:    Conductor: Demo_con_pedro Demo_con_rojas (77.458.958-9)
+2026-03-28 21:37:10 [INFO]: 
+2026-03-28 21:37:10 [INFO]: ⏱️  Tiempo de Ejecución: 54.17s
+2026-03-28 21:37:10 [INFO]: ================================================================================
+2026-03-28 21:37:10 [INFO]: ✅ BASE OPERATIONAL SUITE COMPLETADA EXITOSAMENTE!
+2026-03-28 21:37:10 [INFO]: 🎯 Data lista para tests de creación de contrato y planificación de viajes
+2026-03-28 21:37:10 [INFO]: ================================================================================

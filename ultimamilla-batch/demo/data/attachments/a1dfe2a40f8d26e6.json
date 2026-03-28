@@ -1,0 +1,41 @@
+{
+  "cliente": "Demo_cli_servicios_541",
+  "requestedBatchSize": 8,
+  "createdOrders": [
+    "677732",
+    "516026",
+    "304600",
+    "468916",
+    "606725",
+    "448129",
+    "211726",
+    "856187"
+  ],
+  "assignedRowIds": [
+    "220",
+    "221",
+    "222",
+    "223",
+    "224",
+    "225",
+    "226",
+    "227"
+  ],
+  "selectedCount": 8,
+  "tripId": "6829",
+  "vehiculo": "Demo_veh_GA8622 - Demo_veh_GA8622",
+  "transportista": "Demo_tra_andes_100",
+  "conductor": "100447:Demo_con_josé Demo_con_araya",
+  "estadosAplicados": [
+    "677732:Rechazado",
+    "516026:Entregado",
+    "304600:No Entregado",
+    "468916:Entregado Parcial",
+    "606725:Entregado Parcial",
+    "448129:Entregado",
+    "211726:No Entregado",
+    "856187:No Entregado"
+  ],
+  "refreshDetected": "true",
+  "gridMutated": "true"
+}
