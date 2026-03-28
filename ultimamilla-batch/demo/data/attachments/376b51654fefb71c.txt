@@ -1,0 +1,130 @@
+2026-03-28 01:43:01 [INFO]: ENTORNO: DEMO 🎭
+2026-03-28 01:43:01 [INFO]: 🚀 Iniciando Suite Operacional Base - Pasos 1-4
+2026-03-28 01:43:01 [INFO]: 🔧 Worker 2 | Navegador: firefox | Proyecto: base-entities-firefox
+2026-03-28 01:43:01 [INFO]: ================================================================================
+2026-03-28 01:43:01 [INFO]: 🔐 PASO 0: Autenticando...
+2026-03-28 01:43:01 [INFO]: [LoginPage] Intentando loguearse con usuario: arivas y esperando el dashboard...
+2026-03-28 01:43:01 [INFO]: [LoginPage] Logueandose con usuario: arivas
+2026-03-28 01:43:01 [INFO]: [BasePage] [PASO] 🟦 Navegando hacia: /login 🌐
+2026-03-28 01:43:04 [INFO]: [LoginPage] Inicio de sesión confirmado: Usuario se encuentra en Dashboard
+2026-03-28 01:43:04 [INFO]: ✅ Paso 0 Completado - Autenticado como arivas
+2026-03-28 01:43:04 [INFO]: 
+2026-03-28 01:43:05 [INFO]: 📦 PASO 1/4: Creando Transportista...
+2026-03-28 01:43:05 [INFO]: 🌱 UI Seeding Transportista: [Demo_tra_horizonte_385] RUT: 73593674-3...
+2026-03-28 01:43:05 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-28 01:43:06 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_horizonte_385
+2026-03-28 01:43:06 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_horizonte_385
+2026-03-28 01:43:06 [INFO]: [TransportistaFormPage] Completando documento (RUT): 73593674-3
+2026-03-28 01:43:06 [INFO]: [BasePage] Ingresando RUT con verificación: [73593674-3] en #transportistas-documento
+2026-03-28 01:43:07 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 73.593.674-3
+2026-03-28 01:43:07 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-28 01:43:08 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-28 01:43:09 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 01:43:09 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 01:43:09 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Antofagasta
+2026-03-28 01:43:11 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: El Loa
+2026-03-28 01:43:12 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: San Pedro de Atacama
+2026-03-28 01:43:12 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Antofagasta → El Loa → San Pedro de Atacama
+2026-03-28 01:43:12 [INFO]: [TransportistaFormPage] Completando calle: Av. Apoquindo
+2026-03-28 01:43:12 [INFO]: [TransportistaFormPage] Completando altura: 5881
+2026-03-28 01:43:12 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-28 01:43:13 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-28 01:43:13 [INFO]: [TransportistaFormPage] Seleccionando tercerizar viajes: No
+2026-03-28 01:43:13 [INFO]: 💾 Guardando Transportista vía UI...
+2026-03-28 01:43:13 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-28 01:43:13 [INFO]: ⏳ Esperando que finalice el guardado/redirección...
+2026-03-28 01:43:14 [INFO]: 📍 URL posterior al guardado: https://demo.bermanntms.cl/transportistas/index
+2026-03-28 01:43:14 [INFO]: ⚠️ Redirigido al Índice. Ejecutando Rescate de Grilla basado en #search...
+2026-03-28 01:43:14 [INFO]: 🔍 Buscando vía #search global: Demo_tra_horizonte_385
+2026-03-28 01:43:15 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-28 01:43:17 [WARN]: ⚠️ ⚠️ No se encontró fila que coincida con: Demo_tra_horizonte_385
+2026-03-28 01:43:17 [WARN]: ⚠️ ⚠️ Rescate de Grilla: No se pudo determinar el ID del Transportista creado.
+2026-03-28 01:43:17 [WARN]: ⚠️ ⚠️ Sembrado UI: No se pudo determinar el ID del Transportista creado. Devolviendo solo los datos básicos.
+2026-03-28 01:43:17 [INFO]: ✅ Paso 1/4 Completado - Transportista: Demo_tra_horizonte_385
+2026-03-28 01:43:17 [INFO]:    RUT: 73593674-3, ID: 
+2026-03-28 01:43:17 [INFO]: 
+2026-03-28 01:43:17 [INFO]: 👤 Paso 2/4: Creando Cliente...
+2026-03-28 01:43:17 [INFO]: 🌱 Sembrado UI Cliente: [Demo_cli_central_470] RUT: 99758272-1...
+2026-03-28 01:43:17 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-28 01:43:19 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_central_470
+2026-03-28 01:43:19 [INFO]: [ClienteFormPage] Completando RUT: 99758272-1
+2026-03-28 01:43:19 [INFO]: [BasePage] Ingresando RUT con verificación: [99758272-1] en #clientes-rut
+2026-03-28 01:43:20 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 99.758.272-1
+2026-03-28 01:43:20 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_central spa_470
+2026-03-28 01:43:20 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-28 01:43:21 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-28 01:43:21 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 01:43:21 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 01:43:22 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de la Araucania
+2026-03-28 01:43:23 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Malleco
+2026-03-28 01:43:25 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Traiguén
+2026-03-28 01:43:25 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de la Araucania → Malleco → Traiguén
+2026-03-28 01:43:25 [INFO]: [ClienteFormPage] Completando calle: Av. Providencia
+2026-03-28 01:43:25 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-28 01:43:25 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 844/844
+2026-03-28 01:43:26 [INFO]: 💾 Guardando Cliente vía UI...
+2026-03-28 01:43:26 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-28 01:43:26 [INFO]: ⏳ Esperando la finalización del guardado/redirección...
+2026-03-28 01:43:29 [INFO]: 📍 URL Post-guardado: https://demo.bermanntms.cl/clientes/index
+2026-03-28 01:43:31 [INFO]: 🔍 Buscando por RUT: 99758272-1
+2026-03-28 01:43:31 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-28 01:43:31 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 410
+2026-03-28 01:43:31 [INFO]: ✅ Cliente [Demo_cli_central_470] ID: 410 sembrado exitosamente
+2026-03-28 01:43:31 [INFO]: ✅ Paso 2/4 Completado - Cliente: Demo_cli_central_470
+2026-03-28 01:43:31 [INFO]:    RUT: 99758272-1
+2026-03-28 01:43:31 [INFO]: 
+2026-03-28 01:43:31 [INFO]: 🚛 Paso 3/4: Creando Vehiculo...
+2026-03-28 01:43:31 [INFO]: 🌱 Sembrado UI Vehículo: Patente [Demo_veh_TD6375] para Transportista: Demo_tra_horizonte_385
+2026-03-28 01:43:31 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-28 01:43:32 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_TD6375
+2026-03-28 01:43:32 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_TD6375
+2026-03-28 01:43:32 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_horizonte_385
+2026-03-28 01:43:34 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_horizonte_385" seleccionado
+2026-03-28 01:43:34 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: RAMPLA
+2026-03-28 01:43:35 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "RAMPLA" seleccionado
+2026-03-28 01:43:36 [INFO]: [VehiculoFormPage] Seleccionando tipo de rampla: Plana
+2026-03-28 01:43:36 [WARN]: [VehiculoFormPage] ⚠️ ⚠️ Dropdown de Tipo Rampla no visible — saltando
+2026-03-28 01:43:36 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-28 01:43:37 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-28 01:43:37 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-28 01:43:41 [INFO]: ✅ Vehículo creado exitosamente
+2026-03-28 01:43:41 [INFO]: ✅ Paso 3/4 Completado - Vehiculo: Demo_veh_TD6375
+2026-03-28 01:43:41 [INFO]:    Capacidad: 1 a 12 TON
+2026-03-28 01:43:41 [INFO]: 
+2026-03-28 01:43:41 [INFO]: 👨‍✈️ Paso 4/4: Creando Conductor...
+2026-03-28 01:43:41 [INFO]: 🌱 Sembrado UI Conductor: [Demo_con_antonio Demo_con_contreras] RUT: 94.928.809-9 vinculado a: Demo_tra_horizonte_385
+2026-03-28 01:43:41 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-28 01:43:42 [INFO]: [ConductorFormPage] Llenando usuario: qaantoncontr79
+2026-03-28 01:43:43 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-28 01:43:43 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_antonio
+2026-03-28 01:43:43 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_contreras
+2026-03-28 01:43:43 [INFO]: [ConductorFormPage] Llenando documento: 94.928.809-9
+2026-03-28 01:43:43 [INFO]: [BasePage] Ingresando RUT con verificación: [94.928.809-9] en #conductores-documento
+2026-03-28 01:43:44 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 94.928.809-9
+2026-03-28 01:43:44 [INFO]: [ConductorFormPage] Llenando telefono: +56998156495
+2026-03-28 01:43:44 [INFO]: [ConductorFormPage] Llenando email: antoniocontreras@gmail.com
+2026-03-28 01:43:44 [INFO]: [ConductorFormPage] Seleccionando licencia: [A2]
+2026-03-28 01:43:46 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-28 01:43:46 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_horizonte_385]
+2026-03-28 01:43:47 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-28 01:43:49 [INFO]: ✅ Conductor creado exitosamente
+2026-03-28 01:43:49 [INFO]: ✅ Paso 4/4 Completado - Conductor: Demo_con_antonio Demo_con_contreras
+2026-03-28 01:43:49 [INFO]:    RUT: 94.928.809-9
+2026-03-28 01:43:49 [INFO]: 
+2026-03-28 01:43:49 [INFO]: ================================================================================
+2026-03-28 01:43:49 [INFO]: 💾 DATA OPERACIONAL EXPORTADA (Browser-Isolated)
+2026-03-28 01:43:49 [INFO]: ================================================================================
+2026-03-28 01:43:49 [INFO]: 📁 Navegador: firefox | Archivo: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-base-entities-data-firefox-demo.json
+2026-03-28 01:43:49 [INFO]: 🌐 Worker 2 | Projecto: base-entities-firefox
+2026-03-28 01:43:49 [INFO]: 
+2026-03-28 01:43:49 [INFO]: 📦 Resumen:
+2026-03-28 01:43:49 [INFO]:    Transportista: Demo_tra_horizonte_385 (73593674-3)
+2026-03-28 01:43:49 [INFO]:    Cliente: Demo_cli_central_470 (99758272-1)
+2026-03-28 01:43:49 [INFO]:    Vehiculo: Demo_veh_TD6375 (1 a 12 TON)
+2026-03-28 01:43:49 [INFO]:    Conductor: Demo_con_antonio Demo_con_contreras (94.928.809-9)
+2026-03-28 01:43:49 [INFO]: 
+2026-03-28 01:43:49 [INFO]: ⏱️  Tiempo de Ejecución: 48.35s
+2026-03-28 01:43:49 [INFO]: ================================================================================
+2026-03-28 01:43:49 [INFO]: ✅ BASE OPERATIONAL SUITE COMPLETADA EXITOSAMENTE!
+2026-03-28 01:43:49 [INFO]: 🎯 Data lista para tests de creación de contrato y planificación de viajes
+2026-03-28 01:43:49 [INFO]: ================================================================================

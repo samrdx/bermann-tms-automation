@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","304228","Happy path: debe crear, seleccionar, optimizar y crear viaje para múltiples pedidos elegibles","firefox-demo","2026-03-28","passed","2026-03-28","Última Milla - Asignación batch de pedidos","","",""
+"","48844","Create Base Operational Entities (Steps 1-4)","base-entities-chromium","2026-03-28","passed","2026-03-28","Base Operational Suite - Entity Creation","","",""
+"","298585","Happy path: debe crear, seleccionar, optimizar y crear viaje para múltiples pedidos elegibles","chromium-demo","2026-03-28","passed","2026-03-28","Última Milla - Asignación batch de pedidos","","",""
+"","4227","authenticate","Autorización","2026-03-28","passed","2026-03-28","","","",""
+"","50752","Create Base Operational Entities (Steps 1-4)","base-entities-firefox","2026-03-28","passed","2026-03-28","Base Operational Suite - Entity Creation","","",""
