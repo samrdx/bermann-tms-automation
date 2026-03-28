@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏭 Transportista : [Demo_tra_austral_188]         | ID: 428
+🏢 Cliente       : [Demo_cli_servicios_387]       | ID: 414
+🚚 Vehiculo      : [Demo_veh_XX3500]              | ID: 100479 | Patente: Demo_veh_XX3500 | Asociado: Demo_tra_austral_188
+👤 Conductor     : [Demo_con_sofía Demo_con_garcía Demo_con_garcía] | ID: 480 | Asociado: Demo_tra_austral_188
+🏭 Transportista : [Demo_tra_austral_188]        
+🏢 Cliente       : [Demo_cli_servicios_387]      
+🔹 Contrato Venta: [417913]                      
+🔹 Contrato Costo: [397555]                      
+🎫 Viaje         : [235949]                       | Asociado: Demo_cli_servicios_387 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 205 | Cliente: Demo_cli_servicios_387
+====================================================================================================

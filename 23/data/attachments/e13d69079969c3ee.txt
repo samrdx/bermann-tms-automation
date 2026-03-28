@@ -1,0 +1,26 @@
+2026-03-28 04:57:26 [INFO]: ENTORNO: QA 🧪
+2026-03-28 04:57:26 [INFO]: ✅ Cargado seededTransportista: Qa_tra_transportes_559 (ID: 620)
+2026-03-28 04:57:28 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-28 04:57:31 [INFO]: 📝 Completando formulario de conductor para: Qa_con_carlos Qa_con_rojas
+2026-03-28 04:57:31 [INFO]: [ConductorFormPage] Llenando usuario: rksllf47
+2026-03-28 04:57:31 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-28 04:57:31 [INFO]: [ConductorFormPage] Llenando nombre: Qa_con_carlos
+2026-03-28 04:57:31 [INFO]: [ConductorFormPage] Llenando apellido: Qa_con_rojas
+2026-03-28 04:57:31 [INFO]: [ConductorFormPage] Llenando documento: 92.505.858-0
+2026-03-28 04:57:31 [INFO]: [BasePage] Ingresando RUT con verificación: [92.505.858-0] en #conductores-documento
+2026-03-28 04:57:32 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 92.505.858-0
+2026-03-28 04:57:32 [INFO]: [ConductorFormPage] Llenando telefono: +56967290435
+2026-03-28 04:57:32 [INFO]: [ConductorFormPage] Llenando email: qa_con_carlosqa_con_rojas@gmail.com
+2026-03-28 04:57:33 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-28 04:57:34 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-28 04:57:34 [INFO]: [ConductorFormPage] Seleccionando transportista: [Qa_tra_transportes_559]
+2026-03-28 04:57:35 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-28 04:57:38 [INFO]: ✅ Conductor [Qa_con_carlos Qa_con_rojas] guardado exitosamente
+2026-03-28 04:57:38 [INFO]: ✅ seededConductor guardado: Qa_con_carlos Qa_con_rojas
+2026-03-28 04:57:38 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+👤 Conductor     : [Qa_con_carlos Qa_con_rojas]   | Asociado: Qa_tra_transportes_559
+====================================================================================================

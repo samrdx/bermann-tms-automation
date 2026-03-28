@@ -1,0 +1,42 @@
+2026-03-28 05:14:14 [INFO]: ENTORNO: DEMO 🎭
+2026-03-28 05:14:14 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-28 05:14:14 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-28 05:14:17 [INFO]: ✅ Navegación correcta
+2026-03-28 05:14:17 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-28 05:14:17 [INFO]: [ClienteFormPage] Completando nombre (razón social): Demo_cli_comercial_132
+2026-03-28 05:14:17 [INFO]: [ClienteFormPage] Completando RUT: 31223129-8
+2026-03-28 05:14:17 [INFO]: [BasePage] Ingresando RUT con verificación: [31223129-8] en #clientes-rut
+2026-03-28 05:14:19 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 31.223.129-8
+2026-03-28 05:14:19 [INFO]: [ClienteFormPage] Completando nombre fantasía: Demo_cli_comercial spa_132
+2026-03-28 05:14:19 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-28 05:14:20 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-28 05:14:20 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 05:14:20 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 05:14:21 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Bío Bío
+2026-03-28 05:14:22 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Arauco
+2026-03-28 05:14:24 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Curanilahue
+2026-03-28 05:14:24 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Bío Bío → Arauco → Curanilahue
+2026-03-28 05:14:24 [INFO]: [ClienteFormPage] Completando calle: Av. Apoquindo
+2026-03-28 05:14:24 [INFO]: [ClienteFormPage] Completando altura: 319
+2026-03-28 05:14:24 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-28 05:14:24 [INFO]: [ClienteFormPage] ✅ Todos los Polígonos seleccionados: 844/844
+2026-03-28 05:14:25 [INFO]: ✅ Formulario Completado
+2026-03-28 05:14:25 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-28 05:14:25 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-28 05:14:30 [INFO]: ✅ Guardar iniciado
+2026-03-28 05:14:30 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-28 05:14:32 [INFO]: 📍 URL Post-guardado para extracción de ID: https://demo.bermanntms.cl/clientes/index
+2026-03-28 05:14:32 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-28 05:14:32 [INFO]: 🔍 Buscando por RUT: 31223129-8 (limpio: 312231298)
+2026-03-28 05:14:32 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-28 05:14:34 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-28 05:14:34 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 412
+2026-03-28 05:14:34 [INFO]: ✅ Cliente [Demo_cli_comercial_132] ID: 412 identificado exitosamente
+2026-03-28 05:14:34 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-23677798925.json
+2026-03-28 05:14:34 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+🏢 Cliente       : [Demo_cli_comercial_132]       | ID: 412
+====================================================================================================

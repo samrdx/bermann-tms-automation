@@ -1,0 +1,39 @@
+2026-03-28 05:13:48 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-28 05:13:48 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-28 05:13:51 [INFO]: ✅ Navegación exitosa
+2026-03-28 05:13:51 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-28 05:13:51 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_andes_243
+2026-03-28 05:13:51 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_andes_243
+2026-03-28 05:13:51 [INFO]: [TransportistaFormPage] Completando documento (RUT): 83449015-3
+2026-03-28 05:13:51 [INFO]: [BasePage] Ingresando RUT con verificación: [83449015-3] en #transportistas-documento
+2026-03-28 05:13:52 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 83.449.015-3
+2026-03-28 05:13:52 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-28 05:13:53 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-28 05:13:53 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 05:13:53 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 05:13:54 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region Metropolitana
+2026-03-28 05:13:55 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: La Cisterna
+2026-03-28 05:13:57 [WARN]: [TransportistaFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-28 05:13:57 [WARN]: [TransportistaFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "La Cisterna" (región: "Region Metropolitana"), reintentando...
+2026-03-28 05:13:57 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 2/5
+2026-03-28 05:13:58 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region Aisen del Gral. Carlos Ibanez del Campo
+2026-03-28 05:13:59 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: General Carrera
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Río Ibáñez
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region Aisen del Gral. Carlos Ibanez del Campo → General Carrera → Río Ibáñez
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] Completando calle: Gran Avenida
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] Completando altura: 612
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-28 05:14:01 [INFO]: ✅ Formulario completado
+2026-03-28 05:14:01 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-28 05:14:01 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-28 05:14:06 [INFO]: ✅ Guardado iniciado
+2026-03-28 05:14:06 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-28 05:14:08 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-28 05:14:08 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-28 05:14:08 [INFO]: 🔍 Buscando por nombre: Demo_tra_andes_243
+2026-03-28 05:14:09 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-28 05:14:11 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 425
+2026-03-28 05:14:11 [INFO]: ✅ ID del Transportista [Demo_tra_andes_243] extraído exitosamente: 425
+2026-03-28 05:14:11 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-demo-nightly-demo-23677798925.json
+2026-03-28 05:14:11 [INFO]: ✅ Prueba exitosa

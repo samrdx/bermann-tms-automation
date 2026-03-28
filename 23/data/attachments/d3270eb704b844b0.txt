@@ -1,0 +1,34 @@
+2026-03-28 04:50:43 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-28 04:50:43 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-28 04:50:46 [INFO]: ✅ Navegación exitosa
+2026-03-28 04:50:46 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-28 04:50:46 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_rutas_460
+2026-03-28 04:50:46 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_rutas_460
+2026-03-28 04:50:46 [INFO]: [TransportistaFormPage] Completando documento (RUT): 13617243-3
+2026-03-28 04:50:46 [INFO]: [BasePage] Ingresando RUT con verificación: [13617243-3] en #transportistas-documento
+2026-03-28 04:50:47 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 13.617.243-3
+2026-03-28 04:50:47 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-28 04:50:48 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-28 04:50:48 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 04:50:48 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 04:50:49 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Atacama
+2026-03-28 04:50:50 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Huasco
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Freirina
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Atacama → Huasco → Freirina
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] Completando calle: Av. Apoquindo
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] Completando altura: 909
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-28 04:50:52 [INFO]: ✅ Formulario completado
+2026-03-28 04:50:52 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-28 04:50:52 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-28 04:50:57 [INFO]: ✅ Guardado iniciado
+2026-03-28 04:50:57 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-28 04:50:59 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-28 04:50:59 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-28 04:50:59 [INFO]: 🔍 Buscando por nombre: Qa_tra_rutas_460
+2026-03-28 04:51:00 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-28 04:51:02 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 619
+2026-03-28 04:51:02 [INFO]: ✅ ID del Transportista [Qa_tra_rutas_460] extraído exitosamente: 619
+2026-03-28 04:51:02 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23677798925.json
+2026-03-28 04:51:02 [INFO]: ✅ Prueba exitosa

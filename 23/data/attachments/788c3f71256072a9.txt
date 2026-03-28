@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_express_987]           | ID: 622
+🏢 Cliente       : [Qa_cli_importadora_934]       | ID: 550
+🚚 Vehiculo      : [Qa_veh_XP8846]                | ID: 100784 | Patente: Qa_veh_XP8846 | Asociado: Qa_tra_express_987
+👤 Conductor     : [Qa_con_juan Qa_con_torres Qa_con_torres] | ID: 1280 | Asociado: Qa_tra_express_987
+🏭 Transportista : [Qa_tra_express_987]          
+🏢 Cliente       : [Qa_cli_importadora_934]      
+🔹 Contrato Venta: [584025]                      
+🔹 Contrato Costo: [906589]                      
+🎫 Viaje         : [904758]                       | Asociado: Qa_cli_importadora_934 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 285 | Cliente: Qa_cli_importadora_934
+====================================================================================================

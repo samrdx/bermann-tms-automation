@@ -1,0 +1,26 @@
+2026-03-28 05:15:07 [INFO]: ENTORNO: DEMO 🎭
+2026-03-28 05:15:07 [INFO]: ✅ Cargado seededTransportista: Demo_tra_andes_243 (ID: 425)
+2026-03-28 05:15:07 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-28 05:15:09 [INFO]: 📝 Completando formulario de conductor para: Demo_con_antonio Demo_con_rojas
+2026-03-28 05:15:09 [INFO]: [ConductorFormPage] Llenando usuario: zzvsof45
+2026-03-28 05:15:10 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-28 05:15:10 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_antonio
+2026-03-28 05:15:10 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_rojas
+2026-03-28 05:15:10 [INFO]: [ConductorFormPage] Llenando documento: 93.896.849-7
+2026-03-28 05:15:10 [INFO]: [BasePage] Ingresando RUT con verificación: [93.896.849-7] en #conductores-documento
+2026-03-28 05:15:11 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 93.896.849-7
+2026-03-28 05:15:11 [INFO]: [ConductorFormPage] Llenando telefono: +56969572161
+2026-03-28 05:15:11 [INFO]: [ConductorFormPage] Llenando email: demo_con_antoniodemo_con_rojas@gmail.com
+2026-03-28 05:15:11 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-28 05:15:13 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-28 05:15:13 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_andes_243]
+2026-03-28 05:15:14 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-28 05:15:16 [INFO]: ✅ Conductor [Demo_con_antonio Demo_con_rojas] guardado exitosamente
+2026-03-28 05:15:16 [INFO]: ✅ seededConductor guardado: Demo_con_antonio Demo_con_rojas
+2026-03-28 05:15:16 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_antonio Demo_con_rojas] | Asociado: Demo_tra_andes_243
+====================================================================================================

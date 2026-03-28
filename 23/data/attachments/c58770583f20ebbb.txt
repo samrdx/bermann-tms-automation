@@ -1,0 +1,26 @@
+2026-03-28 05:20:25 [INFO]: ENTORNO: DEMO 🎭
+2026-03-28 05:20:25 [INFO]: ✅ Cargado seededTransportista: Demo_tra_transportes_653 (ID: 426)
+2026-03-28 05:20:26 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-28 05:20:29 [INFO]: 📝 Completando formulario de conductor para: Demo_con_sofía Demo_con_rodríguez
+2026-03-28 05:20:29 [INFO]: [ConductorFormPage] Llenando usuario: detjlu55
+2026-03-28 05:20:29 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-28 05:20:29 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_sofía
+2026-03-28 05:20:29 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_rodríguez
+2026-03-28 05:20:29 [INFO]: [ConductorFormPage] Llenando documento: 95.071.077-2
+2026-03-28 05:20:29 [INFO]: [BasePage] Ingresando RUT con verificación: [95.071.077-2] en #conductores-documento
+2026-03-28 05:20:31 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 95.071.077-2
+2026-03-28 05:20:31 [INFO]: [ConductorFormPage] Llenando telefono: +56944831412
+2026-03-28 05:20:31 [INFO]: [ConductorFormPage] Llenando email: demo_con_sofiademo_con_rodriguez@gmail.com
+2026-03-28 05:20:31 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-28 05:20:32 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-28 05:20:32 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_transportes_653]
+2026-03-28 05:20:34 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-28 05:20:36 [INFO]: ✅ Conductor [Demo_con_sofía Demo_con_rodríguez] guardado exitosamente
+2026-03-28 05:20:36 [INFO]: ✅ seededConductor guardado: Demo_con_sofía Demo_con_rodríguez
+2026-03-28 05:20:36 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_sofía Demo_con_rodríguez] | Asociado: Demo_tra_transportes_653
+====================================================================================================

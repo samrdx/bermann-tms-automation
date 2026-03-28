@@ -1,0 +1,15 @@
+2026-03-28 05:15:17 [INFO]: ✅ Transportista seeded cargado: Demo_tra_andes_243 (ID: 425)
+2026-03-28 05:15:17 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-28 05:15:20 [INFO]: 📝 Completando formulario para Transportista: Demo_tra_andes_243
+2026-03-28 05:15:20 [INFO]: [VehiculoFormPage] Completando patente: Demo_veh_TAWL37
+2026-03-28 05:15:20 [INFO]: [VehiculoFormPage] Completando muestra: Demo_veh_TAWL37
+2026-03-28 05:15:21 [INFO]: [VehiculoFormPage] Seleccionando transportista: Demo_tra_andes_243
+2026-03-28 05:15:22 [INFO]: [VehiculoFormPage] ✅ Transportista "Demo_tra_andes_243" seleccionado
+2026-03-28 05:15:22 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-28 05:15:23 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-28 05:15:24 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-28 05:15:25 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-28 05:15:25 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-28 05:15:25 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-28 05:15:29 [INFO]: ✅ Vehículo [Demo_veh_TAWL37] guardado exitosamente
+2026-03-28 05:15:29 [INFO]: ✅ Vehículo seeded guardado: Demo_veh_TAWL37

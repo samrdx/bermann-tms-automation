@@ -1,0 +1,52 @@
+2026-03-28 04:50:15 [INFO]: ENTORNO: QA 🧪
+2026-03-28 04:50:15 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-28 04:50:15 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-28 04:50:18 [INFO]: ✅ Navegación correcta
+2026-03-28 04:50:18 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-28 04:50:18 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_central_869
+2026-03-28 04:50:18 [INFO]: [ClienteFormPage] Completando RUT: 26439331-0
+2026-03-28 04:50:18 [INFO]: [BasePage] Ingresando RUT con verificación: [26439331-0] en #clientes-rut
+2026-03-28 04:50:19 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 26.439.331-0
+2026-03-28 04:50:19 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_central spa_869
+2026-03-28 04:50:19 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-28 04:50:20 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-28 04:50:20 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 04:50:20 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 04:50:21 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region Metropolitana
+2026-03-28 04:50:23 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Renca
+2026-03-28 04:50:24 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-28 04:50:24 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Renca" (región: "Region Metropolitana"), reintentando...
+2026-03-28 04:50:24 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 2/5
+2026-03-28 04:50:25 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region del Biobio
+2026-03-28 04:50:26 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Hualpén
+2026-03-28 04:50:28 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna disponibles (count=1)
+2026-03-28 04:50:28 [WARN]: [ClienteFormPage] ⚠️ ⚠️ No hay opciones de comuna para la ciudad "Hualpén" (región: "Region del Biobio"), reintentando...
+2026-03-28 04:50:28 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 3/5
+2026-03-28 04:50:29 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de los Lagos
+2026-03-28 04:50:30 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Palena
+2026-03-28 04:50:32 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Hualaihué
+2026-03-28 04:50:32 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de los Lagos → Palena → Hualaihué
+2026-03-28 04:50:32 [INFO]: [ClienteFormPage] Completando calle: Av. Matta
+2026-03-28 04:50:32 [INFO]: [ClienteFormPage] Completando altura: 363
+2026-03-28 04:50:32 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-28 04:50:32 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-28 04:50:32 [INFO]: ✅ Formulario Completado
+2026-03-28 04:50:32 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-28 04:50:32 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-28 04:50:37 [INFO]: ✅ Guardar iniciado
+2026-03-28 04:50:37 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-28 04:50:39 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-28 04:50:39 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-28 04:50:39 [INFO]: 🔍 Buscando por RUT: 26439331-0 (limpio: 264393310)
+2026-03-28 04:50:39 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-28 04:50:41 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-28 04:50:41 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 547
+2026-03-28 04:50:41 [INFO]: ✅ Cliente [Qa_cli_central_869] ID: 547 identificado exitosamente
+2026-03-28 04:50:41 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23677798925.json
+2026-03-28 04:50:41 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_central_869]           | ID: 547
+====================================================================================================

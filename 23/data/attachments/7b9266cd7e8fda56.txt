@@ -1,0 +1,34 @@
+2026-03-28 04:51:35 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-28 04:51:35 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-28 04:51:37 [INFO]: ✅ Navegación exitosa
+2026-03-28 04:51:37 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-28 04:51:37 [INFO]: [TransportistaFormPage] Completando nombre: Qa_tra_transportes_559
+2026-03-28 04:51:37 [INFO]: [TransportistaFormPage] Completando razón social: Qa_tra_transportes_559
+2026-03-28 04:51:37 [INFO]: [TransportistaFormPage] Completando documento (RUT): 44192227-2
+2026-03-28 04:51:37 [INFO]: [BasePage] Ingresando RUT con verificación: [44192227-2] en #transportistas-documento
+2026-03-28 04:51:39 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 44.192.227-2
+2026-03-28 04:51:39 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-28 04:51:40 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-28 04:51:40 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-28 04:51:40 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-28 04:51:41 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Region de Atacama
+2026-03-28 04:51:42 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Copiapó
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: Copiapó
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Region de Atacama → Copiapó → Copiapó
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] Completando calle: Av. Pajaritos
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] Completando altura: 510
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-28 04:51:44 [INFO]: ✅ Formulario completado
+2026-03-28 04:51:44 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-28 04:51:44 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-28 04:51:49 [INFO]: ✅ Guardado iniciado
+2026-03-28 04:51:49 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-28 04:51:51 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/transportistas/index
+2026-03-28 04:51:51 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-28 04:51:51 [INFO]: 🔍 Buscando por nombre: Qa_tra_transportes_559
+2026-03-28 04:51:52 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-28 04:51:54 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 620
+2026-03-28 04:51:54 [INFO]: ✅ ID del Transportista [Qa_tra_transportes_559] extraído exitosamente: 620
+2026-03-28 04:51:54 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-qa-nightly-qa-23677798925.json
+2026-03-28 04:51:54 [INFO]: ✅ Prueba exitosa

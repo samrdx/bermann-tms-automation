@@ -1,0 +1,64 @@
+2026-03-28 04:53:15 [INFO]: ================================================================================
+2026-03-28 04:53:15 [INFO]: 🚀 Iniciando creación de Contrato Tipo Venta (Seeded Cliente Mode)
+2026-03-28 04:53:15 [INFO]: ================================================================================
+2026-03-28 04:53:15 [INFO]: 📋 Fase 1: Cargando datos del cliente sembrado...
+2026-03-28 04:53:15 [INFO]: 📦 Usando cliente: "Qa_cli_central spa_869" (ID: 547)
+2026-03-28 04:53:15 [INFO]: 📋 Fase 2: Navegando al formulario de creación de contratos...
+2026-03-28 04:53:15 [INFO]: [ContratosFormPage] Navegando a la página de creación de contrato: /contrato/crear
+2026-03-28 04:53:18 [INFO]: [ContratosFormPage] ✅ Página de creación de contrato cargada y campo Nro Contrato visible
+2026-03-28 04:53:18 [INFO]: ✅ Formulario cargado
+2026-03-28 04:53:18 [INFO]: 📋 Fase 3-4: Completando el encabezado del contrato y guardando...
+2026-03-28 04:53:18 [INFO]: [ContratosFormPage] 📝 Completando información básica del contrato (Fase 1) - Tipo: Venta
+2026-03-28 04:53:18 [INFO]: [ContratosFormPage] Completando Nro Contrato: 598535
+2026-03-28 04:53:18 [INFO]: [ContratosFormPage] 🔽 Seleccionando Tipo Contrato = Venta...
+2026-03-28 04:53:25 [WARN]: [ContratosFormPage] ⚠️ ⚠️ fallback: clicking option via JS for "Venta"
+2026-03-28 04:53:25 [WARN]: [ContratosFormPage] ⚠️ ⚠️ No se detectó la respuesta esperada de rendersubview, pero se registraron todos los XHR
+2026-03-28 04:53:26 [INFO]: [ContratosFormPage] ⏳ Esperando AJAX...
+2026-03-28 04:53:27 [INFO]: [ContratosFormPage] ✅ Tipo Venta seleccionado
+2026-03-28 04:53:27 [INFO]: [ContratosFormPage] Seleccionando Subtipo: 1...
+2026-03-28 04:53:28 [INFO]: [ContratosFormPage] ✅ Subtipo 1 seleccionado
+2026-03-28 04:53:28 [INFO]: [ContratosFormPage] 🔽 Seleccionando cliente: "Qa_cli_central spa_869"...
+2026-03-28 04:53:28 [INFO]: [ContratosFormPage] Seleccionando Cliente: "Qa_cli_central spa_869"...
+2026-03-28 04:53:28 [INFO]: [ContratosFormPage] ✅ Cliente seleccionado: "QA_CLI_CENTRAL SPA_869" (val: 547)
+2026-03-28 04:53:29 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier fondo de modal...
+2026-03-28 04:53:30 [INFO]: [ContratosFormPage] 💾 Guardando encabezado básico del contrato...
+2026-03-28 04:53:33 [INFO]: [ContratosFormPage] ✅ Encabezado del contrato creado exitosamente con ID: 1019
+2026-03-28 04:53:33 [INFO]: [ContratosFormPage] 📍 Redirigido a: https://moveontruckqa.bermanntms.cl/contrato/editar/1019
+2026-03-28 04:53:33 [INFO]: ✅ Encabezado del contrato guardado! ID: 1019
+2026-03-28 04:53:33 [INFO]: 📋 Fase 5: Agregando ruta 715 + carga 715_19 con tarifas...
+2026-03-28 04:53:33 [INFO]: [ContratosFormPage] 🛣️ Añadiendo Ruta 1413 (ambiente QA)
+2026-03-28 04:53:33 [INFO]: [ContratosFormPage] Haciendo clic en el botón "Añadir Ruta"
+2026-03-28 04:53:35 [INFO]: [ContratosFormPage] Esperando a que aparezca el modal de rutas...
+2026-03-28 04:53:35 [INFO]: [ContratosFormPage] ✅ Modal de rutas visible
+2026-03-28 04:53:36 [INFO]: [ContratosFormPage] Seleccionando Ruta 1413
+2026-03-28 04:53:38 [INFO]: [ContratosFormPage] Cerrando modal de rutas
+2026-03-28 04:53:39 [INFO]: [ContratosFormPage] Haciendo clic en "Añadir Carga" para la Ruta 1413
+2026-03-28 04:53:40 [INFO]: [ContratosFormPage] ✅ Modal de carga visible
+2026-03-28 04:53:40 [INFO]: [ContratosFormPage] Seleccionando Carga vía: a#btn_plus_ruta_1413_2
+2026-03-28 04:53:41 [INFO]: [ContratosFormPage] Cerrando modal de carga
+2026-03-28 04:53:42 [INFO]: [ContratosFormPage] Completando tarifas: Conductor=20000, Viaje=50000
+2026-03-28 04:53:44 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_extra_1413 establecido en "50000"
+2026-03-28 04:53:46 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_conductor_1413 establecido en "20000"
+2026-03-28 04:53:49 [INFO]: [ContratosFormPage] ✅ Campo de tarifa #txt_tarifa_cliente_1413 establecido en "50000"
+2026-03-28 04:53:50 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier modal restante
+2026-03-28 04:53:50 [INFO]: [ContratosFormPage] ✅ Ruta 1413 y carga añadidas exitosamente
+2026-03-28 04:53:50 [INFO]: ✅ Ruta y tarifas agregadas
+2026-03-28 04:53:50 [INFO]: 📋 Fase 6: Guardando contrato completo (con tarifas)...
+2026-03-28 04:53:50 [INFO]: [ContratosFormPage] 💾 Guardando contrato y extrayendo ID
+2026-03-28 04:53:56 [INFO]: [ContratosFormPage] URL actual después de guardar: https://moveontruckqa.bermanntms.cl/contrato/index
+2026-03-28 04:53:56 [WARN]: [ContratosFormPage] ⚠️ ⚠️ Fallo al extraer el ID del contrato de la URL: https://moveontruckqa.bermanntms.cl/contrato/index, devolviendo cadena vacía para confiar en la búsqueda de índice
+2026-03-28 04:53:56 [INFO]: ✅ Contrato completo guardado! ID: 
+2026-03-28 04:53:56 [INFO]: 📋 Fase 7: Verificando contrato en el índice...
+2026-03-28 04:53:56 [INFO]: 🔍 Intentando verificar el contrato 1/3...
+2026-03-28 04:53:59 [INFO]: ⌨️ Buscando por cliente: Qa_cli_central spa_869
+2026-03-28 04:54:01 [INFO]: ✅ Contrato 598535 encontrado en el índice!
+2026-03-28 04:54:01 [INFO]: 📋 Fase 8: Persistiendo datos del contrato en JSON...
+2026-03-28 04:54:01 [INFO]: ✅ Datos de contratoCliente guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23677798925.json
+2026-03-28 04:54:01 [INFO]: ================================================================================
+2026-03-28 04:54:01 [INFO]: ✅ CREACIÓN DE CONTRATO TIPO VENTA COMPLETADA!
+2026-03-28 04:54:01 [INFO]: ================================================================================
+2026-03-28 04:54:01 [INFO]:    Nro Contrato: 598535
+2026-03-28 04:54:01 [INFO]:    Contract ID: 1019
+2026-03-28 04:54:01 [INFO]:    Cliente: Qa_cli_central spa_869
+2026-03-28 04:54:01 [INFO]:    Tiempo de ejecución: 45.46s
+2026-03-28 04:54:01 [INFO]: ================================================================================
