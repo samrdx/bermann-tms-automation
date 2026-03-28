@@ -220,36 +220,85 @@ export class UltimaMillaMonitoreoPage extends BasePage {
   private async openHorarioGpsModalForOrder(orderCode: string, tripId: string): Promise<void> {
     logger.info(`Abriendo Horario GPS para pedido=${orderCode} tripId=${tripId}`);
 
-    const clicked = await this.page.evaluate(({ currentTripId }) => {
-      const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const tripIdPattern = new RegExp(`changeStatusLastMille\\([^,]+,\\s*${escapeRegex(String(currentTripId))}\\)`);
-      const spans = Array.from(document.querySelectorAll('span.manito'));
-      const agregarButton = spans.find(span => {
-        const text = span.textContent?.trim() || '';
-        const onclick = span.getAttribute('onclick') || '';
-        return text === 'Agregar' && tripIdPattern.test(onclick);
-      }) as HTMLElement | undefined;
+    let lastDiagnostics = 'sin-diagnóstico';
 
-      if (!agregarButton) {
-        return false;
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      if (attempt > 1) {
+        logger.warn(`Reintentando apertura de Horario GPS. intento=${attempt}/4 tripId=${tripId}`);
+        await this.searchTripById(tripId);
+        await this.page.waitForTimeout(1200);
       }
 
-      agregarButton.click();
-      return true;
-    }, { currentTripId: tripId });
+      const clickResult = await this.page.evaluate(({ currentTripId }) => {
+        const currentTrip = String(currentTripId).trim();
+        const normalize = (value: string | null | undefined) => (value || '').replace(/\s+/g, ' ').trim();
+        const spans = Array.from(document.querySelectorAll('span.manito')) as HTMLElement[];
+        const agregarSpans = spans.filter(span => normalize(span.textContent) === 'Agregar');
 
-    if (!clicked) {
-      logger.warn(`⚠️ UI: span.manito de "Agregar" no encontrado para tripId=${tripId}. Tomando captura de pantalla...`);
-      await this.takeScreenshot('agregar-button-not-found-ultimamilla');
-      throw new Error(`❌ UI: No se encontró el botón "Agregar" para el tripId ${tripId} en la página.`);
+        const isMatchByTrip = (onclickRaw: string) => {
+          const onclick = normalize(onclickRaw);
+          if (!onclick.includes('changeStatusLastMille')) {
+            return false;
+          }
+
+          const secondArgRegex = new RegExp(`changeStatusLastMille\\([^,]+,\\s*${currentTrip}\\s*\\)`);
+          if (secondArgRegex.test(onclick)) {
+            return true;
+          }
+
+          // Fallback defensivo si la firma cambia
+          return onclick.includes(`(${currentTrip},`) || onclick.includes(`,${currentTrip})`) || onclick.includes(`, ${currentTrip})`);
+        };
+
+        const matched = agregarSpans.find(span => isMatchByTrip(span.getAttribute('onclick') || ''));
+        const fallbackSingle = !matched && agregarSpans.length === 1 ? agregarSpans[0] : null;
+        const target = matched || fallbackSingle;
+
+        if (target) {
+          target.click();
+          return {
+            clicked: true,
+            matchedByTrip: Boolean(matched),
+            agregarCount: agregarSpans.length,
+            onclickSamples: agregarSpans.map(span => normalize(span.getAttribute('onclick') || '')).slice(0, 6),
+          };
+        }
+
+        return {
+          clicked: false,
+          matchedByTrip: false,
+          agregarCount: agregarSpans.length,
+          onclickSamples: agregarSpans.map(span => normalize(span.getAttribute('onclick') || '')).slice(0, 6),
+        };
+      }, { currentTripId: tripId });
+
+      lastDiagnostics = `attempt=${attempt} clicked=${clickResult.clicked} matchedByTrip=${clickResult.matchedByTrip} agregarCount=${clickResult.agregarCount} onclickSamples=[${clickResult.onclickSamples.join(' | ')}]`;
+
+      if (!clickResult.clicked) {
+        logger.warn(`No se pudo clickear "Agregar" en intento ${attempt}. ${lastDiagnostics}`);
+        await this.page.waitForTimeout(1500);
+        continue;
+      }
+
+      logger.info(`✅ Clic en Agregar para tripId=${tripId} vía JS. ${lastDiagnostics}`);
+
+      const modalVisible = await this.page.waitForFunction(modalSelector => {
+        const modal = document.querySelector(modalSelector) as HTMLElement | null;
+        return Boolean(modal && (modal.classList.contains('show') || modal.style.display === 'block'));
+      }, this.selectors.modal, { timeout: 12000 }).then(() => true).catch(() => false);
+
+      if (modalVisible) {
+        logger.info('✅ Modal Última Milla abierto');
+        return;
+      }
+
+      logger.warn(`Se hizo clic en Agregar pero el modal no abrió en intento ${attempt}. Reintentando...`);
+      await this.page.waitForTimeout(1200);
     }
-    logger.info(`✅ Clic en Agregar para tripId=${tripId} vía JS`);
 
-    await this.page.waitForFunction(modalSelector => {
-      const modal = document.querySelector(modalSelector) as HTMLElement | null;
-      return Boolean(modal && (modal.classList.contains('show') || modal.style.display === 'block'));
-    }, this.selectors.modal, { timeout: 15000 });
-    logger.info('✅ Modal Última Milla abierto');
+    logger.warn(`⚠️ UI: no se logró abrir Horario GPS para tripId=${tripId}. ${lastDiagnostics}`);
+    await this.takeScreenshot('agregar-button-not-found-ultimamilla');
+    throw new Error(`❌ UI: No se encontró/abrió el botón "Agregar" para tripId ${tripId}. ${lastDiagnostics}`);
   }
 
   private async fillStatusModal(status: UltimaMillaTerminalStatus): Promise<void> {

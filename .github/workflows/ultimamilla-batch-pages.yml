@@ -102,7 +102,14 @@ jobs:
           RESULTS_DIR="${{ steps.meta.outputs.results_dir }}"
           if [[ -d "$RESULTS_DIR" ]]; then
             echo "Pruning oversized attachments in $RESULTS_DIR"
-            find "$RESULTS_DIR" -type f \( -name '*.zip' -o -name '*.webm' -o -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' \) -size +40M -print -delete || true
+            echo "Removing heavy binary attachments (.zip/.webm/.mp4)"
+            find "$RESULTS_DIR" -type f \( -name '*.zip' -o -name '*.webm' -o -name '*.mp4' \) -print -delete || true
+
+            echo "Removing any remaining oversized files >20MB"
+            find "$RESULTS_DIR" -type f -size +20M -print -delete || true
+
+            echo "Largest remaining files in results dir:"
+            find "$RESULTS_DIR" -type f -printf '%s %p\n' | sort -nr | head -n 20 || true
           fi
 
       - name: Install Allure CLI
