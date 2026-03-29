@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_transportes_500]       | ID: 626
+🏢 Cliente       : [Qa_cli_distribuidora_841]     | ID: 554
+🚚 Vehiculo      : [Qa_veh_BWYL79]                | ID: 100788 | Patente: Qa_veh_BWYL79 | Asociado: Qa_tra_transportes_500
+👤 Conductor     : [Qa_con_josé Qa_con_rodríguez Qa_con_rodríguez] | ID: 1284 | Asociado: Qa_tra_transportes_500
+🏭 Transportista : [Qa_tra_transportes_500]      
+🏢 Cliente       : [Qa_cli_distribuidora_841]    
+🔹 Contrato Venta: [285939]                      
+🔹 Contrato Costo: [789639]                      
+🎫 Viaje         : [251250]                       | Asociado: Qa_cli_distribuidora_841 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 287 | Cliente: Qa_cli_distribuidora_841
+====================================================================================================

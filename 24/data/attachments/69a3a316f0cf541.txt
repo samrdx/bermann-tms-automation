@@ -1,0 +1,15 @@
+2026-03-29 05:09:40 [INFO]: ✅ Transportista seeded cargado: Qa_tra_andes_364 (ID: 623)
+2026-03-29 05:09:40 [INFO]: [VehiculoFormPage] Navegando a la página de creación de Vehículo
+2026-03-29 05:09:42 [INFO]: 📝 Completando formulario para Transportista: Qa_tra_andes_364
+2026-03-29 05:09:42 [INFO]: [VehiculoFormPage] Completando patente: Qa_veh_ZNNE34
+2026-03-29 05:09:42 [INFO]: [VehiculoFormPage] Completando muestra: Qa_veh_ZNNE34
+2026-03-29 05:09:43 [INFO]: [VehiculoFormPage] Seleccionando transportista: Qa_tra_andes_364
+2026-03-29 05:09:45 [INFO]: [VehiculoFormPage] ✅ Transportista "Qa_tra_andes_364" seleccionado
+2026-03-29 05:09:45 [INFO]: [VehiculoFormPage] Seleccionando tipo de vehículo: TRACTO
+2026-03-29 05:09:46 [INFO]: [VehiculoFormPage] ✅ Tipo de vehículo "TRACTO" seleccionado
+2026-03-29 05:09:47 [INFO]: [VehiculoFormPage] Seleccionando capacidad: 1 a 12 TON
+2026-03-29 05:09:47 [INFO]: [VehiculoFormPage] ✅ Capacidad "1 a 12 TON" seleccionada
+2026-03-29 05:09:47 [INFO]: ✅ Capacidad seleccionada: 1 a 12 TON
+2026-03-29 05:09:47 [INFO]: [VehiculoFormPage] Haciendo clic en el botón guardar
+2026-03-29 05:09:51 [INFO]: ✅ Vehículo [Qa_veh_ZNNE34] guardado exitosamente
+2026-03-29 05:09:51 [INFO]: ✅ Vehículo seeded guardado: Qa_veh_ZNNE34

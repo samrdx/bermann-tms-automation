@@ -1,0 +1,15 @@
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏭 Transportista : [Qa_tra_rutas_877]             | ID: 625
+🏢 Cliente       : [Qa_cli_servicios_387]         | ID: 553
+🚚 Vehiculo      : [Qa_veh_RQ9290]                | ID: 100787 | Patente: Qa_veh_RQ9290 | Asociado: Qa_tra_rutas_877
+👤 Conductor     : [Qa_con_sofía Qa_con_silva Qa_con_silva] | ID: 1283 | Asociado: Qa_tra_rutas_877
+🏭 Transportista : [Qa_tra_rutas_877]            
+🏢 Cliente       : [Qa_cli_servicios_387]        
+🔹 Contrato Venta: [128963]                      
+🔹 Contrato Costo: [581214]                      
+🎫 Viaje         : [437217]                       | Asociado: Qa_cli_servicios_387 | Estado: PLANIFICADO
+💳 Prefactura    : [Creada]                       | ID: 286 | Cliente: Qa_cli_servicios_387
+====================================================================================================

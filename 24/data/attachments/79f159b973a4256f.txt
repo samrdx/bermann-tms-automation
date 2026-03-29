@@ -1,0 +1,26 @@
+2026-03-29 05:32:15 [INFO]: ENTORNO: DEMO 🎭
+2026-03-29 05:32:15 [INFO]: ✅ Cargado seededTransportista: Demo_tra_austral_509 (ID: 431)
+2026-03-29 05:32:15 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-29 05:32:18 [INFO]: 📝 Completando formulario de conductor para: Demo_con_ana Demo_con_díaz
+2026-03-29 05:32:18 [INFO]: [ConductorFormPage] Llenando usuario: wewfxr66
+2026-03-29 05:32:18 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-29 05:32:18 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_ana
+2026-03-29 05:32:18 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_díaz
+2026-03-29 05:32:18 [INFO]: [ConductorFormPage] Llenando documento: 73.896.692-9
+2026-03-29 05:32:18 [INFO]: [BasePage] Ingresando RUT con verificación: [73.896.692-9] en #conductores-documento
+2026-03-29 05:32:20 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 73.896.692-9
+2026-03-29 05:32:20 [INFO]: [ConductorFormPage] Llenando telefono: +56997585123
+2026-03-29 05:32:20 [INFO]: [ConductorFormPage] Llenando email: demo_con_anademo_con_diaz@hotmail.com
+2026-03-29 05:32:20 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-29 05:32:21 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-29 05:32:21 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_austral_509]
+2026-03-29 05:32:22 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-29 05:32:24 [INFO]: ✅ Conductor [Demo_con_ana Demo_con_díaz] guardado exitosamente
+2026-03-29 05:32:24 [INFO]: ✅ seededConductor guardado: Demo_con_ana Demo_con_díaz
+2026-03-29 05:32:24 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_ana Demo_con_díaz]   | Asociado: Demo_tra_austral_509
+====================================================================================================

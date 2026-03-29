@@ -1,0 +1,26 @@
+2026-03-29 05:37:32 [INFO]: ENTORNO: DEMO 🎭
+2026-03-29 05:37:32 [INFO]: ✅ Cargado seededTransportista: Demo_tra_express_311 (ID: 432)
+2026-03-29 05:37:33 [INFO]: [ConductorFormPage] Navegando a la página de creación de Conductor
+2026-03-29 05:37:36 [INFO]: 📝 Completando formulario de conductor para: Demo_con_carmen Demo_con_fernández
+2026-03-29 05:37:36 [INFO]: [ConductorFormPage] Llenando usuario: tcfjch35
+2026-03-29 05:37:36 [INFO]: [ConductorFormPage] Llenando clave
+2026-03-29 05:37:36 [INFO]: [ConductorFormPage] Llenando nombre: Demo_con_carmen
+2026-03-29 05:37:36 [INFO]: [ConductorFormPage] Llenando apellido: Demo_con_fernández
+2026-03-29 05:37:36 [INFO]: [ConductorFormPage] Llenando documento: 64.913.339-5
+2026-03-29 05:37:36 [INFO]: [BasePage] Ingresando RUT con verificación: [64.913.339-5] en #conductores-documento
+2026-03-29 05:37:38 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 64.913.339-5
+2026-03-29 05:37:38 [INFO]: [ConductorFormPage] Llenando telefono: +56925707426
+2026-03-29 05:37:38 [INFO]: [ConductorFormPage] Llenando email: demo_con_carmendemo_con_fernandez@hotmail.com
+2026-03-29 05:37:38 [INFO]: [ConductorFormPage] Seleccionando licencia: [A1]
+2026-03-29 05:37:39 [INFO]: [ConductorFormPage] Configurando vencimiento licencia: [2026-12-31]
+2026-03-29 05:37:39 [INFO]: [ConductorFormPage] Seleccionando transportista: [Demo_tra_express_311]
+2026-03-29 05:37:41 [INFO]: [ConductorFormPage] Haciendo clic en Guardar
+2026-03-29 05:37:43 [INFO]: ✅ Conductor [Demo_con_carmen Demo_con_fernández] guardado exitosamente
+2026-03-29 05:37:43 [INFO]: ✅ seededConductor guardado: Demo_con_carmen Demo_con_fernández
+2026-03-29 05:37:43 [INFO]: ✅ Conductor creado y guardado exitosamente
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: FIREFOX-DEMO
+====================================================================================================
+👤 Conductor     : [Demo_con_carmen Demo_con_fernández] | Asociado: Demo_tra_express_311
+====================================================================================================

@@ -1,0 +1,71 @@
+2026-03-29 05:11:36 [INFO]: ENTORNO: QA 🧪
+2026-03-29 05:11:36 [INFO]: ================================================================================
+2026-03-29 05:11:36 [INFO]: Iniciando Paso 6: Planificar Viaje
+2026-03-29 05:11:36 [INFO]: ================================================================================
+2026-03-29 05:11:36 [INFO]: Cargando datos de entidades existentes del JSON específico del worker...
+2026-03-29 05:11:36 [INFO]: ✅ Todos los prerrequisitos validados
+2026-03-29 05:11:36 [INFO]: Entidades cargadas:
+2026-03-29 05:11:36 [INFO]:    Cliente source: seededCliente ✅
+2026-03-29 05:11:36 [INFO]:    Cliente: Qa_cli_central_239
+2026-03-29 05:11:36 [INFO]: 
+2026-03-29 05:11:36 [WARN]: ⚠️ ⚠️ Setup config no encontrado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/setup-config-data-chromium-qa.json. Se usarán defaults.
+2026-03-29 05:11:36 [INFO]: Environment: QA
+2026-03-29 05:11:36 [INFO]: Configuration: {
+  "tipoOperacion": "defecto",
+  "tipoServicio": "defecto",
+  "tipoViaje": "Normal",
+  "unidadNegocio": "Defecto",
+  "codigoCarga": "Test 1",
+  "ruta": "( MINEDUC) BSF_PUDAHUEL-CXP_ANF",
+  "origenManual": "405_LA FARFANA_Pudahuel",
+  "destinoManual": "CXP ANTOFAGASTA"
+}
+2026-03-29 05:11:36 [INFO]: Fase 1: Navegar a Planificar Viajes
+2026-03-29 05:11:36 [INFO]: [PlanificarViajesPage] Navegando a la página de Planificar Viajes
+2026-03-29 05:11:41 [INFO]: Navegación exitosa
+2026-03-29 05:11:41 [INFO]: Fase 2: Completar formulario de viaje
+2026-03-29 05:11:41 [INFO]: [PlanificarViajesPage] Completando Nro Viaje: 44196
+2026-03-29 05:11:41 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Operacion: [defecto]
+2026-03-29 05:11:43 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Servicio: [defecto]
+2026-03-29 05:11:47 [INFO]: Seleccionando Cliente: Qa_cli_central spa_239
+2026-03-29 05:11:47 [INFO]: [PlanificarViajesPage] Seleccionando Cliente: [Qa_cli_central spa_239]
+2026-03-29 05:11:51 [INFO]: [PlanificarViajesPage] Seleccionando Tipo Viaje: [Normal]
+2026-03-29 05:11:55 [INFO]: [PlanificarViajesPage] Seleccionando Unidad Negocio: [Defecto]
+2026-03-29 05:11:56 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-29 05:11:59 [INFO]: [PlanificarViajesPage] Seleccionando Codigo Carga: [Test 1]
+2026-03-29 05:12:03 [INFO]: Intentando agregar Ruta: ( MINEDUC) BSF_PUDAHUEL-CXP_ANF...
+2026-03-29 05:12:03 [INFO]: [PlanificarViajesPage] Añadiendo ruta: ( MINEDUC) BSF_PUDAHUEL-CXP_ANF
+2026-03-29 05:12:07 [INFO]: [PlanificarViajesPage] Ruta [( MINEDUC) BSF_PUDAHUEL-CXP_ANF] encontrada en la fila 1
+2026-03-29 05:12:07 [INFO]: [PlanificarViajesPage] Esperando a que Origen/Destino se completen...
+2026-03-29 05:12:07 [INFO]: Formulario completado
+2026-03-29 05:12:07 [INFO]: Fase 3: Guardar Viaje
+2026-03-29 05:12:07 [INFO]: [PlanificarViajesPage] Haciendo clic en Guardar...
+2026-03-29 05:12:07 [INFO]: [PlanificarViajesPage] 🛡️ Fondo de modal detectado, eliminándolo forzosamente para desbloquear la UI...
+2026-03-29 05:12:10 [INFO]: URL post-guardado: https://moveontruckqa.bermanntms.cl/viajes/crear
+2026-03-29 05:12:10 [WARN]: ⚠️ ⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.
+2026-03-29 05:12:10 [INFO]: Boton guardar clickeado y navegacion completada
+2026-03-29 05:12:10 [INFO]: Fase 4: Verificación
+2026-03-29 05:12:10 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-03-29 05:12:16 [INFO]: Buscando en la grilla de Asignar usando: 44196
+2026-03-29 05:12:16 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 44196 en la grilla de Asignación...
+2026-03-29 05:12:20 [INFO]: [AsignarViajesPage] ✅ Viaje 44196 encontrado por coincidencia de texto en la fila 1
+2026-03-29 05:12:20 [INFO]: ✅ Viaje encontrado en /viajes/asignar usando búsqueda: 44196
+2026-03-29 05:12:20 [INFO]: Actualizando JSON del worker con la información del viaje...
+2026-03-29 05:12:20 [INFO]: Saved viaje.nroViaje: 44196
+2026-03-29 05:12:20 [INFO]: ================================================================================
+2026-03-29 05:12:20 [INFO]: PASO 6: ¡PLANIFICAR VIAJE COMPLETADO!
+2026-03-29 05:12:20 [INFO]: ================================================================================
+2026-03-29 05:12:20 [INFO]: Tiempo de ejecución: 44.06s
+2026-03-29 05:12:20 [INFO]: 
+2026-03-29 05:12:20 [INFO]: Detalles del viaje:
+2026-03-29 05:12:20 [INFO]:    Nro Viaje: 44196
+2026-03-29 05:12:20 [INFO]:    Cliente: Qa_cli_central spa_239
+2026-03-29 05:12:20 [INFO]:    Ruta: ( MINEDUC) BSF_PUDAHUEL-CXP_ANF
+2026-03-29 05:12:20 [INFO]:    Status: PLANIFICADO
+2026-03-29 05:12:20 [INFO]: ================================================================================
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🎫 Viaje         : [44196]                        | ID: N/A | Asociado: Qa_cli_central spa_239 | Estado: PLANIFICADO
+====================================================================================================

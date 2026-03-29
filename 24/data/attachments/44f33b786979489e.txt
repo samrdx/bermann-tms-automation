@@ -1,0 +1,34 @@
+2026-03-29 05:31:47 [INFO]: FASE 1: Navegar hasta creación de transportista
+2026-03-29 05:31:47 [INFO]: [TransportistaFormPage] Navegando a la página de creación de Transportista
+2026-03-29 05:31:49 [INFO]: ✅ Navegación exitosa
+2026-03-29 05:31:49 [INFO]: 📝 Fase 2: Completando formulario de transportista
+2026-03-29 05:31:49 [INFO]: [TransportistaFormPage] Completando nombre: Demo_tra_express_311
+2026-03-29 05:31:49 [INFO]: [TransportistaFormPage] Completando razón social: Demo_tra_express_311
+2026-03-29 05:31:50 [INFO]: [TransportistaFormPage] Completando documento (RUT): 20767245-9
+2026-03-29 05:31:50 [INFO]: [BasePage] Ingresando RUT con verificación: [20767245-9] en #transportistas-documento
+2026-03-29 05:31:51 [INFO]: [BasePage] ✅ RUT Ingresado y Verificado: 20.767.245-9
+2026-03-29 05:31:51 [INFO]: [TransportistaFormPage] Seleccionando tipo de transportista: Terceros
+2026-03-29 05:31:52 [INFO]: [TransportistaFormPage] ✅ Tipo de transportista "Terceros" seleccionado
+2026-03-29 05:31:52 [INFO]: [TransportistaFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-29 05:31:52 [INFO]: [TransportistaFormPage] 📍 Intento de ubicación 1/5
+2026-03-29 05:31:53 [INFO]: [TransportistaFormPage] ✅ región aleatorio seleccionado: Bío Bío
+2026-03-29 05:31:54 [INFO]: [TransportistaFormPage] ✅ ciudad aleatorio seleccionado: Biobío
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] ✅ comuna aleatorio seleccionado: San Rosendo
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] ✅ Ubicación seleccionada: Bío Bío → Biobío → San Rosendo
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] Completando calle: Calle Huérfanos
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] Completando altura: 862
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] Seleccionando forma de pago: Contado
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] ✅ Forma de pago "Contado" seleccionada
+2026-03-29 05:31:56 [INFO]: ✅ Formulario completado
+2026-03-29 05:31:56 [INFO]: 💾 Fase 3: Guardar transportista
+2026-03-29 05:31:56 [INFO]: [TransportistaFormPage] Haciendo clic en el botón guardar
+2026-03-29 05:32:02 [INFO]: ✅ Guardado iniciado
+2026-03-29 05:32:02 [INFO]: ✅ Fase 4: Verificación y guardado de datos
+2026-03-29 05:32:04 [INFO]: 📍 URL posterior al guardado para extracción de ID: https://demo.bermanntms.cl/transportistas/index
+2026-03-29 05:32:04 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-29 05:32:04 [INFO]: 🔍 Buscando por nombre: Demo_tra_express_311
+2026-03-29 05:32:04 [INFO]: 🔎 Se hizo clic en el botón Buscar (rol link)
+2026-03-29 05:32:06 [INFO]: ✅ ID rescatado via busqueda en grilla (editar link): 432
+2026-03-29 05:32:06 [INFO]: ✅ ID del Transportista [Demo_tra_express_311] extraído exitosamente: 432
+2026-03-29 05:32:06 [INFO]: ✅ Datos del transportista guardados en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-23701956056.json
+2026-03-29 05:32:06 [INFO]: ✅ Prueba exitosa

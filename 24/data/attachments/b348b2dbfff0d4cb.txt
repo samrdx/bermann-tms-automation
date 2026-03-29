@@ -1,0 +1,44 @@
+2026-03-29 05:07:39 [INFO]: ENTORNO: QA 🧪
+2026-03-29 05:07:39 [INFO]: 🧭 FASE 1: Navegar hasta creación de cliente
+2026-03-29 05:07:39 [INFO]: [ClienteFormPage] Navegando a la página de creación de Cliente
+2026-03-29 05:07:42 [INFO]: ✅ Navegación correcta
+2026-03-29 05:07:42 [INFO]: 📝 FASE 2: Completar formulario
+2026-03-29 05:07:42 [INFO]: [ClienteFormPage] Completando nombre (razón social): Qa_cli_central_239
+2026-03-29 05:07:42 [INFO]: [ClienteFormPage] Completando RUT: 82791018-K
+2026-03-29 05:07:42 [INFO]: [BasePage] Ingresando RUT con verificación: [82791018-K] en #clientes-rut
+2026-03-29 05:07:44 [WARN]: [BasePage] ⚠️ ¡Discrepancia de RUT! Esperado: 82791018K, Obtenido: 82791018. Usando JS para forzar valor...
+2026-03-29 05:07:44 [WARN]: [BasePage] ⚠️ Probando k minúscula para el dígito verificador...
+2026-03-29 05:07:45 [WARN]: [BasePage] ⚠️ ⚠️ El cuerpo del RUT coincide pero el DV podría faltar - continuando prueba
+2026-03-29 05:07:45 [INFO]: [ClienteFormPage] Completando nombre fantasía: Qa_cli_central spa_239
+2026-03-29 05:07:45 [INFO]: [ClienteFormPage] Seleccionando tipo de cliente: Distribución
+2026-03-29 05:07:45 [INFO]: [ClienteFormPage] ✅ Tipo de cliente "Distribución" seleccionado
+2026-03-29 05:07:46 [INFO]: [ClienteFormPage] 🌍 Seleccionando ubicación aleatoria (Región → Ciudad → Comuna), máx 5 intentos
+2026-03-29 05:07:46 [INFO]: [ClienteFormPage] 📍 Intento de ubicación 1/5
+2026-03-29 05:07:46 [INFO]: [ClienteFormPage] ✅ región aleatorio seleccionado: Region de Atacama
+2026-03-29 05:07:48 [INFO]: [ClienteFormPage] ✅ ciudad aleatorio seleccionado: Huasco
+2026-03-29 05:07:49 [INFO]: [ClienteFormPage] ✅ comuna aleatorio seleccionado: Alto del Carmen
+2026-03-29 05:07:49 [INFO]: [ClienteFormPage] ✅ Ubicación seleccionada: Region de Atacama → Huasco → Alto del Carmen
+2026-03-29 05:07:49 [INFO]: [ClienteFormPage] Completando calle: Av. Libertador Bernardo O'Higgins
+2026-03-29 05:07:49 [INFO]: [ClienteFormPage] Completando altura: 337
+2026-03-29 05:07:49 [INFO]: [ClienteFormPage] Seleccionando todos los Polígonos
+2026-03-29 05:07:49 [WARN]: [ClienteFormPage] ⚠️ ⚠️ Dropdown de Polígonos no visible — saltando
+2026-03-29 05:07:49 [INFO]: ✅ Formulario Completado
+2026-03-29 05:07:49 [INFO]: 💾 FASE 3: Guardar Cliente
+2026-03-29 05:07:49 [INFO]: [ClienteFormPage] Haciendo clic en el botón guardar
+2026-03-29 05:07:54 [INFO]: ✅ Guardar iniciado
+2026-03-29 05:07:54 [INFO]: ✅ FASE 4: Verificar y guardar datos
+2026-03-29 05:07:56 [INFO]: 📍 URL Post-guardado para extracción de ID: https://moveontruckqa.bermanntms.cl/clientes/index
+2026-03-29 05:07:56 [INFO]: ⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...
+2026-03-29 05:07:56 [INFO]: 🔍 Buscando por RUT: 82791018-K (limpio: 82791018K)
+2026-03-29 05:07:57 [WARN]: ⚠️ ⚠️ El campo de filtro RUT no es visible, intentando búsqueda global...
+2026-03-29 05:07:59 [WARN]: ⚠️ ⚠️ Falló la búsqueda por RUT, recurriendo a búsqueda por nombre...
+2026-03-29 05:07:59 [INFO]: ✅ ID Rescatado vía búsqueda por nombre (enlace): 551
+2026-03-29 05:07:59 [INFO]: ✅ Cliente [Qa_cli_central_239] ID: 551 identificado exitosamente
+2026-03-29 05:07:59 [INFO]: ✅ Datos del cliente guardado en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-23701956056.json
+2026-03-29 05:07:59 [INFO]: ✅ Prueba exitosa
+
+====================================================================================================
+📊 RESUMEN DE ENTIDADES CREADAS | NAVEGADOR: CHROMIUM-QA
+====================================================================================================
+🏢 Cliente       : [Qa_cli_central_239]           | ID: 551
+====================================================================================================
