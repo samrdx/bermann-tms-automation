@@ -1,0 +1,16 @@
+{
+  "transportista": {
+    "nombre": "Demo_tra_horizonte_898",
+    "id": ""
+  },
+  "cliente": {
+    "nombre": "Demo_cli_industrial spa_155",
+    "id": "N/A"
+  },
+  "vehiculo": {
+    "patente": "Demo_veh_TO3576"
+  },
+  "conductor": {
+    "nombre": "Demo_con_josé Demo_con_rojas"
+  }
+}

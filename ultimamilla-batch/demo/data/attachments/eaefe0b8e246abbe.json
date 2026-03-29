@@ -1,0 +1,38 @@
+{
+  "cliente": "Demo_cli_industrial_155",
+  "batchSize": 8,
+  "pedidos": [
+    {
+      "codigoPedido": "518740",
+      "direccionBusqueda": "Argomedo 344, Santiago, Chile"
+    },
+    {
+      "codigoPedido": "547360",
+      "direccionBusqueda": "Av. Providencia 1208, Providencia, Chile"
+    },
+    {
+      "codigoPedido": "831822",
+      "direccionBusqueda": "Apoquindo 4500, Las Condes, Chile"
+    },
+    {
+      "codigoPedido": "390470",
+      "direccionBusqueda": "Santa Rosa 1240, Santiago, Chile"
+    },
+    {
+      "codigoPedido": "804671",
+      "direccionBusqueda": "Avenida Grecia 2000, Ñuñoa, Chile"
+    },
+    {
+      "codigoPedido": "840055",
+      "direccionBusqueda": "Neptuno 1314B, 9080679 Cerro Navia, Región Metropolitana"
+    },
+    {
+      "codigoPedido": "272248",
+      "direccionBusqueda": "Av. 5 de Abril 5940, 9160000 Estación Central, Región Metropolitana"
+    },
+    {
+      "codigoPedido": "947193",
+      "direccionBusqueda": "Placer 698, Santiago, Región Metropolitana"
+    }
+  ]
+}

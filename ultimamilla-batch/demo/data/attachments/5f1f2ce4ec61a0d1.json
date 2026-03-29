@@ -1,0 +1,41 @@
+{
+  "cliente": "Demo_cli_industrial_155",
+  "requestedBatchSize": 8,
+  "createdOrders": [
+    "518740",
+    "547360",
+    "831822",
+    "390470",
+    "804671",
+    "840055",
+    "272248",
+    "947193"
+  ],
+  "assignedRowIds": [
+    "236",
+    "237",
+    "238",
+    "239",
+    "240",
+    "241",
+    "242",
+    "243"
+  ],
+  "selectedCount": 8,
+  "tripId": "6835",
+  "vehiculo": "Demo_veh_GA8622 - Demo_veh_GA8622",
+  "transportista": "Demo_tra_andes_100",
+  "conductor": "100447:Demo_con_josé Demo_con_araya",
+  "estadosAplicados": [
+    "518740:No Entregado",
+    "547360:Rechazado",
+    "831822:No Entregado",
+    "390470:Entregado",
+    "804671:Rechazado",
+    "840055:Rechazado",
+    "272248:Entregado",
+    "947193:Rechazado"
+  ],
+  "refreshDetected": "true",
+  "gridMutated": "true"
+}
