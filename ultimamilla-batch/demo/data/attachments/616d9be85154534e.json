@@ -1,0 +1,16 @@
+{
+  "transportista": {
+    "nombre": "Demo_tra_austral_666",
+    "id": ""
+  },
+  "cliente": {
+    "nombre": "Demo_cli_industrial spa_556",
+    "id": "N/A"
+  },
+  "vehiculo": {
+    "patente": "Demo_veh_QN4106"
+  },
+  "conductor": {
+    "nombre": "Demo_con_rosa Demo_con_martínez"
+  }
+}
