@@ -1,6 +1,28 @@
 import path from 'path';
 import fs from 'fs';
-import { TestInfo } from '@playwright/test';
+import type { TestInfo } from '@playwright/test';
+
+export type LegacyOperationalDataSource = 'entities' | 'base';
+export type LegacyOperationalDataSourceInput = LegacyOperationalDataSource | 'base-entities';
+
+export interface LegacyOperationalDataLookupContext {
+    browserName: string;
+    env: string;
+    lookupKey: string;
+    requestedSource: string;
+    normalizedSource: LegacyOperationalDataSource;
+    runId: string | null;
+    runIdSuffix: string;
+    seedCommand: string;
+}
+
+export interface LegacyOperationalDataCandidate extends LegacyOperationalDataLookupContext {
+    filename: string;
+    isPrimary: boolean;
+    path: string;
+    priority: number;
+    source: LegacyOperationalDataSource;
+}
 
 /**
  * DataPathHelper - Browser-Isolated Data Path Management
@@ -28,16 +50,21 @@ export class DataPathHelper {
         return (process.env.ENV || 'QA').toLowerCase();
     }
 
-    private static getLegacyRunIdSuffix(): string {
+    private static getLegacyRunId(): string | null {
         const rawRunId = (process.env.LEGACY_RUN_ID || '').trim();
-        if (!rawRunId) return '';
+        if (!rawRunId) return null;
 
         const sanitized = rawRunId
             .toLowerCase()
             .replace(/[^a-z0-9_-]+/g, '-')
             .replace(/^-+|-+$/g, '');
 
-        return sanitized ? `-${sanitized}` : '';
+        return sanitized || null;
+    }
+
+    private static getLegacyRunIdSuffix(): string {
+        const runId = this.getLegacyRunId();
+        return runId ? `-${runId}` : '';
     }
 
     private static buildDataPath(filename: string): string {
@@ -125,11 +152,72 @@ export class DataPathHelper {
      * Optional LEGACY_RUN_ID is honored by both sources.
      */
     static getLegacyOperationalDataPath(testInfo: TestInfo): string {
-        const source = (process.env.LEGACY_DATA_SOURCE || 'entities').toLowerCase();
-        if (source === 'base' || source === 'base-entities') {
+        const source = this.normalizeLegacyDataSource();
+        if (source === 'base') {
             return this.getLegacyBaseDataPath(testInfo);
         }
         return this.getLegacyEntityDataPath(testInfo);
+    }
+
+    static normalizeLegacyDataSource(source = process.env.LEGACY_DATA_SOURCE): LegacyOperationalDataSource {
+        const normalizedSource = (source || 'entities').trim().toLowerCase();
+        return normalizedSource === 'base' || normalizedSource === 'base-entities'
+            ? 'base'
+            : 'entities';
+    }
+
+    static getLegacyOperationalSeedCommand(source = process.env.LEGACY_DATA_SOURCE): string {
+        const envPrefix = this.getEnvName() === 'demo' ? 'demo' : 'qa';
+        return this.normalizeLegacyDataSource(source) === 'base'
+            ? `npm run ${envPrefix}:seed:legacy`
+            : `npm run ${envPrefix}:regression:entities`;
+    }
+
+    static getLegacyOperationalDataLookupContext(
+        testInfo: TestInfo,
+        source = process.env.LEGACY_DATA_SOURCE
+    ): LegacyOperationalDataLookupContext {
+        const browserName = this.getBrowserName(testInfo);
+        const env = this.getEnvName();
+        const runId = this.getLegacyRunId();
+        const runIdSuffix = runId ? `-${runId}` : '';
+        const requestedSource = (source || 'entities').trim().toLowerCase() || 'entities';
+
+        return {
+            browserName,
+            env,
+            lookupKey: `${browserName}:${env}:${runId || 'default'}`,
+            normalizedSource: this.normalizeLegacyDataSource(source),
+            requestedSource,
+            runId,
+            runIdSuffix,
+            seedCommand: this.getLegacyOperationalSeedCommand(source)
+        };
+    }
+
+    static getLegacyOperationalDataCandidates(
+        testInfo: TestInfo,
+        source = process.env.LEGACY_DATA_SOURCE
+    ): LegacyOperationalDataCandidate[] {
+        const context = this.getLegacyOperationalDataLookupContext(testInfo, source);
+        const orderedSources: LegacyOperationalDataSource[] = context.normalizedSource === 'base'
+            ? ['base', 'entities']
+            : ['entities', 'base'];
+
+        return orderedSources.map((candidateSource, index) => {
+            const filename = candidateSource === 'base'
+                ? `legacy-base-entities-data-${context.browserName}-${context.env}${context.runIdSuffix}.json`
+                : `legacy-entities-data-${context.browserName}-${context.env}${context.runIdSuffix}.json`;
+
+            return {
+                ...context,
+                filename,
+                isPrimary: index === 0,
+                path: this.buildDataPath(filename),
+                priority: index,
+                source: candidateSource
+            };
+        });
     }
 
     /**
@@ -141,14 +229,7 @@ export class DataPathHelper {
      * generated for the current browser/environment.
      */
     static getLegacyOperationalDataCandidatePaths(testInfo: TestInfo): string[] {
-        const preferredPath = this.getLegacyOperationalDataPath(testInfo);
-        const entityPath = this.getLegacyEntityDataPath(testInfo);
-        const basePath = this.getLegacyBaseDataPath(testInfo);
-
-        return Array.from(new Set([
-            preferredPath,
-            preferredPath === basePath ? entityPath : basePath,
-        ]));
+        return this.getLegacyOperationalDataCandidates(testInfo).map((candidate) => candidate.path);
     }
 
     /**

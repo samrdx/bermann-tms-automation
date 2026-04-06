@@ -1,8 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
-import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
-import fs from 'fs';
+import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
@@ -10,8 +9,8 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Contract Creation - Tipo Costo (Seeded Transportista)
  *
  * Prerequisites:
- *   LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
- *   LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
+ *   LEGACY_DATA_SOURCE=entities: correr la cadena de entidades (`npm run qa:regression:entities` / `npm run demo:regression:entities`)
+ *   LEGACY_DATA_SOURCE=base: correr el seed base (`npm run qa:seed:legacy` / `npm run demo:seed:legacy`)
  *
  * Anti-false-positive strategy:
  *   1. Fill header → save → assert redirect to /contrato/editar/ID
@@ -33,15 +32,19 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
     // ---------------------------------------------------------------
     // PHASE 1: Load seeded data
     // ---------------------------------------------------------------
-    const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-    if (!fs.existsSync(dataPath)) {
-      throw new Error(`Archivo con data no encontrado: ${dataPath}. Asegurate de que transportistas-crear.test.ts se haya ejecutado primero.`);
-    }
-    const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+      logger,
+      purpose: 'contrato tipo costo'
+    });
+    const dataPath = candidate.path;
+    logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
 
     const transportista = operationalData.seededTransportista || operationalData.transportista;
     if (!transportista?.nombre) {
       throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly`);
+    }
+    if (!operationalData.seededTransportista) {
+      logger.warn(`⚠️ Usando transportista fallback desde key legacy 'transportista' en ${dataPath}`);
     }
     const transportistaNombre = transportista.nombre as string;
     logger.info(`📦 Transportista: "${transportistaNombre}" (ID: ${transportista.id})`);
@@ -191,4 +194,3 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
     logger.info('='.repeat(80));
   });
 });
-

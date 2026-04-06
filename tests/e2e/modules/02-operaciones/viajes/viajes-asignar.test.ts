@@ -1,7 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
@@ -10,9 +10,10 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Step 6.5: Asignar Viaje (Legacy - uses seeded data from JSON)
  *
  * Prerequisites (run in order):
- *   1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
- *      o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
- *   2. Correr viajes-planificar para poblar viaje.nroViaje
+ *   1. LEGACY_DATA_SOURCE=entities: correr `npm run qa:regression:entities` / `npm run demo:regression:entities`
+ *      o LEGACY_DATA_SOURCE=base: correr `npm run qa:seed:legacy` / `npm run demo:seed:legacy`
+ *   2. Crear contratos previos con los wrappers smoke/regression correspondientes al source elegido
+ *   3. Correr `qa|demo:smoke:trip:planificar` (base) o `qa|demo:regression:trip:planificar` (entities)
  *
  * Flow:
  *   1. Navigate to /viajes/asignar
@@ -40,16 +41,12 @@ test.describe('[V02] Viajes - Asignar', () => {
         // PHASE 1: Load JSON Data
         // =================================================================
         logger.info('Fase 1: Cargando datos del JSON...');
-        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-
-        if (!fs.existsSync(dataPath)) {
-            throw new Error(
-                `Archivo de datos no encontrado!\nExpected: ${dataPath}\n` +
-                'Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first'
-            );
-        }
-
-        const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+            logger,
+            purpose: 'asignar viaje'
+        });
+        const dataPath = candidate.path;
+        logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
 
         const seededTransportista = operationalData.seededTransportista;
         if (!seededTransportista?.nombre) {

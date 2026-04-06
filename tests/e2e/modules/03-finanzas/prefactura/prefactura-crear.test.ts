@@ -1,7 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { PrefacturaPage } from '../../../../../src/modules/finanzas/PrefacturaPage.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 
@@ -9,9 +9,9 @@ import { allure } from 'allure-playwright';
  * Finanzas - Prefactura (Legacy)
  * 
  * Prerequisites:
- *   1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
- *      o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
- *   2. Correr viajes-planificar, viajes-asignar y viajes-monitoreo
+ *   1. LEGACY_DATA_SOURCE=entities: correr `npm run qa:regression:entities` / `npm run demo:regression:entities`
+ *      o LEGACY_DATA_SOURCE=base: correr `npm run qa:seed:legacy` / `npm run demo:seed:legacy`
+ *   2. Correr la cadena previa del mismo source: contratos + `trip:planificar` + `trip:asignar` + `trip:finalizar`
  */
 test.describe('[V04] Finanzas - Prefacturar Viaje (Legacy)', () => {
     test.setTimeout(120000);
@@ -29,23 +29,25 @@ test.describe('[V04] Finanzas - Prefacturar Viaje (Legacy)', () => {
 
         // PHASE 1: Load Data
         logger.info('Fase 1: Cargando datos del JSON del trabajador...');
-        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-
-        if (!fs.existsSync(dataPath)) {
-            throw new Error(`Archivo de datos no encontrado en ${dataPath}. Por favor, ejecute los prerrequisitos.`);
-        }
-
-        const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-        const nroViaje = operationalData.viaje?.nroViaje;
+        const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+            logger,
+            purpose: 'prefacturar viaje'
+        });
+        const dataPath = candidate.path;
+        logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
+        const viaje = operationalData.viaje as Record<string, any> | undefined;
+        const seededCliente = operationalData.seededCliente as Record<string, any> | undefined;
+        const cliente = operationalData.cliente as Record<string, any> | undefined;
+        const nroViaje = viaje?.nroViaje;
         // Prioritize seeded client from JSON to handle Qa_/Demo_ prefixes
-        const nombreCliente = operationalData.viaje?.cliente || operationalData.seededCliente?.nombre || operationalData.cliente?.nombre;
+        const nombreCliente = viaje?.cliente || seededCliente?.nombre || cliente?.nombre;
 
         if (!nroViaje || !nombreCliente) {
             throw new Error('❌ Missing: viaje.nroViaje o cliente.nombre in JSON. Ensure previous steps ran successfully.');
         }
         
-        if (operationalData.viaje?.status !== 'FINALIZADO') {
-            logger.warn(`El viaje ${nroViaje} no figura como FINALIZADO en el JSON. Status actual: ${operationalData.viaje?.status}. Intentando de todas formas...`);
+        if (viaje?.status !== 'FINALIZADO') {
+            logger.warn(`El viaje ${nroViaje} no figura como FINALIZADO en el JSON. Status actual: ${viaje?.status}. Intentando de todas formas...`);
         } else {
             logger.info(`✅ Viaje finalizado cargado: ${nroViaje} para cliente ${nombreCliente}`);
         }
@@ -82,7 +84,10 @@ test.describe('[V04] Finanzas - Prefacturar Viaje (Legacy)', () => {
         });
 
         // PHASE 5: Update JSON
-        operationalData.viaje.prefacturado = true;
+        operationalData.viaje = {
+            ...(viaje || {}),
+            prefacturado: true
+        };
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
         logger.info('✅ JSON updated: viaje.prefacturado = true');
         await allure.parameter('Estado Prefactura', 'CREADA');

@@ -1,7 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
-import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
 import { config } from '../../../../../src/config/environment.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
@@ -11,8 +11,8 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Contract Creation - Tipo Venta (Uses Seeded Cliente)
  *
  * Prerequisites:
- * - LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
- * - LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
+ * - LEGACY_DATA_SOURCE=entities: correr la cadena de entidades (`npm run qa:regression:entities` / `npm run demo:regression:entities`)
+ * - LEGACY_DATA_SOURCE=base: correr el seed base (`npm run qa:seed:legacy` / `npm run demo:seed:legacy`)
  *
  * This test:
  * - Loads seededCliente from worker-specific JSON
@@ -38,9 +38,12 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         // PHASE 1: Load Data
         // =================================================================
         logger.info('📋 Fase 1: Cargando datos del cliente sembrado...');
-        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-        if (!fs.existsSync(dataPath)) throw new Error(`Data file not found: ${dataPath}`);
-        const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+            logger,
+            purpose: 'contrato tipo venta'
+        });
+        const dataPath = candidate.path;
+        logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
 
         const cliente = operationalData.seededCliente || operationalData.cliente;
         if (!cliente) {
@@ -48,6 +51,9 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
                 `'seededCliente' or 'cliente' not found in ${dataPath}.\n` +
                 `Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly.`
             );
+        }
+        if (!operationalData.seededCliente) {
+            logger.warn(`⚠️ Usando cliente fallback desde key legacy 'cliente' en ${dataPath}`);
         }
         const clienteNombre = cliente.nombreFantasia || cliente.nombre;
         logger.info(`📦 Usando cliente: "${clienteNombre}" (ID: ${cliente.id})`);
@@ -181,4 +187,3 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         logger.info('='.repeat(80));
     });
 });
-

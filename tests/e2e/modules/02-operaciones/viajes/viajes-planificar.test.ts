@@ -1,6 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
@@ -9,10 +10,10 @@ import { entityTracker } from '../../../../../src/utils/entityTracker.js';
  * Step 6: Planificar Viaje (Trip Planning)
  *
  * Prerequisites:
- * 1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
- *    o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
- * 2. Run contrato-crear.test.ts (Step 5) to create Transportista Contract
- * 3. Run contrato2cliente-crear.test.ts (Step 5.5) to create Cliente Contract
+ * 1. LEGACY_DATA_SOURCE=entities: correr `npm run qa:regression:entities` / `npm run demo:regression:entities`
+ *    o LEGACY_DATA_SOURCE=base: correr `npm run qa:seed:legacy` / `npm run demo:seed:legacy`
+ * 2. Crear contrato transportista con `qa|demo:smoke:contract:transportista` (base) o `qa|demo:regression:contract:transportista` (entities)
+ * 3. Crear contrato cliente con `qa|demo:smoke:contract:cliente` (base) o `qa|demo:regression:contract:cliente` (entities)
  *
  * This test:
  * - Loads existing entity data from the selected legacy data source
@@ -42,17 +43,12 @@ test.describe('[V01] Viajes - Planificar', () => {
     // STEP 1: Load JSON Data
     // =================================================================
     logger.info('Cargando datos de entidades existentes del JSON específico del worker...');
-    const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-
-    if (!fs.existsSync(dataPath)) {
-      throw new Error(
-        'Archivo de datos específico del worker no encontrado!\n' +
-        `Expected: ${dataPath}\n` +
-        'Please run seed flow first and set LEGACY_DATA_SOURCE=base or LEGACY_DATA_SOURCE=entities.'
-      );
-    }
-
-    const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+      logger,
+      purpose: 'planificar viaje'
+    });
+    const dataPath = candidate.path;
+    logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
 
     // Prefer seededCliente (set by cliente-crear.test.ts OR base-entities.setup.ts).
     // Fall back to legacy `cliente` key for backward compatibility.
@@ -312,4 +308,3 @@ test.describe('[V01] Viajes - Planificar', () => {
     logger.info('='.repeat(80));
   });
 });
-

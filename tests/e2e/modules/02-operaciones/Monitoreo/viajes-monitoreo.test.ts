@@ -1,7 +1,7 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { MonitoreoPage } from '../../../../../src/modules/monitoring/pages/MonitoreoPage.js';
 import { logger } from '../../../../../src/utils/logger.js';
-import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 
@@ -9,9 +9,9 @@ import { allure } from 'allure-playwright';
  * Operaciones - Monitoreo - Finalizar Viaje (Legacy)
  * 
  * Prerequisites:
- *   1. LEGACY_DATA_SOURCE=entities: correr entidades (transportista/cliente/conductor/vehiculo)
- *      o LEGACY_DATA_SOURCE=base: correr base-entities.setup.ts
- *   2. Correr viajes-planificar y viajes-asignar
+ *   1. LEGACY_DATA_SOURCE=entities: correr `npm run qa:regression:entities` / `npm run demo:regression:entities`
+ *      o LEGACY_DATA_SOURCE=base: correr `npm run qa:seed:legacy` / `npm run demo:seed:legacy`
+ *   2. Correr la cadena previa con los wrappers del mismo source: contratos + `trip:planificar` + `trip:asignar`
  */
 test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
     test.setTimeout(120000);
@@ -29,13 +29,12 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
 
         // PHASE 1: Load Data
         logger.info('Fase 1: Cargando datos del JSON del trabajador...');
-        const dataPath = DataPathHelper.getLegacyOperationalDataPath(testInfo);
-
-        if (!fs.existsSync(dataPath)) {
-            throw new Error(`Archivo de datos no encontrado en ${dataPath}. Por favor, ejecute los prerrequisitos.`);
-        }
-
-        const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+            logger,
+            purpose: 'finalizar viaje en monitoreo'
+        });
+        const dataPath = candidate.path;
+        logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
         const nroViaje = operationalData.viaje?.nroViaje;
 
         if (!nroViaje) {
