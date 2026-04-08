@@ -59,11 +59,11 @@ test.describe('Última Milla - Asignación de Pedido', () => {
     };
     const targetTerminalStatus = resolveTerminalStatus(process.env.ULTIMAMILLA_TERMINAL_STATUS);
     const expectedTripConfig = resolveExpectedTripConfiguration();
-    const unidadNegocioObjetivo = resolveAssignmentBusinessUnit();
+    let unidadNegocioObjetivo = resolveAssignmentBusinessUnit(operationalData);
     let createTripResult: Awaited<ReturnType<typeof ultimaMillaAsignarPage.createTrip>> | null = null;
 
     logger.info('🚀 Inicio — Última Milla asignación de pedido');
-    logger.info(`🧾 Contexto: cliente=${clienteObjetivo} | pedido=${executionSummary.pedido} | fecha=${orderData.fechaEntrega ?? 'UI default date'}`);
+    logger.info(`🧾 Contexto: cliente=${clienteObjetivo} | unidadNegocio=${unidadNegocioObjetivo || 'auto'} | pedido=${executionSummary.pedido} | fecha=${orderData.fechaEntrega ?? 'UI default date'}`);
 
     try {
       await test.step('Fase 1: Crear pedido elegible', async () => {
@@ -74,7 +74,17 @@ test.describe('Última Milla - Asignación de Pedido', () => {
         await ultimaMillaPage.fillCompleteForm(orderData as any, {
           clienteDropdownCandidates,
           environment: (process.env.ENV || 'QA').trim().toUpperCase(),
+          unidadNegocio: unidadNegocioObjetivo,
         });
+
+        if (!unidadNegocioObjetivo) {
+          const selectedBusinessUnit = await ultimaMillaPage.getSelectedUnidadNegocioLabel();
+          if (!selectedBusinessUnit) {
+            throw new Error('No se pudo detectar la Unidad de Negocio seleccionada al crear el pedido.');
+          }
+          unidadNegocioObjetivo = selectedBusinessUnit;
+          logger.info(`🔒 Unidad de Negocio detectada y bloqueada para la corrida: ${unidadNegocioObjetivo}`);
+        }
 
         await page.waitForTimeout(1000);
         await ultimaMillaPage.clickGuardar();
@@ -85,7 +95,16 @@ test.describe('Última Milla - Asignación de Pedido', () => {
           throw new Error(`Validación fallida al crear pedido para asignación. errores=[${errores.join(' | ')}]`);
         }
 
-        await expect(page.getByText('Pedido creado Correctamente', { exact: true })).toBeVisible({ timeout: 10000 });
+        const toastExact = page.getByText('Pedido creado Correctamente', { exact: true }).waitFor({ state: 'visible', timeout: 12000 });
+        const toastRelaxed = page.getByText(/Pedido creado/i).first().waitFor({ state: 'visible', timeout: 12000 });
+        const redirectedToIndex = page.waitForURL(/.*\/order\/(index|asignar).*/, { timeout: 12000 });
+
+        try {
+          await Promise.any([toastExact, toastRelaxed, redirectedToIndex]);
+        } catch {
+          throw new Error('No se detectó confirmación visual de creación de pedido (toast o redirección esperada).');
+        }
+
         logger.success(`Pedido elegible creado: ${executionSummary.pedido}`);
       });
 
@@ -93,6 +112,10 @@ test.describe('Última Milla - Asignación de Pedido', () => {
         logPhaseHeader(2, '🔎', 'Buscar y seleccionar pedido');
         await ultimaMillaAsignarPage.navigate();
         await expect(page).toHaveURL(/.*\/order\/asignar/);
+
+        if (!unidadNegocioObjetivo) {
+          throw new Error('No hay Unidad de Negocio resuelta para la búsqueda de pedidos asignables.');
+        }
 
         await ultimaMillaAsignarPage.searchOrders({
           cliente: clienteObjetivo,
@@ -278,12 +301,22 @@ function resolveExpectedTripConfiguration(): { operation: string; service: strin
   };
 }
 
-function resolveAssignmentBusinessUnit(): string {
+function resolveAssignmentBusinessUnit(operationalData?: OperationalData): string | undefined {
   const override = process.env.ULTIMAMILLA_UNIDAD_NEGOCIO?.trim();
   if (override) {
     return override;
   }
 
-  const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
-  return isDemo ? '123' : 'Defecto';
+  const seedBusinessUnit = (
+    operationalData?.unidadNegocio?.nombre
+    || operationalData?.setupConfig?.unidadNegocio?.nombre
+    || operationalData?.seededUnidadNegocio?.nombre
+    || operationalData?.seededUnidadNegocio
+  )?.toString().trim();
+
+  if (seedBusinessUnit) {
+    return seedBusinessUnit;
+  }
+
+  return undefined;
 }

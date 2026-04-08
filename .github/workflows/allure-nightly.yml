@@ -31,9 +31,9 @@ jobs:
         run: npx playwright install --with-deps chromium firefox
 
       # ==========================================
-      # 1. QA TESTS - Legacy Flow + Atomic E2E
+      # 1. QA TESTS - Heavy grouped regressions
       # ==========================================
-      - name: QA - Legacy Flow (entidades -> contratos -> viajes -> prefactura)
+      - name: QA - Grouped Regressions (ops + finanzas + ultima milla)
         id: qa_legacy_flow
         env:
           ENV: QA
@@ -42,43 +42,21 @@ jobs:
           LEGACY_RUN_ID: nightly-qa-${{ github.run_id }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          SKIP_CLEAN: true
         continue-on-error: true
         run: |
           rm -f "playwright/.data/legacy-entities-data-chromium-qa-${LEGACY_RUN_ID}.json"
           rm -f "playwright/.data/legacy-entities-data-firefox-qa-${LEGACY_RUN_ID}.json"
 
-          # Fase 1 (seed): ejecutar transportista/cliente primero para poblar data compartida
-          npx playwright test \
-            tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts \
-            tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts \
-            --workers=1 --trace on
-
-          # Fase 2 (dependientes): usa seededTransportista/seededCliente persistidos en Fase 1
-          npx playwright test \
-            tests/e2e/modules/01-entidades/conductor/conductor-crear.test.ts \
-            tests/e2e/modules/01-entidades/vehiculos/vehiculo-crear.test.ts \
-            tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
-            tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
-            tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts \
-            tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-            tests/e2e/modules/02-operaciones/Monitoreo/viajes-monitoreo.test.ts \
-            tests/e2e/modules/03-finanzas/prefactura/prefactura-crear.test.ts \
-            --workers=1 --trace on
-
-      - name: QA - Atomic E2E (prefactura-crear-e2e)
-        id: qa_atomic_e2e
-        env:
-          ENV: QA
-          CI: true
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
-        continue-on-error: true
-        run: npx playwright test tests/e2e/suites/prefactura-crear-e2e.test.ts --trace on
+          npm run clean:reports
+          npm run qa:regression:ops
+          npm run qa:regression:finanzas
+          npm run qa:regression:ultimamilla
 
       # ==========================================
-      # 2. DEMO TESTS - Legacy Flow + Atomic E2E
+      # 2. DEMO TESTS - Heavy grouped regressions
       # ==========================================
-      - name: DEMO - Legacy Flow (entidades -> contratos -> viajes -> prefactura)
+      - name: DEMO - Grouped Regressions (ops + finanzas + ultima milla)
         id: demo_legacy_flow
         env:
           ENV: DEMO
@@ -87,38 +65,15 @@ jobs:
           LEGACY_RUN_ID: nightly-demo-${{ github.run_id }}
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          SKIP_CLEAN: true
         continue-on-error: true
         run: |
           rm -f "playwright/.data/legacy-entities-data-chromium-demo-${LEGACY_RUN_ID}.json"
           rm -f "playwright/.data/legacy-entities-data-firefox-demo-${LEGACY_RUN_ID}.json"
 
-          # Fase 1 (seed): ejecutar transportista/cliente primero para poblar data compartida
-          npx playwright test \
-            tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts \
-            tests/e2e/modules/01-entidades/clientes/cliente-crear.test.ts \
-            --workers=1 --trace on
-
-          # Fase 2 (dependientes): usa seededTransportista/seededCliente persistidos en Fase 1
-          npx playwright test \
-            tests/e2e/modules/01-entidades/conductor/conductor-crear.test.ts \
-            tests/e2e/modules/01-entidades/vehiculos/vehiculo-crear.test.ts \
-            tests/e2e/modules/02-operaciones/contratos/contrato-crear.test.ts \
-            tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts \
-            tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts \
-            tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts \
-            tests/e2e/modules/02-operaciones/Monitoreo/viajes-monitoreo.test.ts \
-            tests/e2e/modules/03-finanzas/prefactura/prefactura-crear.test.ts \
-            --workers=1 --trace on
-
-      - name: DEMO - Atomic E2E (prefactura-crear-e2e)
-        id: demo_atomic_e2e
-        env:
-          ENV: DEMO
-          CI: true
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
-        continue-on-error: true
-        run: npx playwright test tests/e2e/suites/prefactura-crear-e2e.test.ts --trace on
+          npm run demo:regression:ops
+          npm run demo:regression:finanzas
+          npm run demo:regression:ultimamilla
 
       # ==========================================
       # 3. MERGE RESULTS + ALLURE -> GITHUB PAGES
@@ -194,18 +149,8 @@ jobs:
             FAIL=1
           fi
 
-          if [[ "${{ steps.qa_atomic_e2e.outcome }}" != "success" ]]; then
-            echo "QA atomic E2E failed with outcome: ${{ steps.qa_atomic_e2e.outcome }}"
-            FAIL=1
-          fi
-
           if [[ "${{ steps.demo_legacy_flow.outcome }}" != "success" ]]; then
             echo "DEMO legacy flow failed with outcome: ${{ steps.demo_legacy_flow.outcome }}"
-            FAIL=1
-          fi
-
-          if [[ "${{ steps.demo_atomic_e2e.outcome }}" != "success" ]]; then
-            echo "DEMO atomic E2E failed with outcome: ${{ steps.demo_atomic_e2e.outcome }}"
             FAIL=1
           fi
 

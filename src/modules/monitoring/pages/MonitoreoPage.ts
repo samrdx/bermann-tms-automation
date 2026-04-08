@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, type Locator } from '@playwright/test';
 import { BasePage } from '../../../core/BasePage.js';
 import { config } from '../../../config/environment.js';
 import { createLogger } from '../../../utils/logger.js';
@@ -29,6 +29,7 @@ export class MonitoreoPage extends BasePage {
     private readonly selectors = {
         filtroIdViaje: '#id',
         contenedor: '#registros',
+        btnQuitarFiltros: 'button:has-text("Quitar Filtros"), a:has-text("Quitar Filtros")',
         // Verified via Playwright MCP inspection:
         modalCambioEstado: '#modalCambioEstadoSinGps',
         selectEstado: '#drop_state_without_gps',
@@ -95,59 +96,62 @@ export class MonitoreoPage extends BasePage {
         await this.page.locator('#registros').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
 
         try {
-            // 1. Llenar filtro de ID del viaje
             logger.info('⏳ UI: Esperando input #id...');
             const inputId = this.page.locator(this.selectors.filtroIdViaje);
+            const contenedor = this.page.locator(this.selectors.contenedor);
             await inputId.waitFor({ state: 'visible', timeout: 10000 });
             logger.info('👁️ UI: Input #id visible');
-            await inputId.clear();
-            await inputId.fill(nroViaje);
-            logger.info(`📝 UI: Filtro de ID completado con: "${nroViaje}"`);
 
-            // 2. Disparar búsqueda (estrategia robusta multi-entorno)
-            await this.clickBuscar(inputId);
+            await this.clearResidualFiltersIfPossible();
 
-            // 3. ESPERA EXPLÍCITA: Esperar que el registro aparezca dentro de #registros
-            // En QA aparece el texto del nroViaje. En Demo (bug visual) la celda del ID de viaje 
-            // a veces sale vacía, pero los botones de acción (.manito) sí se renderizan.
-            // Esperamos a que la tabla se pueble con el texto del viaje o con botones de acción.
-            logger.info(`⏳ UI: Esperando a que la fila del viaje aparezca dentro de #registros...`);
-            const contenedor = this.page.locator(this.selectors.contenedor);
+            let lookupResolved = false;
+            let lastSnapshot = '';
 
-            // Wait for either the text or at least one action button (manito) to appear in the container
-            const rowLoadedPromise = Promise.any([
-                contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error('text not found'); }),
-                contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { throw new Error('manito not found'); })
-            ]);
+            const maxAttempts = 6;
+            const backoffByAttempt = [1200, 2400, 3600, 5000, 7000, 9000];
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                logger.info(`🔁 UI: Intento de búsqueda ${attempt}/${maxAttempts} para viaje [${nroViaje}]`);
 
-            try {
-                await rowLoadedPromise;
-                logger.info(`✅ UI: Fila de viaje reconocida dentro de #registros`);
-            } catch {
-                logger.warn(`⚠️ UI: Fila de viaje NO encontrada en 30s. Reintentando...`);
-                await this.takeScreenshot('buscar-viaje-primer-intento-fallido');
+                await this.setTripFilterValue(inputId, nroViaje, attempt > 1);
+                await this.clickBuscar(inputId, attempt);
 
-                await this.page.reload();
-                await this.page.waitForLoadState('networkidle');
-                logger.info('🔄 UI: Página recargada, re-filtrando...');
+                const lookup = await this.waitForTripLookupResult(nroViaje, 15000 + (attempt * 3000));
+                lastSnapshot = lookup.snapshot;
 
-                await inputId.waitFor({ state: 'visible', timeout: 10000 });
-                await inputId.clear();
-                await this.page.waitForTimeout(500); // Wait after clear
-                await inputId.pressSequentially(nroViaje, { delay: 100 }); // Slower typing for Firefox
-                await this.clickBuscar(inputId, true); // Pasar true para indicar reintento largo
-                logger.info('🔄 UI: Re-filtro ejecutado, esperando fila del viaje...');
-
-                try {
-                    const rowLoadedRetry = Promise.any([
-                        contenedor.getByText(nroViaje, { exact: true }).first().waitFor({ state: 'visible', timeout: 35000 }).catch(() => { throw new Error(); }),
-                        contenedor.locator('span.manito').first().waitFor({ state: 'visible', timeout: 35000 }).catch(() => { throw new Error(); })
-                    ]);
-                    await rowLoadedRetry;
-                    logger.info(`✅ UI: Fila de viaje encontrada en el reintento`);
-                } catch {
-                    throw new Error(`Text "${nroViaje}" or action buttons did not appear after retry`);
+                if (lookup.matchedByText || lookup.matchedByAction) {
+                    logger.info(
+                        `✅ UI: Viaje detectado en #registros (text=${lookup.matchedByText}, action=${lookup.matchedByAction})`
+                    );
+                    lookupResolved = true;
+                    break;
                 }
+
+                logger.warn(
+                    `⚠️ UI: Viaje no visible tras intento ${attempt}/${maxAttempts} (input="${lookup.inputValue}", actions=${lookup.actionCount}).`
+                );
+                await this.takeScreenshot(`buscar-viaje-intento-${attempt}-sin-resultados`);
+
+                if (lookup.emptyGridMessageVisible || lookup.totalTrips === 0) {
+                    logger.warn(
+                        `⚠️ UI: Grilla vacía detectada (sin-registros=${lookup.emptyGridMessageVisible}, total=${lookup.totalTrips}). Limpiando filtros...`
+                    );
+                    await this.clearResidualFiltersIfPossible();
+                }
+
+                if (attempt === 3 || attempt === 5) {
+                    logger.warn('🔄 UI: Recargando Monitoreo para forzar refresco de grilla...');
+                    await this.page.reload();
+                    await this.page.waitForLoadState('networkidle').catch(() => { });
+                    await this.page.locator(this.selectors.filtroIdViaje).waitFor({ state: 'visible', timeout: 10000 });
+                }
+
+                const backoffMs = backoffByAttempt[attempt - 1] ?? 9000;
+                logger.info(`⏱️ UI: Backoff determinístico ${backoffMs}ms antes de reintentar...`);
+                await this.page.waitForTimeout(backoffMs);
+            }
+
+            if (!lookupResolved) {
+                throw new Error(`Text "${nroViaje}" or action buttons did not appear after retry. Snapshot="${lastSnapshot}"`);
             }
 
             // 4. Scroll a la fila (buscamos cualquier elemento dentro para scrollear)
@@ -182,32 +186,182 @@ export class MonitoreoPage extends BasePage {
      * Estrategia 1: JS click en #buscar (patrón probado en TmsApiClient para todos los módulos).
      * Estrategia 2: Enter en el input #id (fallback universal — funciona en cualquier form).
      */
-    private async clickBuscar(inputId: any, isRetry: boolean = false): Promise<void> {
+    private async clickBuscar(inputId: Locator, attempt: number = 1): Promise<void> {
         logger.info('🔎 UI: Disparando búsqueda (multi-estrategia)...');
 
         // Extra wait before clicking in Firefox to avoid state detachment
         await this.page.waitForTimeout(500);
 
-        // Execute both enter and JS click for maximum robustness (especially in Demo/Firefox)
-        await Promise.all([
-            this.page.waitForLoadState('domcontentloaded').catch(() => { }),
-            inputId.press('Enter').catch(() => { }),
-            this.page.evaluate(() => {
-                const btn = document.getElementById('buscar');
-                if (btn) { (btn as HTMLElement).click(); }
-            }).catch(() => { })
-        ]);
+        await inputId.press('Enter').catch(() => { });
+        await this.page.waitForTimeout(120);
+        await this.page.evaluate(() => {
+            const btn = document.getElementById('buscar');
+            if (btn) { (btn as HTMLElement).click(); }
+        }).catch(() => { });
 
         logger.info('✅ UI: Buscar disparado combinando JS y tecla Enter');
 
         // Wait for AJAX to complete before checking #registros
         // Give time for the grid to start its loading process
-        await this.page.waitForTimeout(isRetry ? 4000 : 2500); // Wait more on retry for Firefox
+        await this.page.waitForTimeout(1000 + (attempt * 600));
         await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
             logger.warn('⚠️ UI: tiempo de espera networkidle agotado después de Buscar, continuando...');
         });
         await this.page.waitForTimeout(500);
         logger.info('✅ UI: Estabilización post-búsqueda completa');
+    }
+
+    private async setTripFilterValue(inputId: Locator, nroViaje: string, slowTyping: boolean): Promise<void> {
+        await inputId.click();
+        await inputId.fill('');
+        await this.page.waitForTimeout(120);
+
+        if (slowTyping) {
+            await inputId.pressSequentially(nroViaje, { delay: 80 });
+        } else {
+            await inputId.fill(nroViaje);
+        }
+
+        const currentValue = (await inputId.inputValue()).trim();
+        if (currentValue !== nroViaje.trim()) {
+            logger.warn(`⚠️ UI: Valor de filtro inconsistente (actual="${currentValue}"). Reaplicando...`);
+            await inputId.fill('');
+            await inputId.pressSequentially(nroViaje, { delay: 60 });
+        }
+
+        logger.info(`📝 UI: Filtro de ID aplicado con: "${nroViaje}"`);
+    }
+
+    private async waitForTripLookupResult(
+        nroViaje: string,
+        timeoutMs: number
+    ): Promise<{
+        matchedByText: boolean;
+        matchedByAction: boolean;
+        actionCount: number;
+        inputValue: string;
+        snapshot: string;
+        emptyGridMessageVisible: boolean;
+        totalTrips: number | null;
+    }> {
+        const result = await this.page.waitForFunction(
+            ({ containerSelector, currentTripId }) => {
+                const normalize = (value: string | null | undefined) => (value || '').replace(/\s+/g, ' ').trim();
+                const getNumericParts = (value: string) => value.match(/\d+/g) || [];
+                const container = document.querySelector(containerSelector) as HTMLElement | null;
+                const input = document.querySelector('#id') as HTMLInputElement | null;
+                const bodyText = normalize(document.body?.textContent);
+                const totalTripsNode = Array.from(document.querySelectorAll('div, span, p, strong')).find(node => {
+                    const txt = normalize(node.textContent);
+                    return /^Total Viajes:\s*\d+$/i.test(txt);
+                });
+                const totalTripsMatch = normalize(totalTripsNode?.textContent).match(/(\d+)/);
+                const totalTrips = totalTripsMatch ? Number(totalTripsMatch[1]) : null;
+                const emptyGridMessageVisible = bodyText.includes('Sin registros para mostrar');
+
+                if (!container) {
+                    return {
+                        matchedByText: false,
+                        matchedByAction: false,
+                        actionCount: 0,
+                        inputValue: normalize(input?.value),
+                        snapshot: 'container-not-found',
+                        emptyGridMessageVisible,
+                        totalTrips,
+                    };
+                }
+
+                const tripNeedle = normalize(String(currentTripId));
+                const tripDigits = normalize(String(currentTripId)).replace(/\D/g, '');
+                const text = normalize(container.textContent);
+                const actionNodes = Array.from(container.querySelectorAll('span.manito[onclick*="showModalEditTripWithoutGPSManually"]'));
+                const matchedByAction = actionNodes.some(node => {
+                    const onclick = normalize(node.getAttribute('onclick'));
+                    if (onclick.includes(`(${tripNeedle}`) || onclick.includes(`,${tripNeedle}`) || onclick.includes(`, ${tripNeedle}`)) {
+                        return true;
+                    }
+                    if (!tripDigits) {
+                        return false;
+                    }
+                    return getNumericParts(onclick).some(num => num === tripDigits);
+                });
+                const matchedByRow = Array.from(container.querySelectorAll('li.list-group-item')).some(node => {
+                    const rowText = normalize(node.textContent);
+                    if (rowText.includes(tripNeedle)) {
+                        return true;
+                    }
+                    if (!tripDigits) {
+                        return false;
+                    }
+                    return getNumericParts(rowText).some(num => num === tripDigits);
+                });
+                const matchedByText = text.includes(tripNeedle);
+
+                return {
+                    matchedByText: matchedByText || matchedByRow,
+                    matchedByAction,
+                    actionCount: actionNodes.length,
+                    inputValue: normalize(input?.value),
+                    snapshot: text.slice(0, 260) || bodyText.slice(0, 260),
+                    emptyGridMessageVisible,
+                    totalTrips,
+                };
+            },
+            { containerSelector: this.selectors.contenedor, currentTripId: nroViaje },
+            { timeout: timeoutMs }
+        ).then(handle => handle.jsonValue() as Promise<{
+            matchedByText: boolean;
+            matchedByAction: boolean;
+            actionCount: number;
+            inputValue: string;
+            snapshot: string;
+            emptyGridMessageVisible: boolean;
+            totalTrips: number | null;
+        }>)
+            .catch(async () => {
+                const fallback = await this.page.evaluate(({ containerSelector }) => {
+                    const normalize = (value: string | null | undefined) => (value || '').replace(/\s+/g, ' ').trim();
+                    const container = document.querySelector(containerSelector) as HTMLElement | null;
+                    const input = document.querySelector('#id') as HTMLInputElement | null;
+                    const bodyText = normalize(document.body?.textContent);
+                    const totalTripsNode = Array.from(document.querySelectorAll('div, span, p, strong')).find(node => {
+                        const txt = normalize(node.textContent);
+                        return /^Total Viajes:\s*\d+$/i.test(txt);
+                    });
+                    const totalTripsMatch = normalize(totalTripsNode?.textContent).match(/(\d+)/);
+                    const actionCount = container?.querySelectorAll('span.manito[onclick*="showModalEditTripWithoutGPSManually"]').length || 0;
+                    return {
+                        matchedByText: false,
+                        matchedByAction: false,
+                        actionCount,
+                        inputValue: normalize(input?.value),
+                        snapshot: normalize(container?.textContent).slice(0, 260) || bodyText.slice(0, 260),
+                        emptyGridMessageVisible: bodyText.includes('Sin registros para mostrar'),
+                        totalTrips: totalTripsMatch ? Number(totalTripsMatch[1]) : null,
+                    };
+                }, { containerSelector: this.selectors.contenedor });
+
+                return fallback;
+            });
+
+        return result;
+    }
+
+    private async clearResidualFiltersIfPossible(): Promise<void> {
+        const btnQuitar = this.page.locator(this.selectors.btnQuitarFiltros).first();
+        if (!(await btnQuitar.isVisible().catch(() => false))) {
+            return;
+        }
+
+        try {
+            logger.info('🧼 UI: Limpiando filtros residuales desde "Quitar Filtros"...');
+            await btnQuitar.click({ timeout: 3000 });
+            await this.page.waitForTimeout(450);
+            await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+            logger.info('✅ UI: Filtros limpiados');
+        } catch (error) {
+            logger.warn(`⚠️ UI: No se pudo limpiar filtros residuales: ${(error as Error).message}`);
+        }
     }
 
     // ================================================================

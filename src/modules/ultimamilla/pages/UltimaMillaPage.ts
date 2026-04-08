@@ -72,6 +72,7 @@ export class UltimaMillaFormPage extends BasePage {
         options?: {
             clienteDropdownCandidates?: string[];
             environment?: string;
+            unidadNegocio?: string;
         }
     ): Promise<void> {
         logger.debug(`Llenando formulario de Pedido: ${data.codigoPedido}`);
@@ -88,7 +89,7 @@ export class UltimaMillaFormPage extends BasePage {
             await this.page.waitForTimeout(500);
         }
 
-        await this.selectUnidadNegocio();
+        await this.selectUnidadNegocio(options?.unidadNegocio);
         if (options?.clienteDropdownCandidates && options.clienteDropdownCandidates.length > 0) {
             await this.selectClienteFromCandidates(options.clienteDropdownCandidates, {
                 environment: options.environment
@@ -177,9 +178,29 @@ export class UltimaMillaFormPage extends BasePage {
         }
     }
 
-    async selectUnidadNegocio(): Promise<void> {
+    async selectUnidadNegocio(unidadNegocio?: string): Promise<void> {
+        if (unidadNegocio?.trim()) {
+            logger.debug(`Seleccionando Unidad de Negocio: ${unidadNegocio}`);
+            await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton, unidadNegocio);
+            return;
+        }
+
         logger.debug('Seleccionando primera Unidad de Negocio disponible');
         await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton);
+    }
+
+    async getSelectedUnidadNegocioLabel(): Promise<string> {
+        const selectedLabel = await this.page.evaluate(() => {
+            const select = document.getElementById('pedido-unidad_negocio_id') as HTMLSelectElement | null;
+            if (!select) {
+                return '';
+            }
+
+            const selectedOption = select.options[select.selectedIndex];
+            return selectedOption?.text?.trim() || '';
+        });
+
+        return selectedLabel;
     }
 
     async selectCliente(nombreCliente?: string): Promise<void> {

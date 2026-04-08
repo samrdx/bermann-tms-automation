@@ -41,15 +41,8 @@ jobs:
       - name: Preflight - Validate workflow script references
         run: npm run ci:validate:workflow-scripts
 
-      - name: Validate workflow_dispatch environment input
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        shell: bash
-        run: |
-          if [[ "${{ github.event.inputs.environment }}" != "QA" && "${{ github.event.inputs.environment }}" != "DEMO" ]]; then
-            echo "Unsupported environment input: ${{ github.event.inputs.environment }}"
-            echo "Supported values: QA, DEMO"
-            exit 1
-          fi
+      - name: TypeScript check
+        run: npm run typecheck
 
       - name: Resolve auth environment metadata
         id: auth_meta
@@ -151,19 +144,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight - Validate workflow script references
-        run: npm run ci:validate:workflow-scripts
-
-      - name: Validate workflow_dispatch environment input
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        shell: bash
-        run: |
-          if [[ "${{ github.event.inputs.environment }}" != "QA" && "${{ github.event.inputs.environment }}" != "DEMO" ]]; then
-            echo "Unsupported environment input: ${{ github.event.inputs.environment }}"
-            echo "Supported values: QA, DEMO"
-            exit 1
-          fi
-
       - name: Resolve matrix execution
         id: matrix_gate
         shell: bash
@@ -189,7 +169,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
-        run: npx playwright install --with-deps chromium firefox
+        run: npx playwright install --with-deps chromium
 
       - name: Run Atomic E2E (${{ matrix.environment }})
         id: atomic_e2e
@@ -200,11 +180,13 @@ jobs:
           CI: true
           ENV: ${{ steps.atomic_meta.outputs.env_upper }}
         continue-on-error: true
-        run: npx playwright test tests/e2e/suites/prefactura-crear-e2e.test.ts --trace on
-
-      - name: Install Allure Commandline
-        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
-        run: npm install -g allure-commandline
+        shell: bash
+        run: |
+          if [[ "${{ matrix.environment }}" == "QA" ]]; then
+            npm run qa:e2e:prefactura -- --project chromium-qa --workers 1
+          else
+            npm run demo:e2e:prefactura -- --project chromium-demo --workers 1
+          fi
 
       - name: Generate Allure Report (${{ matrix.environment }})
         id: atomic_allure_generate
@@ -215,7 +197,7 @@ jobs:
           REPORT_DIR="${{ steps.atomic_meta.outputs.report_dir }}"
 
           if [[ -d "$RESULTS_DIR" ]] && [[ -n "$(ls -A "$RESULTS_DIR" 2>/dev/null)" ]]; then
-            allure generate "$RESULTS_DIR" -o "$REPORT_DIR" --clean
+            npx allure generate "$RESULTS_DIR" -o "$REPORT_DIR" --clean
             echo "generated=true" >> "$GITHUB_OUTPUT"
           else
             echo "generated=false" >> "$GITHUB_OUTPUT"

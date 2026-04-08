@@ -80,6 +80,34 @@ Checklist sugerido:
 
 ## 5. Allure por ambiente
 
+### Corridas agrupadas operativas
+
+Usá estos comandos cuando querés una regresión operativa completa con reporte Allure consolidado al final:
+
+```bash
+# QA
+LEGACY_RUN_ID=qa-$(date +%s) npm run qa:regression:ops:full
+
+# DEMO
+LEGACY_RUN_ID=demo-$(date +%s) npm run demo:regression:ops:full
+```
+
+Qué hacen:
+- limpian reportes una sola vez al inicio
+- encadenan `ops` → `finanzas` → `ultimamilla`
+- preservan `allure-results-{qa|demo}` entre pasos usando `SKIP_CLEAN=true`
+- generan `allure-report-{qa|demo}` al final
+
+Cuándo usar cada grupo:
+- `npm run qa:regression:finanzas` / `demo:regression:finanzas`: prefactura + proforma atómicos únicamente
+- `npm run qa:regression:ultimamilla` / `demo:regression:ultimamilla`: batch flows de Última Milla
+- `npm run qa:regression:ops:full` / `demo:regression:ops:full`: corrida operativa completa con Allure consolidado
+
+Guardrails operativos:
+- definí siempre un `LEGACY_RUN_ID` único en flujos mutantes o agrupados
+- no lances dos corridas agrupadas del mismo ambiente al mismo tiempo, porque comparten `allure-results-*` y datos legacy
+- no rompas la serialización de Última Milla: los scripts ya usan `&&` y `--workers 1` por una razón
+
 ### QA
 
 Generar reporte:

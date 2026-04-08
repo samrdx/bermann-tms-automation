@@ -241,22 +241,84 @@ export class TmsApiClient {
     // --- GUARDADO ROBUSTO (JS INJECTION) ---
     logger.info('💾 Guardando Transportista vía Inyección JS...');
 
-    await Promise.all([
-      this.page.waitForNavigation({ waitUntil: 'networkidle' }),
+    const postSaveTimeoutMs = 15000;
+    const postSaveDetection = Promise.race<
+      'url' | 'toast' | 'index-state' | 'timeout'
+    >([
+      this.page
+        .waitForURL(/\/transportistas\/(?:index|ver|view|editar|update)(?:\/\d+)?(?:\?.*)?$/i, {
+          timeout: postSaveTimeoutMs,
+        })
+        .then(() => 'url' as const),
+      this.page
+        .locator('.toast-success, .alert-success, .alert.alert-success')
+        .first()
+        .waitFor({ state: 'visible', timeout: postSaveTimeoutMs })
+        .then(() => 'toast' as const),
+      this.page
+        .waitForFunction(
+          () => {
+            const path = window.location.pathname || '';
+            const inIndex = path.includes('/transportistas/index');
+            if (!inIndex) {
+              return false;
+            }
 
-      // FIX: Usamos evaluate() para hacer click directo en el DOM.
-      // Esto evita que Firefox falle esperando que el botón sea "estable" o visible si hay overlays.
-      this.page.evaluate(() => {
-        const buttons = Array.from(document.querySelectorAll('button.btn-success, input[type="submit"].btn-success'));
-        const btnGuardar = buttons.find(b => b.textContent?.includes('Guardar') || (b as HTMLInputElement).value?.includes('Guardar'));
-
-        if (btnGuardar) {
-          (btnGuardar as HTMLElement).click();
-        } else {
-          throw new Error('JS Injection: Botón Guardar no encontrado en el DOM');
-        }
-      })
+            return Boolean(
+              document.querySelector('#search') ||
+              document.querySelector('#buscar') ||
+              document.querySelector('table tbody tr')
+            );
+          },
+          undefined,
+          { timeout: postSaveTimeoutMs },
+        )
+        .then(() => 'index-state' as const),
+      this.page.waitForTimeout(postSaveTimeoutMs).then(() => 'timeout' as const),
     ]);
+
+    // FIX: Usamos evaluate() para hacer click directo en el DOM.
+    // Esto evita que Firefox falle esperando que el botón sea "estable" o visible si hay overlays.
+    const clickSave = this.page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button.btn-success, input[type="submit"].btn-success'));
+      const btnGuardar = buttons.find(b => b.textContent?.includes('Guardar') || (b as HTMLInputElement).value?.includes('Guardar'));
+
+      if (btnGuardar) {
+        (btnGuardar as HTMLElement).click();
+      } else {
+        throw new Error('JS Injection: Botón Guardar no encontrado en el DOM');
+      }
+    });
+
+    const [, postSaveSignal] = await Promise.all([clickSave, postSaveDetection]);
+
+    if (postSaveSignal === 'timeout') {
+      const currentUrl = this.page.url();
+      const hasSuccessToast = await this.page
+        .locator('.toast-success, .alert-success, .alert.alert-success')
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
+        .catch(() => false);
+      const hasIndexState = await this.page
+        .locator('#search, #buscar, table tbody')
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (currentUrl.includes('/transportistas/index') || hasSuccessToast || hasIndexState) {
+        logger.warn(
+          `⚠️ Post-save sin señal temprana en ${postSaveTimeoutMs}ms; continuando por fallback. URL=${currentUrl}`,
+        );
+      } else {
+        logger.warn(
+          `⚠️ Post-save sin confirmación fuerte en ${postSaveTimeoutMs}ms. URL actual: ${currentUrl}`,
+        );
+      }
+    } else {
+      logger.info(`✅ Guardado detectado por señal: ${postSaveSignal}`);
+    }
 
     logger.info(`✅ Transportista [${nombre}] creado exitosamente`);
 
@@ -477,13 +539,39 @@ export class TmsApiClient {
   private async extractIdAfterSave(
     nombre: string,
     entityLabel: string,
-    options?: { indexPath?: string; transportistaFilterName?: string },
+    options?: {
+      indexPath?: string;
+      transportistaFilterName?: string;
+      fallbackSearchValues?: string[];
+    },
   ): Promise<string> {
     let id = '0';
+    const fallbackSearchValues = (options?.fallbackSearchValues ?? [])
+      .map((value) => value.trim())
+      .filter((value, index, arr) => value.length > 0 && arr.indexOf(value) === index);
+
+    const extractIdFromUrl = (url: string): string | null => {
+      const normalizedUrl = (url || '').trim();
+      if (!normalizedUrl) {
+        return null;
+      }
+
+      const pathMatch = normalizedUrl.match(/\/(?:ver|view|editar|update)\/(\d+)(?:\D|$)/i);
+      if (pathMatch?.[1]) {
+        return pathMatch[1];
+      }
+
+      const queryMatch = normalizedUrl.match(/[?&](?:id|entity_id)=(\d+)(?:\D|$)/i);
+      if (queryMatch?.[1]) {
+        return queryMatch[1];
+      }
+
+      return null;
+    };
 
     // FIX FIREFOX: Esperar a que la redirección a /ver/\d+ o /editar/\d+ complete antes de leer la URL.
     // Chromium lo hace casi instantáneamente, Firefox puede tardar hasta 5-8 segundos más.
-    await this.page.waitForURL(/\/(ver|view|editar|update)\/\d+/, { timeout: 8000 }).catch(() => {
+    await this.page.waitForURL(/\/(ver|view|editar|update)(\/\d+|\?.*[?&]?id=\d+)?/i, { timeout: 8000 }).catch(() => {
       logger.warn(`⚠️ waitForURL (ver/editar) no completó en 8s para ${entityLabel} (${nombre}) — continuando con URL actual`);
     });
 
@@ -491,9 +579,9 @@ export class TmsApiClient {
     logger.info(`📍 URL después de guardar (${entityLabel}): ${currentUrl}`);
 
     // 1. Intentar extraer de la URL directa (ej: /ver/123)
-    let idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
-    if (idMatch) {
-      id = idMatch[1];
+    const idFromCurrentUrl = extractIdFromUrl(currentUrl);
+    if (idFromCurrentUrl) {
+      id = idFromCurrentUrl;
       logger.info(`✅ ${entityLabel} ID extraído de la URL: ${id}`);
       return id;
     }
@@ -502,9 +590,9 @@ export class TmsApiClient {
     logger.info(`🔄 URL no contiene ID todavía, esperando 2s y reintentando...`);
     await this.page.waitForTimeout(2000);
     currentUrl = this.page.url();
-    idMatch = currentUrl.match(/\/(?:ver|view|editar|update)\/(\d+)/);
-    if (idMatch) {
-      id = idMatch[1];
+    const idFromRetryUrl = extractIdFromUrl(currentUrl);
+    if (idFromRetryUrl) {
+      id = idFromRetryUrl;
       logger.info(`✅ ${entityLabel} ID extraído de la URL (retry): ${id}`);
       return id;
     }
@@ -586,10 +674,16 @@ export class TmsApiClient {
       return null;
     };
 
-    const lookupResult = await extractIdFromCurrentGrid(nombre, 'lookup-inicial');
-    if (lookupResult?.id) {
-      logger.info(`✅ ${entityLabel} ID desde ${lookupResult.strategy}: ${lookupResult.id}`);
-      return lookupResult.id;
+    const searchCandidates = [nombre, ...fallbackSearchValues]
+      .map((value) => value.trim())
+      .filter((value, index, arr) => value.length > 0 && arr.indexOf(value) === index);
+
+    for (const candidate of searchCandidates) {
+      const lookupResult = await extractIdFromCurrentGrid(candidate, `lookup-inicial:${candidate}`);
+      if (lookupResult?.id) {
+        logger.info(`✅ ${entityLabel} ID desde ${lookupResult.strategy} (busqueda="${candidate}"): ${lookupResult.id}`);
+        return lookupResult.id;
+      }
     }
 
     if (id === '0') {
@@ -600,10 +694,12 @@ export class TmsApiClient {
       await this.page.goto(indexUrl);
       await this.page.waitForLoadState('networkidle');
 
-      const rescueResult = await extractIdFromCurrentGrid(nombre, 'grid-rescue', 4);
-      if (rescueResult?.id) {
-        logger.info(`✅ ${entityLabel} ID desde ${rescueResult.strategy} de Rescate de Grilla: ${rescueResult.id}`);
-        return rescueResult.id;
+      for (const candidate of searchCandidates) {
+        const rescueResult = await extractIdFromCurrentGrid(candidate, `grid-rescue:${candidate}`, 4);
+        if (rescueResult?.id) {
+          logger.info(`✅ ${entityLabel} ID desde ${rescueResult.strategy} de Rescate de Grilla (busqueda="${candidate}"): ${rescueResult.id}`);
+          return rescueResult.id;
+        }
       }
     }
 
@@ -1123,6 +1219,7 @@ export class TmsApiClient {
     const vehiculoId = await this.extractIdAfterSave(patente, 'Vehiculo', {
       indexPath: '/vehiculos/index',
       transportistaFilterName: transportistaNombre,
+      fallbackSearchValues: [transportistaNombre],
     });
 
     await this.assertEntityIndexedInGrid({
@@ -2028,10 +2125,85 @@ export class TmsApiClient {
         await this.page.waitForTimeout(400);
       }
       const firstOrigenOption = origenList.locator('li:not(.disabled) a').first();
-      await firstOrigenOption.waitFor({ state: 'attached', timeout: 5000 });
-      const fallbackOrigenText = await firstOrigenOption.textContent().catch(() => 'primera opción');
-      await firstOrigenOption.evaluate(el => (el as HTMLElement).click());
-      logger.info(`✅ Origen Fallback seleccionado: ${fallbackOrigenText?.trim()}`);
+      const hasListOption = await firstOrigenOption.isVisible({ timeout: 5000 }).catch(() => false);
+      if (hasListOption) {
+        const fallbackOrigenText = await firstOrigenOption.textContent().catch(() => 'primera opción');
+        await firstOrigenOption.evaluate(el => (el as HTMLElement).click());
+        logger.info(`✅ Origen Fallback seleccionado desde dropdown: ${fallbackOrigenText?.trim()}`);
+      } else {
+        logger.warn('⚠️ Dropdown Origen sin opciones visibles. Aplicando recuperación: wait + refresh + re-open...');
+
+        await this.page.waitForFunction(() => {
+          const select = document.getElementById('_origendestinoform-origen') as HTMLSelectElement | null;
+          if (!select) return false;
+          const validOptions = Array.from(select.options).filter(opt => !opt.disabled && opt.value && opt.value !== '0');
+          return validOptions.length > 0;
+        }, { timeout: 8000 }).catch(() => logger.warn('⚠️ Origen nativo sigue sin opciones válidas tras espera inicial.'));
+
+        await this.page.evaluate(() => {
+          const select = document.getElementById('_origendestinoform-origen') as HTMLSelectElement | null;
+          if (!select) return;
+          // @ts-ignore
+          const $ = window.jQuery;
+          if ($ && $(select).selectpicker) {
+            $(select).selectpicker('refresh');
+          }
+        });
+        await this.page.waitForTimeout(500);
+
+        const origenExpanded = await origenBtn.getAttribute('aria-expanded').catch(() => null);
+        if (origenExpanded === 'true') {
+          await this.page.keyboard.press('Escape').catch(() => undefined);
+          await this.page.waitForTimeout(300);
+        }
+
+        await origenBtn.evaluate(el => (el as HTMLElement).click());
+        await this.page.waitForTimeout(700);
+
+        if (await origenSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await origenSearchBox.fill('');
+          await this.page.waitForTimeout(400);
+        }
+
+        const recoveredOrigenOption = origenList.locator('li:not(.disabled) a').first();
+        const hasRecoveredListOption = await recoveredOrigenOption.isVisible({ timeout: 4000 }).catch(() => false);
+
+        if (hasRecoveredListOption) {
+          const recoveredOrigenText = await recoveredOrigenOption.textContent().catch(() => 'primera opción');
+          await recoveredOrigenOption.evaluate(el => (el as HTMLElement).click());
+          logger.info(`✅ Origen recuperado desde dropdown tras refresh/re-open: ${recoveredOrigenText?.trim()}`);
+        } else {
+          logger.warn('⚠️ Recuperación dropdown Origen sin éxito. Aplicando fallback por <select> nativo...');
+          const fallbackOrigenText = await this.page.evaluate((preferredText: string) => {
+            const select = document.getElementById('_origendestinoform-origen') as HTMLSelectElement | null;
+            if (!select) return '';
+
+            const validOptions = Array.from(select.options).filter(opt => !opt.disabled && opt.value && opt.value !== '0');
+            if (!validOptions.length) return '';
+
+            const preferred = validOptions.find(opt =>
+              (opt.text || '').toUpperCase().includes(preferredText.toUpperCase())
+            );
+            const option = preferred || validOptions[0];
+
+            select.value = option.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            // @ts-ignore
+            if (window.jQuery && window.jQuery(select).selectpicker) {
+              // @ts-ignore
+              window.jQuery(select).selectpicker('refresh');
+            }
+
+            return (option.text || '').trim();
+          }, origenText);
+
+          if (!fallbackOrigenText) {
+            throw new Error('No se pudo seleccionar Origen: no hay opciones disponibles ni en dropdown ni en select nativo.');
+          }
+
+          logger.info(`✅ Origen Fallback seleccionado desde select nativo: ${fallbackOrigenText}`);
+        }
+      }
     }
     await this.page.waitForTimeout(1000);
 
@@ -2072,10 +2244,36 @@ export class TmsApiClient {
         await this.page.waitForTimeout(400);
       }
       const firstDestinoOption = destinoList.locator('li:not(.disabled) a span.text, li:not(.disabled) a').first();
-      await firstDestinoOption.waitFor({ state: 'attached', timeout: 5000 });
-      const fallbackDestinoText = await firstDestinoOption.textContent().catch(() => 'primera opción');
-      await firstDestinoOption.evaluate(el => (el as HTMLElement).click());
-      logger.info(`✅ Destino Fallback seleccionado: ${fallbackDestinoText?.trim()}`);
+      const hasListOption = await firstDestinoOption.isVisible({ timeout: 5000 }).catch(() => false);
+      if (hasListOption) {
+        const fallbackDestinoText = await firstDestinoOption.textContent().catch(() => 'primera opción');
+        await firstDestinoOption.evaluate(el => (el as HTMLElement).click());
+        logger.info(`✅ Destino Fallback seleccionado desde dropdown: ${fallbackDestinoText?.trim()}`);
+      } else {
+        logger.warn('⚠️ Dropdown Destino sin opciones visibles. Aplicando fallback por <select> nativo...');
+        const fallbackDestinoText = await this.page.evaluate(() => {
+          const select = document.getElementById('_origendestinoform-destino') as HTMLSelectElement | null;
+          if (!select) return '';
+          const option = Array.from(select.options).find(opt => !opt.disabled && opt.value && opt.value !== '0');
+          if (!option) return '';
+
+          select.value = option.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          // @ts-ignore
+          if (window.jQuery && window.jQuery(select).selectpicker) {
+            // @ts-ignore
+            window.jQuery(select).selectpicker('refresh');
+          }
+
+          return (option.text || '').trim();
+        });
+
+        if (!fallbackDestinoText) {
+          throw new Error('No se pudo seleccionar Destino: no hay opciones disponibles ni en dropdown ni en select nativo.');
+        }
+
+        logger.info(`✅ Destino Fallback seleccionado desde select nativo: ${fallbackDestinoText}`);
+      }
     }
     await this.page.waitForTimeout(1000);
     logger.info(`✅ Origen/Destino configurados correctamente`);

@@ -167,11 +167,73 @@ export class AsignarPage extends BasePage {
     } catch {
       const snapshot = await this.page.evaluate((id) => {
         const select = document.getElementById(id) as HTMLSelectElement | null;
-        if (!select) return [];
-        return Array.from(select.options).map(opt => `${opt.value}:${opt.text.trim()}`);
+        if (!select) return { found: false, disabled: true, selected: '', options: [] as string[] };
+        return {
+          found: true,
+          disabled: !!select.disabled,
+          selected: select.value,
+          options: Array.from(select.options).map(opt => `${opt.value}:${opt.text.trim()}`),
+        };
       }, selectId).catch(() => [] as string[]);
-      logger.warn(`⚠️ Timeout esperando opciones de ${labelForLog}. Opciones detectadas: ${snapshot.join(' | ') || 'ninguna'}`);
+      const details = Array.isArray(snapshot)
+        ? `Opciones detectadas: ${snapshot.join(' | ') || 'ninguna'}`
+        : `found=${snapshot.found} disabled=${snapshot.disabled} selected=${snapshot.selected || 'vacío'} opciones=${snapshot.options.join(' | ') || 'ninguna'}`;
+      logger.warn(`⚠️ Timeout esperando opciones de ${labelForLog}. ${details}`);
       return false;
+    }
+  }
+
+  private async forceSelectChangeByDataId(buttonLocator: Locator, labelForLog: string): Promise<void> {
+    const dataId = await buttonLocator.getAttribute('data-id');
+    if (!dataId) {
+      logger.warn(`⚠️ No se pudo forzar change en ${labelForLog}: botón sin data-id`);
+      return;
+    }
+
+    const changeTriggered = await this.page.evaluate((id) => {
+      const select = document.getElementById(id) as HTMLSelectElement | null;
+      if (!select) return false;
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      select.dispatchEvent(new Event('blur', { bubbles: true }));
+      return true;
+    }, dataId).catch(() => false);
+
+    if (!changeTriggered) {
+      logger.warn(`⚠️ No se encontró select nativo #${dataId} para ${labelForLog}`);
+      return;
+    }
+
+    logger.info(`🔁 Evento change forzado en ${labelForLog} (#${dataId})`);
+  }
+
+  private async refreshBootstrapSelectByDataId(buttonLocator: Locator, labelForLog: string): Promise<void> {
+    const dataId = await buttonLocator.getAttribute('data-id');
+    if (!dataId) {
+      logger.warn(`⚠️ No se pudo refrescar ${labelForLog}: botón sin data-id`);
+      return;
+    }
+
+    const refreshed = await this.page.evaluate((id) => {
+      const win = window as unknown as { jQuery?: ((selector: string) => { selectpicker?: (action: string) => void }) };
+      const jq = win.jQuery;
+      if (typeof jq !== 'function') return false;
+
+      const select = document.getElementById(id) as HTMLSelectElement | null;
+      if (!select) return false;
+
+      try {
+        jq(`#${id}`).selectpicker?.('refresh');
+        return true;
+      } catch {
+        return false;
+      }
+    }, dataId).catch(() => false);
+
+    if (refreshed) {
+      logger.info(`🔄 Bootstrap Select refrescado en ${labelForLog} (#${dataId})`);
+    } else {
+      logger.warn(`⚠️ No fue posible refrescar Bootstrap Select en ${labelForLog} (#${dataId})`);
     }
   }
 
@@ -236,17 +298,8 @@ export class AsignarPage extends BasePage {
       logger.info(`✅ ${labelForLog} FALLBACK seleccionado: ${fallbackText?.trim()}`);
     }
 
-    // FIX CASCADAS: Asegurarnos de que el Select nativo dispare el evento change
-    // a veces evaluate(.click()) en el <a> no lo propaga hacia SelectPicker
-    await buttonLocator.evaluate((btn) => {
-      if (btn && btn.parentElement) {
-        // En btn-group, el <select> es sibling de nuestro target o esta dentro del abuelo
-        const select = btn.parentElement.parentElement?.querySelector('select');
-        if (select) {
-          select.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      }
-    });
+    // FIX CASCADAS: asegurar eventos en el select nativo por data-id
+    await this.forceSelectChangeByDataId(buttonLocator, labelForLog);
 
     await this.page.waitForTimeout(1000);
   }
@@ -284,13 +337,24 @@ export class AsignarPage extends BasePage {
     // 1. Seleccionar Transportista
     const transportistaBtn = this.page.locator('button[data-id="viajes-transportista_id"]');
     await this.selectDropdownOption(transportistaBtn, data.transportista, 'Transportista');
+    await this.forceSelectChangeByDataId(transportistaBtn, 'Transportista');
 
     logger.info('⏳ Esperando cascada (transportista -> vehículos)...');
     let vehiculoReady = await this.waitForNativeSelectOptions('viajes-vehiculo_uno_id', 'Vehículo Principal', 1, 25000);
     if (!vehiculoReady) {
-      logger.warn('⚠️ Vehículos no cargados tras primera espera, reintentando selección de transportista...');
+      logger.warn('⚠️ Vehículos no cargados tras primera espera, aplicando recuperación controlada...');
+      await this.page.waitForTimeout(1200);
+      const vehiculoBtn = this.page.locator('button[data-id="viajes-vehiculo_uno_id"]');
+      await this.refreshBootstrapSelectByDataId(vehiculoBtn, 'Vehículo Principal');
+      await vehiculoBtn.waitFor({ state: 'visible', timeout: 6000 }).catch(() => {});
+      await vehiculoBtn.evaluate(el => (el as HTMLElement).click()).catch(() => {});
+      await this.page.waitForTimeout(500);
+      await this.page.keyboard.press('Escape').catch(() => {});
+      await this.page.waitForTimeout(500);
+
       await this.selectDropdownOption(transportistaBtn, data.transportista, 'Transportista');
-      await this.page.waitForTimeout(2000);
+      await this.forceSelectChangeByDataId(transportistaBtn, 'Transportista');
+      await this.page.waitForTimeout(2200);
       vehiculoReady = await this.waitForNativeSelectOptions('viajes-vehiculo_uno_id', 'Vehículo Principal', 1, 15000);
     }
     if (!vehiculoReady) {

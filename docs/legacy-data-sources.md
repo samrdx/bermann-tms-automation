@@ -40,17 +40,24 @@ If not defined, default is `entities`.
 
 - Regression based on entities:
   - Set `LEGACY_DATA_SOURCE=entities`
-  - Optional: set `LEGACY_RUN_ID=<unique_id>`
+  - For manual/CI mutating runs, set `LEGACY_RUN_ID=<unique_id>`
   - Run entities seed
   - Run contratos/viajes/prefactura
 
 - Regression based on base setup:
   - Set `LEGACY_DATA_SOURCE=base`
-  - Optional: set `LEGACY_RUN_ID=<unique_id>`
+  - For manual/CI mutating runs, set `LEGACY_RUN_ID=<unique_id>`
   - Run `base-entities.setup.ts`
   - Run contratos/viajes/prefactura
 
 Do not mix sources in the same run.
+
+## Guardrails for mutating grouped runs
+
+- Use a unique `LEGACY_RUN_ID` per operator/CI execution (examples: `qa-$(date +%s)`, `${GITHUB_RUN_ID}-${GITHUB_JOB}`). Reusing the same value defeats isolation.
+- Do not overlap grouped QA runs with other grouped QA runs, and do not overlap grouped DEMO runs with other grouped DEMO runs, while they are writing shared `allure-results-*` and legacy JSON data.
+- Ultima Milla grouped runs stay serialized on purpose (`&&` plus `--workers 1` on the atomic mutating commands). Do not parallelize them manually.
+- If you need two independent executions at the same time, split them by environment and still generate Allure only after each grouped flow finishes.
 
 ## CI note
 
@@ -58,7 +65,7 @@ In GitHub Actions, set:
 
 - `LEGACY_DATA_SOURCE: entities` for entity-seeded regression
 - `LEGACY_DATA_SOURCE: base` for base-seeded regression
-- Optional `LEGACY_RUN_ID: <unique_run_id>` to isolate concurrent/manual runs
+- Mandatory for mutating/manual grouped flows: `LEGACY_RUN_ID: <unique_run_id>`
 
 ## Setup config integration
 

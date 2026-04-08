@@ -6,9 +6,11 @@ const logger = createLogger('UltimaMillaPedidoIndexPage');
 
 export interface PedidoIndexSearchResult {
   tripId: string;
+  tripIdSource: 'link-text' | 'cell-text' | 'onclick' | 'href' | 'data-attr' | 'none';
   orderCode: string;
   status: string;
   rowIndex: number;
+  tripCandidates: string[];
 }
 
 export interface PedidoIndexTripLookupOptions {
@@ -103,18 +105,33 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
     return this.withActionScreenshot('ultimamilla-pedido-index-tripid-error', async () => {
       const maxAttempts = options.maxAttempts ?? 8;
       const pollIntervalMs = options.pollIntervalMs ?? 2000;
+      const normalizedOrderCode = this.normalizeValue(orderCode);
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         logger.info(`Resolviendo Trip ID por UI. codigo=${orderCode} | intento=${attempt}/${maxAttempts}`);
         await this.searchByOrderCode(orderCode);
 
         const matches = await this.getVisibleResults();
-        const exactMatch = matches.find(result => result.orderCode === orderCode.trim());
+        const exactMatch = matches.find(result => this.normalizeValue(result.orderCode) === normalizedOrderCode);
         if (exactMatch?.tripId) {
           logger.info(
-            `✅ Trip ID resuelto desde /order/index. codigo=${orderCode} | tripId=${exactMatch.tripId} | intento=${attempt}`
+            `✅ Trip ID resuelto desde /order/index. codigo=${orderCode} | tripId=${exactMatch.tripId} | source=${exactMatch.tripIdSource} | intento=${attempt}`
           );
           return exactMatch.tripId;
+        }
+
+        const fuzzyMatch = matches.find(result => this.normalizeValue(result.orderCode).includes(normalizedOrderCode));
+        if (fuzzyMatch?.tripId) {
+          logger.warn(
+            `Trip ID resuelto por coincidencia parcial de pedido. codigo=${orderCode} | pedidoVisible=${fuzzyMatch.orderCode} | tripId=${fuzzyMatch.tripId} | source=${fuzzyMatch.tripIdSource}`
+          );
+          return fuzzyMatch.tripId;
+        }
+
+        if (exactMatch && !exactMatch.tripId) {
+          logger.warn(
+            `Fila del pedido encontrada sin Trip ID parseable. codigo=${orderCode} | source=${exactMatch.tripIdSource} | candidates=[${exactMatch.tripCandidates.join(' | ')}]`
+          );
         }
 
         if (attempt < maxAttempts) {
@@ -163,6 +180,91 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
 
   private async getVisibleResults(): Promise<PedidoIndexSearchResult[]> {
     return this.page.evaluate(rowsSelector => {
+      const normalizeValue = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+      const normalizeTripIdCandidate = (value: string | null | undefined): string | null => {
+        const trimmed = value?.trim();
+        if (!trimmed) {
+          return null;
+        }
+
+        const numericMatch = trimmed.match(/^(\d{3,})$/);
+        if (numericMatch?.[1]) {
+          return numericMatch[1];
+        }
+
+        const tripLabelMatch = trimmed.match(/(?:trip(?:_id)?|viaje(?:_id)?|nro(?:\s+)?viaje)[^0-9]{0,20}(\d{3,})/i);
+        if (tripLabelMatch?.[1]) {
+          return tripLabelMatch[1];
+        }
+
+        return null;
+      };
+
+      const extractTripIdFromOnclick = (value: string | null | undefined): string | null => {
+        const onclick = value?.trim();
+        if (!onclick) {
+          return null;
+        }
+
+        const tripDetailsMatch = onclick.match(/tripDetails\(\s*['\"]?(\d{3,})['\"]?\s*\)/i);
+        if (tripDetailsMatch?.[1]) {
+          return tripDetailsMatch[1];
+        }
+
+        const changeStatusMatch = onclick.match(/changeStatus(?:LastMille)?\(\s*[^,]+,\s*['\"]?(\d{3,})['\"]?\s*\)/i);
+        if (changeStatusMatch?.[1]) {
+          return changeStatusMatch[1];
+        }
+
+        return normalizeTripIdCandidate(onclick);
+      };
+
+      const extractTripIdFromHref = (value: string | null | undefined): string | null => {
+        const href = value?.trim();
+        if (!href) {
+          return null;
+        }
+
+        const queryMatch = href.match(/[?&](?:trip(?:_id)?|viaje(?:_id)?|id)=([0-9]{3,})/i);
+        if (queryMatch?.[1]) {
+          return queryMatch[1];
+        }
+
+        const pathMatch = href.match(/\/(?:trip|viaje)\/(\d{3,})(?:\b|\/|\?)/i);
+        if (pathMatch?.[1]) {
+          return pathMatch[1];
+        }
+
+        return normalizeTripIdCandidate(href);
+      };
+
+      const getTripIdFromDataAttrs = (element: Element | null): string | null => {
+        if (!element) {
+          return null;
+        }
+
+        const candidates = [
+          element.getAttribute('data-trip-id'),
+          element.getAttribute('data-tripid'),
+          element.getAttribute('data-viaje-id'),
+          element.getAttribute('data-id-trip'),
+          element.getAttribute('data-id-viaje'),
+          element.getAttribute('data-trip'),
+          element.getAttribute('data-viaje'),
+          element.getAttribute('data-id'),
+        ];
+
+        for (const candidate of candidates) {
+          const normalized = normalizeTripIdCandidate(candidate);
+          if (normalized) {
+            return normalized;
+          }
+        }
+
+        return null;
+      };
+
       return Array.from(document.querySelectorAll(rowsSelector))
         .map((row, rowIndex) => {
           const cells = Array.from(row.querySelectorAll('td'));
@@ -170,10 +272,41 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
             return null;
           }
 
+          const tripCell = cells[1] || null;
           const tripLink = cells[1]?.querySelector('a');
-          const tripId = (tripLink?.textContent || cells[1]?.textContent || '').replace(/\s+/g, ' ').trim();
-          const orderCode = (cells[2]?.textContent || '').replace(/\s+/g, ' ').trim();
-          const status = (cells[3]?.textContent || '').replace(/\s+/g, ' ').trim();
+          const orderCode = normalizeValue(cells[2]?.textContent || '');
+          const status = normalizeValue(cells[3]?.textContent || '');
+
+          const textTripId = normalizeTripIdCandidate(normalizeValue(tripLink?.textContent || ''));
+          const cellTripId = normalizeTripIdCandidate(normalizeValue(tripCell?.textContent || ''));
+          const onclickTripId =
+            extractTripIdFromOnclick(tripLink?.getAttribute('onclick'))
+            || extractTripIdFromOnclick(tripCell?.getAttribute('onclick'))
+            || extractTripIdFromOnclick(row.getAttribute('onclick'));
+          const hrefTripId = extractTripIdFromHref(tripLink?.getAttribute('href'));
+          const dataAttrTripId =
+            getTripIdFromDataAttrs(tripLink)
+            || getTripIdFromDataAttrs(tripCell)
+            || getTripIdFromDataAttrs(row);
+
+          let tripId = '';
+          let tripIdSource: PedidoIndexSearchResult['tripIdSource'] = 'none';
+          if (textTripId) {
+            tripId = textTripId;
+            tripIdSource = 'link-text';
+          } else if (cellTripId) {
+            tripId = cellTripId;
+            tripIdSource = 'cell-text';
+          } else if (onclickTripId) {
+            tripId = onclickTripId;
+            tripIdSource = 'onclick';
+          } else if (hrefTripId) {
+            tripId = hrefTripId;
+            tripIdSource = 'href';
+          } else if (dataAttrTripId) {
+            tripId = dataAttrTripId;
+            tripIdSource = 'data-attr';
+          }
 
           if (!orderCode) {
             return null;
@@ -181,13 +314,29 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
 
           return {
             tripId,
+            tripIdSource,
             orderCode,
             status,
             rowIndex,
+            tripCandidates: [
+              normalizeValue(tripLink?.textContent || ''),
+              normalizeValue(tripCell?.textContent || ''),
+              tripLink?.getAttribute('onclick')?.trim() || '',
+              tripCell?.getAttribute('onclick')?.trim() || '',
+              row.getAttribute('onclick')?.trim() || '',
+              tripLink?.getAttribute('href')?.trim() || '',
+              tripLink?.getAttribute('data-trip-id')?.trim() || '',
+              tripCell?.getAttribute('data-trip-id')?.trim() || '',
+              row.getAttribute('data-trip-id')?.trim() || '',
+            ].filter(Boolean),
           };
         })
         .filter((value): value is PedidoIndexSearchResult => value !== null);
     }, this.selectors.rows);
+  }
+
+  private normalizeValue(value: string): string {
+    return value.replace(/\s+/g, ' ').trim().toLowerCase();
   }
 
   protected async withActionScreenshot<T>(screenshotName: string, action: () => Promise<T>): Promise<T> {

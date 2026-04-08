@@ -1,5 +1,5 @@
 import { BasePage } from '../../core/BasePage.js';
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import { createLogger } from '../../utils/logger.js';
 
 const logger = createLogger('PrefacturaPage');
@@ -49,6 +49,43 @@ export class PrefacturaPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
+  }
+
+  private getAgregarViajeButton(): Locator {
+    return this.page
+      .locator('#div_viajes button[title="agregar"], #div_viajes a[title="agregar"], #div_viajes button.btn-success:not(#btn_guardar):not(.d-none), table button[title="agregar"], table a[title="agregar"]')
+      .filter({ hasNotText: /^Guardar$/i })
+      .first();
+  }
+
+  private async waitForAgregarViajeButtonVisible(timeout = 15000): Promise<Locator> {
+    const button = this.getAgregarViajeButton();
+    const primaryVisible = await button.isVisible({ timeout }).catch(() => false);
+    if (primaryVisible) {
+      return button;
+    }
+
+    await this.page.waitForFunction(() => {
+      const candidates = Array.from(document.querySelectorAll(
+        '#div_viajes button[title="agregar"], #div_viajes a[title="agregar"], #div_viajes button.btn-success:not(#btn_guardar), table button[title="agregar"], table a[title="agregar"]'
+      ));
+
+      return candidates.some((candidate) => {
+        const element = candidate as HTMLElement;
+        const style = window.getComputedStyle(element);
+        const text = (element.textContent || '').trim().toLowerCase();
+        const rect = element.getBoundingClientRect();
+        return style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && !element.classList.contains('d-none')
+          && rect.width > 0
+          && rect.height > 0
+          && text !== 'guardar'
+          && element.id !== 'btn_guardar';
+      });
+    }, { timeout });
+
+    return this.getAgregarViajeButton();
   }
 
   // ==========================================
@@ -151,7 +188,7 @@ export class PrefacturaPage extends BasePage {
         throw new Error(errorMsg);
     }
     
-    await this.waitForElement(this.selectors.crear.btnAgregar, 15000);
+    await this.waitForAgregarViajeButtonVisible(15000);
   }
 
   async filtrarViajesPorTransportista(transportistaName: string): Promise<void> {
@@ -198,7 +235,7 @@ export class PrefacturaPage extends BasePage {
       throw new Error(errorMsg);
     }
 
-    await this.waitForElement(this.selectors.crear.btnAgregar, 15000);
+    await this.waitForAgregarViajeButtonVisible(15000);
   }
 
   async waitForTransportistasGridLoaded(options?: { timeoutMs?: number }): Promise<void> {
@@ -250,16 +287,65 @@ export class PrefacturaPage extends BasePage {
 
   async seleccionarPrimerViajeParaProforma(): Promise<void> {
     logger.info('➕ Seleccionando primer viaje para proforma...');
-    const btnAgregarProforma = this.page.locator(this.selectors.crear.btnAgregarViajeProforma).first();
-    const usarBotonProforma = await btnAgregarProforma.isVisible().catch(() => false);
-    const btnAgregar = usarBotonProforma
-      ? btnAgregarProforma
-      : this.page.locator(this.selectors.crear.btnAgregar).first();
-
-    await btnAgregar.waitFor({ state: 'visible', timeout: 10000 });
+    const btnAgregar = await this.waitForAgregarViajeButtonVisible(10000);
     await btnAgregar.click();
     await this.page.waitForTimeout(500);
     logger.success('Primer viaje agregado a proforma');
+  }
+
+  private async waitForProformaGuardarReady(timeoutMs: number = 12000): Promise<Locator> {
+    const guardarBtn = this.page.locator(this.selectors.crear.btnGuardar).first();
+
+    await guardarBtn.waitFor({ state: 'visible', timeout: timeoutMs });
+    await guardarBtn.scrollIntoViewIfNeeded().catch(() => {});
+
+    await this.page.waitForFunction((selector: string) => {
+      const element = document.querySelector(selector) as HTMLElement | null;
+      if (!element) {
+        return false;
+      }
+
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      const disabled =
+        element.hasAttribute('disabled')
+        || element.getAttribute('aria-disabled') === 'true'
+        || element.classList.contains('disabled');
+
+      return !disabled
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && rect.width > 0
+        && rect.height > 0;
+    }, this.selectors.crear.btnGuardar, { timeout: timeoutMs });
+
+    await guardarBtn.click({ trial: true, timeout: Math.min(6000, timeoutMs) }).catch(() => {});
+    return guardarBtn;
+  }
+
+  private async clickGuardarProformaWithRetry(): Promise<void> {
+    const maxAttempts = 2;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      logger.info(`🧾 Click Guardar Proforma - intento ${attempt}/${maxAttempts}`);
+
+      const guardarBtn = await this.waitForProformaGuardarReady(12000);
+
+      try {
+        await guardarBtn.click({ timeout: 8000 });
+        return;
+      } catch (error) {
+        logger.warn(`Intento ${attempt} de Guardar Proforma falló: ${String(error)}`);
+
+        if (attempt === maxAttempts) {
+          await this.takeScreenshot('proforma-click-guardar-timeout');
+          throw error;
+        }
+
+        await this.page.keyboard.press('Escape').catch(() => {});
+        await this.page.waitForTimeout(1000);
+      }
+    }
   }
 
   async generarProforma(): Promise<void> {
@@ -273,7 +359,7 @@ export class PrefacturaPage extends BasePage {
     }
 
     await this.seleccionarPrimerViajeParaProforma();
-    await this.click(this.selectors.crear.btnGuardar);
+    await this.clickGuardarProformaWithRetry();
 
     logger.info('⏳ Esperando confirmación de generación de proforma...');
     const reachedIndex = this.page.waitForURL('**/proforma/index*', { timeout: 25000 });
@@ -286,7 +372,7 @@ export class PrefacturaPage extends BasePage {
       await Promise.any([reachedIndex, successToast]);
     } catch {
       await this.takeScreenshot('proforma-sin-confirmacion-exito');
-      logger.warn('No hubo señal visual de éxito inmediata. Se validará existencia en /proforma/index en el siguiente paso.');
+      throw new Error('No hubo señal de éxito tras hacer click en Guardar Proforma (sin redirección ni toast visible).');
     }
 
     logger.success('Proforma generada correctamente');
@@ -306,8 +392,7 @@ export class PrefacturaPage extends BasePage {
 
     // Seleccionar el viaje y agregarlo (clic en "btn agregar")
     logger.info('Haciendo clic en "btn agregar"');
-    const btnAgregar = this.page.locator(this.selectors.crear.btnAgregar).first();
-    await btnAgregar.waitFor({ state: 'visible', timeout: 5000 });
+    const btnAgregar = await this.waitForAgregarViajeButtonVisible(8000);
     await btnAgregar.click();
 
     await this.page.waitForTimeout(500); // Esperar a que se asigne al bloque inferior
@@ -335,32 +420,102 @@ export class PrefacturaPage extends BasePage {
    * Busca prefacturas en el index y retorna el ID de la primera encontrada
    */
   async buscarPrefacturaEnIndex(clienteName: string): Promise<string> {
-    logger.info(`Buscando prefacturas para el cliente: ${clienteName} en /index`);
-    
-    // Filtrar por cliente
-    await this.selectBootstrapDropdownWithSearch('cliente', clienteName);
+    const normalizedCliente = clienteName.trim();
+    logger.info(`Buscando prefacturas para el cliente: ${normalizedCliente} en /index`);
 
-    // Buscar (Botón Success mt-2 según observación del usuario)
-    logger.info('Haciendo clic en botón Buscar (Index)');
-    await this.click(this.selectors.index.btnBuscar);
-    
-    // Esperar a que la tabla se actualice
-    await this.page.waitForTimeout(3000);
-    await this.page.waitForLoadState('networkidle').catch(() => {});
-    
-    // Validar que la tabla tiene registros
-    const rows = this.page.locator(this.selectors.index.filasPrefactura).filter({ hasNotText: /Ningún dato disponible/i });
-    const count = await rows.count();
-    if (count === 0) {
-      throw new Error(`Visualización fallida: No se encontraron prefacturas para el cliente ${clienteName}`);
+    if (!normalizedCliente) {
+      throw new Error('Nombre de cliente requerido para buscar prefactura en index.');
     }
 
-    // Extraer el ID (Primera columna del primer row)
-    const firstRowId = await rows.first().locator('td').first().textContent();
-    const id = firstRowId?.trim() || 'N/A';
-    
-    logger.info(`Se encontraron ${count} registros. ID de la primera prefactura: [${id}]`);
-    return id;
+    const maxAttempts = 4;
+    const refreshSearchesPerAttempt = 2;
+    let lastEvidence = 'Sin evidencia de tabla disponible';
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      logger.info(`Intento ${attempt}/${maxAttempts} para localizar prefactura en index`);
+
+      await this.selectBootstrapDropdownByDataIdsWithSearch(
+        ['cliente', 'prefactura-cliente_id'],
+        normalizedCliente,
+        false,
+      );
+
+      let count = 0;
+      let rows = this.page.locator(this.selectors.index.filasPrefactura);
+
+      for (let refreshAttempt = 1; refreshAttempt <= refreshSearchesPerAttempt; refreshAttempt += 1) {
+        logger.info(
+          `Haciendo clic en botón Buscar (Index) [refresh ${refreshAttempt}/${refreshSearchesPerAttempt}]`,
+        );
+
+        const btnBuscar = this.page.locator(this.selectors.index.btnBuscar).first();
+        if (await btnBuscar.isVisible().catch(() => false)) {
+          await btnBuscar.click();
+        } else {
+          await this.page.evaluate(() => {
+            const candidate = document.querySelector('button[onclick="getGridPreInvoice()"]') as HTMLButtonElement | null;
+            candidate?.click();
+          }).catch(() => {});
+        }
+
+        await this.page.waitForTimeout(250);
+        await this.waitForPrefacturaIndexGridLoaded({ timeoutMs: Math.min(15000, 7000 + attempt * 2000) }).catch(() => {});
+        await this.page.waitForLoadState('networkidle').catch(() => {});
+
+        rows = this.page.locator(
+          [
+            this.selectors.index.filasPrefactura,
+            'table.dataTable tbody tr',
+            '#tabla-prefactura tbody tr',
+            'div.dataTables_scrollBody table tbody tr',
+          ].join(', '),
+        ).filter({ hasNotText: /Ningún dato disponible/i });
+
+        count = await rows.count();
+        if (count > 0) {
+          break;
+        }
+
+        logger.info('Sin filas tras búsqueda. Reintentando refresh determinístico de la grilla en el mismo intento.');
+        await this.page.waitForTimeout(500);
+      }
+
+      if (count > 0) {
+        const rowByCliente = rows
+          .filter({ hasText: new RegExp(this.escapeForRegExp(normalizedCliente), 'i') })
+          .first();
+        const hasExactClienteRow = (await rowByCliente.count()) > 0;
+        const selectedRow = hasExactClienteRow ? rowByCliente : rows.first();
+
+        const firstRowId = await selectedRow.locator('td').first().textContent();
+        const id = firstRowId?.trim() || 'N/A';
+
+        logger.info(
+          `Se encontraron ${count} registros. ID de la primera prefactura: [${id}] ` +
+          `(matchedBy=${hasExactClienteRow ? 'cliente' : 'fallback-first-row'})`,
+        );
+        return id;
+      }
+
+      const firstVisibleRowText = (
+        await this.page.locator(this.selectors.index.filasPrefactura).first().textContent().catch(() => '')
+      )?.trim() || '<sin texto>';
+      lastEvidence = `attempt=${attempt}, firstVisibleRowText="${firstVisibleRowText}"`;
+      logger.warn(`No se encontraron filas para cliente ${normalizedCliente}. ${lastEvidence}`);
+
+      if (attempt === 2) {
+        logger.info('Sin resultados tras reintentos iniciales. Recargando /prefactura/index para forzar refresco de grilla.');
+        await this.page.reload({ waitUntil: 'domcontentloaded' });
+        await this.waitForPrefacturaIndexGridLoaded({ timeoutMs: 12000 }).catch(() => {});
+      }
+
+      await this.page.waitForTimeout(1000 + attempt * 400);
+    }
+
+    await this.takeScreenshot('prefactura-index-sin-resultados');
+    throw new Error(
+      `Visualización fallida: No se encontraron prefacturas para el cliente ${normalizedCliente}. ${lastEvidence}`,
+    );
   }
 
   async buscarProformaEnIndexPorTransportista(transportistaName: string): Promise<string> {
@@ -906,6 +1061,47 @@ export class PrefacturaPage extends BasePage {
     }, { timeout: timeoutMs });
 
     logger.success('DataTable de proforma cargada en index');
+  }
+
+  private async waitForPrefacturaIndexGridLoaded(options?: { timeoutMs?: number }): Promise<void> {
+    const timeoutMs = options?.timeoutMs ?? 15000;
+    logger.info('⏳ Esperando carga de DataTable en /prefactura/index...');
+
+    await this.page.waitForSelector(this.selectors.index.tablaPrefacturas, { state: 'visible', timeout: timeoutMs });
+
+    await this.page.waitForFunction(() => {
+      const processing = document.querySelector('div.dataTables_processing') as HTMLElement | null;
+      const processingVisible = Boolean(
+        processing &&
+        processing.offsetParent !== null &&
+        getComputedStyle(processing).display !== 'none' &&
+        processing.innerText.trim().length > 0,
+      );
+
+      if (processingVisible) {
+        return false;
+      }
+
+      const rows = Array.from(
+        document.querySelectorAll(
+          'div.dataTables_wrapper table tbody tr, table#tabla-prefactura tbody tr, table.dataTable tbody tr, div.dataTables_scrollBody table tbody tr',
+        ),
+      );
+
+      if (rows.length === 0) {
+        return false;
+      }
+
+      const hasDataRows = rows.some((row) => {
+        const rowText = (row.textContent || '').trim();
+        return rowText.length > 0 && !/Ningún dato disponible/i.test(rowText);
+      });
+      const hasNoDataRow = rows.some((row) => /Ningún dato disponible/i.test((row.textContent || '').trim()));
+
+      return hasDataRows || hasNoDataRow;
+    }, { timeout: timeoutMs });
+
+    logger.success('DataTable de prefactura cargada en index');
   }
 
   private validateProformaIdOrThrow(rawId: string, lookupContext: ProformaLookupContext): string {
