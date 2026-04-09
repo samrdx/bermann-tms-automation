@@ -124,6 +124,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: [smoke-auth]
+    concurrency:
+      group: tms-atomic-${{ github.workflow }}-${{ github.ref_name }}-${{ matrix.environment }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
