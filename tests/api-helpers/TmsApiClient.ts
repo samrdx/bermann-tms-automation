@@ -432,6 +432,14 @@ export class TmsApiClient {
       throw new Error(`Failed to extract Transportista ID for: ${nombre}`);
     }
 
+    await this.assertEntityIndexedInGrid({
+      entityLabel: 'Transportista',
+      indexPath: '/transportistas/index',
+      searchValue: nombre,
+      expectedId: id,
+      expectedTokens: [nombre],
+    });
+
     logger.info(`✅ Transportista creado: ${nombre} | ID: ${id}`);
     entityTracker.register({ type: 'Transportista', name: nombre, id: String(id) });
     return String(id);
@@ -528,6 +536,13 @@ export class TmsApiClient {
 
     // ... (El resto de la lógica de extracción de ID se mantiene igual)
     const id = await this.extractIdAfterSave(nombre, 'Cliente');
+    await this.assertEntityIndexedInGrid({
+      entityLabel: 'Cliente',
+      indexPath: '/clientes/index',
+      searchValue: nombre,
+      expectedId: id,
+      expectedTokens: [nombre],
+    });
     entityTracker.register({ type: 'Cliente', name: nombre, id: String(id) });
     return id;
   }
@@ -634,7 +649,13 @@ export class TmsApiClient {
           const normalizedTarget = normalize(targetName);
           const rows = Array.from(document.querySelectorAll('table tbody tr')) as HTMLTableRowElement[];
 
-          const row = rows.find((item) => normalize(item.innerText || '').includes(normalizedTarget));
+          const rowByExactCell = rows.find((item) => {
+            const cells = Array.from(item.querySelectorAll('td')) as HTMLTableCellElement[];
+            return cells.some((cell) => normalize(cell.innerText || '') === normalizedTarget);
+          });
+
+          const rowByContains = rows.find((item) => normalize(item.innerText || '').includes(normalizedTarget));
+          const row = rowByExactCell || rowByContains;
           if (!row) {
             return { id: '', rowText: '' };
           }
@@ -1423,7 +1444,12 @@ export class TmsApiClient {
 
 
 
-  private async fillGenericContract(tipoVal: '1' | '2', entityName: string, selectId: string): Promise<string> {
+  private async fillGenericContract(
+    tipoVal: '1' | '2',
+    entityName: string,
+    selectId: string,
+    entityId?: string,
+  ): Promise<string> {
 
 
 
@@ -1562,14 +1588,14 @@ export class TmsApiClient {
       value?: string;
       text?: string;
       msg?: string;
-      matchType?: 'exact' | 'contains';
+      matchType?: 'exact' | 'contains' | 'id';
     } = { success: false, msg: 'Not started' };
     const maxRetries = 5;
 
     for (let i = 0; i < maxRetries; i++) {
       logger.info(`📋 Intentando seleccionar ${tipoVal === '1' ? 'Transportista' : 'Cliente'}: "${entityName}" (intento ${i + 1}/${maxRetries})...`);
 
-      selectionResult = await this.page.evaluate(({ selectIdFull, nombre }) => {
+      selectionResult = await this.page.evaluate(({ selectIdFull, nombre, expectedId }) => {
         const $ = (window as any).jQuery;
         if (!$) return { success: false, msg: 'jQuery not available' };
 
@@ -1585,11 +1611,16 @@ export class TmsApiClient {
             .toUpperCase();
 
         const target = normalize(nombre);
+        const normalizedExpectedId = normalize(expectedId || '');
         const options = $sel.find('option').toArray();
+
+        const idOption = normalizedExpectedId
+          ? options.find((opt: any) => normalize(String($(opt).val() || '')) === normalizedExpectedId)
+          : null;
 
         const exactOption = options.find((opt: any) => normalize($(opt).text() || '') === target);
         const containsOption = options.find((opt: any) => normalize($(opt).text() || '').includes(target));
-        const chosen = exactOption || containsOption;
+        const chosen = idOption || exactOption || containsOption;
 
         if (!chosen) return { success: false, msg: `Option matching "${nombre}" not found` };
 
@@ -1605,9 +1636,9 @@ export class TmsApiClient {
           success: true,
           value: val,
           text: ($(chosen).text() || '').trim(),
-          matchType: exactOption ? 'exact' : 'contains',
+          matchType: idOption ? 'id' : exactOption ? 'exact' : 'contains',
         };
-      }, { selectIdFull: selectId, nombre: entityName });
+      }, { selectIdFull: selectId, nombre: entityName, expectedId: entityId || '' });
 
       if (selectionResult.success) break;
 
@@ -1618,6 +1649,12 @@ export class TmsApiClient {
     if (!selectionResult.success) {
       logger.error(`❌ Selección de entidad fallida después de ${maxRetries} intentos: ${selectionResult.msg}`);
       throw new Error(`Failed to select ${entityName} after ${maxRetries} attempts: ${selectionResult.msg}`);
+    }
+
+    if (entityId && String(selectionResult.value || '') !== String(entityId)) {
+      throw new Error(
+        `Selected value mismatch for ${entityName}. Expected ID=${entityId}, actual=${selectionResult.value || 'EMPTY'}`,
+      );
     }
 
 
@@ -2062,12 +2099,12 @@ export class TmsApiClient {
 
   }
 
-  async createContratoCosto(transportistaNombre: string): Promise<string> {
-    return await this.fillGenericContract('1', transportistaNombre, 'contrato-transportista_id');
+  async createContratoCosto(transportistaNombre: string, transportistaId?: string): Promise<string> {
+    return await this.fillGenericContract('1', transportistaNombre, 'contrato-transportista_id', transportistaId);
   }
 
-  async createContratoVenta(clienteNombre: string): Promise<string> {
-    return await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id');
+  async createContratoVenta(clienteNombre: string, clienteId?: string): Promise<string> {
+    return await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id', clienteId);
   }
 
   // --- 6. PLANIFICAR VIAJE (FIX CARGA & AUTO-HEALING) ---

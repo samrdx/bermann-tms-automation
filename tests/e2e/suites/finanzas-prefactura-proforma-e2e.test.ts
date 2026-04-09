@@ -27,16 +27,17 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     const api = new TmsApiClient(page);
     await api.initialize();
 
-    const transName = NamingHelper.getTransportistaName().nombre;
-    const cliName = NamingHelper.getClienteName().nombre;
+    const runToken = (process.env.GITHUB_RUN_ID || `${Date.now()}`).slice(-6);
+    const transName = `${NamingHelper.getTransportistaName().nombre}_${runToken}`;
+    const cliName = `${NamingHelper.getClienteName().nombre}_${runToken}`;
     const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
 
     const transportistaId = await api.createTransportista(transName, generateValidChileanRUT());
     const clienteId = await api.createCliente(cliName);
     const patente = await api.createVehiculo(transName);
     const conductor = await api.createConductor(transName);
-    const contratoVenta = await api.createContratoVenta(cliName);
-    const contratoCosto = await api.createContratoCosto(transName);
+    const contratoVenta = await api.createContratoVenta(cliName, clienteId);
+    const contratoCosto = await api.createContratoCosto(transName, transportistaId);
 
     await test.step('Validar entidades base creadas antes del flujo encadenado', async () => {
       expect(transportistaId, `Transportista no creado correctamente para ${transName}`).toMatch(/^\d+$/);
