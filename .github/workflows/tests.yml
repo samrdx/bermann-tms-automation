@@ -183,9 +183,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.environment }}" == "QA" ]]; then
-            npm run qa:e2e:prefactura -- --project chromium-qa --workers 1
+            npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
           else
-            npm run demo:e2e:prefactura -- --project chromium-demo --workers 1
+            npm run demo:e2e:finanzas-full -- --project chromium-demo --workers 1
           fi
 
       - name: Generate Allure Report (${{ matrix.environment }})

@@ -1427,7 +1427,7 @@ export class TmsApiClient {
 
 
 
-    const nro = this.generateRandomId();
+    let nro = this.generateRandomId();
 
 
 
@@ -1557,7 +1557,13 @@ export class TmsApiClient {
 
 
     // 4. Select entity using jQuery (most reliable for Bootstrap Select)
-    let selectionResult: { success: boolean; value?: string; text?: string; msg?: string } = { success: false, msg: 'Not started' };
+    let selectionResult: {
+      success: boolean;
+      value?: string;
+      text?: string;
+      msg?: string;
+      matchType?: 'exact' | 'contains';
+    } = { success: false, msg: 'Not started' };
     const maxRetries = 5;
 
     for (let i = 0; i < maxRetries; i++) {
@@ -1570,13 +1576,24 @@ export class TmsApiClient {
         const $sel = $(`#${selectIdFull}`);
         if (!$sel.length) return { success: false, msg: `Select #${selectIdFull} not found` };
 
-        const matchingOption = $sel.find('option').filter(function (this: any) {
-          return ($(this).text() || '').toUpperCase().includes(nombre.toUpperCase());
-        });
+        const normalize = (value: string) =>
+          (value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toUpperCase();
 
-        if (!matchingOption.length) return { success: false, msg: `Option containing "${nombre}" not found` };
+        const target = normalize(nombre);
+        const options = $sel.find('option').toArray();
 
-        const val = matchingOption.val();
+        const exactOption = options.find((opt: any) => normalize($(opt).text() || '') === target);
+        const containsOption = options.find((opt: any) => normalize($(opt).text() || '').includes(target));
+        const chosen = exactOption || containsOption;
+
+        if (!chosen) return { success: false, msg: `Option matching "${nombre}" not found` };
+
+        const val = $(chosen).val();
         $sel.val(val).trigger('change');
 
         // Refresh Bootstrap Select visual if available
@@ -1584,7 +1601,12 @@ export class TmsApiClient {
           $sel.selectpicker('refresh');
         }
 
-        return { success: true, value: val, text: matchingOption.text() };
+        return {
+          success: true,
+          value: val,
+          text: ($(chosen).text() || '').trim(),
+          matchType: exactOption ? 'exact' : 'contains',
+        };
       }, { selectIdFull: selectId, nombre: entityName });
 
       if (selectionResult.success) break;
@@ -1600,7 +1622,9 @@ export class TmsApiClient {
 
 
 
-    logger.info(`✅ Seleccionado: ${selectionResult.text} (valor: ${selectionResult.value})`);
+    logger.info(
+      `✅ Seleccionado: ${selectionResult.text} (valor: ${selectionResult.value}, match=${selectionResult.matchType || 'unknown'})`,
+    );
 
 
 
@@ -1643,42 +1667,58 @@ export class TmsApiClient {
       });
     }
 
-    // 5. Save with navigation wait
+    // 5. Save with navigation wait (with one deterministic retry if still in /crear)
     logger.info('💾 Guardando encabezado del contrato...');
 
-    // FIX FIREFOX: Limpiar modal-backdrop residuales que bloquean page.click() en Firefox
-    await this.page.evaluate(() => {
-      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-      document.body?.classList.remove('modal-open');
-    });
-    await this.page.waitForTimeout(300);
+    const maxSaveAttempts = 2;
+    for (let saveAttempt = 1; saveAttempt <= maxSaveAttempts; saveAttempt++) {
+      // FIX FIREFOX: Limpiar modal-backdrop residuales que bloquean page.click() en Firefox
+      await this.page.evaluate(() => {
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body?.classList.remove('modal-open');
+      });
+      await this.page.waitForTimeout(300);
 
-    await Promise.all([
+      await Promise.all([
+        this.page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {
+          logger.warn('⚠️ Tiempo de espera de navegación agotado, verificando URL...');
+        }),
+        // FIX FIREFOX: JS click bypasea overlays invisibles que causan TimeoutError
+        this.page.evaluate(() => {
+          const btn = document.getElementById('btn_guardar') as HTMLElement;
+          if (btn) btn.click();
+          else console.error('btn_guardar not found');
+        })
+      ]);
 
+      const postSaveUrl = this.page.url();
+      if (!postSaveUrl.includes('/crear')) {
+        break;
+      }
 
+      if (saveAttempt < maxSaveAttempts) {
+        const diagnostic = await this.page.evaluate(() => {
+          const candidates = Array.from(document.querySelectorAll(
+            '.help-block, .help-block-error, .invalid-feedback, .alert, .alert-danger, .toast-message, .bootbox-body'
+          ));
+          return candidates
+            .map((el) => (el.textContent || '').trim())
+            .filter((text) => text.length > 0)
+            .slice(0, 3)
+            .join(' | ');
+        }).catch(() => '');
 
-      this.page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {
+        if (diagnostic) {
+          logger.warn(`⚠️ Guardado de contrato quedó en /crear. Diagnóstico UI: ${diagnostic}`);
+        }
 
-
-
-        logger.warn('⚠️ Tiempo de espera de navegación agotado, verificando URL...');
-
-
-
-      }),
-
-
-
-      // FIX FIREFOX: JS click bypasea overlays invisibles que causan TimeoutError
-      this.page.evaluate(() => {
-        const btn = document.getElementById('btn_guardar') as HTMLElement;
-        if (btn) btn.click();
-        else console.error('btn_guardar not found');
-      })
-
-
-
-    ]);
+        const newNro = this.generateRandomId();
+        logger.warn(`⚠️ Reintentando guardado de contrato con nuevo número [${newNro}] (intento ${saveAttempt + 1}/${maxSaveAttempts})`);
+        nro = newNro;
+        await this.page.fill('#contrato-nro_contrato', nro);
+        await this.page.waitForTimeout(400);
+      }
+    }
 
 
 
@@ -1728,6 +1768,8 @@ export class TmsApiClient {
       if (errorFields.length > 0) {
         throw new Error(`Contract save failed. Invalid fields: ${errorFields.join(', ')}`);
       }
+
+      throw new Error(`Contract save failed. Still in /crear after save without explicit field errors. URL=${currentUrl}`);
     } else {
       logger.info(`⚠️ Formulario de contrato enviado (URL: ${currentUrl})`);
     }
