@@ -2495,6 +2495,44 @@ export class TmsApiClient {
       return nroViaje;
     }
 
+    // Estrategia 3.5: Si seguimos en /crear, reintentar guardado una vez con click DOM nativo
+    if (currentUrl.includes('/viajes/crear')) {
+      logger.warn('⚠️ Seguimos en /viajes/crear sin señales de éxito; reintentando guardado con click DOM nativo...');
+
+      await this.page.evaluate(() => {
+        document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+        document.body?.classList.remove('modal-open');
+      });
+
+      await Promise.all([
+        this.page.waitForResponse(
+          (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
+          { timeout: 15000 },
+        ).catch(() => logger.warn('⚠️ Reintento guardado: no se capturó response /viajes/')), 
+        this.page.evaluate(() => {
+          const btn = document.getElementById('btn_guardar_form') as HTMLElement | null;
+          if (btn) btn.click();
+        }),
+      ]);
+
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(2000);
+
+      const retryToast = this.page.getByText('Viaje Creado con éxito', { exact: true });
+      if (await retryToast.isVisible({ timeout: 4000 }).catch(() => false)) {
+        logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast exacto en reintento)`);
+        entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
+        return nroViaje;
+      }
+
+      const retryUrl = this.page.url();
+      if (retryUrl.includes('/viajes/asignar') || retryUrl.includes('/viajes/index')) {
+        logger.info(`✅ Viaje [${nroViaje}] creado (redirect en reintento a ${retryUrl})`);
+        entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
+        return nroViaje;
+      }
+    }
+
     // Fallback: navegar a grilla y buscar (con retry loop para Firefox)
     logger.info('⚠️ Fallback: verificando en grilla de asignación con retry loop (Firefox-safe)...');
 
@@ -2508,6 +2546,12 @@ export class TmsApiClient {
       await this.page.goto(`${this.baseUrl}/viajes/asignar`);
       await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => { });
       await this.page.waitForTimeout(1000);
+
+      const clearFiltersBtn = this.page.locator('button:has-text("Quitar Filtros"), a:has-text("Quitar Filtros")').first();
+      if (await clearFiltersBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await clearFiltersBtn.click().catch(() => {});
+        await this.page.waitForTimeout(700);
+      }
 
       const searchInput = this.page.locator('#search');
       await searchInput.waitFor({ state: 'visible', timeout: 10000 }).catch(() => { });
