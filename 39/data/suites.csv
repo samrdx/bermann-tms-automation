@@ -1,0 +1,4 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","4335","authenticate","Autorización","Mon Apr 13 06:46:33 UTC 2026","passed","Mon Apr 13 06:46:38 UTC 2026","","","",""
+"","34045","Happy path: debe buscar, optimizar y crear viaje para un pedido elegible","chromium-qa","Mon Apr 13 06:08:28 UTC 2026","failed","Mon Apr 13 06:09:02 UTC 2026","Última Milla - Asignación de Pedido","","",""
+"","300759","Happy path: debe crear, seleccionar, optimizar y crear viaje para múltiples pedidos elegibles","firefox-demo","Mon Apr 13 06:46:39 UTC 2026","passed","Mon Apr 13 06:51:40 UTC 2026","Última Milla - Asignación batch de pedidos","","",""
