@@ -1,0 +1,181 @@
+2026-04-14 06:29:47 [INFO]: ENTORNO: DEMO 🎭
+2026-04-14 06:29:47 [WARN]: [UltimaMilla-AsignarPedidoBatch] ⚠️ No existe data operacional en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-base-entities-data-firefox-demo-nightly-demo-24382302394.json.
+2026-04-14 06:29:47 [WARN]: [UltimaMilla-AsignarPedidoBatch] ⚠️ Usando fallback determinístico de data operacional: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-demo-nightly-demo-24382302394.json
+2026-04-14 06:29:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🚀 Inicio — Última Milla asignación batch de pedidos
+2026-04-14 06:29:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🧾 Contexto: cliente=Demo_cli_global_721 | unidadNegocio=auto | batchSize=8 | pedidos=[513096 | 340140 | 930930 | 731237 | 522356 | 213305 | 385018 | 578327]
+2026-04-14 06:29:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:29:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:29:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] 📝 Fase 1 — Crear 8 pedidos elegibles
+2026-04-14 06:29:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 1/8. codigo=513096 | direccion=Argomedo 344, Santiago, Chile
+2026-04-14 06:30:02 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🔒 Unidad de Negocio detectada y bloqueada para la corrida batch: 123
+2026-04-14 06:30:08 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=513096
+2026-04-14 06:30:08 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 2/8. codigo=340140 | direccion=Av. Providencia 1208, Providencia, Chile
+2026-04-14 06:30:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=340140
+2026-04-14 06:30:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 3/8. codigo=930930 | direccion=Apoquindo 4500, Las Condes, Chile
+2026-04-14 06:30:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=930930
+2026-04-14 06:30:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 4/8. codigo=731237 | direccion=Santa Rosa 1240, Santiago, Chile
+2026-04-14 06:31:07 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=731237
+2026-04-14 06:31:07 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 5/8. codigo=522356 | direccion=Avenida Grecia 2000, Ñuñoa, Chile
+2026-04-14 06:31:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=522356
+2026-04-14 06:31:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 6/8. codigo=213305 | direccion=Neptuno 1314B, 9080679 Cerro Navia, Región Metropolitana
+2026-04-14 06:31:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=213305
+2026-04-14 06:31:47 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 7/8. codigo=385018 | direccion=Av. 5 de Abril 5940, 9160000 Estación Central, Región Metropolitana
+2026-04-14 06:32:07 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=385018
+2026-04-14 06:32:07 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Creando pedido 8/8. codigo=578327 | direccion=Placer 698, Santiago, Región Metropolitana
+2026-04-14 06:32:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedido batch creado: codigo=578327
+2026-04-14 06:32:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:32:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:32:27 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🔎 Fase 2 — Buscar y seleccionar pedidos batch
+2026-04-14 06:32:28 [INFO]: [UltimaMillaAsignarPage] Buscando pedidos asignables. cliente=Demo_cli_global_721 | unidad=123 | fecha=UI default date
+2026-04-14 06:32:31 [INFO]: [UltimaMillaAsignarPage] No se recibió fecha explícita para la búsqueda; se usará la fecha por defecto visible en UI.
+2026-04-14 06:32:32 [INFO]: [UltimaMillaAsignarPage] Búsqueda ejecutada. status=200 url=https://demo.bermanntms.cl/order/searchassign
+2026-04-14 06:32:33 [INFO]: [UltimaMillaAsignarPage] ✅ Búsqueda con resultados. filasDetectadas=8
+2026-04-14 06:32:41 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=434 | estrategia=native-checkbox-click
+2026-04-14 06:32:50 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=435 | estrategia=native-checkbox-click
+2026-04-14 06:32:58 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=436 | estrategia=native-checkbox-click
+2026-04-14 06:33:06 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=437 | estrategia=native-checkbox-click
+2026-04-14 06:33:15 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=438 | estrategia=native-checkbox-click
+2026-04-14 06:33:23 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=439 | estrategia=native-checkbox-click
+2026-04-14 06:33:31 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=440 | estrategia=native-checkbox-click
+2026-04-14 06:33:39 [INFO]: [UltimaMillaAsignarPage] ✅ Fila seleccionada correctamente. data-id=441 | estrategia=native-checkbox-click
+2026-04-14 06:33:39 [INFO]: [UltimaMillaAsignarPage] ✅ Selección batch completada. pedidos=513096 | 340140 | 930930 | 731237 | 522356 | 213305 | 385018 | 578327 | rowIds=434 | 435 | 436 | 437 | 438 | 439 | 440 | 441 | seleccionados=8
+2026-04-14 06:33:40 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Pedidos batch seleccionados: count=8 | rowIds=434 | 435 | 436 | 437 | 438 | 439 | 440 | 441
+2026-04-14 06:33:40 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:33:40 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:33:40 [INFO]: [UltimaMilla-AsignarPedidoBatch] ⚙️ Fase 3 — Configurar optimización
+2026-04-14 06:33:40 [INFO]: [UltimaMillaAsignarPage] ✅ Prerrequisitos validados. pedidos=8 | zonaValida=true
+2026-04-14 06:33:42 [INFO]: [UltimaMillaAsignarPage] ✅ Tipo de optimización seleccionado por value nativo. value=1 text=Rutas más rápidas
+2026-04-14 06:33:43 [INFO]: [UltimaMillaAsignarPage] ✅ Modo de optimización seleccionado por value nativo. value=1 text=Flexible
+2026-04-14 06:33:46 [INFO]: [UltimaMillaAsignarPage] ✅ Transportista y vehículo configurados. transportista=Demo_tra_andes_100 | vehiculo=Demo_veh_GA8622 - Demo_veh_GA8622
+2026-04-14 06:33:46 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Optimización batch preparada: transportista=Demo_tra_andes_100 | vehiculo=Demo_veh_GA8622 - Demo_veh_GA8622
+2026-04-14 06:33:46 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:33:46 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:33:46 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🗺️ Fase 4 — Optimizar y configurar viaje
+2026-04-14 06:33:46 [INFO]: [UltimaMillaAsignarPage] Ejecutando optimización de Última Milla
+2026-04-14 06:33:48 [INFO]: [UltimaMillaAsignarPage] ✅ Optimización completada: resultados y mapa visibles
+2026-04-14 06:33:48 [INFO]: [UltimaMillaAsignarPage] Configurando operación, servicio y conductores
+2026-04-14 06:33:50 [INFO]: [UltimaMillaAsignarPage] ✅ Tipo de Operación seleccionado por value nativo. value=1 text=Cristales
+2026-04-14 06:33:59 [WARN]: [UltimaMillaAsignarPage] ⚠️ No se capturó la respuesta esperada /getServiceType; continuando tras recarga visual.
+2026-04-14 06:34:00 [INFO]: [UltimaMillaAsignarPage] ✅ Tipo de Operación configurado: Cristales
+2026-04-14 06:34:01 [INFO]: [UltimaMillaAsignarPage] ✅ Tipo de Servicio seleccionado por value nativo. value=13 text=Roundtrip
+2026-04-14 06:34:01 [INFO]: [UltimaMillaAsignarPage] ✅ Tipo de Servicio configurado: Roundtrip
+2026-04-14 06:34:02 [INFO]: [UltimaMillaAsignarPage] ✅ Conductor asignado a ruta 1: 100447:Demo_con_josé Demo_con_araya
+2026-04-14 06:34:02 [INFO]: [UltimaMillaAsignarPage] ✅ Configuración post-optimización completa. operacion=Cristales | servicio=Roundtrip | conductores=100447:Demo_con_josé Demo_con_araya
+2026-04-14 06:34:02 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Viaje batch configurado: conductor=100447:Demo_con_josé Demo_con_araya
+2026-04-14 06:34:02 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:34:02 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:34:02 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🚚 Fase 5 — Crear viaje y verificar mutación
+2026-04-14 06:34:03 [INFO]: [UltimaMillaAsignarPage] ✅ Preflight createTrip OK. operacion=Cristales | servicio=Roundtrip | conductores=100447:Demo_con_josé Demo_con_araya
+2026-04-14 06:34:03 [INFO]: [UltimaMillaAsignarPage] Creando viaje. operacion=Cristales | servicio=Roundtrip | conductores=100447:Demo_con_josé Demo_con_araya
+2026-04-14 06:34:03 [INFO]: [UltimaMillaAsignarPage] ✅ POST /order/createtrip OK. status=200 url=https://demo.bermanntms.cl/order/createtrip
+2026-04-14 06:34:03 [WARN]: [UltimaMillaAsignarPage] ⚠️ POST /order/createtrip no expuso Trip ID utilizable en body/headers/request.
+2026-04-14 06:34:04 [INFO]: [UltimaMillaAsignarPage] Refresh de grilla detectado tras createTrip. status=200 url=https://demo.bermanntms.cl/order/searchassign
+2026-04-14 06:34:04 [INFO]: [UltimaMillaAsignarPage] ✅ Viaje creado correctamente. panelOptimizadoOculto=true | refreshHttp=true | gridMutated=true | filasAntes=8 | filasDespues=0
+2026-04-14 06:34:04 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ createTrip batch ejecutado. refresh=true | gridMutated=true
+2026-04-14 06:34:04 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:34:04 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:34:04 [INFO]: [UltimaMilla-AsignarPedidoBatch] 🧾 Fase 6 — Resolver Trip ID
+2026-04-14 06:34:04 [INFO]: [UltimaMillaPedidoIndexPage] Navegando a Última Milla > Listado de pedidos
+2026-04-14 06:34:05 [INFO]: [UltimaMillaPedidoIndexPage] Resolviendo Trip ID por UI. codigo=513096 | intento=1/8
+2026-04-14 06:34:05 [INFO]: [UltimaMillaPedidoIndexPage] Buscando pedido en /order/index. codigo=513096
+2026-04-14 06:34:06 [INFO]: [UltimaMillaPedidoIndexPage] ✅ Trip ID resuelto desde /order/index. codigo=513096 | tripId=7007 | source=link-text | intento=1
+2026-04-14 06:34:06 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Trip ID batch resuelto desde UI /order/index: 7007
+2026-04-14 06:34:06 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:34:06 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:34:06 [INFO]: [UltimaMilla-AsignarPedidoBatch] 📍 Fase 7 — Finalizar viaje batch desde monitoreo con estados aleatorios
+2026-04-14 06:34:06 [INFO]: [UltimaMillaMonitoreoPage] Navegando a Viajes > Monitoreo
+2026-04-14 06:34:08 [INFO]: [UltimaMillaMonitoreoPage] Configurando categoría = Ultima milla
+2026-04-14 06:34:10 [INFO]: [UltimaMillaMonitoreoPage] ✅ Categoría configurada: Ultima Milla
+2026-04-14 06:34:10 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 513096 con estado aleatorio=Entregado Parcial | requireTripTransition=false
+2026-04-14 06:34:10 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=513096 | estado=Entregado Parcial | fecha=14/04/2026 06:34
+2026-04-14 06:34:10 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:13 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:13 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=513096 tripId=7007
+2026-04-14 06:34:13 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=16 onclickSamples=[changeStatusLastMille(15040, 7007) | changeStatusLastMille(15040, 7007) | changeStatusLastMille(15041, 7007) | changeStatusLastMille(15041, 7007) | changeStatusLastMille(15042, 7007) | changeStatusLastMille(15042, 7007)]
+2026-04-14 06:34:13 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:13 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=Entregado Parcial (fecha/hora se autocompletan)
+2026-04-14 06:34:14 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:15 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=513096 | estado=Entregado Parcial | transition=false | requireTripTransition=false
+2026-04-14 06:34:15 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=513096 | estado=Entregado Parcial | transition=false | accionesPendientes=-1
+2026-04-14 06:34:15 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 340140 con estado aleatorio=Rechazado | requireTripTransition=false
+2026-04-14 06:34:15 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=340140 | estado=Rechazado | fecha=14/04/2026 06:34
+2026-04-14 06:34:15 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:17 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:17 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=340140 tripId=7007
+2026-04-14 06:34:17 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=14 onclickSamples=[changeStatusLastMille(15041, 7007) | changeStatusLastMille(15041, 7007) | changeStatusLastMille(15042, 7007) | changeStatusLastMille(15042, 7007) | changeStatusLastMille(15043, 7007) | changeStatusLastMille(15043, 7007)]
+2026-04-14 06:34:18 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:18 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=Rechazado (fecha/hora se autocompletan)
+2026-04-14 06:34:19 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:19 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=340140 | estado=Rechazado | transition=false | requireTripTransition=false
+2026-04-14 06:34:19 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=340140 | estado=Rechazado | transition=false | accionesPendientes=-1
+2026-04-14 06:34:19 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 930930 con estado aleatorio=Entregado | requireTripTransition=false
+2026-04-14 06:34:19 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=930930 | estado=Entregado | fecha=14/04/2026 06:34
+2026-04-14 06:34:19 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:22 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:22 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=930930 tripId=7007
+2026-04-14 06:34:22 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=12 onclickSamples=[changeStatusLastMille(15042, 7007) | changeStatusLastMille(15042, 7007) | changeStatusLastMille(15043, 7007) | changeStatusLastMille(15043, 7007) | changeStatusLastMille(15044, 7007) | changeStatusLastMille(15044, 7007)]
+2026-04-14 06:34:23 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:23 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=Entregado (fecha/hora se autocompletan)
+2026-04-14 06:34:23 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:24 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=930930 | estado=Entregado | transition=false | requireTripTransition=false
+2026-04-14 06:34:24 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=930930 | estado=Entregado | transition=false | accionesPendientes=-1
+2026-04-14 06:34:24 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 731237 con estado aleatorio=Entregado Parcial | requireTripTransition=false
+2026-04-14 06:34:24 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=731237 | estado=Entregado Parcial | fecha=14/04/2026 06:34
+2026-04-14 06:34:24 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:27 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:27 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=731237 tripId=7007
+2026-04-14 06:34:27 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=10 onclickSamples=[changeStatusLastMille(15043, 7007) | changeStatusLastMille(15043, 7007) | changeStatusLastMille(15044, 7007) | changeStatusLastMille(15044, 7007) | changeStatusLastMille(15045, 7007) | changeStatusLastMille(15045, 7007)]
+2026-04-14 06:34:28 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:28 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=Entregado Parcial (fecha/hora se autocompletan)
+2026-04-14 06:34:28 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:29 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=731237 | estado=Entregado Parcial | transition=false | requireTripTransition=false
+2026-04-14 06:34:29 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=731237 | estado=Entregado Parcial | transition=false | accionesPendientes=-1
+2026-04-14 06:34:29 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 522356 con estado aleatorio=No Entregado | requireTripTransition=false
+2026-04-14 06:34:29 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=522356 | estado=No Entregado | fecha=14/04/2026 06:34
+2026-04-14 06:34:29 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:32 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:32 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=522356 tripId=7007
+2026-04-14 06:34:32 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=8 onclickSamples=[changeStatusLastMille(15044, 7007) | changeStatusLastMille(15044, 7007) | changeStatusLastMille(15045, 7007) | changeStatusLastMille(15045, 7007) | changeStatusLastMille(15046, 7007) | changeStatusLastMille(15046, 7007)]
+2026-04-14 06:34:32 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:32 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=No Entregado (fecha/hora se autocompletan)
+2026-04-14 06:34:33 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:34 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=522356 | estado=No Entregado | transition=false | requireTripTransition=false
+2026-04-14 06:34:34 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=522356 | estado=No Entregado | transition=false | accionesPendientes=-1
+2026-04-14 06:34:34 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 213305 con estado aleatorio=Entregado | requireTripTransition=false
+2026-04-14 06:34:34 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=213305 | estado=Entregado | fecha=14/04/2026 06:34
+2026-04-14 06:34:34 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:37 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:37 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=213305 tripId=7007
+2026-04-14 06:34:37 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=6 onclickSamples=[changeStatusLastMille(15045, 7007) | changeStatusLastMille(15045, 7007) | changeStatusLastMille(15046, 7007) | changeStatusLastMille(15046, 7007) | changeStatusLastMille(15047, 7007) | changeStatusLastMille(15047, 7007)]
+2026-04-14 06:34:37 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:37 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=Entregado (fecha/hora se autocompletan)
+2026-04-14 06:34:38 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:38 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=213305 | estado=Entregado | transition=false | requireTripTransition=false
+2026-04-14 06:34:38 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=213305 | estado=Entregado | transition=false | accionesPendientes=-1
+2026-04-14 06:34:38 [INFO]: [UltimaMilla-AsignarPedidoBatch] ➡️ Actualizando pedido batch 385018 con estado aleatorio=No Entregado | requireTripTransition=false
+2026-04-14 06:34:38 [INFO]: [UltimaMillaMonitoreoPage] Actualizando pedido en monitoreo. tripId=7007 | pedido=385018 | estado=No Entregado | fecha=14/04/2026 06:34
+2026-04-14 06:34:38 [INFO]: [UltimaMillaMonitoreoPage] Buscando viaje en monitoreo. tripId=7007
+2026-04-14 06:34:41 [INFO]: [UltimaMillaMonitoreoPage] ✅ Resultado de monitoreo visible para tripId=7007
+2026-04-14 06:34:41 [INFO]: [UltimaMillaMonitoreoPage] Abriendo Horario GPS para pedido=385018 tripId=7007
+2026-04-14 06:34:41 [INFO]: [UltimaMillaMonitoreoPage] ✅ Clic en Agregar para tripId=7007 vía JS. attempt=1 clicked=true matchedByTrip=true agregarCount=4 onclickSamples=[changeStatusLastMille(15046, 7007) | changeStatusLastMille(15046, 7007) | changeStatusLastMille(15047, 7007) | changeStatusLastMille(15047, 7007)]
+2026-04-14 06:34:42 [INFO]: [UltimaMillaMonitoreoPage] ✅ Modal Última Milla abierto
+2026-04-14 06:34:42 [INFO]: [UltimaMillaMonitoreoPage] Completando modal Última Milla. estado=No Entregado (fecha/hora se autocompletan)
+2026-04-14 06:34:43 [INFO]: [UltimaMillaMonitoreoPage] Guardando modal Última Milla
+2026-04-14 06:34:43 [INFO]: [UltimaMillaMonitoreoPage] ✅ Estado aplicado. tripId=7007 | pedido=385018 | estado=No Entregado | transition=false | requireTripTransition=false
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Estado aplicado en monitoreo. pedido=385018 | estado=No Entregado | transition=false | accionesPendientes=-1
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] [OK] ✅ Happy path batch completado en 296.61s
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] 
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] 📊 Resumen de ejecución batch
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Cliente: Demo_cli_global_721
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Batch size solicitado: 8
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Pedidos creados: 513096 | 340140 | 930930 | 731237 | 522356 | 213305 | 385018 | 578327
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Row ids asignación: 434 | 435 | 436 | 437 | 438 | 439 | 440 | 441
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Cantidad seleccionada: 8
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Trip ID: 7007
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Vehículo: Demo_veh_GA8622 - Demo_veh_GA8622
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Transportista: Demo_tra_andes_100
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Conductor(es): 100447:Demo_con_josé Demo_con_araya
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Estados aplicados: 513096:Entregado Parcial | 340140:Rechazado | 930930:Entregado | 731237:Entregado Parcial | 522356:No Entregado | 213305:Entregado | 385018:No Entregado
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Refresh detectado: true
+2026-04-14 06:34:43 [INFO]: [UltimaMilla-AsignarPedidoBatch] • Mutación de grilla: true
