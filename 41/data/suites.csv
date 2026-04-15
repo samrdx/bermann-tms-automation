@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","4678","authenticate","Autorización","Wed Apr 15 06:08:08 UTC 2026","passed","Wed Apr 15 06:08:13 UTC 2026","","","",""
+"","37758","Deberia crear un Contrato Tipo Costo correctamente y asociarlo a un transportista","chromium-qa","Wed Apr 15 05:27:01 UTC 2026","failed","Wed Apr 15 05:27:39 UTC 2026","[C01] Contratos - Tipo Costo","","",""
+"","48067","Deberia crear un Contrato Tipo Costo correctamente y asociarlo a un transportista","chromium-qa","Wed Apr 15 05:28:16 UTC 2026","failed","Wed Apr 15 05:29:04 UTC 2026","[C01] Contratos - Tipo Costo","","",""
+"","300652","Happy path: debe crear, seleccionar, optimizar y crear viaje para múltiples pedidos elegibles","firefox-demo","Wed Apr 15 06:08:14 UTC 2026","passed","Wed Apr 15 06:13:15 UTC 2026","Última Milla - Asignación batch de pedidos","","",""
+"","48636","Deberia crear un Contrato Tipo Costo correctamente y asociarlo a un transportista","firefox-qa","Wed Apr 15 05:29:06 UTC 2026","passed","Wed Apr 15 05:29:54 UTC 2026","[C01] Contratos - Tipo Costo","","",""
+"","33743","Deberia crear un Contrato Tipo Costo correctamente y asociarlo a un transportista","chromium-qa","Wed Apr 15 05:27:41 UTC 2026","failed","Wed Apr 15 05:28:14 UTC 2026","[C01] Contratos - Tipo Costo","","",""
