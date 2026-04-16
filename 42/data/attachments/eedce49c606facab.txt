@@ -1,0 +1,42 @@
+2026-04-16 06:10:54 [INFO]: ENTORNO: DEMO 🎭
+2026-04-16 06:10:54 [WARN]: [UltimaMilla-AsignarPedido] ⚠️ No existe data operacional en /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-base-entities-data-chromium-demo-nightly-demo-24493739254.json.
+2026-04-16 06:10:54 [WARN]: [UltimaMilla-AsignarPedido] ⚠️ Usando fallback determinístico de data operacional: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-demo-nightly-demo-24493739254.json
+2026-04-16 06:10:54 [INFO]: [UltimaMilla-AsignarPedido] 🚀 Inicio — Última Milla asignación de pedido
+2026-04-16 06:10:54 [INFO]: [UltimaMilla-AsignarPedido] 🧾 Contexto: cliente=Demo_cli_logistica_165 | unidadNegocio=auto | pedido=180921 | fecha=UI default date
+2026-04-16 06:10:54 [INFO]: [UltimaMilla-AsignarPedido] 
+2026-04-16 06:10:54 [INFO]: [UltimaMilla-AsignarPedido] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-16 06:10:54 [INFO]: [UltimaMilla-AsignarPedido] 📝 Fase 1 — Crear pedido elegible
+2026-04-16 06:11:04 [WARN]: [BasePage] ⚠️ Campo #pedido-peso no visible, saltando interacción ⚠️
+2026-04-16 06:11:07 [WARN]: [BasePage] ⚠️ Campo #pedido-ancho no visible, saltando interacción ⚠️
+2026-04-16 06:11:07 [WARN]: [BasePage] ⚠️ Campo #pedido-largo no visible, saltando interacción ⚠️
+2026-04-16 06:11:07 [WARN]: [BasePage] ⚠️ Campo #pedido-alto no visible, saltando interacción ⚠️
+2026-04-16 06:11:10 [INFO]: [UltimaMilla-AsignarPedido] 🔒 Unidad de Negocio detectada y bloqueada para la corrida: 123
+2026-04-16 06:11:27 [ERROR]: [UltimaMilla-AsignarPedido] ❌ Falló el happy path de asignación de pedido No se detectó confirmación visual de creación de pedido (toast o redirección esperada).
+Error: No se detectó confirmación visual de creación de pedido (toast o redirección esperada).
+    at file:///home/runner/work/bermann-tms-automation/bermann-tms-automation/tests/e2e/modules/ultimamilla/pedido-asignar.test.ts:105:17
+    at TestStepInfoImpl._runStepBody (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/testInfo.js:506:14)
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/common/testType.js:245:20
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/common/testType.js:243:18
+    at TestTypeImpl._step (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/common/testType.js:240:12)
+    at file:///home/runner/work/bermann-tms-automation/bermann-tms-automation/tests/e2e/modules/ultimamilla/pedido-asignar.test.ts:69:7
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/workerMain.js:323:9
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/testInfo.js:320:11
+    at TimeoutManager.withRunnable (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/timeoutManager.js:67:14)
+    at TestInfoImpl._runWithTimeout (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/testInfo.js:318:7)
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/workerMain.js:321:7
+    at WorkerMain._runTest (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/workerMain.js:296:5)
+    at WorkerMain.runTestGroup (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/worker/workerMain.js:196:11)
+    at process.<anonymous> (/home/runner/work/bermann-tms-automation/bermann-tms-automation/node_modules/playwright/lib/common/process.js:72:22)
+2026-04-16 06:11:27 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/pedido-asignar-happy-path-failure-1776319887312.png 📸
+2026-04-16 06:11:27 [ERROR]: [UltimaMilla-AsignarPedido] ❌ Screenshot de falla: ./reports/screenshots/pedido-asignar-happy-path-failure-1776319887312.png
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] 
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] 📊 Resumen de ejecución
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Cliente: Demo_cli_logistica_165
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Pedido código: 180921
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Row id asignación: N/A
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Trip ID: N/A
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Vehículo: N/A
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Transportista: N/A
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Conductor: N/A
+2026-04-16 06:11:27 [INFO]: [UltimaMilla-AsignarPedido] • Estado aplicado: N/A

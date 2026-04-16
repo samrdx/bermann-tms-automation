@@ -1,0 +1,5 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","4765","authenticate","Autorización","Thu Apr 16 06:10:48 UTC 2026","passed","Thu Apr 16 06:10:53 UTC 2026","","","",""
+"","33820","Happy path: debe buscar, optimizar y crear viaje para un pedido elegible","chromium-demo","Thu Apr 16 06:12:06 UTC 2026","failed","Thu Apr 16 06:12:39 UTC 2026","Última Milla - Asignación de Pedido","","",""
+"","43250","Debe asignar un viaje usando entidades del JSON","chromium-qa","Thu Apr 16 05:37:15 UTC 2026","failed","Thu Apr 16 05:37:59 UTC 2026","[V02] Viajes - Asignar","","",""
+"","44497","Debe asignar un viaje usando entidades del JSON","firefox-qa","Thu Apr 16 05:39:36 UTC 2026","failed","Thu Apr 16 05:40:20 UTC 2026","[V02] Viajes - Asignar","","",""
