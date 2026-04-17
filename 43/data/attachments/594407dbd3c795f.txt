@@ -1,0 +1,23 @@
+2026-04-17 05:35:35 [INFO]: ENTORNO: QA 🧪
+2026-04-17 05:35:35 [INFO]: ================================================================================
+2026-04-17 05:35:35 [INFO]: Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: QA]
+2026-04-17 05:35:35 [INFO]: ================================================================================
+2026-04-17 05:35:35 [INFO]: Fase 1: Cargando datos del JSON...
+2026-04-17 05:35:35 [INFO]: Usando data operacional primaria: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-qa-nightly-qa-24549197945.json (lookupKey=firefox:qa:nightly-qa-24549197945; requested=entities; normalized=entities)
+2026-04-17 05:35:35 [INFO]: 📦 Data operacional seleccionada: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-firefox-qa-nightly-qa-24549197945.json (source=entities; fallback=false)
+2026-04-17 05:35:35 [INFO]: ✅ Todos los prerrequisitos validados
+2026-04-17 05:35:35 [INFO]:    Transportista : Qa_tra_logistica_171
+2026-04-17 05:35:35 [INFO]:    Vehículo      : Qa_veh_MT7480
+2026-04-17 05:35:35 [INFO]:    Conductor     : Qa_con_ana Qa_con_rojas
+2026-04-17 05:35:35 [INFO]:    Nro Viaje     : 74816
+2026-04-17 05:35:35 [INFO]:    Search ID     : 74816 (nroViaje)
+2026-04-17 05:35:35 [INFO]: Fase 2: Navegando a /viajes/asignar... [isDemo=false]
+2026-04-17 05:35:35 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-04-17 05:35:41 [INFO]: 🔍 Buscando viaje "74816" y abriendo formulario de edición...
+2026-04-17 05:35:41 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 74816
+2026-04-17 05:35:41 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 74816 en la grilla de Asignación...
+2026-04-17 05:35:46 [INFO]: [AsignarViajesPage] ✅ Viaje 74816 encontrado por coincidencia de texto en la fila 1
+2026-04-17 05:35:48 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-04-17 05:35:48 [INFO]: ✅ Formulario de asignación de viaje cargado — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/9241
+2026-04-17 05:35:48 [INFO]: Fase 3: Seleccionando Transportista: Qa_tra_logistica_171
+2026-04-17 05:35:48 [INFO]: 🛡️ Robust Selection: Transportista "Qa_tra_logistica_171"
