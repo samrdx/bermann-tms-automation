@@ -1,0 +1,8 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","42092","Debe asignar un viaje usando entidades del JSON","chromium-qa","Sun Apr 19 05:34:42 UTC 2026","failed","Sun Apr 19 05:35:24 UTC 2026","[V02] Viajes - Asignar","","",""
+"","48928","Crear Contrato (Venta) usando seeded Cliente","chromium-demo","Sun Apr 19 05:41:04 UTC 2026","failed","Sun Apr 19 05:41:53 UTC 2026","[C02] Contratos - Tipo Venta","","",""
+"","52312","Debe asignar un viaje usando entidades del JSON","firefox-qa","Sun Apr 19 05:36:59 UTC 2026","failed","Sun Apr 19 05:37:51 UTC 2026","[V02] Viajes - Asignar","","",""
+"","4255","authenticate","Autorización","Sun Apr 19 05:40:59 UTC 2026","passed","Sun Apr 19 05:41:03 UTC 2026","","","",""
+"","49112","Crear Contrato (Venta) usando seeded Cliente","chromium-demo","Sun Apr 19 05:42:45 UTC 2026","failed","Sun Apr 19 05:43:34 UTC 2026","[C02] Contratos - Tipo Venta","","",""
+"","48927","Crear Contrato (Venta) usando seeded Cliente","chromium-demo","Sun Apr 19 05:41:55 UTC 2026","failed","Sun Apr 19 05:42:44 UTC 2026","[C02] Contratos - Tipo Venta","","",""
+"","47503","Crear Contrato (Venta) usando seeded Cliente","firefox-demo","Sun Apr 19 05:43:36 UTC 2026","passed","Sun Apr 19 05:44:24 UTC 2026","[C02] Contratos - Tipo Venta","","",""

@@ -1,0 +1,42 @@
+2026-04-19 05:41:55 [INFO]: ENTORNO: DEMO 🎭
+2026-04-19 05:41:55 [INFO]: ================================================================================
+2026-04-19 05:41:55 [INFO]: 🚀 Iniciando creación de Contrato Tipo Venta (Seeded Cliente Mode)
+2026-04-19 05:41:55 [INFO]: ================================================================================
+2026-04-19 05:41:55 [INFO]: 📋 Fase 1: Cargando datos del cliente sembrado...
+2026-04-19 05:41:55 [INFO]: Usando data operacional primaria: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-demo-nightly-demo-24621791025.json (lookupKey=chromium:demo:nightly-demo-24621791025; requested=entities; normalized=entities)
+2026-04-19 05:41:55 [INFO]: 📦 Data operacional seleccionada: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-demo-nightly-demo-24621791025.json (source=entities; fallback=false)
+2026-04-19 05:41:55 [INFO]: 📦 Usando cliente: "Demo_cli_logistica spa_165" (ID: 561)
+2026-04-19 05:41:55 [INFO]: 📋 Fase 2: Navegando al formulario de creación de contratos...
+2026-04-19 05:41:55 [INFO]: [ContratosFormPage] Navegando a la página de creación de contrato: /contrato/crear
+2026-04-19 05:41:58 [INFO]: [ContratosFormPage] ✅ Página de creación de contrato cargada y campo Nro Contrato visible
+2026-04-19 05:41:58 [INFO]: ✅ Formulario cargado
+2026-04-19 05:41:58 [INFO]: 📋 Fase 3-4: Completando el encabezado del contrato y guardando...
+2026-04-19 05:41:58 [INFO]: [ContratosFormPage] 📝 Completando información básica del contrato (Fase 1) - Tipo: Venta
+2026-04-19 05:41:58 [INFO]: [ContratosFormPage] Completando Nro Contrato: 318038
+2026-04-19 05:41:58 [INFO]: [ContratosFormPage] 🔽 Seleccionando Tipo Contrato = Venta...
+2026-04-19 05:42:04 [WARN]: [ContratosFormPage] ⚠️ ⚠️ fallback: clicking option via JS for "Venta"
+2026-04-19 05:42:05 [WARN]: [ContratosFormPage] ⚠️ ⚠️ No se detectó la respuesta esperada de rendersubview, pero se registraron todos los XHR
+2026-04-19 05:42:05 [INFO]: [ContratosFormPage] ⏳ Esperando AJAX...
+2026-04-19 05:42:07 [INFO]: [ContratosFormPage] ✅ Tipo Venta seleccionado
+2026-04-19 05:42:07 [INFO]: [ContratosFormPage] Seleccionando Subtipo: 1...
+2026-04-19 05:42:08 [INFO]: [ContratosFormPage] ✅ Subtipo 1 seleccionado
+2026-04-19 05:42:08 [INFO]: [ContratosFormPage] 🔽 Seleccionando cliente: "Demo_cli_logistica spa_165"...
+2026-04-19 05:42:08 [INFO]: [ContratosFormPage] Seleccionando Cliente: "Demo_cli_logistica spa_165"...
+2026-04-19 05:42:08 [INFO]: [ContratosFormPage] ✅ Cliente seleccionado: "DEMO_CLI_LOGISTICA SPA_165" (val: 561)
+2026-04-19 05:42:08 [INFO]: [ContratosFormPage] 📅 [DEMO] Seleccionando Fecha de vencimiento: 31/12/2026
+2026-04-19 05:42:10 [INFO]: [ContratosFormPage] ✅ Fecha de vencimiento establecida en 31/12/2026 vía daypicker
+2026-04-19 05:42:10 [INFO]: [ContratosFormPage] 🏢 [DEMO] Seleccionando Unidad de negocio: Defecto
+2026-04-19 05:42:11 [INFO]: [ContratosFormPage] ✅ Unidad de negocio establecida en "Defecto"
+2026-04-19 05:42:11 [INFO]: [ContratosFormPage] 🔧 Forzando la limpieza de cualquier fondo de modal...
+2026-04-19 05:42:12 [INFO]: [ContratosFormPage] 💾 Guardando encabezado básico del contrato...
+2026-04-19 05:42:42 [ERROR]: [ContratosFormPage] ❌ FALLO CRÍTICO en fillBasicContractInfo page.waitForURL: Timeout 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+page.waitForURL: Timeout 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at ContratosFormPage.fillBasicContractInfo (/home/runner/work/bermann-tms-automation/bermann-tms-automation/src/modules/contracts/pages/ContratosPage.ts:219:23)
+    at /home/runner/work/bermann-tms-automation/bermann-tms-automation/tests/e2e/modules/02-operaciones/contratos/contrato2cliente-crear.test.ts:85:28
+2026-04-19 05:42:43 [INFO]: [BasePage] Captura de Pantalla: ./reports/screenshots/fill-basic-contract-error-1776577362887.png 📸

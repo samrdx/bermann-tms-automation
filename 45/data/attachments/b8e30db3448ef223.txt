@@ -1,0 +1,34 @@
+2026-04-19 05:33:14 [INFO]: ENTORNO: QA 🧪
+2026-04-19 05:33:14 [INFO]: ================================================================================
+2026-04-19 05:33:14 [INFO]: Iniciando Prueba de Asignación de Viaje (Legacy from JSON) [ENV: QA]
+2026-04-19 05:33:14 [INFO]: ================================================================================
+2026-04-19 05:33:14 [INFO]: Fase 1: Cargando datos del JSON...
+2026-04-19 05:33:14 [INFO]: Usando data operacional primaria: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-24621791025.json (lookupKey=chromium:qa:nightly-qa-24621791025; requested=entities; normalized=entities)
+2026-04-19 05:33:14 [INFO]: 📦 Data operacional seleccionada: /home/runner/work/bermann-tms-automation/bermann-tms-automation/playwright/.data/legacy-entities-data-chromium-qa-nightly-qa-24621791025.json (source=entities; fallback=false)
+2026-04-19 05:33:14 [INFO]: ✅ Todos los prerrequisitos validados
+2026-04-19 05:33:14 [INFO]:    Transportista : Qa_tra_austral_828
+2026-04-19 05:33:14 [INFO]:    Vehículo      : Qa_veh_AOHU63
+2026-04-19 05:33:14 [INFO]:    Conductor     : Qa_con_sofía Qa_con_torres
+2026-04-19 05:33:14 [INFO]:    Nro Viaje     : 93089
+2026-04-19 05:33:14 [INFO]:    Search ID     : 93089 (nroViaje)
+2026-04-19 05:33:14 [INFO]: Fase 2: Navegando a /viajes/asignar... [isDemo=false]
+2026-04-19 05:33:14 [INFO]: [AsignarViajesPage] Navegando a la página de Asignar Viajes
+2026-04-19 05:33:20 [INFO]: 🔍 Buscando viaje "93089" y abriendo formulario de edición...
+2026-04-19 05:33:20 [INFO]: [AsignarViajesPage] Seleccionando fila de viaje: 93089
+2026-04-19 05:33:20 [INFO]: [AsignarViajesPage] 🔍 Buscando viaje 93089 en la grilla de Asignación...
+2026-04-19 05:33:25 [INFO]: [AsignarViajesPage] ✅ Viaje 93089 encontrado por coincidencia de texto en la fila 1
+2026-04-19 05:33:27 [INFO]: [AsignarViajesPage] ✅ Formulario de Asignación Cargado
+2026-04-19 05:33:27 [INFO]: ✅ Formulario de asignación de viaje cargado — URL: https://moveontruckqa.bermanntms.cl/viajes/editar/9251
+2026-04-19 05:33:27 [INFO]: Fase 3: Seleccionando Transportista: Qa_tra_austral_828
+2026-04-19 05:33:27 [INFO]: 🛡️ Robust Selection: Transportista "Qa_tra_austral_828"
+2026-04-19 05:33:31 [INFO]: ✅ Transportista verified: Qa_tra_austral_828
+2026-04-19 05:33:31 [INFO]: Fase 4: Esperando recarga de cascada...
+2026-04-19 05:33:32 [INFO]: Fase 5: Seleccionando Vehículo: Qa_veh_AOHU63
+2026-04-19 05:33:33 [INFO]: ✅ Bootstrap dropdown [viajes-vehiculo_uno_id] → "Qa_veh_AOHU63"
+2026-04-19 05:33:33 [INFO]: Fase 6: Seleccionando Conductor: Qa_con_sofía Qa_con_torres
+2026-04-19 05:33:34 [INFO]: ✅ Bootstrap dropdown [viajes-conductor_id] → "Qa_con_sofía Qa_con_torres"
+2026-04-19 05:33:34 [INFO]: Fase 7: Verificación final anti-reset para Transportista...
+2026-04-19 05:33:34 [INFO]: ✅ Transportista confirmado: "Qa_tra_austral_828"
+2026-04-19 05:33:35 [INFO]: Fase 8: Guardar asignación...
+2026-04-19 05:33:35 [INFO]: 💾 Guardado completado
+2026-04-19 05:33:35 [INFO]: Fase 9: Verificando asignación en grilla /viajes/asignar...
