@@ -1,3 +1,0 @@
-2026-03-10 04:53:43 [INFO]: ENTORNO: DEMO 🎭
-2026-03-10 04:53:43 [INFO]: [LoginPage] Logueandose con usuario: arivas
-2026-03-10 04:53:43 [INFO]: [BasePage] [PASO] 🟦 Navegando hacia: /login 🌐

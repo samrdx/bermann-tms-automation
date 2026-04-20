@@ -1,3 +1,0 @@
-2026-03-10 04:28:50 [INFO]: ENTORNO: QA 🧪
-2026-03-10 04:28:50 [INFO]: [LoginPage] Logueandose con usuario: arivas
-2026-03-10 04:28:50 [INFO]: [BasePage] [PASO] 🟦 Navegando hacia: /login 🌐
