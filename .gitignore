@@ -75,3 +75,7 @@ engram/
 # Keep Engram helper scripts tracked
 !scripts/engram/
 !scripts/engram/*.mjs
+
+# Mobile automation generated artifacts
+tmsapp/mobile/app.apk
+tmsapp/mobile/artifacts/

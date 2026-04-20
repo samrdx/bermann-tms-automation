@@ -127,7 +127,10 @@
     "sdd:sync:pull": "git pull --ff-only origin main",
     "sdd:sync:push": "node scripts/sdd/sync-push.mjs",
     "engram:preflight": "node scripts/engram/preflight.mjs",
-    "engram:topic-key": "node scripts/engram/topic-key.mjs"
+    "engram:topic-key": "node scripts/engram/topic-key.mjs",
+    "mobile:wdio": "npm --prefix ./tmsapp/mobile run wdio",
+    "mobile:test:smoke:auth": "npm --prefix ./tmsapp/mobile run test:smoke:auth",
+    "mobile:test:smoke:auth:local": "bash ./tmsapp/mobile/scripts/run-smoke-auth-local.sh"
   },
   "dependencies": {
     "dotenv": "^16.6.1",
