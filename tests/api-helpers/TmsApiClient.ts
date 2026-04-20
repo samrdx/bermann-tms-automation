@@ -13,6 +13,8 @@ import {
 import { entityTracker } from '../../src/utils/entityTracker.js';
 import { NamingHelper } from '../../src/utils/NamingHelper.js';
 
+const STRICT_DROPDOWN_WAIT_MS = 15000;
+
 
 export class TmsApiClient {
 
@@ -2108,8 +2110,8 @@ export class TmsApiClient {
   }
 
   // --- 6. PLANIFICAR VIAJE (FIX CARGA & AUTO-HEALING) ---
-  async createViaje(clienteNombre: string, nroViaje: string) {
-    logger.info(`🚚 UI: Creando Viaje [${nroViaje}] para Cliente [${clienteNombre}]`);
+  async createViaje(clienteNombre: string, nroViaje: string, clienteId?: string) {
+    logger.info(`🚚 UI: Creando Viaje [${nroViaje}] para Cliente [${clienteNombre}]${clienteId ? ` (ID: ${clienteId})` : ''}`);
 
     await this.page.goto(`${this.baseUrl}/viajes/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -2126,15 +2128,25 @@ export class TmsApiClient {
       const tipoServicioText = isDemo ? 'Lcl' : 'defecto';
 
       // 2. Dropdowns Simples (Operación, Servicio, Cliente)
-      // Usamos JS directo si es retry para mayor velocidad y seguridad
+      // PRIORIDAD DE BRANCH: cuando existe clienteId usamos selección estricta por ID.
+      // Si no existe, mantenemos el camino legacy por texto para backward compatibility.
+      // En retry solo dejamos JS directo para campos legacy; cliente sigue yendo por ID si está disponible.
       if (isRetry) {
         await this.forceSelectByText('tipo_operacion_form', tipoOperacionText); // Asumiendo ID del select oculto
         await this.forceSelectByText('viajes-tipo_servicio_id', tipoServicioText);
-        await this.forceSelectByText('viajes-cliente_id', clienteNombre);
+        if (clienteId) {
+          await this.selectDropdownByIdStrict('viajes-cliente_id', clienteId, 'Cliente');
+        } else {
+          await this.forceSelectByText('viajes-cliente_id', clienteNombre);
+        }
       } else {
         await this.selectBootstrapDropdownSimple('button[data-id="tipo_operacion_form"]', tipoOperacionText, 'Tipo Operación');
         await this.selectBootstrapDropdownSimple('button[data-id="viajes-tipo_servicio_id"]', tipoServicioText, 'Tipo Servicio');
-        await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
+        if (clienteId) {
+          await this.selectDropdownByIdStrict('viajes-cliente_id', clienteId, 'Cliente');
+        } else {
+          await this.selectBootstrapDropdownSimple('button[data-id="viajes-cliente_id"]', clienteNombre, 'Cliente');
+        }
       }
 
       if (!isRetry) await this.page.waitForTimeout(1000); // Esperar carga de datos del cliente
@@ -3188,6 +3200,95 @@ export class TmsApiClient {
         }
       }
     }, { id: selectId, text: textToSelect });
+  }
+
+  private async selectDropdownByIdStrict(
+    selectId: string,
+    valueToSelect: string,
+    fieldName: string,
+    timeoutMs: number = STRICT_DROPDOWN_WAIT_MS,
+  ): Promise<void> {
+    logger.info(`🎯 Selección estricta por ID para ${fieldName}: ${valueToSelect}`);
+
+    const selectLocator = this.page.locator(`select#${selectId}`).first();
+    const optionLocator = this.page.locator(`select#${selectId} option[value="${valueToSelect}"]`).first();
+
+    try {
+      await selectLocator.waitFor({ state: 'attached', timeout: timeoutMs });
+      await optionLocator.waitFor({ state: 'attached', timeout: timeoutMs });
+    } catch (error) {
+      const screenshotPath = `./reports/screenshots/${selectId}-timeout-${Date.now()}.png`;
+      logger.error(
+        `❌ Timeout esperando ${fieldName} con ID ${valueToSelect} en #${selectId} tras ${timeoutMs}ms`,
+        error,
+      );
+      await this.page.screenshot({ path: screenshotPath, fullPage: true });
+      throw new Error(
+        `Timeout esperando opción con ID ${valueToSelect} para ${fieldName} en #${selectId} tras ${timeoutMs}ms`,
+      );
+    }
+
+    const selectionResult = await this.page.evaluate(
+      ({ id, value }) => {
+        const select = document.getElementById(id) as HTMLSelectElement | null;
+        if (!select) {
+          return { success: false, reason: `Select #${id} no encontrado` };
+        }
+
+        const option = Array.from(select.options).find(opt => opt.value === value);
+        if (!option) {
+          return { success: false, reason: `Option value ${value} no disponible en #${id}` };
+        }
+
+        select.value = option.value;
+        option.selected = true;
+        select.dispatchEvent(new Event('input', { bubbles: true }));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        select.dispatchEvent(new Event('blur', { bubbles: true }));
+
+        // @ts-ignore
+        if (window.jQuery && window.jQuery(select).selectpicker) {
+          // @ts-ignore
+          window.jQuery(select).selectpicker('refresh');
+        }
+
+        const selectedOption = select.options[select.selectedIndex] ?? null;
+
+        return {
+          success: true,
+          selectedValue: select.value,
+          selectedText: selectedOption?.text?.trim() ?? '',
+        };
+      },
+      { id: selectId, value: valueToSelect },
+    );
+
+    if (!selectionResult.success) {
+      const screenshotPath = `./reports/screenshots/${selectId}-selection-error-${Date.now()}.png`;
+      logger.error(
+        `❌ No se pudo seleccionar ${fieldName} con ID ${valueToSelect} en #${selectId}: ${selectionResult.reason}`,
+      );
+      await this.page.screenshot({ path: screenshotPath, fullPage: true });
+      throw new Error(
+        `No se pudo seleccionar ${fieldName} con ID ${valueToSelect} en #${selectId}: ${selectionResult.reason}`,
+      );
+    }
+
+    if (selectionResult.selectedValue !== valueToSelect) {
+      const screenshotPath = `./reports/screenshots/${selectId}-verification-mismatch-${Date.now()}.png`;
+      logger.error(
+        `❌ Verificación fallida en ${fieldName}. Esperado ID=${valueToSelect}, actual=${selectionResult.selectedValue ?? 'EMPTY'}, texto="${selectionResult.selectedText ?? ''}"`,
+      );
+      await this.page.screenshot({ path: screenshotPath, fullPage: true });
+      throw new Error(
+        `Mismatched selection para ${fieldName} en #${selectId}. Esperado ID=${valueToSelect}, actual=${selectionResult.selectedValue ?? 'EMPTY'}`,
+      );
+    }
+
+    logger.info(
+      `✅ ${fieldName} seleccionado estrictamente por ID=${selectionResult.selectedValue} (${selectionResult.selectedText || 'sin texto'})`,
+    );
+    await this.page.waitForTimeout(300);
   }
 
 }

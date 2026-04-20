@@ -48,7 +48,8 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       expect(conductor, `Conductor inválido para ${transName}`).toBeTruthy();
     });
 
-    await api.createViaje(cliName, nroViaje);
+    logger.info(`🧭 Planificando viaje [${nroViaje}] usando cliente ID [${clienteId}] para evitar selección stale.`);
+    await api.createViaje(cliName, nroViaje, clienteId);
     logger.success(`Viaje [${nroViaje}] planificado.`);
 
     logger.fase(2, 'Asignar y finalizar viaje');
