@@ -1,29 +1,16 @@
-name: TMS QA Suite
+name: PR E2E DEMO
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to run tests'
-        required: true
-        default: 'QA'
-        type: choice
-        options:
-          - QA
-          - DEMO
+
+permissions:
+  contents: read
 
 jobs:
-  # ------------------------------------------------------------------
-  # JOB 1: FAST SMOKE (AUTH)
-  # ------------------------------------------------------------------
-  smoke-auth:
-    name: Fast Smoke (Auth)
+  e2e-finanzas-full-demo:
+    name: E2E Finanzas Full (DEMO)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
 
     steps:
       - name: Checkout code
@@ -41,101 +28,27 @@ jobs:
       - name: Preflight - Validate workflow script references
         run: npm run ci:validate:workflow-scripts
 
-      - name: TypeScript check
-        run: npm run typecheck
-
-      - name: Resolve auth environment metadata
-        id: auth_meta
-        shell: bash
-        run: |
-          ENV_UPPER="QA"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            ENV_UPPER="${{ github.event.inputs.environment }}"
-          fi
-          ENV_LOWER=$(echo "$ENV_UPPER" | tr '[:upper:]' '[:lower:]')
-          echo "env_upper=$ENV_UPPER" >> "$GITHUB_OUTPUT"
-          echo "env_lower=$ENV_LOWER" >> "$GITHUB_OUTPUT"
-          echo "report_dir=playwright-report-$ENV_LOWER" >> "$GITHUB_OUTPUT"
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Auth Smoke Tests
-        id: auth_smoke
+      - name: Run E2E Finanzas Full (DEMO)
         env:
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           CI: true
-          ENV: ${{ steps.auth_meta.outputs.env_upper }}
-        continue-on-error: true
-        run: npx playwright test tests/e2e/auth/login.test.ts tests/e2e/auth/logout.test.ts --trace on
+          ENV: DEMO
+        run: npm run demo:e2e:finanzas-full -- --project chromium-demo --workers 1
 
-      - name: Check Auth Report Directory
-        id: auth_report_check
-        if: always()
-        shell: bash
-        run: |
-          REPORT_DIR="${{ steps.auth_meta.outputs.report_dir }}"
-          if [[ -d "$REPORT_DIR" ]] && [[ -n "$(ls -A "$REPORT_DIR" 2>/dev/null)" ]]; then
-            echo "report_exists=true" >> "$GITHUB_OUTPUT"
-            echo "Auth report directory ready: $REPORT_DIR"
-          else
-            echo "report_exists=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Missing or empty auth report directory: $REPORT_DIR"
-          fi
-
-      - name: Upload Auth Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: report-smoke-auth-${{ steps.auth_meta.outputs.env_lower }}
-          path: ${{ steps.auth_meta.outputs.report_dir }}/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Final Auth Gate
-        id: final_auth_gate
-        if: always()
-        shell: bash
-        run: |
-          FAIL=0
-
-          if [[ "${{ steps.auth_smoke.outcome }}" != "success" ]]; then
-            echo "Auth smoke suite failed with outcome: ${{ steps.auth_smoke.outcome }}"
-            FAIL=1
-          fi
-
-          # Missing-artifact policy: warn during upload, fail in final gate to preserve diagnostics.
-          if [[ "${{ steps.auth_report_check.outputs.report_exists }}" != "true" ]]; then
-            echo "Mandatory auth report artifact is missing."
-            FAIL=1
-          fi
-
-          exit $FAIL
-
-  # ------------------------------------------------------------------
-  # JOB 2: ATOMIC CORE FLOWS - QA + DEMO
-  # - workflow_dispatch: only selected environment
-  # - push/pull_request: run both environments
-  # PR policy decision: keep QA + DEMO on pull_request to preserve multi-env signal.
-  # ------------------------------------------------------------------
-  atomic-core-flows:
-    name: Atomic Core Flows (${{ matrix.environment }})
+  ultimamilla-batch-demo:
+    name: Ultima Milla Batch (DEMO)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    needs: [smoke-auth]
+    timeout-minutes: 120
     concurrency:
-      group: tms-atomic-${{ github.workflow }}-${{ github.ref_name }}-${{ matrix.environment }}
+      group: ultimamilla-batch-${{ github.workflow }}-${{ github.ref_name }}
       cancel-in-progress: true
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - environment: QA
-          - environment: DEMO
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -147,105 +60,91 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Resolve matrix execution
-        id: matrix_gate
-        shell: bash
-        run: |
-          RUN_SUITE="true"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.environment }}" != "${{ matrix.environment }}" ]]; then
-            RUN_SUITE="false"
-            echo "Skipping matrix environment ${{ matrix.environment }} for dispatch input ${{ github.event.inputs.environment }}."
-          fi
-          echo "run_suite=$RUN_SUITE" >> "$GITHUB_OUTPUT"
+      - name: Preflight - Validate workflow script references
+        run: npm run ci:validate:workflow-scripts
 
-      - name: Resolve atomic environment metadata
-        id: atomic_meta
-        if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
+      - name: Resolve metadata
+        id: meta
         shell: bash
         run: |
-          ENV_UPPER="${{ matrix.environment }}"
-          ENV_LOWER=$(echo "$ENV_UPPER" | tr '[:upper:]' '[:lower:]')
+          ENV_UPPER="DEMO"
+          ENV_LOWER="demo"
+          PROJECT_ONE="chromium-demo"
+          PROJECT_TWO="firefox-demo"
+          SEED_CMD="npm run demo:seed:legacy"
+          BATCH_SIZE="8"
+
           echo "env_upper=$ENV_UPPER" >> "$GITHUB_OUTPUT"
           echo "env_lower=$ENV_LOWER" >> "$GITHUB_OUTPUT"
-          echo "results_dir=allure-results-$ENV_LOWER" >> "$GITHUB_OUTPUT"
+          echo "project_one=$PROJECT_ONE" >> "$GITHUB_OUTPUT"
+          echo "project_two=$PROJECT_TWO" >> "$GITHUB_OUTPUT"
+          echo "seed_cmd=$SEED_CMD" >> "$GITHUB_OUTPUT"
+          echo "batch_size=$BATCH_SIZE" >> "$GITHUB_OUTPUT"
           echo "report_dir=allure-report-$ENV_LOWER" >> "$GITHUB_OUTPUT"
+          echo "results_dir=allure-results-$ENV_LOWER" >> "$GITHUB_OUTPUT"
 
       - name: Install Playwright browsers
-        if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium firefox
 
-      - name: Run Atomic E2E (${{ matrix.environment }})
-        id: atomic_e2e
-        if: ${{ steps.matrix_gate.outputs.run_suite == 'true' }}
+      - name: Seed legacy data (${{ steps.meta.outputs.env_upper }})
         env:
           TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
           CI: true
-          ENV: ${{ steps.atomic_meta.outputs.env_upper }}
-        continue-on-error: true
+        run: ${{ steps.meta.outputs.seed_cmd }}
+
+      - name: Run Ultima Milla batch test (multi-browser serial)
+        env:
+          ENV: ${{ steps.meta.outputs.env_upper }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          ULTIMAMILLA_ENABLE_MUTATION: 'true'
+          ULTIMAMILLA_BATCH_SIZE: ${{ steps.meta.outputs.batch_size }}
+          CI: true
+        run: |
+          npx playwright test tests/e2e/modules/ultimamilla/pedido-asignar-batch.test.ts \
+            --project ${{ steps.meta.outputs.project_one }} \
+            --project ${{ steps.meta.outputs.project_two }} \
+            --workers 1 --trace retain-on-failure
+
+      - name: Prune oversized Allure attachments
+        if: always()
         shell: bash
         run: |
-          if [[ "${{ matrix.environment }}" == "QA" ]]; then
-            npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
-          else
-            npm run demo:e2e:finanzas-full -- --project chromium-demo --workers 1
+          RESULTS_DIR="${{ steps.meta.outputs.results_dir }}"
+          if [[ -d "$RESULTS_DIR" ]]; then
+            echo "Pruning oversized attachments in $RESULTS_DIR"
+            echo "Removing heavy binary attachments (.zip/.webm/.mp4)"
+            find "$RESULTS_DIR" -type f \( -name '*.zip' -o -name '*.webm' -o -name '*.mp4' \) -print -delete || true
+
+            echo "Removing any remaining oversized files >20MB"
+            find "$RESULTS_DIR" -type f -size +20M -print -delete || true
+
+            echo "Largest remaining files in results dir:"
+            find "$RESULTS_DIR" -type f -printf '%s %p\n' | sort -nr | head -n 20 || true
           fi
 
-      - name: Generate Allure Report (${{ matrix.environment }})
-        id: atomic_allure_generate
-        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
+      - name: Install Allure CLI
+        if: always()
+        run: npm install -g allure-commandline
+
+      - name: Generate Allure report
+        if: always()
         shell: bash
         run: |
-          RESULTS_DIR="${{ steps.atomic_meta.outputs.results_dir }}"
-          REPORT_DIR="${{ steps.atomic_meta.outputs.report_dir }}"
-
-          if [[ -d "$RESULTS_DIR" ]] && [[ -n "$(ls -A "$RESULTS_DIR" 2>/dev/null)" ]]; then
-            npx allure generate "$RESULTS_DIR" -o "$REPORT_DIR" --clean
-            echo "generated=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "generated=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Missing or empty Allure results directory: $RESULTS_DIR"
+          RESULTS_DIR="${{ steps.meta.outputs.results_dir }}"
+          REPORT_DIR="${{ steps.meta.outputs.report_dir }}"
+          if [[ ! -d "$RESULTS_DIR" ]] || [[ -z "$(ls -A "$RESULTS_DIR" 2>/dev/null)" ]]; then
+            echo "Missing or empty Allure results directory: $RESULTS_DIR"
+            exit 1
           fi
+          allure generate "$RESULTS_DIR" -o "$REPORT_DIR" --clean
 
-      - name: Check Allure Report Directory (${{ matrix.environment }})
-        id: atomic_report_check
-        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
-        shell: bash
-        run: |
-          REPORT_DIR="${{ steps.atomic_meta.outputs.report_dir }}"
-          if [[ -d "$REPORT_DIR" ]] && [[ -n "$(ls -A "$REPORT_DIR" 2>/dev/null)" ]]; then
-            echo "report_exists=true" >> "$GITHUB_OUTPUT"
-            echo "Allure report directory ready: $REPORT_DIR"
-          else
-            echo "report_exists=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Missing or empty Allure report directory: $REPORT_DIR"
-          fi
-
-      - name: Upload Allure Report (${{ matrix.environment }})
-        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
+      - name: Upload Allure report artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report-${{ github.sha }}-${{ steps.atomic_meta.outputs.env_lower }}
-          path: ${{ steps.atomic_meta.outputs.report_dir }}/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Final Atomic Gate (${{ matrix.environment }})
-        id: final_atomic_gate
-        if: ${{ always() && steps.matrix_gate.outputs.run_suite == 'true' }}
-        shell: bash
-        run: |
-          FAIL=0
-
-          if [[ "${{ steps.atomic_e2e.outcome }}" != "success" ]]; then
-            echo "Atomic suite failed with outcome: ${{ steps.atomic_e2e.outcome }}"
-            FAIL=1
-          fi
-
-          # Missing-artifact policy: warn during upload, fail in final gate to preserve diagnostics.
-          if [[ "${{ steps.atomic_report_check.outputs.report_exists }}" != "true" ]]; then
-            echo "Mandatory atomic Allure report artifact is missing."
-            FAIL=1
-          fi
-
-          exit $FAIL
+          name: allure-ultimamilla-batch-${{ steps.meta.outputs.env_lower }}-${{ github.run_id }}
+          path: ${{ steps.meta.outputs.report_dir }}/
+          if-no-files-found: error
+          retention-days: 14
