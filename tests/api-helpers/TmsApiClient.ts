@@ -221,10 +221,20 @@ export class TmsApiClient {
     await this.page.locator('select[name="Transportistas[tipo_transportista_id]"]').dispatchEvent('change');
     await this.page.waitForTimeout(500);
 
-    // Mantener "Permite Tercearizar viajes" en NO (valor '0' = No)
-    logger.info('⚙️ Manteniendo "Permite Tercearizar viajes" en NO...');
-    await this.page.selectOption('select[name="Transportistas[terceariza]"]', '0');
-    await this.page.locator('select[name="Transportistas[terceariza]"]').dispatchEvent('change');
+    // FIX: Campo "Permite Tercearizar viajes" puede NO existir en BD por configuración
+    // Verificar si existe antes de manipularlo
+    logger.info('⚙️ Verificando campo "Permite Tercearizar viajes"...');
+    const tercearizaSelect = this.page.locator('select[name="Transportistas[terceariza]"]');
+    const tercearizaExists = await tercearizaSelect.count() > 0 && await tercearizaSelect.isVisible().catch(() => false);
+
+    if (tercearizaExists) {
+      await tercearizaSelect.selectOption('0'); // Valor '0' = No
+      await tercearizaSelect.dispatchEvent('change');
+      logger.info('✅ Campo "Permite Tercearizar viajes" configurado en NO');
+    } else {
+      logger.info('⏭️ Campo "Permite Tercearizar viajes" no existe en formulario — omitiendo');
+    }
+
     await this.page.waitForTimeout(500);
 
     // Opcional: Establecer forma de pago (1 = Contado) para asegurar guardado exitoso
@@ -2124,8 +2134,11 @@ export class TmsApiClient {
       await this.page.fill('#viajes-nro_viaje', nroViaje);
 
       const isDemo = process.env.ENV === 'DEMO';
-      const tipoOperacionText = isDemo ? 'Distribución' : 'defecto';
-      const tipoServicioText = isDemo ? 'Lcl' : 'defecto';
+      // FIX: Valores correctos para QA usan nomenclatura Qa_to_* y Qa_TS_:
+      // - QA: Qa_to_std_* para Tipo Operación, Qa_TS_* para Tipo Servicio
+      // - Demo: Distribución / Lcl
+      const tipoOperacionText = isDemo ? 'Distribución' : 'Qa_to_';
+      const tipoServicioText = isDemo ? 'Lcl' : 'Qa_TS_';
 
       // 2. Dropdowns Simples (Operación, Servicio, Cliente)
       // PRIORIDAD DE BRANCH: cuando existe clienteId usamos selección estricta por ID.

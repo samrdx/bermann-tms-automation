@@ -67,7 +67,8 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
     const batchSize = resolveBatchSize(process.env.ULTIMAMILLA_BATCH_SIZE);
     const operationalData = loadOperationalData(testInfo);
     const expectedTripConfig = resolveExpectedTripConfiguration();
-    let unidadNegocioObjetivo = resolveAssignmentBusinessUnit(operationalData);
+    const unidadNegocioSecundaria = resolveAssignmentBusinessUnit(operationalData);
+    let unidadNegocioObjetivo: string | undefined;
     const clienteDropdownCandidates = ClientResolver.getDropdownCandidates(operationalData);
     const fallbackClientName = ClientResolver.resolveClientName(operationalData);
     const clienteObjetivo = clienteDropdownCandidates[0] || fallbackClientName;
@@ -109,7 +110,7 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
 
     logger.info('🚀 Inicio — Última Milla asignación batch de pedidos');
     logger.info(
-      `🧾 Contexto: cliente=${clienteObjetivo} | unidadNegocio=${unidadNegocioObjetivo || 'auto'} | batchSize=${batchSize} | pedidos=[${executionSummary.createdOrders.join(' | ')}]`
+      `🧾 Contexto: cliente=${clienteObjetivo} | unidadNegocio=Defecto -> ${unidadNegocioSecundaria || 'primera disponible UI'} | batchSize=${batchSize} | pedidos=[${executionSummary.createdOrders.join(' | ')}]`
     );
 
     await allure.parameter('Ambiente', (process.env.ENV || 'QA').trim().toUpperCase());
@@ -132,7 +133,8 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
           await ultimaMillaPage.fillCompleteForm(orderData as any, {
             clienteDropdownCandidates,
             environment: (process.env.ENV || 'QA').trim().toUpperCase(),
-            unidadNegocio: unidadNegocioObjetivo,
+            unidadNegocio: 'Defecto',
+            unidadNegocioFallback: unidadNegocioSecundaria,
           });
 
           if (!unidadNegocioObjetivo) {
@@ -184,7 +186,8 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
 
         await ultimaMillaAsignarPage.searchOrders({
           cliente: clienteObjetivo,
-          unidadNegocio: unidadNegocioObjetivo || 'Defecto',
+          unidadNegocio: 'Defecto',
+          unidadNegocioFallback: unidadNegocioObjetivo || unidadNegocioSecundaria,
         });
 
         const selectionResult = await ultimaMillaAsignarPage.selectOrderRowsByCodes(

@@ -7,6 +7,7 @@ const logger = createLogger('UltimaMillaAsignarPage');
 export interface AssignmentSearchCriteria {
   cliente: string;
   unidadNegocio: string;
+  unidadNegocioFallback?: string;
   fecha?: string;
 }
 
@@ -254,13 +255,13 @@ export class UltimaMillaAsignarPage extends BasePage {
   async searchOrders(criteria: AssignmentSearchCriteria): Promise<Locator> {
     return this.withActionScreenshot('ultimamilla-asignar-search-error', async () => {
       logger.info(
-        `Buscando pedidos asignables. cliente=${criteria.cliente} | unidad=${criteria.unidadNegocio} | fecha=${formatSearchDateDiagnostic(criteria.fecha)}`
+        `Buscando pedidos asignables. cliente=${criteria.cliente} | unidad=${criteria.unidadNegocio} | unidadFallback=${criteria.unidadNegocioFallback || 'N/A'} | fecha=${formatSearchDateDiagnostic(criteria.fecha)}`
       );
 
       await this.resetPersistedFilters();
       await this.clearTextSearch();
       await this.selectCliente(criteria.cliente);
-      await this.selectUnidadNegocio(criteria.unidadNegocio);
+      await this.selectUnidadNegocioWithFallback(criteria.unidadNegocio, criteria.unidadNegocioFallback);
       if (criteria.fecha) {
         await this.setFechaEntrega(criteria.fecha);
       } else {
@@ -822,6 +823,25 @@ export class UltimaMillaAsignarPage extends BasePage {
     });
   }
 
+  private async selectUnidadNegocioWithFallback(primary: string, fallback?: string): Promise<void> {
+    try {
+      await this.selectUnidadNegocio(primary);
+      return;
+    } catch (primaryError) {
+      const normalizedFallback = fallback?.trim();
+      if (normalizedFallback && normalizedFallback.toLowerCase() !== primary.trim().toLowerCase()) {
+        logger.warn(
+          `No se pudo seleccionar Unidad de Negocio primaria "${primary}". Aplicando fallback explícito "${normalizedFallback}".`,
+          primaryError
+        );
+        await this.selectUnidadNegocio(normalizedFallback);
+        return;
+      }
+
+      throw primaryError;
+    }
+  }
+
   private async setFechaEntrega(fecha: string): Promise<void> {
     logger.debug(`Configurando fecha exacta de entrega: ${fecha}`);
 
@@ -1153,7 +1173,22 @@ export class UltimaMillaAsignarPage extends BasePage {
   private async findBestTextOption(selectSelector: string, expectedText: string): Promise<SelectOptionData | undefined> {
     const normalizedExpected = this.normalizeValue(expectedText);
     const options = await this.getUsableOptions(selectSelector);
-    return options.find(option => this.normalizeValue(option.text) === normalizedExpected);
+    
+    // Primero buscar coincidencia exacta
+    const exactMatch = options.find(option => this.normalizeValue(option.text) === normalizedExpected);
+    if (exactMatch) return exactMatch;
+    
+    // Si no hay coincidencia exacta, buscar coincidencia parcial (para prefijos como "Qa_to_std_")
+    const partialMatch = options.find(option => 
+      this.normalizeValue(option.text).includes(normalizedExpected) || 
+      normalizedExpected.includes(this.normalizeValue(option.text))
+    );
+    if (partialMatch) {
+      logger.debug(`✅ Match parcial encontrado para "${expectedText}": ${partialMatch.text}`);
+      return partialMatch;
+    }
+    
+    return undefined;
   }
 
   private async resolveVehicleSelectSelector(): Promise<string> {
@@ -1212,11 +1247,13 @@ export class UltimaMillaAsignarPage extends BasePage {
   }
 
   private getTargetOperationTypeLabel(): string {
-    return this.isDemoEnvironment() ? 'Cristales' : 'defecto';
+    // QA usa nomenclatura Qa_to_std_* (creados en smoke config), Demo usa Cristales
+    return this.isDemoEnvironment() ? 'Cristales' : 'Qa_to_std_';
   }
 
   private getTargetServiceTypeLabel(): string {
-    return this.isDemoEnvironment() ? 'Roundtrip' : 'defecto';
+    // QA usa nomenclatura Qa_TS_* (creados en smoke config), Demo usa Roundtrip
+    return this.isDemoEnvironment() ? 'Roundtrip' : 'Qa_TS_';
   }
 
   private async probeCarrierAndVehicle(

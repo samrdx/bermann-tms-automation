@@ -33,12 +33,12 @@ export class UltimaMillaFormPage extends BasePage {
 
         // Dimensiones
         cantidad: '#pedido-cantidad',
-        peso: '#pedido-peso',
+        peso: '#peso',
         dimensionesContenedor: '#dimensiones-container', // To verify if needed for wait
-        ancho: '#pedido-ancho',
-        largo: '#pedido-largo',
-        alto: '#pedido-alto',
-        m3: '#pedido-metros_cubicos',
+        ancho: '#ancho',
+        largo: '#largo',
+        alto: '#alto',
+        m3: '#metros_cubicos',
 
         // Acciones y validaciones
         btnGuardar: 'button.btn-success:has-text("Guardar")',
@@ -73,6 +73,7 @@ export class UltimaMillaFormPage extends BasePage {
             clienteDropdownCandidates?: string[];
             environment?: string;
             unidadNegocio?: string;
+            unidadNegocioFallback?: string;
         }
     ): Promise<void> {
         logger.debug(`Llenando formulario de Pedido: ${data.codigoPedido}`);
@@ -89,7 +90,7 @@ export class UltimaMillaFormPage extends BasePage {
             await this.page.waitForTimeout(500);
         }
 
-        await this.selectUnidadNegocio(options?.unidadNegocio);
+        await this.selectUnidadNegocio(options?.unidadNegocio, options?.unidadNegocioFallback);
         if (options?.clienteDropdownCandidates && options.clienteDropdownCandidates.length > 0) {
             await this.selectClienteFromCandidates(options.clienteDropdownCandidates, {
                 environment: options.environment
@@ -109,11 +110,7 @@ export class UltimaMillaFormPage extends BasePage {
 
         if (data.dimensiones) {
             await this.selectVolumen('Dimensiones');
-            await this.fill(this.selectors.ancho, data.dimensiones.ancho);
-            await this.fill(this.selectors.largo, data.dimensiones.largo);
-            await this.fill(this.selectors.alto, data.dimensiones.alto);
-            await this.page.keyboard.press('Tab');
-            await this.page.waitForTimeout(500);
+            await this.fillDimensiones(data.dimensiones.ancho, data.dimensiones.largo, data.dimensiones.alto);
         }
 
         await this.fillDireccion(data.direccionBusqueda);
@@ -178,11 +175,32 @@ export class UltimaMillaFormPage extends BasePage {
         }
     }
 
-    async selectUnidadNegocio(unidadNegocio?: string): Promise<void> {
-        if (unidadNegocio?.trim()) {
-            logger.debug(`Seleccionando Unidad de Negocio: ${unidadNegocio}`);
-            await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton, unidadNegocio);
-            return;
+    async selectUnidadNegocio(unidadNegocio?: string, unidadNegocioFallback?: string): Promise<void> {
+        const normalizedPrimary = unidadNegocio?.trim();
+        const normalizedFallback = unidadNegocioFallback?.trim();
+
+        if (normalizedPrimary) {
+            try {
+                logger.debug(`Seleccionando Unidad de Negocio primaria: ${normalizedPrimary}`);
+                await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton, normalizedPrimary);
+                return;
+            } catch (error) {
+                if (normalizedFallback && normalizedFallback.toLowerCase() !== normalizedPrimary.toLowerCase()) {
+                    logger.warn(
+                        `No se pudo seleccionar Unidad de Negocio primaria "${normalizedPrimary}". Aplicando fallback explícito: "${normalizedFallback}".`,
+                        error
+                    );
+                    await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton, normalizedFallback);
+                    return;
+                }
+
+                logger.warn(
+                    `No se pudo seleccionar Unidad de Negocio primaria "${normalizedPrimary}". Aplicando fallback a primera opción disponible.`,
+                    error
+                );
+                await this.selectBootstrapDropdown(this.selectors.unidadNegocioButton);
+                return;
+            }
         }
 
         logger.debug('Seleccionando primera Unidad de Negocio disponible');
@@ -292,18 +310,20 @@ export class UltimaMillaFormPage extends BasePage {
         await this.page.waitForTimeout(2000);
     }
 
-    async fillDimensiones(ancho: string, largo: string, alto: string): Promise<void> {
+async fillDimensiones(ancho: string, largo: string, alto: string): Promise<void> {
         logger.info('Volviendo a completar dimensiones para activar el recálculo de m3 vía Javascript');
 
         // Esperar explícitamente a que JS y Bootstrap retiren el 'display: none' tras seleccionar Volumen->Dimensiones
         await this.page.waitForSelector(this.selectors.ancho, { state: 'visible', timeout: 5000 }).catch(() => {
-            logger.warn('⚠️ `#pedido-ancho` no se hizo visible a tiempo. El clear() podría fallar.');
+            logger.warn('⚠️ `#ancho` no se hizo visible a tiempo. El clear() podría fallar.');
         });
 
         // Limpiar para forzar un cambio real de valor que dispare los eventos JS
         await this.page.locator(this.selectors.ancho).clear();
         await this.page.locator(this.selectors.largo).clear();
         await this.page.locator(this.selectors.alto).clear();
+        
+        await this.page.waitForTimeout(500); // Wait for clear to settle
 
         await this.fill(this.selectors.ancho, ancho);
         await this.fill(this.selectors.largo, largo);
@@ -314,6 +334,9 @@ export class UltimaMillaFormPage extends BasePage {
         await this.page.locator(this.selectors.largo).dispatchEvent('change');
         await this.page.locator(this.selectors.alto).dispatchEvent('change');
         await this.page.locator(this.selectors.alto).dispatchEvent('blur');
+
+        // Wait for m3 calculation to complete via JavaScript
+        await this.page.waitForTimeout(3000);
 
         // Click out (h4 "Pedido") en lugar de Tab, para evitar hacer foco accidental en FechaEntrega y abrir el datepicker
         await this.page.locator('h4:has-text("Pedido")').first().click();
@@ -329,7 +352,18 @@ export class UltimaMillaFormPage extends BasePage {
     }
 
     async getMetrosCubicosValue(): Promise<string> {
-        return this.page.locator(this.selectors.m3).inputValue();
+        // Use evaluate to capture JS-calculated values
+        const value = await this.page.locator(this.selectors.m3).evaluate(el => el.value);
+        
+        // Also try innerText as fallback for different input types
+        if (!value || value === '') {
+            const textValue = await this.page.locator(this.selectors.m3).evaluate(el => el.innerText);
+            logger.debug(`Valor de m3 (innerText): "${textValue}"`);
+            return textValue || value;
+        }
+        
+        logger.debug(`Valor de m3 leído: "${value}"`);
+        return value;
     }
 
     async isCantidadVisible(): Promise<boolean> {

@@ -168,13 +168,25 @@ test.describe('Última Milla - Asignación de Pedido', () => {
 
       await test.step('Fase 6: Resolver Trip ID desde /order/index', async () => {
         logPhaseHeader(6, '🧾', 'Resolver Trip ID');
+        
+        // Wait for the trip to be fully processed and appear in the index
+        logger.info('Esperando a que el Trip se procese completamente...');
+        await page.waitForTimeout(5000);
+        
         await ultimaMillaPedidoIndexPage.navigate();
         await expect(page).toHaveURL(/.*\/order\/index/);
+        
+        // Additional wait for the table to load
+        await page.waitForTimeout(3000);
 
         let tripId: string | null = null;
 
         try {
-          tripId = await ultimaMillaPedidoIndexPage.extractTripIdFromResults(executionSummary.pedido);
+          // Try with more attempts and longer poll intervals
+          tripId = await ultimaMillaPedidoIndexPage.extractTripIdFromResults(executionSummary.pedido, {
+            maxAttempts: 12,
+            pollIntervalMs: 3000
+          });
           logger.success(`Trip ID resuelto desde UI /order/index: ${tripId}`);
         } catch (error) {
           logger.warn('No se pudo resolver Trip ID desde /order/index; evaluando fallback de createTrip.', error);
@@ -295,9 +307,10 @@ function resolveTerminalStatus(rawStatus: string | undefined): 'Entregado' | 'En
 
 function resolveExpectedTripConfiguration(): { operation: string; service: string } {
   const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
+  // QA usa nomenclatura Qa_to_std_* y Qa_TS_*, Demo usa Cristales y Roundtrip
   return {
-    operation: isDemo ? 'Cristales' : 'defecto',
-    service: isDemo ? 'Roundtrip' : 'defecto',
+    operation: isDemo ? 'Cristales' : 'Qa_to_std_',
+    service: isDemo ? 'Roundtrip' : 'Qa_TS_',
   };
 }
 

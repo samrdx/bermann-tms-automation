@@ -8,55 +8,55 @@ import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../src/utils/entityTracker.js';
 import { NamingHelper } from '../../../src/utils/NamingHelper.js';
+import { DataPathHelper } from '../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../api-helpers/OperationalDataLoader.js';
+import fs from 'fs';
 
 const logger = createLogger('PrefacturaCrearE2ETest');
 let prefacturaId = 'N/A';
 let createdEntities: any = {};
 
-test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
-  test.setTimeout(600000); // 10 min para creación de datos + flujo de viaje + prefactura (Demo puede ser lento)
+test.describe('[E2E] Finanzas - Prefactura (Usando datos seeded)', () => {
+  test.setTimeout(300000); // 5 min - solo prefactura, no creación de ecosistema
 
-  test('Flujo E2E Completo Atómico - PREFACTURAR VIAJE FINALIZADO', async ({ page }, testInfo) => {
+  test('Crear Prefactura usando datos seeded de regression:entities/contracts/trips', async ({ page }, testInfo) => {
     const startTime = Date.now();
     await allure.epic('TMS E2E Flow');
     await allure.feature('Modulo Finanzas');
-    await allure.story('Crear Viaje → Finalizar → Crear Prefactura');
+    await allure.story('Crear Prefactura desde viaje existente');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
-    logger.fase(1, 'Preparación de Datos (API)');
+    
+    // =================================================================
+    // Cargar datos seeded de ejecuciones anteriores
+    // =================================================================
+    logger.info('📦 Cargando datos seeded de regression:entities/contracts/trips...');
+    
+    const { data: operationalData } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+      logger,
+      purpose: 'prefactura con datos seedeados'
+    });
 
-    const api = new TmsApiClient(page);
-    await api.initialize();
+    const cliente = operationalData.seededCliente || operationalData.cliente;
+    const transportista = operationalData.seededTransportista;
+    const viajeData = operationalData.viaje;
+    
+    if (!cliente?.nombre) {
+      throw new Error('❌ No se encontró cliente seeded. Ejecuta regression:entities primero.');
+    }
+    if (!viajeData?.nroViaje || viajeData.status !== 'FINALIZADO') {
+      throw new Error('❌ No se encontró viaje FINALIZADO. Ejecuta regression:trips primero.');
+    }
 
-    // 1. Crear Ecosistema
-    const transName = NamingHelper.getTransportistaName().nombre;
-    const cliName = NamingHelper.getClienteName().nombre;
-    const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
+    const clienteNombre = cliente.nombreFantasia || cliente.nombre;
+    const transName = transportista?.nombre || operationalData.transportista;
+    const nroViaje = viajeData.nroViaje;
 
-    logger.subpaso(`Setup: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
+    logger.success(`Datos loaded: Cliente=[${clienteNombre}] Transportista=[${transName}] Viaje=[${nroViaje}] (${viajeData.status})`);
 
-    await api.createTransportista(transName, generateValidChileanRUT());
-    await api.createCliente(cliName);
-    const patente = await api.createVehiculo(transName);
-    const conductor = await api.createConductor(transName);
-
+    entityTracker.register({ type: 'Cliente', name: clienteNombre });
     entityTracker.register({ type: 'Transportista', name: transName });
-    entityTracker.register({ type: 'Cliente', name: cliName });
+    entityTracker.register({ type: 'Viaje', name: nroViaje, extra: viajeData.status });
 
-    // Contratos
-    const contratoVenta = await api.createContratoVenta(cliName);
-    const contratoCosto = await api.createContratoCosto(transName);
-
-    createdEntities = {
-      transportista: transName,
-      cliente: cliName,
-      vehiculo: patente,
-      conductor: conductor,
-      contratoVenta: contratoVenta,
-      contratoCosto: contratoCosto,
-      viaje: nroViaje
-    };
-
-    logger.info('Estabilizando navegador...');
     await page.waitForLoadState('domcontentloaded').catch(() => { });
     await page.waitForTimeout(2000);
 
@@ -66,43 +66,20 @@ test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
       document.body?.classList.remove('modal-open');
     });
 
-    // Planificar
-    await api.createViaje(cliName, nroViaje);
-    logger.success(`Viaje [${nroViaje}] planificado.`);
+    logger.success(`Viaje [${nroViaje}] ya se encuentra en estado: ${viajeData.status}`);
 
-    // 2. Asignar
-    logger.fase(2, `Asignación del Viaje [${nroViaje}]`);
-    const asignarPage = new AsignarPage(page);
-    await asignarPage.navigate();
-    await asignarPage.assignViaje(nroViaje, {
-      transportista: transName,
-      vehiculoPrincipal: patente,
-      conductor: conductor
-    });
+    // El viaje ya está FINALIZADO (de regression:trips) -可以直接 pasar a prefactura
+    // Solo verificamos que existe y está en estado correcto
+    logger.fase(2, 'Verificar Viaje Finalizado');
+    logger.success(`Viaje [${nroViaje}]确认 state: ${viajeData.status}. Listo para prefactura.`);
 
-    // Confirmar modal si aparece
-    const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
-    if (await btnConfirmar.isVisible({ timeout: 5000 })) {
-      await btnConfirmar.click();
-    }
-
-    await page.waitForTimeout(2000);
-    logger.success(`Viaje [${nroViaje}] asignado.`);
-
-    // 3. Monitoreo (Finalizar)
-    logger.fase(3, 'Finalizar Viaje');
-    const monitoreo = new MonitoreoPage(page);
-    await monitoreo.navegar();
-    await monitoreo.finalizarViaje(nroViaje);
-    logger.success(`Viaje [${nroViaje}] finalizado.`);
-
-    // 4. PREFACTURA (Flujo Nuevo)
+    // 3. PREFACTURA (Solo esta parte)
     logger.fase(4, 'Generación de Prefactura');
     const prefacturaPage = new PrefacturaPage(page);
 
     await test.step('Navegar y filtrar viajes finalizados', async () => {
       await prefacturaPage.navigateToCrear();
-      await prefacturaPage.filtrarViajesPorCliente(cliName);
+      await prefacturaPage.filtrarViajesPorCliente(clienteNombre);
     });
 
     await test.step('Generar Prefactura y procesar', async () => {
@@ -111,13 +88,13 @@ test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
 
     await test.step('Verificar prefactura en el Index', async () => {
       // Redirecciona automáticamente según spec, pero igual usamos el index como comprobación
-      prefacturaId = await prefacturaPage.buscarPrefacturaEnIndex(cliName);
+      prefacturaId = await prefacturaPage.buscarPrefacturaEnIndex(clienteNombre);
       // Registrar prefactura en entityTracker para el resumen
       entityTracker.register({
         type: 'Prefactura',
         name: 'Creada',
         id: prefacturaId,
-        extra: `Cliente: ${cliName}`
+        extra: `Cliente: ${clienteNombre}`
       });
     });
 
@@ -136,12 +113,9 @@ test.describe('[E2E] Finanzas - Prefactura (Atómico)', () => {
 
     // Parámetros visibles en el header del test en Allure
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
-    await allure.parameter('Transportista', transName);
-    await allure.parameter('Cliente', cliName);
-    await allure.parameter('Vehículo', patente);
-    await allure.parameter('Contrato Venta', createdEntities.contratoVenta);
-    await allure.parameter('Contrato Costo', createdEntities.contratoCosto);
+    await allure.parameter('Cliente', clienteNombre);
     await allure.parameter('Viaje', nroViaje);
+    await allure.parameter('Viaje Estado', viajeData.status);
     await allure.parameter('Prefactura ID', prefacturaId);
     await allure.parameter('Estado Final', '✅ PREFACTURADO');
     await allure.parameter('Duración (s)', executionTime);

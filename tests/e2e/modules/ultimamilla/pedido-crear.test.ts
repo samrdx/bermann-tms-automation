@@ -91,7 +91,9 @@ test.describe('Última Milla - Creación de Pedido', () => {
         logger.info(`Volumen calculado (m3): ${m3Calculado}`);
         expect(m3Calculado).not.toBe('');
         expect(m3Calculado).not.toBe('0');
-        expect(Number(m3Calculado)).toBeGreaterThan(0);
+        // Parsear número con formato europeo (3.000,00 -> 3000)
+        const m3Number = parseFloat(m3Calculado.replace(/\./g, '').replace(',', '.'));
+        expect(m3Number).toBeGreaterThan(0);
         logger.info('Cálculo de volumen operando correctamente');
 
         // PHASE 5: Guardado exitoso

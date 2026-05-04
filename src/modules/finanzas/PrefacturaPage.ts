@@ -156,11 +156,23 @@ export class PrefacturaPage extends BasePage {
     // 2. Esperar a que se carguen dependencias (Moneda)
     await this.page.waitForTimeout(2000);
 
-    // 3. Seleccionar Tipo de Moneda (Pesos Chilenos) - Usamos búsqueda por robustez
-    await this.selectBootstrapDropdownWithSearch('drop_currecy_type', 'Pesos Chilenos');
+    // 3. Seleccionar Tipo de Moneda (solo si el dropdown existe - Multimodeda activada en BD)
+    const currencyDropdownExists = await this.page.locator('button[data-id="drop_currecy_type"]').isVisible().catch(() => false);
+    if (currencyDropdownExists) {
+      logger.info('🪙 Multimodeda activa: seleccionando Moneda...');
+      await this.selectBootstrapDropdownWithSearch('drop_currecy_type', 'Pesos Chilenos');
+    } else {
+      logger.warn('⚠️ Multimodeda DESACTIVADA en BD: dropdown Moneda no visible, saltando...');
+    }
     
-    // 4. Seleccionar Incluye IVA (Si)
-    await this.selectBootstrapOption('drop_include_tax', 'Si');
+    // 4. Seleccionar Incluye IVA (solo si el dropdown existe - depende de configuración)
+    const ivaDropdownExists = await this.page.locator('button[data-id="drop_include_tax"]').isVisible().catch(() => false);
+    if (ivaDropdownExists) {
+      logger.info('📊 Dropdown IVA visible: seleccionando Incluye IVA...');
+      await this.selectBootstrapOption('drop_include_tax', 'Si');
+    } else {
+      logger.warn('⚠️ Dropdown IVA no visible (configuración BD), saltando...');
+    }
     
     // 5. Procesar
     await this.page.locator(this.selectors.crear.btnProcesar).click();
@@ -217,8 +229,23 @@ export class PrefacturaPage extends BasePage {
     );
 
     await this.page.waitForTimeout(1200);
-    await this.selectRequiredBootstrapDropdown('drop_currecy_type', 'Pesos Chilenos', 'Tipo de Moneda');
-    await this.selectRequiredBootstrapDropdown('drop_include_tax', 'Si', 'Incluye IVA');
+    
+    // Multimodeda: verificar si dropdowns existen (pueden estar desactivados en BD)
+    const currencyDropdownExists = await this.page.locator('button[data-id="drop_currecy_type"]').isVisible().catch(() => false);
+    if (currencyDropdownExists) {
+      logger.info('🪙 Multimodeda activa en proforma: seleccionando Moneda...');
+      await this.selectRequiredBootstrapDropdown('drop_currecy_type', 'Pesos Chilenos', 'Tipo de Moneda');
+    } else {
+      logger.warn('⚠️ Multimodeda DESACTIVADA en BD para proforma: dropdown Moneda no visible, saltando...');
+    }
+    
+    const ivaDropdownExists = await this.page.locator('button[data-id="drop_include_tax"]').isVisible().catch(() => false);
+    if (ivaDropdownExists) {
+      logger.info('📊 Dropdown IVA visible en proforma: seleccionando Incluye IVA...');
+      await this.selectRequiredBootstrapDropdown('drop_include_tax', 'Si', 'Incluye IVA');
+    } else {
+      logger.warn('⚠️ Dropdown IVA no visible en proforma (configuración BD), saltando...');
+    }
 
     await this.page.locator(this.selectors.crear.btnProcesar).click();
     await this.page.waitForLoadState('networkidle').catch(() => {});
@@ -970,20 +997,25 @@ export class PrefacturaPage extends BasePage {
 
     const isDemo = (process.env.ENV || 'QA').toUpperCase() === 'DEMO';
 
+    // Verificar si los dropdowns existen (Multimodeda puede estar desactivada en BD)
+    const currencyDropdownExists = await this.page.locator('button[data-id="drop_currecy_type"]').isVisible().catch(() => false);
+    const ivaDropdownExists = await this.page.locator('button[data-id="drop_include_tax"]').isVisible().catch(() => false);
+
+    // Solo validar Moneda e IVA si los dropdowns existen
     const checks = await Promise.all([
-      this.isBootstrapSelectionApplied('drop_currecy_type', 'Pesos Chilenos'),
-      this.isBootstrapSelectionApplied('drop_include_tax', 'Si'),
+      currencyDropdownExists ? this.isBootstrapSelectionApplied('drop_currecy_type', 'Pesos Chilenos') : Promise.resolve(true),
+      ivaDropdownExists ? this.isBootstrapSelectionApplied('drop_include_tax', 'Si') : Promise.resolve(true),
       isDemo
         ? this.isBootstrapSelectionValid('tipo_servicio_proforma')
         : this.isBootstrapSelectionApplied('tipo_servicio_proforma', 'defecto'),
     ]);
 
-    if (!checks[0]) {
+    if (currencyDropdownExists && !checks[0]) {
       await this.takeScreenshot('proforma-moneda-no-seleccionada-antes-guardar');
       throw new Error('Tipo de Moneda no está correctamente seleccionado antes de guardar Proforma.');
     }
 
-    if (!checks[1]) {
+    if (ivaDropdownExists && !checks[1]) {
       await this.takeScreenshot('proforma-iva-no-seleccionado-antes-guardar');
       throw new Error('Incluye IVA no está correctamente seleccionado antes de guardar Proforma.');
     }

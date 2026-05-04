@@ -85,8 +85,10 @@ test.describe('[V01] Viajes - Planificar', () => {
     // =================================================================
     const isDemo = process.env.ENV === 'DEMO';
     const defaults = {
-      tipoOperacion: isDemo ? 'Distribución' : 'defecto',
-      tipoServicio: isDemo ? 'Lcl' : 'defecto',
+      // QA usa nomenclatura Qa_to_std_* y Qa_TS_* (creados en smoke config)
+      // Los sufijos son dinámicos, el Page Object hará match parcial
+      tipoOperacion: isDemo ? 'Distribución' : 'Qa_to_std_',
+      tipoServicio: isDemo ? 'Lcl' : 'Qa_TS_',
       tipoViaje: isDemo ? 'DIRECTO' : 'Normal',
       unidadNegocio: isDemo ? 'Defecto' : 'Defecto',
       codigoCarga: isDemo ? 'CONTENEDOR DRY' : 'Test 1',

@@ -8,6 +8,9 @@ import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../src/utils/entityTracker.js';
 import { NamingHelper } from '../../../src/utils/NamingHelper.js';
+import { DataPathHelper } from '../../api-helpers/DataPathHelper.js';
+import { OperationalDataLoader } from '../../api-helpers/OperationalDataLoader.js';
+import fs from 'fs';
 
 interface CreatedEntities {
   transportista: string;
@@ -24,94 +27,65 @@ const PROFORMA_ID_REGEX = /^\d+$/;
 let proformaId = 'N/A';
 let createdEntities: CreatedEntities;
 
-test.describe('[E2E] Finanzas - Proforma (Atomico)', () => {
-  test.setTimeout(600000);
+test.describe('[E2E] Finanzas - Proforma (Usando datos seeded)', () => {
+  test.setTimeout(300000); // 5 min - solo proforma, no creación de ecosistema
 
-  test('Flujo E2E Completo Atomico - PROFORMAR VIAJE FINALIZADO', async ({ page }, testInfo) => {
+  test('Crear Proforma usando datos seeded de regression:entities/contracts/trips', async ({ page }, testInfo) => {
     const startTime = Date.now();
 
     await allure.epic('TMS E2E Flow');
     await allure.feature('Modulo Finanzas');
-    await allure.story('Crear Viaje -> Finalizar -> Crear Proforma');
+    await allure.story('Crear Proforma desde viaje existente');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
 
-    logger.fase(1, 'Preparacion de Datos (API)');
-    const api = new TmsApiClient(page);
-    await api.initialize();
-
-    const transName = NamingHelper.getTransportistaName().nombre;
-    const cliName = NamingHelper.getClienteName().nombre;
-    const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
-
-    logger.subpaso(`📦 Setup: Transportista=[${transName}] Cliente=[${cliName}] Viaje=[${nroViaje}]`);
-
-    const transportistaId = await api.createTransportista(transName, generateValidChileanRUT());
-    const clienteId = await api.createCliente(cliName);
-    const patente = await api.createVehiculo(transName);
-    const conductor = await api.createConductor(transName);
-
-    entityTracker.register({ type: 'Transportista', name: transName });
-    entityTracker.register({ type: 'Cliente', name: cliName });
-
-    const contratoVenta = await api.createContratoVenta(cliName);
-    const contratoCosto = await api.createContratoCosto(transName);
-
-    await test.step('Validar entidades base creadas antes del flujo Proforma', async () => {
-      expect(transportistaId, `Transportista no creado correctamente para ${transName}`).toMatch(/^\d+$/);
-      expect(clienteId, `Cliente no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
-      expect(contratoVenta, `Contrato venta no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
-      expect(contratoCosto, `Contrato costo no creado correctamente para ${transName}`).toMatch(/^\d+$/);
-      expect(patente, `Patente de vehiculo inválida para ${transName}`).toBeTruthy();
-      expect(conductor, `Conductor inválido para ${transName}`).toBeTruthy();
+    // =================================================================
+    // Cargar datos seeded de ejecuciones anteriores
+    // =================================================================
+    logger.info('📦 Cargando datos seeded de regression:entities/contracts/trips...');
+    
+    const { data: operationalData } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+      logger,
+      purpose: 'proforma con datos seedeados'
     });
 
-    createdEntities = {
-      transportista: transName,
-      cliente: cliName,
-      vehiculo: patente,
-      conductor,
-      contratoVenta,
-      contratoCosto,
-      viaje: nroViaje,
-    };
-
-    logger.info('🧹 Estabilizando navegador y limpiando overlays...');
-    await Promise.allSettled([
-      page.waitForLoadState('domcontentloaded'),
-      page.evaluate(() => {
-        document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
-        document.body?.classList.remove('modal-open');
-      }),
-    ]);
-    await page.waitForTimeout(1500);
-
-    await api.createViaje(cliName, nroViaje);
-    logger.success(`Viaje [${nroViaje}] planificado.`);
-
-    logger.fase(2, `Asignacion del Viaje [${nroViaje}]`);
-    const asignarPage = new AsignarPage(page);
-    await asignarPage.navigate();
-    await asignarPage.assignViaje(nroViaje, {
-      transportista: transName,
-      vehiculoPrincipal: patente,
-      conductor,
-    });
-
-    const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
-    if (await btnConfirmar.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await btnConfirmar.click();
+    const cliente = operationalData.seededCliente || operationalData.cliente;
+    const transportista = operationalData.seededTransportista;
+    const viajeData = operationalData.viaje;
+    
+    if (!cliente?.nombre) {
+      throw new Error('❌ No se encontró cliente seeded. Ejecuta regression:entities primero.');
+    }
+    if (!viajeData?.nroViaje || viajeData.status !== 'FINALIZADO') {
+      throw new Error('❌ No se encontró viaje FINALIZADO. Ejecuta regression:trips primero.');
     }
 
+    const clienteNombre = cliente.nombreFantasia || cliente.nombre;
+    const transName = transportista?.nombre || operationalData.transportista;
+    const nroViaje = viajeData.nroViaje;
+
+    logger.success(`Datos loaded: Cliente=[${clienteNombre}] Transportista=[${transName}] Viaje=[${nroViaje}] (${viajeData.status})`);
+
+    entityTracker.register({ type: 'Cliente', name: clienteNombre });
+    entityTracker.register({ type: 'Transportista', name: transName });
+    entityTracker.register({ type: 'Viaje', name: nroViaje, extra: viajeData.status });
+
+    await page.waitForLoadState('domcontentloaded').catch(() => { });
     await page.waitForTimeout(2000);
-    logger.success(`Viaje [${nroViaje}] asignado.`);
 
-    logger.fase(3, 'Finalizar Viaje');
-    const monitoreo = new MonitoreoPage(page);
-    await monitoreo.navegar();
-    await monitoreo.finalizarViaje(nroViaje);
-    logger.success(`Viaje [${nroViaje}] finalizado.`);
+    // Limpiar modales residuales
+    await page.evaluate(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+      document.body?.classList.remove('modal-open');
+    });
 
-    logger.fase(4, 'Generacion de Proforma');
+    logger.success(`Viaje [${nroViaje}] ya se encuentra en estado: ${viajeData.status}`);
+
+    // El viaje ya está FINALIZADO (de regression:trips) -可以直接 pasar a proforma
+    // Solo verificamos que existe y está en estado correcto
+    logger.fase(2, 'Verificar Viaje Finalizado');
+    logger.success(`Viaje [${nroViaje}]确认 state: ${viajeData.status}. Listo para proforma.`);
+
+    logger.fase(3, 'Generacion de Proforma');
     const proformaPage = new PrefacturaPage(page);
 
     await test.step('Navegar a /proforma/crear y filtrar por transportista', async () => {
@@ -150,12 +124,11 @@ test.describe('[E2E] Finanzas - Proforma (Atomico)', () => {
       contentType: 'text/plain',
     });
 
-    await allure.parameter('Transportista', createdEntities.transportista);
-    await allure.parameter('Cliente', createdEntities.cliente);
-    await allure.parameter('Vehiculo', createdEntities.vehiculo);
-    await allure.parameter('Contrato Venta', createdEntities.contratoVenta);
-    await allure.parameter('Contrato Costo', createdEntities.contratoCosto);
-    await allure.parameter('Viaje', createdEntities.viaje);
+    await allure.parameter('Ambiente', process.env.ENV || 'QA');
+    await allure.parameter('Cliente', clienteNombre);
+    await allure.parameter('Transportista', transName);
+    await allure.parameter('Viaje', nroViaje);
+    await allure.parameter('Viaje Estado', viajeData.status);
     await allure.parameter('Proforma ID', proformaId);
     await allure.parameter('Estado Final', '✅ PROFORMADO');
     await allure.parameter('Duracion (s)', executionTime);

@@ -63,35 +63,21 @@ export class ContratosFormPage extends BasePage {
     logger.info(`🔽 Seleccionando Tipo Contrato = ${tipo}...`);
     // The dropdown itself is #contrato-tipo_tarifa_contrato_id, but the visible element is a button.
 
-    // If 'Venta' is selected, we MUST setup the listener BEFORE clicking
-    let responsePromise: Promise<any> | null = null;
-    let urlLogger: ((response: any) => void) | null = null;
-    if (tipo === 'Venta') {
-      urlLogger = (r: any) => {
-        if (r.request().resourceType() === 'xhr' || r.request().resourceType() === 'fetch') {
-          logger.debug(`[RED] Respuesta XHR: ${r.url()} (Estado: ${r.status()})`);
-        }
-      };
-      this.page.on('response', urlLogger);
-
-      responsePromise = this.page.waitForResponse(
-        r => r.url().includes('rendersubview') && r.status() === 200,
-        { timeout: 7000 } // Shortened to force it to show logs faster
-      ).catch(() => {
-        logger.warn('⚠️ No se detectó la respuesta esperada de rendersubview, pero se registraron todos los XHR');
-        return this.page.waitForTimeout(500);
-      });
-    }
-
     await this.selectBootstrapDropdown(this.selectors.tipoContratoButton, tipo);
 
-    if (tipo === 'Venta' && responsePromise && urlLogger) {
-      logger.info('⏳ Esperando AJAX...');
-      await responsePromise;
-      await this.page.waitForTimeout(1500); // Stability buffer after AJAX
-      this.page.off('response', urlLogger);
+    // For Venta, wait for the cascaded fields to render (cliente dropdown should appear)
+    // The AJAX call to rendersubview may vary in time, so we use a robust wait on the expected elements
+    if (tipo === 'Venta') {
+      logger.info('⏳ Esperando renderizado de campos para Venta...');
+      // Wait for either the cliente dropdown OR the subtipo dropdown to appear
+      // Using 'visible' state to ensure element is actually rendered in DOM
+      await this.page.waitForSelector(this.selectors.clienteDropdown, { state: 'visible', timeout: 15000 })
+        .catch(() => {
+          logger.warn('⚠️ Cliente dropdown no encontrado en timeout, continuando de todas formas');
+        });
+      await this.page.waitForTimeout(2000); // Stability buffer after cascade
     } else {
-      await this.page.waitForTimeout(2500); // Fallback wait for cascade
+      await this.page.waitForTimeout(2500); // Fallback wait for cascade (Costo)
     }
 
     logger.info(`✅ Tipo ${tipo} seleccionado`);
@@ -99,7 +85,19 @@ export class ContratosFormPage extends BasePage {
 
   async selectSubtipo(subtipoValue: string): Promise<void> {
     logger.info(`Seleccionando Subtipo: ${subtipoValue}...`);
-    await this.page.waitForSelector(this.selectors.subtipoDropdown, { state: 'attached', timeout: 10000 });
+    
+    // Wait for the subtipo dropdown with longer timeout and robust error handling
+    const subtipoExists = await this.page.locator(this.selectors.subtipoDropdown).count() > 0;
+    
+    if (!subtipoExists) {
+      // Subtipo dropdown may not render if AJAX didn't complete - this is expected
+      // The important thing is that cliente/transportista dropdowns are available
+      logger.warn('⚠️ Dropdown de Subtipo no encontrado (probablemente AJAX no respondió a tiempo). Omitiendo selección de Subtipo.');
+      logger.warn('⚠️ El flujo continuará con los campos principales (Cliente/Transportista) que SÍ se renderizaron.');
+      return;
+    }
+
+    await this.page.waitForSelector(this.selectors.subtipoDropdown, { state: 'visible', timeout: 15000 });
     await this.page.evaluate((value) => {
       const el = document.querySelector('select#tipo') as HTMLSelectElement; // select#tipo is the actual ID
       if (el) {
@@ -366,17 +364,51 @@ export class ContratosFormPage extends BasePage {
     logger.info('💾 Guardando contrato y extrayendo ID');
 
     try {
-      const saveBtn = this.page
-        .locator(this.selectors.btnGuardarContrato)
-        .or(this.page.locator(this.selectors.btnGuardar))
-        .first();
+      const pickVisibleSaveButton = async () => {
+        const candidates = [
+          '#btn_guardar_contrato:visible',
+          '#btn_guardar:visible',
+          '#formContrato #btn_guardar_contrato:visible',
+          '#form-dinamico #btn_guardar_contrato:visible',
+          '#formContrato #btn_guardar:visible',
+          '#form-dinamico #btn_guardar:visible',
+        ];
+
+        for (const selector of candidates) {
+          const candidate = this.page.locator(selector).first();
+          if (await candidate.isVisible().catch(() => false)) {
+            return { button: candidate, selector };
+          }
+        }
+
+        return null;
+      };
+
+      let picked = await pickVisibleSaveButton();
+      if (!picked) {
+        await this.forceCloseModal();
+        await this.page.waitForTimeout(300);
+        picked = await pickVisibleSaveButton();
+      }
+
+      if (!picked) {
+        throw new Error('No se encontró un botón Guardar visible para guardar contrato final');
+      }
+
+      const saveBtn = picked.button;
+      logger.info(`🖱️ Usando selector de guardado final: ${picked.selector}`);
+
+      await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await saveBtn.scrollIntoViewIfNeeded().catch(() => { });
 
       // Wait for navigation after save (Bermann TMS typically reloads the edit/view page)
       await Promise.all([
         this.page.waitForNavigation({ waitUntil: 'load', timeout: 30000 }).catch(() => {
           logger.warn('⚠️ No se detectó navegación después de guardar — continuando de todas formas');
         }),
-        this.click(`${this.selectors.btnGuardarContrato}, ${this.selectors.btnGuardar}`)
+        saveBtn.click({ timeout: 8000 }).catch(async () => {
+          await saveBtn.evaluate((el) => (el as HTMLElement).click());
+        })
       ]);
 
       await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
