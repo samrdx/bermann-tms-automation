@@ -33,8 +33,8 @@ jobs:
 
       - name: Run E2E Finanzas Full (DEMO)
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
           CI: true
           ENV: DEMO
         run: npm run demo:e2e:finanzas-full -- --project chromium-demo --workers 1
@@ -69,42 +69,39 @@ jobs:
         run: |
           ENV_UPPER="DEMO"
           ENV_LOWER="demo"
-          PROJECT_ONE="chromium-demo"
-          PROJECT_TWO="firefox-demo"
+          PROJECT="chromium-demo"
           SEED_CMD="npm run demo:seed:legacy"
           BATCH_SIZE="8"
 
           echo "env_upper=$ENV_UPPER" >> "$GITHUB_OUTPUT"
           echo "env_lower=$ENV_LOWER" >> "$GITHUB_OUTPUT"
-          echo "project_one=$PROJECT_ONE" >> "$GITHUB_OUTPUT"
-          echo "project_two=$PROJECT_TWO" >> "$GITHUB_OUTPUT"
+          echo "project=$PROJECT" >> "$GITHUB_OUTPUT"
           echo "seed_cmd=$SEED_CMD" >> "$GITHUB_OUTPUT"
           echo "batch_size=$BATCH_SIZE" >> "$GITHUB_OUTPUT"
           echo "report_dir=allure-report-$ENV_LOWER" >> "$GITHUB_OUTPUT"
           echo "results_dir=allure-results-$ENV_LOWER" >> "$GITHUB_OUTPUT"
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox
+        run: npx playwright install --with-deps chromium
 
       - name: Seed legacy data (${{ steps.meta.outputs.env_upper }})
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
           CI: true
         run: ${{ steps.meta.outputs.seed_cmd }}
 
-      - name: Run Ultima Milla batch test (multi-browser serial)
+      - name: Run Ultima Milla batch test (Chromium serial)
         env:
           ENV: ${{ steps.meta.outputs.env_upper }}
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'arivas' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'arivas' }}
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
           ULTIMAMILLA_ENABLE_MUTATION: 'true'
           ULTIMAMILLA_BATCH_SIZE: ${{ steps.meta.outputs.batch_size }}
           CI: true
         run: |
           npx playwright test tests/e2e/modules/ultimamilla/pedido-asignar-batch.test.ts \
-            --project ${{ steps.meta.outputs.project_one }} \
-            --project ${{ steps.meta.outputs.project_two }} \
+            --project ${{ steps.meta.outputs.project }} \
             --workers 1 --trace retain-on-failure
 
       - name: Prune oversized Allure attachments

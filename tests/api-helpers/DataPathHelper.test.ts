@@ -48,7 +48,7 @@ test('normalizes legacy operational aliases and builds deterministic lookup meta
     assert.equal(context.normalizedSource, 'base');
     assert.equal(context.runId, 'run-42-qa');
     assert.equal(context.runIdSuffix, '-run-42-qa');
-    assert.equal(context.lookupKey, 'chromium:qa:run-42-qa');
+    assert.equal(context.lookupKey, 'qa:run-42-qa');
     assert.equal(context.seedCommand, 'npm run qa:seed:legacy');
 });
 
@@ -57,7 +57,7 @@ test('returns ordered candidate metadata keyed by browser env and run id', () =>
     process.env.LEGACY_DATA_SOURCE = 'entities';
     process.env.LEGACY_RUN_ID = 'batch-7';
 
-    const candidates = DataPathHelper.getLegacyOperationalDataCandidates(createTestInfo('firefox') as never);
+    const candidates = DataPathHelper.getLegacyOperationalDataCandidates(createTestInfo('chromium') as never);
 
     assert.equal(candidates.length, 2);
     assert.deepEqual(
@@ -71,14 +71,14 @@ test('returns ordered candidate metadata keyed by browser env and run id', () =>
         [
             {
                 isPrimary: true,
-                lookupKey: 'firefox:demo:batch-7',
+                lookupKey: 'demo:batch-7',
                 priority: 0,
                 seedCommand: 'npm run demo:regression:entities',
                 source: 'entities'
             },
             {
                 isPrimary: false,
-                lookupKey: 'firefox:demo:batch-7',
+                lookupKey: 'demo:batch-7',
                 priority: 1,
                 seedCommand: 'npm run demo:regression:entities',
                 source: 'base'
@@ -86,10 +86,10 @@ test('returns ordered candidate metadata keyed by browser env and run id', () =>
         ]
     );
 
-    assert.match(candidates[0].path, /legacy-entities-data-firefox-demo-batch-7\.json$/);
-    assert.match(candidates[1].path, /legacy-base-entities-data-firefox-demo-batch-7\.json$/);
+    assert.match(candidates[0].path, /legacy-entities-data-demo-batch-7\.json$/);
+    assert.match(candidates[1].path, /legacy-base-entities-data-demo-batch-7\.json$/);
     assert.deepEqual(
-        DataPathHelper.getLegacyOperationalDataCandidatePaths(createTestInfo('firefox') as never),
+        DataPathHelper.getLegacyOperationalDataCandidatePaths(createTestInfo('chromium') as never),
         candidates.map((candidate) => candidate.path)
     );
 });

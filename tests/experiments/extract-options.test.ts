@@ -5,7 +5,7 @@ import { TransportistaFormPage } from '../../src/modules/transport/pages/Transpo
 test('Extract Tipo Transportista options', async ({ page }) => {
   const loginPage = new LoginPage(page);
   await loginPage.navigate();
-  await loginPage.login(process.env.TMS_USERNAME || 'arivas', process.env.TMS_PASSWORD || 'arivas');
+  await loginPage.login(process.env.TMS_USERNAME || 'srodriguez', process.env.TMS_PASSWORD || 'srodriguez');
   
   const transportistaPage = new TransportistaFormPage(page);
   await transportistaPage.navigate();

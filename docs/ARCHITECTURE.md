@@ -69,14 +69,13 @@ This document records the architectural decisions made during the development of
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Parallel Execution Layer                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │  Chromium    │  │   Firefox    │  │   WebKit     │          │
-│  │   Worker 1   │  │   Worker 2   │  │   Worker 3   │          │
-│  │              │  │              │  │              │          │
-│  │last-run-data │  │last-run-data │  │last-run-data │          │
-│  │-chromium.json│  │-firefox.json │  │-webkit.json  │          │
-│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                       Execution Layer                           │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                      Chromium                           │    │
+│  │                    Workers 1-3                           │    │
+│  │                                                         │    │
+│  │              last-run-data-chromium.json                 │    │
+│  └─────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -210,35 +209,28 @@ test('Login test', async ({ page }) => {
 
 ---
 
-### Decision 3: Worker-Specific JSON Data Persistence
+### Decision 3: Unified Data Persistence
 
 **What We Did:**
 
 ```
-last-run-data-chromium.json  # Chromium worker only
-last-run-data-firefox.json   # Firefox worker only
-last-run-data-webkit.json    # WebKit worker only
+last-run-data-chromium.json  # Chromium worker data
 ```
 
 **Why We Did It:**
 
 **Problem Solved:**
-- Parallel tests share single `last-run-data.json`
-- Race conditions when multiple workers write simultaneously
-- Data collisions (Chromium overwrites Firefox data)
-- Flaky tests that pass individually but fail in parallel
+- Parallel tests need deterministic data paths
+- Simple, predictable file naming for CI and local runs
 
 **Benefits:**
-1. **Worker Isolation** - Each browser has its own data
-2. **No Race Conditions** - No file locking issues
-3. **True Parallel Execution** - 3x faster test suite
-4. **Predictable Results** - Tests never interfere with each other
+1. **Simple** - Single JSON file per environment
+2. **Deterministic** - Always know where data lives
+3. **Predictable Results** - Tests never interfere with each other
 
 **Trade-offs:**
-- ❌ 3 JSON files instead of 1
-- ❌ Need DataPathHelper to resolve correct file
-- ✅ But: Essential for parallel execution
-- ✅ But: Eliminates entire class of bugs
+- ✅ Need DataPathHelper to resolve correct path
+- ✅ Simple, maintainable approach
 
 **How It Works:**
 
@@ -246,18 +238,7 @@ last-run-data-webkit.json    # WebKit worker only
 // DataPathHelper.ts
 export class DataPathHelper {
   static getWorkerDataPath(testInfo: TestInfo): string {
-    const projectName = testInfo.project.name; // 'chromium', 'firefox', 'webkit'
-
-    if (projectName.includes('chromium')) {
-      return 'last-run-data-chromium.json';
-    } else if (projectName.includes('firefox')) {
-      return 'last-run-data-firefox.json';
-    } else if (projectName.includes('webkit')) {
-      return 'last-run-data-webkit.json';
-    }
-
-    // Fallback for single-browser runs
-    return 'last-run-data.json';
+    return this.getSetupConfigDataPath(testInfo);
   }
 }
 ```
@@ -268,16 +249,11 @@ export class DataPathHelper {
 Time 0s:  Setup project runs (auth.setup.ts)
           ↓ Creates playwright/.auth/user.json
 
-Time 5s:  3 base-entities projects run IN PARALLEL
-          ├── base-entities-chromium writes to last-run-data-chromium.json
-          ├── base-entities-firefox writes to last-run-data-firefox.json
-          └── base-entities-webkit writes to last-run-data-webkit.json
+Time 5s:  base-entities-chromium writes to setup-config-data-{env}.json
 
-Time 60s: All 3 JSON files ready, NO collisions
+Time 60s: JSON file ready
 
-Time 65s: Chromium tests read from last-run-data-chromium.json
-          Firefox tests read from last-run-data-firefox.json
-          WebKit tests read from last-run-data-webkit.json
+Time 65s: Chromium tests read from setup-config-data-{env}.json
 ```
 
 **Alternatives Considered:**
@@ -538,7 +514,7 @@ logger.error("Login failed", { error: err.message, stack: err.stack });
   "timestamp": "2026-02-06T10:30:45.123Z",
   "component": "LoginPage",
   "metadata": {
-    "username": "arivas",
+    "username": "srodriguez",
     "timestamp": 1707217845123
   }
 }
@@ -758,23 +734,15 @@ auth.setup.ts
      ↓
      └─→ playwright/.auth/user.json (stored session)
           ↓
-          ├─→ base-entities-chromium.setup.ts
-          │        ↓
-          │        └─→ last-run-data-chromium.json
-          │                ↓
-          │                ├─→ contrato-crear.test.ts
-          │                └─→ viajes-planificar.test.ts
-          │
-          ├─→ base-entities-firefox.setup.ts
-          │        ↓
-          │        └─→ last-run-data-firefox.json
-          │
-          └─→ base-entities-webkit.setup.ts
+          └─→ base-entities-chromium.setup.ts
                    ↓
-                   └─→ last-run-data-webkit.json
+                   └─→ legacy-base-entities-data-{env}.json
+                           ↓
+                           ├─→ contrato-crear.test.ts
+                           └─→ viajes-planificar.test.ts
 ```
 
-**Key Insight:** Each browser gets its own dependency chain, preventing collisions.
+**Key Insight:** Single dependency chain for all execution.
 
 ---
 
@@ -966,16 +934,13 @@ test('Test Name', async ({ page }, testInfo) => {
 
 ### Test Execution Performance
 
-| Metric | Single Browser | Parallel (3 Browsers) |
-|--------|----------------|----------------------|
-| Base Entities Setup | 60s | 60s (parallel) |
-| Contract Creation | 20s | 20s |
-| Trip Planning | 15s | 15s |
-| Trip Assignment | 10s | 10s |
-| **Total (Sequential)** | 105s | 105s |
-| **Total (Parallel)** | N/A | **35s** |
-
-**Speedup:** 3x faster with parallel execution
+| Metric | Chromium |
+|--------|----------|
+| Base Entities Setup | 60s |
+| Contract Creation | 20s |
+| Trip Planning | 15s |
+| Trip Assignment | 10s |
+| **Total** | **105s** |
 
 ---
 

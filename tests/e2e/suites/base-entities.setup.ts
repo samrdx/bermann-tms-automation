@@ -11,6 +11,7 @@ import { TransportistaHelper } from '../../api-helpers/TransportistaHelper.js';
 import { ClienteHelper } from '../../api-helpers/ClienteHelper.js';
 import { VehiculoHelper } from '../../api-helpers/VehiculoHelper.js';
 import { ConductorHelper } from '../../api-helpers/ConductorHelper.js';
+import { getTestUser } from '../../../src/config/credentials.js';
 
 /**
  * Base Operational Suite - Steps 1-4
@@ -18,7 +19,7 @@ import { ConductorHelper } from '../../api-helpers/ConductorHelper.js';
  * Exports data to worker-specific JSON (legacy-base-entities-data-{browser}-{env}.json)
  * Target: Complete in under 90 seconds (increased from 60s for stability)
  */
-test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can take significantly longer due to strict actionability checks triggering JS fallbacks
+test.describe('Base Operational Suite - Entity Creation', () => {
     test.setTimeout(150000); // 90 seconds for stability (4 entities x ~15s each + margin)
 
     test('Create Base Operational Entities (Steps 1-4)', async ({ page }, testInfo) => {
@@ -43,8 +44,9 @@ test.describe('Base Operational Suite - Entity Creation', () => { // Firefox can
         // =================================================================
         logger.info('🔐 PASO 0: Autenticando...');
         const loginPage = new LoginPage(page);
-        await loginPage.loginAndWaitForDashboard('arivas', 'arivas');
-        logger.info('✅ Paso 0 Completado - Autenticado como arivas');
+        const user = getTestUser('admin');
+        await loginPage.loginAndWaitForDashboard(user.username, user.password);
+        logger.info(`✅ Paso 0 Completado - Autenticado como ${user.username}`);
         logger.info('');
 
         // Data structure for export

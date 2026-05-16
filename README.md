@@ -15,8 +15,8 @@ Framework E2E para el sistema TMS (Transport Management System) de Bermann, cons
 |---|---|
 | Tests automatizados | **20+** |
 | Módulos | **9** (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla) |
-| Pass Rate | **100%** (Chromium & Firefox) |
-| Navegadores | Chromium + Firefox (WebKit removido por inestabilidad) |
+| Pass Rate | **100%** (Chromium) |
+| Navegadores | Chromium (Firefox, WebKit removidos por eficiencia) |
 | Arquitectura | Page Object Model + Domain-Driven Modules |
 | Skills System | **18** skills AI-ready (TMS + SDD) |
 | CI/CD | GitHub Actions — PR Demo pipeline + Ultimamilla batch |
@@ -45,8 +45,8 @@ npm install
 cp .env.example .env
 # Editar .env con credenciales TMS (TMS_USERNAME / TMS_PASSWORD)
 
-# 4. Install browsers
-npx playwright install chromium firefox
+# 4. Install browser
+npx playwright install chromium
 
 # 5. Run smoke test
 npm run qa:smoke:01:transportista
@@ -123,7 +123,7 @@ ENV=DEMO npm run demo:smoke:01:transportista  # Demo
 Todas las pruebas usan el wrapper `scripts/run-playwright-suite.mjs` vía `npm run pw:run`, que maneja:
 - Run locks para evitar colisiones CI
 - Limpieza automática de reportes
-- Proyectos específicos por entorno (chromium-qa, firefox-demo, etc.)
+- Proyectos específicos por entorno (chromium-qa, chromium-demo, etc.)
 
 ### Smoke Tests (por paso)
 
@@ -183,7 +183,7 @@ npm run qa:e2e:all                   # Todos los E2E atómicos
 
 ```bash
 npm run qa:smoke:ultimamilla                  # Crear pedido
-npm run qa:smoke:ultimamilla:asignar           # Asignar pedido (multi-browser)
+npm run qa:smoke:ultimamilla:asignar           # Asignar pedido (Chromium)
 npm run qa:smoke:ultimamilla:batch             # Batch asignación
 ULTIMAMILLA_ENABLE_MUTATION=true npm run qa:smoke:ultimamilla:asignar  # Con mutación
 ```
@@ -218,7 +218,7 @@ Pipeline actual: **PR E2E Demo** (`.github/workflows/tests.yml`)
 | Job | Descripción | Timeout |
 |---|---|---|
 | `e2e-finanzas-full-demo` | Prefactura + Proforma E2E en Demo | 60 min |
-| `ultimamilla-batch-demo` | Batch asignación multi-browser + Allure report + GitHub Pages | 120 min |
+| `ultimamilla-batch-demo` | Batch asignación Chromium + Allure report + GitHub Pages | 120 min |
 
 ### Secrets Requeridos
 
@@ -259,19 +259,19 @@ Para detalle completo: [CLOUD.md](CLOUD.md) y [docs/CI_CD_SETUP.md](docs/CI_CD_S
 
 1. **Page Object Model** — Una clase por página, selectores encapsulados
 2. **Atomic E2E** — Tests que cargan datos seedeados vía `OperationalDataLoader` en vez de crear su propio ecosistema
-3. **Legacy Sequential** — Tests que leen de `last-run-data-{browser}.json` y deben ejecutarse en orden
-4. **Worker-Specific JSON** — Cada browser tiene su propio JSON para evitar colisiones en paralelo
+3. **Legacy Sequential** — Tests que leen de archivos JSON unificados y deben ejecutarse en orden
+4. **Unified Data JSON** — La persistencia está unificada para Chromium, simplificando el flujo de seeding.
 5. **Entity Tracker** — `entityTracker` registra entidades creadas y genera resumen para Allure
 6. **Skills System** — AI lee skills autoritativas antes de generar código (~95% reducción de alucinaciones)
 
 ### Data Flow (Legacy)
 
 ```text
-auth.setup.ts → playwright/.auth/user.json
+auth.setup.ts → playwright/.auth/user-{env}.json
      ↓
-base-entities.setup.ts (2 browsers en paralelo)
+base-entities.setup.ts
      ↓
-last-run-data-{chromium,firefox}.json
+legacy-base-entities-data-{env}.json
      ↓
 contrato-crear → contrato2cliente-crear
      ↓

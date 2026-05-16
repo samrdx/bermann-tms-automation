@@ -51,7 +51,7 @@ test('Happy path: debe buscar, optimizar y crear viaje', async ({
 
 - File: `tests/e2e/modules/ultimamilla/pedido-asignar-batch.test.ts`
 - Uses `ULTIMAMILLA_BATCH_SIZE` env var for configurable parallelism
-- Browser-specific projects: `chromium-demo`, `firefox-demo` (DEMO) or `chromium-qa`, `firefox-qa` (QA)
+- Browser-specific projects: `chromium-demo` (DEMO) or `chromium-qa` (QA)
 - Always multi-browser serial (`--workers 1`)
 
 ## Environment Variables
@@ -67,7 +67,7 @@ test('Happy path: debe buscar, optimizar y crear viaje', async ({
 ```bash
 # QA
 npm run qa:smoke:ultimamilla              # Create order
-npm run qa:smoke:ultimamilla:asignar       # Assign order (chromium + firefox)
+npm run qa:smoke:ultimamilla:asignar       # Assign order (chromium)
 npm run qa:smoke:ultimamilla:batch         # Batch assign
 
 # DEMO

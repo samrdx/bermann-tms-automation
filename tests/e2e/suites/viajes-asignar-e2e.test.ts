@@ -7,8 +7,7 @@ import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 
 test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
 
-    test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page, browserName }) => {
-test.skip(browserName === 'webkit', '🚧 Skipping WebKit due to known legacy form rendering issues (footer interception)');
+    test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page }) => {
         test.setTimeout(300000);
         const api = new TmsApiClient(page);
         await api.initialize();

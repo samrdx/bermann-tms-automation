@@ -294,9 +294,7 @@ When running tests in parallel across multiple browsers (Chromium, Firefox, WebK
 ### Solution: Worker-Specific JSON Files
 
 ```
-last-run-data-chromium.json  # Chromium worker only
-last-run-data-firefox.json   # Firefox worker only
-last-run-data-webkit.json    # WebKit worker only
+last-run-data-chromium.json  # Chromium/Chrome worker only
 ```
 
 ### DataPathHelper
@@ -318,9 +316,7 @@ test('Create Contract', async ({ page }, testInfo) => {
   const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
   console.log(`Using: ${dataPath}`);
-  // Chromium worker: "last-run-data-chromium.json"
-  // Firefox worker: "last-run-data-firefox.json"
-  // WebKit worker: "last-run-data-webkit.json"
+  // Chromium/Chrome worker: "last-run-data-chromium.json"
 
   // Use data
   const transportista = operationalData.transportista.nombre;

@@ -14,7 +14,7 @@ export class UnidadNegocioHelper {
 
     /**
      * Clicks the "Buscar" button on the TMS grid index pages.
-     * Uses the proven pattern from TmsApiClient: link role first, JS fallback for Firefox.
+     * Uses the proven pattern from TmsApiClient: link role first, JS fallback.
      */
     static async clickBuscarButton(page: Page): Promise<void> {
         try {
@@ -28,7 +28,7 @@ export class UnidadNegocioHelper {
             // Fallback below
         }
 
-        // JS fallback (Firefox-safe): click #buscar element directly
+        // JS fallback: click #buscar element directly
         logger.info('🔎 Usando fallback de JS para hacer clic en el botón Buscar...');
         await page.evaluate(() => {
             const btn = document.getElementById('buscar');

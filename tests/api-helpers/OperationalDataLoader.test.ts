@@ -91,7 +91,7 @@ test('falls back deterministically and warns when preferred source is missing', 
     process.env.LEGACY_DATA_SOURCE = 'entities';
     process.env.LEGACY_RUN_ID = 'fallback-source';
 
-    const testInfo = createTestInfo('firefox') as never;
+    const testInfo = createTestInfo('chromium') as never;
     const [, fallbackCandidate] = DataPathHelper.getLegacyOperationalDataCandidates(testInfo);
     writeCandidateData(fallbackCandidate.path, JSON.stringify({ cliente: { nombre: 'Cliente Base' } }));
 
@@ -133,7 +133,7 @@ test('throws actionable missing-data error when no candidate is available', () =
     process.env.LEGACY_DATA_SOURCE = 'base-entities';
     process.env.LEGACY_RUN_ID = 'missing-data';
 
-    const testInfo = createTestInfo('webkit') as never;
+    const testInfo = createTestInfo('chromium') as never;
 
     assert.throws(
         () => OperationalDataLoader.loadOrThrow(testInfo, {
@@ -142,11 +142,11 @@ test('throws actionable missing-data error when no candidate is available', () =
         (error: unknown) => {
             assert.ok(error instanceof Error);
             assert.match(error.message, /Missing operational data for prefactura/);
-            assert.match(error.message, /lookupKey=webkit:demo:missing-data/);
+            assert.match(error.message, /lookupKey=demo:missing-data/);
             assert.match(error.message, /requested=base-entities/);
             assert.match(error.message, /Seed prerequisite: npm run demo:seed:legacy/);
-            assert.match(error.message, /legacy-base-entities-data-webkit-demo-missing-data\.json/);
-            assert.match(error.message, /legacy-entities-data-webkit-demo-missing-data\.json/);
+            assert.match(error.message, /legacy-base-entities-data-demo-missing-data\.json/);
+            assert.match(error.message, /legacy-entities-data-demo-missing-data\.json/);
             return true;
         }
     );

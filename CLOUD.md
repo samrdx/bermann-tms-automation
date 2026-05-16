@@ -27,7 +27,7 @@ Jobs run in parallel (no dependencies between them)
 
 **Job 2: Ultima Milla Batch (Demo)**
 
-- Runs: `pedido-asignar-batch.test.ts` (multi-browser: chromium → firefox serial)
+- Runs: `pedido-asignar-batch.test.ts` (chromium only)
 - Workers: 1 (sequential, required for batch isolation)
 - Timeout: 120 minutes
 - Environment: `ULTIMAMILLA_ENABLE_MUTATION=true`, `ULTIMAMILLA_BATCH_SIZE=8`
@@ -52,7 +52,7 @@ secrets.TMS_USER  →  TMS_USERNAME
 secrets.TMS_PASS  →  TMS_PASSWORD
 ```
 
-Fallback `|| 'arivas'` allows CI to run without secrets configured.
+Fallback `|| 'srodriguez'` allows CI to run without secrets configured.
 
 ---
 
@@ -97,7 +97,7 @@ Fallback `|| 'arivas'` allows CI to run without secrets configured.
 | Retries | 2 | 0 |
 | Test timeout | 240s | 60s |
 | Headless | true | configurable |
-| Browsers | Chromium + Firefox | Chromium + Firefox |
+| Browsers | Chromium | Chromium |
 | Traces | retain-on-failure | retain-on-failure |
 
 ---
@@ -140,7 +140,7 @@ Without concurrency groups, two PRs opened close together would both seed legacy
 ## Known Limitations
 
 1. **Demo-only validation:** PR pipeline tests only Demo, not QA. QA runs are triggered manually.
-2. **No matrix strategy:** Multi-browser runs (chromium + firefox) are serial, not parallel.
+2. **No matrix strategy:** Single browser (chromium), serial execution.
 3. **No Docker Compose:** No local CI reproduction with environment variables.
 4. **Shared Demo data:** Concurrent PR runs from different branches are still serialized per branch, but multiple branches targeting the same base can collide on Demo data.
 5. **No notifications:** Pipeline failures don't trigger Slack/email alerts.
@@ -150,7 +150,7 @@ Without concurrency groups, two PRs opened close together would both seed legacy
 ## Future Improvements
 
 - Add QA environment validation on merge to main
-- Implement matrix strategy for parallel multi-browser CI
+- Implement matrix strategy for parallel multi-worker CI
 - Add `docker-compose.yml` for local CI simulation
 - Cache `node_modules` and Playwright browsers between runs
 - Add Slack/email notifications on failure

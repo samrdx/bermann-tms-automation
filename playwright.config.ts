@@ -72,9 +72,13 @@ export default defineConfig({
 
     /* * CORRECCIÓN DE PANTALLA:
      * Usamos 1920x1080 para evitar que footers o menús responsivos tapen botones.
-     * Esto reemplaza el hack de --window-size que rompía Firefox.
+     * Esto reemplaza el hack de --window-size que causaba problemas.
      */
     viewport: { width: 1920, height: 1080 },
+
+    /* Usar Chrome del sistema en lugar de Chromium bundleado.
+     * Necesario en CachyOS/Arch donde Playwright no tiene soporte oficial. */
+    channel: 'chrome',
 
     actionTimeout: (process.env.CI || ENV === 'DEMO') ? 30 * 1000 : 10 * 1000,
     navigationTimeout: (process.env.CI || ENV === 'DEMO') ? 60 * 1000 : 20 * 1000,
@@ -106,15 +110,6 @@ export default defineConfig({
       },
       dependencies: ['Autorización'],
     },
-    {
-      name: `config-fase1-firefox`,
-      testMatch: 'e2e/suites/01-config-master.setup.ts',
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
 
     // --- CONFIGURACIÓN SETUP: Fase 2 (Carga) ---
     {
@@ -122,15 +117,6 @@ export default defineConfig({
       testMatch: 'e2e/suites/02-carga-master.setup.ts',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
-    {
-      name: `config-fase2-firefox`,
-      testMatch: 'e2e/suites/02-carga-master.setup.ts',
-      use: {
-        ...devices['Desktop Firefox'],
         storageState: `playwright/.auth/user-${envName}.json`,
       },
       dependencies: ['Autorización'],
@@ -148,12 +134,6 @@ export default defineConfig({
       name: 'base-entities-chromium',
       testMatch: 'e2e/suites/base-entities.setup.ts',
       use: devices['Desktop Chrome'],
-      dependencies: ['Autorización'],
-    },
-    {
-      name: 'base-entities-firefox',
-      testMatch: 'e2e/suites/base-entities.setup.ts',
-      use: devices['Desktop Firefox'],
       dependencies: ['Autorización'],
     },
 
@@ -177,36 +157,5 @@ export default defineConfig({
       },
       dependencies: ['Autorización'],
     },
-    {
-      name: `firefox-${envName}`,
-      testMatch: [
-        'e2e/modules/**/*.test.ts',
-        'e2e/suites/**/*.test.ts',
-      ],
-      testIgnore: [
-        '**/suites/*.setup.ts',
-        '**/modules/00-config/config/**',
-      ],
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: `playwright/.auth/user-${envName}.json`,
-      },
-      dependencies: ['Autorización'],
-    },
-
-    // 🗑️ WEBKIT ELIMINADO POR INESTABILIDAD EN FORMULARIOS LEGACY
-    // Se mantiene comentado para referencia futura o debugging local puntual.
-    // {
-    //   name: 'webkit',
-    //   testMatch: [
-    //     'e2e/modules/**/*.test.ts',
-    //     'e2e/suites/**/*.test.ts',
-    //   ],
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     storageState: `playwright/.auth/user-${envName}.json`,
-    //   },
-    //   dependencies: ['setup'],
-    // },
   ],
 });

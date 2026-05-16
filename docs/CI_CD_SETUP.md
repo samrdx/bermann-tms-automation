@@ -23,14 +23,14 @@ Navigate to: `GitHub Repository → Settings → Secrets and variables → Actio
 
 **Description:** TMS QA environment username
 
-**Value:** `arivas` (or your test user)
+**Value:** `srodriguez` (or your test user)
 
 **How to add:**
 ```
 1. Go to: https://github.com/[your-repo]/settings/secrets/actions
 2. Click "New repository secret"
 3. Name: TMS_USER
-4. Secret: arivas
+4. Secret: srodriguez
 5. Click "Add secret"
 ```
 
@@ -38,18 +38,18 @@ Navigate to: `GitHub Repository → Settings → Secrets and variables → Actio
 
 **Description:** TMS QA environment password
 
-**Value:** `arivas` (or your test password)
+**Value:** `srodriguez` (or your test password)
 
 **How to add:**
 ```
 1. Go to: https://github.com/[your-repo]/settings/secrets/actions
 2. Click "New repository secret"
 3. Name: TMS_PASS
-4. Secret: arivas
+4. Secret: srodriguez
 5. Click "Add secret"
 ```
 
-**Note:** If secrets are not configured, workflow falls back to default values (arivas/arivas)
+**Note:** If secrets are not configured, workflow falls back to default values (srodriguez/srodriguez)
 
 ---
 
@@ -100,12 +100,12 @@ npx tsc --noEmit
 
 ```bash
 # Set environment variables (Windows)
-set TMS_USER=arivas
-set TMS_PASS=arivas
+set TMS_USER=srodriguez
+set TMS_PASS=srodriguez
 
 # Set environment variables (Linux/Mac)
-export TMS_USER=arivas
-export TMS_PASS=arivas
+export TMS_USER=srodriguez
+export TMS_PASS=srodriguez
 
 # Run auth setup only
 npx playwright test tests/helpers/auth.setup.ts --project=setup
@@ -196,14 +196,14 @@ Error: Timeout waiting for .logo-min selector
 ```
 GitHub → Settings → Secrets → Actions
 Verify:
-  TMS_USER = arivas
-  TMS_PASS = arivas
+  TMS_USER = srodriguez
+  TMS_PASS = srodriguez
 ```
 
 **Test locally:**
 ```bash
-export TMS_USER=arivas
-export TMS_PASS=arivas
+export TMS_USER=srodriguez
+export TMS_PASS=srodriguez
 npx playwright test tests/helpers/auth.setup.ts --project=setup --headed
 ```
 
@@ -211,7 +211,7 @@ npx playwright test tests/helpers/auth.setup.ts --project=setup --headed
 ```
 Visit: https://moveontruckqa.bermanntms.cl
 Verify site is accessible
-Try manual login with arivas/arivas
+Try manual login with srodriguez/srodriguez
 ```
 
 ---
@@ -319,7 +319,7 @@ export default defineConfig({
 # When API automation is implemented:
 strategy:
   matrix:
-    browser: [chromium, firefox, webkit]  # Add all browsers
+    browser: [chromium]
 
 timeout-minutes: 15  # Reduced from 30 (6x faster setup)
 ```
@@ -512,10 +512,10 @@ Select: "Only notify for failed workflows"
 3. **Don't hardcode credentials:**
    ```typescript
    // ❌ BAD
-   const user = 'arivas';
+    const user = 'srodriguez';
 
    // ✅ GOOD
-   const user = process.env.TMS_USER || 'arivas';
+    const user = process.env.TMS_USER || 'srodriguez';
    ```
 
 ---
@@ -533,7 +533,7 @@ Select: "Only notify for failed workflows"
 
 - [ ] Implement API automation (6x faster)
 - [ ] Reduce CI execution time
-- [ ] Add more browsers (firefox, webkit)
+- [ ] Add more browsers (placeholder for future need)
 
 ### Week 3: Scale
 

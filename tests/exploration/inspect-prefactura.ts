@@ -7,8 +7,8 @@ import { chromium } from 'playwright';
 
     console.log("Logging in...");
     await page.goto('https://moveontruckqa.bermanntms.cl/login');
-    await page.fill('#login-usuario', 'arivas');
-    await page.fill('#login-clave', 'arivas');
+    await page.fill('#login-usuario', process.env.TMS_USERNAME || 'srodriguez');
+    await page.fill('#login-clave', process.env.TMS_PASSWORD || 'srodriguez');
     await page.click('button[type="submit"]');
     await page.waitForTimeout(5000);
 

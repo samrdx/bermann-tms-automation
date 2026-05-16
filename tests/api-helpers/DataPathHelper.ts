@@ -25,17 +25,10 @@ export interface LegacyOperationalDataCandidate extends LegacyOperationalDataLoo
 }
 
 /**
- * DataPathHelper - Browser-Isolated Data Path Management
+ * DataPathHelper - Unified Data Path Management
  *
- * Provides centralized logic for generating browser-specific data file paths
- * to enable safe parallel test execution across multiple browsers.
- *
- * Each browser project gets its own isolated JSON file:
- * - Chromium projects -> setup-config-data-chromium-{env}.json
- * - Firefox projects  -> setup-config-data-firefox-{env}.json
- * - Webkit projects   -> setup-config-data-webkit-{env}.json
- *
- * This prevents data collisions when running tests in parallel.
+ * Provides centralized logic for generating data file paths
+ * for test execution.
  */
 export class DataPathHelper {
     private static ensureDataDir(): string {
@@ -76,40 +69,28 @@ export class DataPathHelper {
      * This ensures that base-entities-chromium and chromium use the same data file
      */
     private static readonly PROJECT_TO_BROWSER: Record<string, string> = {
-        // Seed transportista projects
         'seed-transportista-chromium': 'chromium',
-        'seed-transportista-firefox': 'firefox',
-
-        // Base entities setup projects
         'base-entities-chromium': 'chromium',
-        'base-entities-firefox': 'firefox',
-        'base-entities-webkit': 'webkit',
-
-        // Test projects
         'chromium': 'chromium',
-        'firefox': 'firefox',
-        'webkit': 'webkit',
     };
 
     /**
      * Get browser-specific config setup data path.
      *
      * @param testInfo - Playwright TestInfo object containing project metadata
-     * @returns Absolute path like: /path/to/project/playwright/.data/setup-config-data-chromium-qa.json
+     * @returns Absolute path like: /path/to/project/playwright/.data/setup-config-data-qa.json
      *
      * @example
      * ```typescript
      * test('My test', async ({ page }, testInfo) => {
      *   const dataPath = DataPathHelper.getSetupConfigDataPath(testInfo);
-     *   // chromium/base-entities-chromium: /project/playwright/.data/setup-config-data-chromium-qa.json
-     *   // firefox/base-entities-firefox:   /project/playwright/.data/setup-config-data-firefox-qa.json
+     *   // Result: /project/playwright/.data/setup-config-data-qa.json
      * });
      * ```
      */
     static getSetupConfigDataPath(testInfo: TestInfo): string {
-        const browserName = this.getBrowserName(testInfo);
         const env = this.getEnvName();
-        const filename = `setup-config-data-${browserName}-${env}.json`;
+        const filename = `setup-config-data-${env}.json`;
         return this.buildDataPath(filename);
     }
 
@@ -127,10 +108,9 @@ export class DataPathHelper {
      * Optional suffix with LEGACY_RUN_ID for run-level isolation.
      */
     static getLegacyEntityDataPath(testInfo: TestInfo): string {
-        const browserName = this.getBrowserName(testInfo);
         const env = this.getEnvName();
         const runIdSuffix = this.getLegacyRunIdSuffix();
-        return this.buildDataPath(`legacy-entities-data-${browserName}-${env}${runIdSuffix}.json`);
+        return this.buildDataPath(`legacy-entities-data-${env}${runIdSuffix}.json`);
     }
 
     /**
@@ -138,10 +118,9 @@ export class DataPathHelper {
      * Optional suffix with LEGACY_RUN_ID for run-level isolation.
      */
     static getLegacyBaseDataPath(testInfo: TestInfo): string {
-        const browserName = this.getBrowserName(testInfo);
         const env = this.getEnvName();
         const runIdSuffix = this.getLegacyRunIdSuffix();
-        return this.buildDataPath(`legacy-base-entities-data-${browserName}-${env}${runIdSuffix}.json`);
+        return this.buildDataPath(`legacy-base-entities-data-${env}${runIdSuffix}.json`);
     }
 
     /**
@@ -186,7 +165,7 @@ export class DataPathHelper {
         return {
             browserName,
             env,
-            lookupKey: `${browserName}:${env}:${runId || 'default'}`,
+            lookupKey: `${env}:${runId || 'default'}`, // Removed browserName from lookupKey
             normalizedSource: this.normalizeLegacyDataSource(source),
             requestedSource,
             runId,
@@ -206,8 +185,8 @@ export class DataPathHelper {
 
         return orderedSources.map((candidateSource, index) => {
             const filename = candidateSource === 'base'
-                ? `legacy-base-entities-data-${context.browserName}-${context.env}${context.runIdSuffix}.json`
-                : `legacy-entities-data-${context.browserName}-${context.env}${context.runIdSuffix}.json`;
+                ? `legacy-base-entities-data-${context.env}${context.runIdSuffix}.json`
+                : `legacy-entities-data-${context.env}${context.runIdSuffix}.json`;
 
             return {
                 ...context,
@@ -246,21 +225,14 @@ export class DataPathHelper {
      */
     static getScopedCargaSetupDataPath(testInfo: TestInfo): string {
         const env = this.getEnvName();
-        const browser = this.getBrowserName(testInfo);
-        return this.buildDataPath(`carga_setup_data-${browser}-${env}.json`);
+        return this.buildDataPath(`carga_setup_data-${env}.json`);
     }
 
     /**
      * Get project identifier (browser name)
      *
      * @param testInfo - Playwright TestInfo object
-     * @returns Browser name: 'chromium', 'firefox', 'webkit', etc.
-     *
-     * @example
-     * ```typescript
-     * const browser = DataPathHelper.getProjectIdentifier(testInfo);
-     * // Returns: 'chromium', 'firefox', or 'webkit'
-     * ```
+     * @returns Project name
      */
     static getProjectIdentifier(testInfo: TestInfo): string {
         return testInfo.project.name;
@@ -280,13 +252,11 @@ export class DataPathHelper {
      * Get browser name from project name
      *
      * @param testInfo - Playwright TestInfo object
-     * @returns Browser name: 'chromium', 'firefox', 'webkit', or 'default'
+     * @returns Browser name: 'chromium' or 'default'
      */
     static getBrowserName(testInfo: TestInfo): string {
         const projectName = testInfo.project.name.toLowerCase();
         if (projectName.includes('chromium')) return 'chromium';
-        if (projectName.includes('firefox')) return 'firefox';
-        if (projectName.includes('webkit')) return 'webkit';
         return this.PROJECT_TO_BROWSER[projectName] || 'default';
     }
 }

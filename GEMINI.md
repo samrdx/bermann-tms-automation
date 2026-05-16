@@ -74,11 +74,11 @@ When executing tasks or receiving specific commands, ALWAYS invoke the correspon
 | Active Branch | main | 2026-05-15 |
 | Automated Tests | 20+ (4 auth + 4 entities + 5 ops + 3 finanzas + 3 ultimamilla + 8 config) | 2026-05-15 |
 | Completed Modules | 9 (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla) | 2026-05-15 |
-| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-05-15 |
+| Pass Rate | 100% (Chromium verified) | 2026-05-15 |
 | Operational Skills | 7 TMS, 9 SDD, 2 Generic | 2026-05-15 |
 | E2E Coverage | Entities → Contracts → Trips → Monitoring → Prefactura → Proforma → Ultima Milla | 2026-05-15 |
 | TypeScript Compilation | Clean (0 errors) | 2026-05-15 |
-| Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-05-15 |
+| Browsers | 1 (Chromium) - Firefox and WebKit removed | 2026-05-15 |
 | CI/CD | PR E2E Demo pipeline + Ultimamilla batch + Allure GitHub Pages | 2026-05-15 |
 
 ---
@@ -170,7 +170,7 @@ qa-automation-framework/
 ├── tmsapp/mobile/              # Mobile automation (WDIO)
 ├── .atl/                       # Skill registry (auto-generated)
 ├── last-run-data-chromium.json # Worker-specific data (Chromium)
-├── last-run-data-firefox.json  # Worker-specific data (Firefox)
+
 ├── reports/                    # Screenshots, videos
 ├── logs/                       # Execution logs
 ├── docs/                       # Documentation
@@ -275,32 +275,31 @@ logger.debug("Debug information");
 - `info` - Main actions
 - `debug` - Detailed information
 
-### 5. Parallel Execution with Worker-Specific Data
+### 5. Parallel Execution with Unified Data
 
-**Innovation:** Each browser has its own JSON file to avoid data collisions during parallel execution.
+**Innovation:** The framework uses unified JSON files for persistence, optimized for Chromium-only execution. Parallel execution is supported via unique entity names (timestamps), while the state is shared through a single source of truth per environment.
 
 **Data Flow:**
 
 ```
 auth.setup.ts
      |
-playwright/.auth/user.json
+playwright/.auth/user-{env}.json
      |
-base-entities.setup.ts (2 browsers in parallel: Chromium, Firefox)
+base-entities.setup.ts
      |
-last-run-data-chromium.json
-last-run-data-firefox.json
+legacy-base-entities-data-{env}.json
      |
 contrato-crear.test.ts -> contrato2cliente-crear.test.ts
      |
 viajes-planificar.test.ts -> viajes-asignar.test.ts -> viajes-monitoreo.test.ts
 ```
 
-**Note:** WebKit was removed due to instability in legacy form interactions. Only Chromium and Firefox are active.
+**Note:** Firefox and WebKit were removed to simplify the data architecture and optimize CI/CD performance. Chromium is the single supported browser.
 
-**Configuration:** See [playwright.config.ts](playwright.config.ts) for per-browser base-entities projects.
+**Configuration:** See [playwright.config.ts](playwright.config.ts) for project definitions.
 
-**Helper:** `tests/api-helpers/DataPathHelper.ts` provides `getWorkerDataPath(testInfo)` to resolve the correct JSON file for each worker.
+**Helper:** `tests/api-helpers/DataPathHelper.ts` provides `getSetupConfigDataPath(testInfo)` to resolve the unified JSON file for each environment.
 
 ### 6. Test Classification: Atomic vs Legacy
 
@@ -497,7 +496,7 @@ TMS_PASSWORD=your_password
 
 **Location:** `src/config/credentials.ts`
 
-The credential system uses `TMS_USERNAME` and `TMS_PASSWORD` as the standard environment variables. Fallback to `arivas` if not set.
+The credential system uses `TMS_USERNAME` and `TMS_PASSWORD` as the standard environment variables. Fallback to `srodriguez` if not set.
 
 **Available roles:**
 
@@ -734,7 +733,7 @@ A single pipeline (`tests.yml`) runs on pull requests, focused on Demo environme
 **Job 2: Ultima Milla Batch (Demo)**
 
 - Timeout: 120 minutes
-- Tests: `pedido-asignar-batch.test.ts` (multi-browser: chromium + firefox)
+- Tests: `pedido-asignar-batch.test.ts` (chromium only)
 - Workers: 1 (sequential)
 - Allure report generated + uploaded as artifact (14-day retention)
 - Allure attachments >20MB pruned automatically
@@ -768,19 +767,13 @@ A single pipeline (`tests.yml`) runs on pull requests, focused on Demo environme
 - `setup` — Auth setup
 - `auth-tests` — Auth test suite
 - `base-entities-chromium` — Entity setup (Chrome)
-- `base-entities-firefox` — Entity setup (Firefox)
-- `chromium-qa` — Main tests QA (Chrome)
-- `firefox-qa` — Main tests QA (Firefox)
-- `chromium-demo` — Main tests Demo (Chrome)
-- `firefox-demo` — Main tests Demo (Firefox)
-- `config-smoke-chromium` — Config smoke (Chrome)
-- `config-smoke-firefox` — Config smoke (Firefox)
-- `config-fase1-chromium` — Config fase 1 (Chrome)
-- `config-fase1-firefox` — Config fase 1 (Firefox)
-- `config-fase2-chromium` — Config fase 2 (Chrome)
-- `config-fase2-firefox` — Config fase 2 (Firefox)
+- `chromium-qa` — Main tests QA
+- `chromium-demo` — Main tests Demo
+- `config-smoke-chromium` — Config smoke
+- `config-fase1-chromium` — Config fase 1
+- `config-fase2-chromium` — Config fase 2
 
-**Removed:** WebKit was removed due to instability in legacy form interactions.
+**Removed:** Firefox and WebKit were removed to simplify the data architecture and optimize CI/CD performance.
 
 ## Data Generation (See tms-data skill)
 
@@ -814,7 +807,7 @@ return `${company} - ${unixSeconds}`;
 
 ## Parallel Execution Strategy
 
-**Configuration:** 2 browsers (Chromium, Firefox) locally, 1 worker in CI
+**Configuration:** Chromium only, 3 workers local, 1 worker in CI
 
 **Key Innovation:** Worker-specific JSON files prevent data collisions
 
@@ -825,8 +818,7 @@ return `${company} - ${unixSeconds}`;
 const dataPath = DataPathHelper.getWorkerDataPath(testInfo);
 const operationalData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
-// Chromium worker uses: last-run-data-chromium.json
-// Firefox worker uses: last-run-data-firefox.json
+// Chromium worker uses: setup-config-data-{env}.json
 ```
 
 **Setup Projects:**
@@ -845,12 +837,7 @@ projects: [
     use: devices['Desktop Chrome'],
     dependencies: ['setup'],
   },
-  {
-    name: 'base-entities-firefox',
-    testMatch: /base-entities\.setup\.ts/,
-    use: devices['Desktop Firefox'],
-    dependencies: ['setup'],
-  },
+
   // WebKit removed due to instability
 ]
 ```
@@ -1138,7 +1125,7 @@ Run the new test in headed mode for visual verification."
 - Pass rate: **100%**
 - Modules complete: **9/9** (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla)
 - Coverage: **Entities → Contracts → Trips → Monitoring → Prefactura → Proforma → Ultima Milla**
-- Parallel execution: **2 browsers (Chromium, Firefox)**
+- Parallel execution: **3 workers (Chromium)**
 - Skills operational: **7 TMS-specific + 9 SDD + 2 Generic**
 - TypeScript compilation: **Clean (0 errors)**
 - CI/CD: **PR E2E Demo pipeline + Ultimamilla batch + Allure GitHub Pages**
@@ -1201,5 +1188,5 @@ Run the new test in headed mode for visual verification."
 **Status:** Production-ready with PR Demo pipeline + Allure reporting
 **Framework Level:** Enterprise-grade with 20+ automated tests across 9 modules
 **Compilation:** TypeScript clean (0 errors)
-**Browsers:** Chromium + Firefox (WebKit removed)
+**Browsers:** Chromium only (Firefox, WebKit removed)
 **Extras:** Mobile automation (WDIO), Engram SDD persistence, AI Skills System

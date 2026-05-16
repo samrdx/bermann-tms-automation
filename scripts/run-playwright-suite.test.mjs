@@ -40,7 +40,7 @@ test('normalizes passthrough positionals ahead of option-value pairs', () => {
   const parsedArgs = parseRunPlaywrightSuiteArgs([
     '--env=DEMO',
     '--setup',
-    '--project=firefox-demo',
+    '--project=chromium-demo',
     'tests/e2e/suites/proforma-crear-e2e.test.ts',
     '--grep',
     'proforma',
@@ -60,7 +60,7 @@ test('normalizes passthrough positionals ahead of option-value pairs', () => {
     '--trace',
     'on',
     '--project',
-    'firefox-demo',
+    'chromium-demo',
     '--grep',
     'proforma',
     '--reporter=json',

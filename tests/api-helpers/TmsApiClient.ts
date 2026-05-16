@@ -106,7 +106,7 @@ export class TmsApiClient {
   }
   /**
     * Helper especializado para escribir RUT en campos con Input Mask.
-    * FIX FIREFOX: Usa .fill('') en lugar de triple clic para limpiar.
+    * Usa .fill('') en lugar de triple clic para limpiar.
     */
   private async typeRutSlowly(selector: string, rutValue: string): Promise<void> {
     logger.info(`🔑 typeRutSlowly: Escribiendo RUT [${rutValue}] en ${selector}`);
@@ -130,7 +130,7 @@ export class TmsApiClient {
     };
 
     // --- Intento 1: Escritura limpia y rápida ---
-    // FIX: Usamos fill('') que es atómico y no falla en Firefox por latencia
+    // FIX: Usamos fill('') que es atómico y evita problemas de latencia
     await locator.fill('');
     await this.page.waitForTimeout(100);
 
@@ -247,7 +247,7 @@ export class TmsApiClient {
     await this.page.selectOption('select[name="Transportistas[ciudad_id]"]', '1');
     await this.page.selectOption('select[name="Transportistas[comuna_id]"]', '2');
 
-    // Pausa técnica para estabilidad en Firefox
+    // Pausa técnica para estabilidad
     await this.page.waitForTimeout(500);
 
     // --- GUARDADO ROBUSTO (JS INJECTION) ---
@@ -290,7 +290,7 @@ export class TmsApiClient {
     ]);
 
     // FIX: Usamos evaluate() para hacer click directo en el DOM.
-    // Esto evita que Firefox falle esperando que el botón sea "estable" o visible si hay overlays.
+    // Evita problemas con overlays que bloquean el click estándar.
     const clickSave = this.page.evaluate(() => {
       const buttons = Array.from(document.querySelectorAll('button.btn-success, input[type="submit"].btn-success'));
       const btnGuardar = buttons.find(b => b.textContent?.includes('Guardar') || (b as HTMLInputElement).value?.includes('Guardar'));
@@ -396,7 +396,7 @@ export class TmsApiClient {
         await searchInput.fill(nombre);
         logger.info(`🔎 Búsqueda completada con: ${nombre}`);
 
-        // FIX FIREFOX: Use JS click on #buscar instead of getByRole which fails in Firefox
+        // Use JS click on #buscar instead of getByRole
         await this.page.evaluate(() => {
           const btn = document.getElementById('buscar');
           if (btn) btn.click();
@@ -471,7 +471,7 @@ export class TmsApiClient {
     await this.page.fill('#clientes-nombre_fantasia', nombre);
     await this.page.fill('#clientes-calle', generateChileanStreet());
 
-    // --- FIX FIREFOX: Clics vía JS para evitar Timeouts de estabilidad ---
+    // --- Clics vía JS para evitar Timeouts de estabilidad ---
 
     // 1. Tipo Cliente
     await this.clickViaJS('button[data-id="clientes-tipo_cliente_id"]');
@@ -596,8 +596,8 @@ export class TmsApiClient {
       return null;
     };
 
-    // FIX FIREFOX: Esperar a que la redirección a /ver/\d+ o /editar/\d+ complete antes de leer la URL.
-    // Chromium lo hace casi instantáneamente, Firefox puede tardar hasta 5-8 segundos más.
+    // Esperar a que la redirección a /ver/\d+ o /editar/\d+ complete antes de leer la URL.
+    // La redirección puede tardar varios segundos en entornos lentos.
     await this.page.waitForURL(/\/(ver|view|editar|update)(\/\d+|\?.*[?&]?id=\d+)?/i, { timeout: 8000 }).catch(() => {
       logger.warn(`⚠️ waitForURL (ver/editar) no completó en 8s para ${entityLabel} (${nombre}) — continuando con URL actual`);
     });
@@ -1225,7 +1225,7 @@ export class TmsApiClient {
 
 
 
-    // FIX FIREFOX: Limpiar modal-backdrop antes de Guardar
+    // Limpiar modal-backdrop antes de Guardar
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body?.classList.remove('modal-open');
@@ -1377,7 +1377,7 @@ export class TmsApiClient {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body?.classList.remove('modal-open');
     });
-    // FIX FIREFOX: waitForResponse puede no interceptarse en Firefox si la respuesta
+    // waitForResponse puede no interceptarse si la respuesta
     // llega antes de que el listener esté listo, o si el POST usa un patrón de redirect distinto.
     // Hacemos el waitForResponse opcional y verificamos el éxito por URL/loadState.
     await Promise.all([
@@ -1385,7 +1385,7 @@ export class TmsApiClient {
       this.page.waitForResponse(
         resp => resp.url().includes('/conductores/') && resp.status() < 400,
         { timeout: 15000 }
-      ).catch(() => logger.warn('⚠️ waitForResponse /conductores/ timeout (Firefox) — verificando via URL')),
+      ).catch(() => logger.warn('⚠️ waitForResponse /conductores/ timeout — verificando via URL')),
       this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); })
     ]);
 
@@ -1721,7 +1721,7 @@ export class TmsApiClient {
 
     const maxSaveAttempts = 2;
     for (let saveAttempt = 1; saveAttempt <= maxSaveAttempts; saveAttempt++) {
-      // FIX FIREFOX: Limpiar modal-backdrop residuales que bloquean page.click() en Firefox
+      // Limpiar modal-backdrop residuales que bloquean page.click()
       await this.page.evaluate(() => {
         document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
         document.body?.classList.remove('modal-open');
@@ -1732,7 +1732,7 @@ export class TmsApiClient {
         this.page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {
           logger.warn('⚠️ Tiempo de espera de navegación agotado, verificando URL...');
         }),
-        // FIX FIREFOX: JS click bypasea overlays invisibles que causan TimeoutError
+        // JS click bypasea overlays invisibles que causan TimeoutError
         this.page.evaluate(() => {
           const btn = document.getElementById('btn_guardar') as HTMLElement;
           if (btn) btn.click();
@@ -2445,15 +2445,15 @@ export class TmsApiClient {
     await guardarBtn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await this.page.waitForTimeout(300);
 
-    // FIX FIREFOX: Limpiar modal-backdrop antes de Guardar
+    // Limpiar modal-backdrop antes de Guardar
     await this.page.evaluate(() => {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body?.classList.remove('modal-open');
     });
 
-    // FIX FIREFOX: usar click nativo de Playwright para el botón Guardar.
-    // evaluate(el.click()) no dispara los handlers jQuery de validación/submit en Firefox.
-    // .click() normal puede quedar colgado en Firefox si la navegación interrumpe la promesa.
+    // Usar click nativo de Playwright para el botón Guardar.
+    // evaluate(el.click()) no dispara los handlers jQuery de validación/submit.
+    // .click() normal puede quedar colgado si la navegación interrumpe la promesa.
     await Promise.all([
       this.page.waitForResponse(
         (resp: any) => resp.url().includes('/viajes/') && resp.status() < 400,
@@ -2498,7 +2498,7 @@ export class TmsApiClient {
     }
 
     // Estrategia 3: Verificar si redirigió (éxito silencioso) o buscar en grilla
-    // FIX FIREFOX: Esperar a que la URL se estabilice antes de leerla (Firefox es más lento para redirigir)
+    // Esperar a que la URL se estabilice antes de leerla
     await Promise.race([
       this.page.waitForURL('**/viajes/asignar**', { timeout: 10000 }),
       this.page.waitForURL('**/viajes/index**', { timeout: 10000 })
@@ -2558,8 +2558,8 @@ export class TmsApiClient {
       }
     }
 
-    // Fallback: navegar a grilla y buscar (con retry loop para Firefox)
-    logger.info('⚠️ Fallback: verificando en grilla de asignación con retry loop (Firefox-safe)...');
+    // Fallback: navegar a grilla y buscar (con retry loop)
+    logger.info('⚠️ Fallback: verificando en grilla de asignación con retry loop...');
 
     const maxSearchRetries = 8;
     for (let attempt = 1; attempt <= maxSearchRetries; attempt++) {
@@ -2581,7 +2581,7 @@ export class TmsApiClient {
       const searchInput = this.page.locator('#search');
       await searchInput.waitFor({ state: 'visible', timeout: 10000 }).catch(() => { });
 
-      // Limpiar y escribir lentamente (Firefox necesita eventos key-by-key)
+      // Limpiar y escribir lentamente (eventos key-by-key para estabilidad)
       await searchInput.fill('');
       await searchInput.pressSequentially(nroViaje, { delay: 80 });
       await Promise.all([

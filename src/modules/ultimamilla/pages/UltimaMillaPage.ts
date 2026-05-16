@@ -353,11 +353,11 @@ async fillDimensiones(ancho: string, largo: string, alto: string): Promise<void>
 
     async getMetrosCubicosValue(): Promise<string> {
         // Use evaluate to capture JS-calculated values
-        const value = await this.page.locator(this.selectors.m3).evaluate(el => el.value);
+        const value = await this.page.locator(this.selectors.m3).evaluate((el: HTMLInputElement) => el.value);
         
         // Also try innerText as fallback for different input types
         if (!value || value === '') {
-            const textValue = await this.page.locator(this.selectors.m3).evaluate(el => el.innerText);
+            const textValue = await this.page.locator(this.selectors.m3).evaluate((el: HTMLElement) => el.innerText);
             logger.debug(`Valor de m3 (innerText): "${textValue}"`);
             return textValue || value;
         }
