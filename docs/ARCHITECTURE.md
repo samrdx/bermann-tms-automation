@@ -6,7 +6,9 @@ This document records the architectural decisions made during the development of
 
 **Audience:** Developers joining the project, QA engineers, and stakeholders
 
-**Last Updated:** February 6, 2026
+**Last Updated:** May 15, 2026
+
+> **Note:** This document covers core architectural decisions (POM, Skills System, Parallel Execution, Atomic vs Legacy). Since February 2026, the project has added 3 new modules (finanzas, configAdmin, ultimamilla), migrated skills to `.agents/skills/`, introduced atomic E2E suites (`tests/e2e/suites/`), consolidated CI to a Demo-only PR pipeline, and added mobile automation (WDIO). These additions follow the same architectural patterns documented here. For a complete current overview, see the [README](../README.md) and [CLAUDE.md](../CLAUDE.md).
 
 ---
 

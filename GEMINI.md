@@ -67,19 +67,19 @@ When executing tasks or receiving specific commands, ALWAYS invoke the correspon
 
 ---
 
-## Project Status Dashboard (Updated: 2026-03-07)
+## Project Status Dashboard (Updated: 2026-05-15)
 
 | Category | Value | Last Updated |
 |----------|-------|--------------|
-| Active Branch | main | 2026-03-07 |
-| Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-03-07 |
-| Completed Modules | 7 (auth, transport, commercial, contracts, planning, monitoring, finanzas) | 2026-03-10 |
-| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-03-10 |
-| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-03-10 |
-| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring -> Prefactura (complete) | 2026-03-10 |
-| TypeScript Compilation | Clean (0 errors) | 2026-03-07 |
-| Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-03-07 |
-| CI/CD | Hybrid workflow (atomic + legacy jobs) | 2026-03-07 |
+| Active Branch | main | 2026-05-15 |
+| Automated Tests | 20+ (4 auth + 4 entities + 5 ops + 3 finanzas + 3 ultimamilla + 8 config) | 2026-05-15 |
+| Completed Modules | 9 (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla) | 2026-05-15 |
+| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-05-15 |
+| Operational Skills | 7 TMS, 9 SDD, 2 Generic | 2026-05-15 |
+| E2E Coverage | Entities → Contracts → Trips → Monitoring → Prefactura → Proforma → Ultima Milla | 2026-05-15 |
+| TypeScript Compilation | Clean (0 errors) | 2026-05-15 |
+| Browsers | 2 (Chromium, Firefox) - WebKit removed for instability | 2026-05-15 |
+| CI/CD | PR E2E Demo pipeline + Ultimamilla batch + Allure GitHub Pages | 2026-05-15 |
 
 ---
 
@@ -111,25 +111,28 @@ qa-automation-framework/
 ├── GEMINI.md                   # This file (project documentation)
 ├── CLOUD.md                    # CI/CD architecture decisions
 ├── README.md                   # Main documentation
-├── .cursorrules                # Cursor IDE optimization
 ├── .github/workflows/          # CI/CD pipelines
-│   ├── playwright.yml          # Legacy single test runner
-│   └── tests.yml               # Hybrid suite (atomic + legacy)
-├── skills/                     # AI agent skills (anti-hallucination)
-│   ├── skill-creator/          # Meta-skill for creating new skills
+│   └── tests.yml               # PR E2E Demo (finanzas + ultimamilla batch)
+├── .agents/skills/             # AI agent skills (anti-hallucination) — 18 skills
 │   ├── tms-selectors/
 │   ├── tms-dropdowns/
 │   ├── tms-page-objects/
 │   ├── tms-tests/
-│   └── tms-data/
+│   ├── tms-data/
+│   ├── tms-atomic-e2e/
+│   ├── tms-ultimamilla/
+│   └── ...
 ├── src/
-│   ├── modules/                # Modular Architecture (Domain-Driven)
+│   ├── modules/                # Modular Architecture (9 modules)
 │   │   ├── auth/               # Login, Dashboard, Auth actions
 │   │   ├── transport/          # Transportista, Conductor, Vehiculo + Factories
 │   │   ├── commercial/         # Cliente + Factory
 │   │   ├── contracts/          # Contratos + Factory
 │   │   ├── planning/           # Planificar/Asignar Viajes
-│   │   └── monitoring/         # Monitoreo (Finalizar Viajes)
+│   │   ├── monitoring/         # Monitoreo (Finalizar Viajes)
+│   │   ├── finanzas/           # Prefactura
+│   │   ├── ultimamilla/        # Pedidos, Asignación, Monitoreo
+│   │   └── configAdmin/        # Config: UnidadNegocio, TipoOperacion, etc.
 │   ├── core/                   # BasePage, BrowserManager
 │   ├── fixtures/               # Playwright Fixtures (Dependency Injection)
 │   ├── utils/                  # Logger, RUT generator, utilities
@@ -138,19 +141,34 @@ qa-automation-framework/
 │   ├── e2e/
 │   │   ├── auth/               # Authentication tests (login, logout, negative, full-flow)
 │   │   ├── modules/
+│   │   │   ├── 00-config/      # Config smoke tests (8 suites)
 │   │   │   ├── 01-entidades/   # Entity creation tests
 │   │   │   ├── 02-operaciones/ # Operation tests (Contratos, Viajes, Monitoreo)
-│   │   │   └── 03-finanzas/    # Reserved for future finance module
+│   │   │   ├── 03-finanzas/    # Reserved
+│   │   │   └── ultimamilla/    # Última Milla (pedido, asignar, batch)
 │   │   └── suites/
-│   │       └── base-entities.setup.ts  # Master entity setup (Steps 1-4)
+│   │       ├── base-entities.setup.ts       # Master entity setup
+│   │       ├── 01-config-master.setup.ts
+│   │       ├── 02-carga-master.setup.ts
+│   │       ├── prefactura-crear-e2e.test.ts
+│   │       ├── proforma-crear-e2e.test.ts
+│   │       ├── finanzas-prefactura-proforma-e2e.test.ts
+│   │       ├── viajes-asignar-e2e.test.ts
+│   │       └── viajes-finalizar-e2e.test.ts
 │   ├── api-helpers/            # API helpers for entity creation
 │   ├── helpers/
 │   │   └── auth.setup.ts       # Global authentication setup
 │   ├── experiments/            # Experimental test scripts
 │   └── exploration/            # Page inspection scripts
-├── scripts/                    # Utility shell scripts
+├── scripts/                    # Utility scripts (pw:run wrapper, engram, SDD sync, CI validation)
+│   ├── run-playwright-suite.mjs
+│   ├── ci/
+│   ├── engram/
+│   └── sdd/
 ├── playwright/.auth/           # Authentication state
 │   └── user.json               # Stored session
+├── tmsapp/mobile/              # Mobile automation (WDIO)
+├── .atl/                       # Skill registry (auto-generated)
 ├── last-run-data-chromium.json # Worker-specific data (Chromium)
 ├── last-run-data-firefox.json  # Worker-specific data (Firefox)
 ├── reports/                    # Screenshots, videos
@@ -158,6 +176,10 @@ qa-automation-framework/
 ├── docs/                       # Documentation
 │   ├── ARCHITECTURE.md
 │   ├── CI_CD_SETUP.md
+│   ├── TEST-ACTIVES.md
+│   ├── ENGRAM_INTEGRATION.md
+│   ├── REPO_MAINTENANCE_ROUTINE.md
+│   ├── ALLURE_REPORT_USAGE.md
 │   ├── project-selectors.csv
 │   └── ProjectSelectors.md
 └── .env                        # Environment variables (not versioned)
@@ -490,84 +512,107 @@ const user = getTestUser('admin');
 
 ## Available NPM Scripts
 
+All tests run through the wrapper `scripts/run-playwright-suite.mjs` (`npm run pw:run`). Env prefix determines target: `qa:*` for QA, `demo:*` for Demo.
+
+### Config Smoke (1 vez por sprint)
+
 ```bash
-# === SMOKE / AUTH ===
-npm run test:auth              # Run all auth tests
-npm run test:auth:login        # Run login test only
-npm run test:auth:logout       # Run logout test only
+npm run qa:config:smoke:all            # 8 suites: unidad negocio, tipo operacion, tipo servicio, tipo carga, capacidades, ruta, carga-setup, carga-crear
+npm run qa:config:sprint               # Fase 1 + Fase 2 completa
+```
 
-# === ATOMIC E2E (Full flow, no JSON deps) ===
-npm run test:qa:trip:full-flow    # QA: full E2E (viajes-finalizar-e2e.test.ts)
-npm run test:demo:trip:full-flow  # Demo: full E2E (same file, ENV=DEMO)
-npm run test:qa:prefactura:e2e    # QA: prefactura full E2E (prefactura-crear-e2e.test.ts)
-npm run test:demo:prefactura:e2e  # Demo: prefactura full E2E (same file, ENV=DEMO)
+### Smoke Tests (por paso)
 
-# === LEGACY QA (Dependent, Sequential Tests) ===
-npm run test:qa:legacy:setup           # Run base entities setup
-npm run test:qa:legacy:setup:headed    # Run base setup with visible browser
-npm run test:qa:legacy:entidades       # Run entity creation tests (sequential)
-npm run test:qa:legacy:entidades:headed
-npm run test:qa:legacy:contratos       # Run contract tests
-npm run test:qa:legacy:contratos:headed
-npm run test:qa:legacy:planificar      # Run trip planning test
-npm run test:qa:legacy:planificar:headed
-npm run test:qa:legacy:asignar         # Assign trip (reads nroViaje from JSON)
-npm run test:qa:legacy:finalizar       # Finalize/Monitoreo (viajes-monitoreo.test.ts)
+```bash
+npm run qa:smoke:01:transportista       # Crear Transportista
+npm run qa:smoke:02:cliente             # Crear Cliente
+npm run qa:smoke:03:conductor           # Crear Conductor
+npm run qa:smoke:04:vehiculo            # Crear Vehiculo
+npm run qa:smoke:05:contract:cliente    # Contrato Ingreso
+npm run qa:smoke:06:contract:transportista # Contrato Costo
+npm run qa:smoke:07:trip:planificar     # Planificar Viaje
+npm run qa:smoke:08:trip:asignar        # Asignar Viaje
+npm run qa:smoke:09:trip:finalizar      # Finalizar Viaje
+npm run qa:smoke:all                    # Todos en secuencia
+```
 
-# === FULL FLOWS (QA) ===
-npm run test:qa:flow:setup-to-prefactura      # setup -> contratos -> viajes (via base-entities)
-npm run test:qa:flow:entidades-to-prefactura  # individual entities -> contratos -> viajes
+### Regression Suites
 
-# === DEMO (Sequential end-to-end) ===
-npm run test:demo:legacy:entidades         # Demo entities (sequential)
-npm run test:demo:flow:entidades-to-prefactura # Demo: entities -> contratos -> viajes
+```bash
+npm run qa:regression:entities          # Transportista + Cliente + Conductor + Vehiculo
+npm run qa:regression:contracts         # Contratos Ingreso + Costo
+npm run qa:regression:trips             # Planificar + Asignar + Finalizar
+npm run qa:regression:ops               # Entities + Contracts + Trips
+npm run qa:regression:finanzas          # Prefactura + Proforma (E2E atómicos)
+npm run qa:regression:ultimamilla       # Asignar + Batch
+npm run qa:regression:ops:full          # Todo + Allure report
+```
 
-# === GRANULAR (Debugging Individual Tests) ===
-npm run test:qa:entity:transportista   # Create transportista entity
-npm run test:qa:entity:cliente         # Create cliente entity
-npm run test:qa:entity:vehiculo        # Create vehiculo entity
-npm run test:qa:entity:conductor       # Create conductor entity
-npm run test:qa:op:contrato            # Create contract (Costo type)
-npm run test:qa:op:contrato2cliente    # Create contract (Ingreso type)
+### Atomic E2E (independientes — cargan datos seedeados)
 
-# === PLAYWRIGHT CORE ===
-npm run test                   # Run all Playwright tests
-npm run test:ui                # Run with Playwright UI mode
-npm run test:headed            # Run with visible browser
-npm run test:debug             # Run with Playwright debugger
+```bash
+npm run qa:e2e:prefactura               # Prefactura desde viaje finalizado
+npm run qa:e2e:proforma                 # Proforma desde viaje finalizado
+npm run qa:e2e:finanzas-full            # Prefactura + Proforma
+npm run qa:e2e:viajes-asignar           # Asignar viaje (E2E atómico)
+npm run qa:e2e:viajes-finalizar         # Finalizar viaje (E2E atómico)
+npm run qa:e2e:all                      # Todos los E2E atómicos QA
+```
 
-# === REPORTS & UTILITIES ===
-npm run allure:generate:qa     # Generate Allure HTML report for QA (non-blocking)
-npm run allure:generate:demo   # Generate Allure HTML report for Demo (non-blocking)
-npm run allure:open:qa         # Open generated QA report in browser
-npm run allure:open:demo       # Open generated Demo report in browser
-npm run allure:serve:qa        # Serve raw QA results (blocking server)
-npm run allure:serve:demo      # Serve raw Demo results (blocking server)
-npm run clean:allure:qa        # Clean QA results + report (before each run)
-npm run clean:allure:demo      # Clean Demo results + report
-npm run clean:allure           # Clean everything
+### Última Milla
 
-# === FULL RUNS (clean + test + generate + open) ===
-npm run run:all:qa             # QA: entidades-to-prefactura + E2E + Allure report
-npm run run:all:demo           # Demo: entidades-to-prefactura + E2E + Allure report
-npm run test:all               # QA + Demo: all tests + generate both reports (no open)
-npm run run:qa:setup-to-prefactura # QA: setup + contratos + viajes + serve
-npm run run:qa:entidades-to-prefactura  # QA: entidades individuales + contratos + viajes + serve
-npm run run:qa:e2e             # QA: E2E atómico + serve
-npm run run:qa:prefactura:e2e   # QA: Prefactura E2E + serve
-npm run run:demo:entidades-to-prefactura # Demo: entidades + contratos + viajes + serve
-npm run run:demo:e2e           # Demo: E2E atómico + serve
-npm run run:demo:prefactura:e2e # Demo: Prefactura E2E + serve
+```bash
+npm run qa:smoke:ultimamilla            # Crear pedido
+npm run qa:smoke:ultimamilla:asignar    # Asignar pedido (multi-browser)
+npm run qa:smoke:ultimamilla:batch      # Batch asignación
+```
 
-npm run show-report            # Open Playwright HTML test report
-npm run codegen                # Launch Playwright codegen for TMS QA environment
-npm run build                  # Compile TypeScript
-npm run clean                  # Clean reports and logs
+### Seed Legacy
+
+```bash
+npm run qa:seed:legacy                  # base-entities.setup.ts
+```
+
+### Allure Reports
+
+```bash
+npm run allure:generate:qa              # Generar reporte QA
+npm run allure:serve:qa                 # Servir reporte QA
+npm run allure:generate:demo            # Generar reporte Demo
+npm run allure:serve:demo               # Servir reporte Demo
+npm run run:all:qa                      # Clean + Test + Generate + Open QA
+npm run run:all:demo                    # Clean + Test + Generate + Open Demo
+```
+
+### Mobile (tmsapp)
+
+```bash
+npm run mobile:test:smoke:auth          # Auth smoke en app mobile (WDIO)
+```
+
+### Playwright Core
+
+```bash
+npm run test                            # Run all tests (default: QA E2E)
+npm run show-report:qa                  # Open HTML report (QA)
+npm run show-report:demo                # Open HTML report (Demo)
+npm run codegen:qa                      # Launch codegen for QA
+npm run codegen:demo                    # Launch codegen for Demo
+```
+
+### Maintenance & SDD
+
+```bash
+npm run clean:reports                   # Clean reports and logs
+npm run storage:maintenance             # Clean reports + npm cache + check browsers
+npx tsc --noEmit                        # TypeScript compilation check
+npm run sdd:sync:pull                   # Pull latest SDD artifacts
+npm run sdd:sync:push                   # Push SDD artifacts
 ```
 
 ## Modules Implemented
 
-### Completed Modules (6/6)
+### Completed Modules (9/9)
 
 1. **auth** - `src/modules/auth/`
    - LoginPage, DashboardPage, AuthActions
@@ -596,7 +641,16 @@ npm run clean                  # Clean reports and logs
 
 7. **finanzas** - `src/modules/finanzas/`
    - PrefacturaPage
-   - Tests: `tests/e2e/suites/prefactura-crear-e2e.test.ts` (atomic E2E)
+   - Tests: `tests/e2e/suites/prefactura-crear-e2e.test.ts`, `proforma-crear-e2e.test.ts`, `finanzas-prefactura-proforma-e2e.test.ts` (atomic E2E)
+
+8. **configAdmin** - `src/modules/configAdmin/pages/`
+   - UnidadNegocioPage, TipoOperacionPage, TipoServicioPage, TipoCargaPage, RutaPage, CargaMasterPage, CrearCargaPage
+   - Tests: `00-config/config/` (8 suites)
+
+9. **ultimamilla** - `src/modules/ultimamilla/pages/`
+   - UltimaMillaFormPage, UltimaMillaPedidoIndexPage, UltimaMillaAsignarPage, UltimaMillaMonitoreoPage
+   - UltimaMillaFactory
+   - Tests: `ultimamilla/pedido-crear.test.ts`, `pedido-asignar.test.ts`, `pedido-asignar-batch.test.ts`
 
 ### Test Organization
 
@@ -608,6 +662,16 @@ tests/e2e/
 │   ├── login-negative.test.ts
 │   └── full-flow.test.ts
 ├── modules/
+│   ├── 00-config/                  # Config smoke tests (8 suites)
+│   │   └── config/
+│   │       ├── unidadnegocio-crear.test.ts
+│   │       ├── tipo-operacion-crear.test.ts
+│   │       ├── tipo-servicio-crear.test.ts
+│   │       ├── tipocarga-crear.test.ts
+│   │       ├── capacidades-crear.test.ts
+│   │       ├── ruta-crear.test.ts
+│   │       ├── carga-setup.test.ts
+│   │       └── carga-crear.test.ts
 │   ├── 01-entidades/               # Entity creation tests (4 tests)
 │   │   ├── transport/transportistas-crear.test.ts
 │   │   ├── clientes/cliente-crear.test.ts
@@ -618,11 +682,21 @@ tests/e2e/
 │   │   ├── contratos/contrato2cliente-crear.test.ts
 │   │   ├── viajes/viajes-planificar.test.ts
 │   │   ├── viajes/viajes-asignar.test.ts
-│   │   └── Monitoreo/viajes-monitoreo.test.ts   ← actual filename
-│   └── 03-finanzas/               # Reserved for future finance module
+│   │   └── Monitoreo/viajes-monitoreo.test.ts
+│   ├── 03-finanzas/               # Reserved
+│   └── ultimamilla/               # Última Milla tests
+│       ├── pedido-crear.test.ts
+│       ├── pedido-asignar.test.ts
+│       └── pedido-asignar-batch.test.ts
 ├── suites/
-│   ├── base-entities.setup.ts     # Master suite (creates all base entities)
-│   └── viajes-finalizar-e2e.test.ts  # Atomic E2E: full flow without JSON deps
+│   ├── base-entities.setup.ts              # Master legacy entity setup
+│   ├── 01-config-master.setup.ts           # Config master setup
+│   ├── 02-carga-master.setup.ts            # Carga master setup
+│   ├── prefactura-crear-e2e.test.ts        # Atomic E2E: Prefactura
+│   ├── proforma-crear-e2e.test.ts          # Atomic E2E: Proforma
+│   ├── finanzas-prefactura-proforma-e2e.test.ts # Atomic E2E: Finanzas Full
+│   ├── viajes-asignar-e2e.test.ts          # Atomic E2E: Viajes Asignar
+│   └── viajes-finalizar-e2e.test.ts        # Atomic E2E: Viajes Finalizar
 └── helpers/
     └── auth.setup.ts              # Global authentication
 ```
@@ -636,42 +710,43 @@ tests/api-helpers/
 ├── ClienteHelper.ts            # Helper for creating clientes
 ├── VehiculoHelper.ts           # Helper for creating vehiculos
 ├── ConductorHelper.ts          # Helper for creating conductores
-└── DataPathHelper.ts           # Resolves worker-specific JSON data paths
+├── DataPathHelper.ts           # Resolves worker-specific JSON data paths
+├── OperationalDataLoader.ts    # Loads seeded data for atomic E2E tests
+├── ClientResolver.ts           # Deterministic client selection for ultimamilla
+└── NamingHelper.ts             # Helper for generating unique names
 ```
 
 ## CI/CD Workflows
 
-### Hybrid Workflow (tests.yml) - Current Standard
+### PR E2E Demo Pipeline (tests.yml) — Current Standard
 
-Two parallel jobs that run on push to main/develop:
+A single pipeline (`tests.yml`) runs on pull requests, focused on Demo environment:
 
-**Job 1: Atomic Suite** (Independent tests)
+**Job 1: E2E Finanzas Full (Demo)**
 
-- Timeout: 20 minutes
-- Tests: `viajes-finalizar-e2e.test.ts` (full E2E, no JSON deps)
+- Timeout: 60 minutes
+- Tests: `finanzas-prefactura-proforma-e2e.test.ts` (prefactura + proforma)
 - Browser: Chromium only
 - Credentials: `TMS_USER` / `TMS_PASS` mapped to `TMS_USERNAME` / `TMS_PASSWORD`
-- Artifact: `report-atomic` (7 days retention)
+- Preflight: `npm run ci:validate:workflow-scripts`
+- Concurrency: Grouped by workflow + ref to prevent collisions
 
-**Job 2: Legacy Suite** (Sequential dependent tests)
+**Job 2: Ultima Milla Batch (Demo)**
 
-- Timeout: 30 minutes
-- Stage 1: `base-entities-chromium` (entity setup)
-- Stage 2: Contratos tests
-- Stage 3: `viajes-planificar.test.ts`
-- Workers: 1 (sequential execution)
-- Credentials: `TMS_USER` / `TMS_PASS` mapped to all legacy variables
-- Artifact: `report-legacy` (7 days retention)
+- Timeout: 120 minutes
+- Tests: `pedido-asignar-batch.test.ts` (multi-browser: chromium + firefox)
+- Workers: 1 (sequential)
+- Allure report generated + uploaded as artifact (14-day retention)
+- Allure attachments >20MB pruned automatically
+- Environment: `ULTIMAMILLA_ENABLE_MUTATION=true`, `ULTIMAMILLA_BATCH_SIZE=8`
+- Seed: `npm run demo:seed:legacy` runs before batch test
 
 > **Note:** `viajes-asignar.test.ts` and `viajes-monitoreo.test.ts` are **Legacy** tests that read from `last-run-data-{browser}.json`. They are NOT atomic.
 
-### Legacy Workflow (playwright.yml)
+### Previous Workflows (Removed)
 
-- Single test runner for `viajes-asignar.test.ts`
-- Uses Docker container: `mcr.microsoft.com/playwright:v1.58.0-jammy`
-- 60-minute timeout
-- Secrets: `BASE_URL`, `TMS_USER`, `TMS_PASS`
-- Artifact: `playwright-report` (7 days retention)
+- `playwright.yml` — Legacy single test runner (removed)
+- `tests.yml` hybrid atomic+legacy QA jobs (consolidated to Demo-only PR pipeline)
 
 ## Playwright Configuration
 
@@ -690,16 +765,22 @@ Two parallel jobs that run on push to main/develop:
 
 **Active Projects:**
 
-- `setup` - Auth setup
-- `auth-tests` - Auth test suite
-- `base-entities-chromium` - Entity setup (Chrome)
-- `base-entities-firefox` - Entity setup (Firefox)
-- `chromium` - Main tests (Chrome)
-- `firefox` - Main tests (Firefox)
+- `setup` — Auth setup
+- `auth-tests` — Auth test suite
+- `base-entities-chromium` — Entity setup (Chrome)
+- `base-entities-firefox` — Entity setup (Firefox)
+- `chromium-qa` — Main tests QA (Chrome)
+- `firefox-qa` — Main tests QA (Firefox)
+- `chromium-demo` — Main tests Demo (Chrome)
+- `firefox-demo` — Main tests Demo (Firefox)
+- `config-smoke-chromium` — Config smoke (Chrome)
+- `config-smoke-firefox` — Config smoke (Firefox)
+- `config-fase1-chromium` — Config fase 1 (Chrome)
+- `config-fase1-firefox` — Config fase 1 (Firefox)
+- `config-fase2-chromium` — Config fase 2 (Chrome)
+- `config-fase2-firefox` — Config fase 2 (Firefox)
 
 **Removed:** WebKit was removed due to instability in legacy form interactions.
-
-**Artifacts:** Trace, screenshot, and video are captured only on failure (`retain-on-failure`).
 
 ## Data Generation (See tms-data skill)
 
@@ -1053,14 +1134,14 @@ Run the new test in headed mode for visual verification."
 
 **Current metrics:**
 
-- Total automated tests: **13**
+- Total automated tests: **20+**
 - Pass rate: **100%**
-- Modules complete: **6/6**
-- Coverage: **Entities -> Contracts -> Trips -> Monitoring (complete)**
+- Modules complete: **9/9** (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla)
+- Coverage: **Entities → Contracts → Trips → Monitoring → Prefactura → Proforma → Ultima Milla**
 - Parallel execution: **2 browsers (Chromium, Firefox)**
-- Skills operational: **5 TMS-specific + 1 meta-skill**
+- Skills operational: **7 TMS-specific + 9 SDD + 2 Generic**
 - TypeScript compilation: **Clean (0 errors)**
-- CI/CD: **Hybrid workflow (atomic + legacy)**
+- CI/CD: **PR E2E Demo pipeline + Ultimamilla batch + Allure GitHub Pages**
 
 ## Notes for AI Agents
 
@@ -1116,8 +1197,9 @@ Run the new test in headed mode for visual verification."
 - CI/CD: [CLOUD.md](CLOUD.md) + [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)
 
 ---
-**Last Updated:** February 20, 2026
-**Status:** Production-ready with hybrid CI/CD (atomic + legacy)
-**Framework Level:** Enterprise-grade with 13 automated tests across 6 modules
+**Last Updated:** May 15, 2026
+**Status:** Production-ready with PR Demo pipeline + Allure reporting
+**Framework Level:** Enterprise-grade with 20+ automated tests across 9 modules
 **Compilation:** TypeScript clean (0 errors)
 **Browsers:** Chromium + Firefox (WebKit removed)
+**Extras:** Mobile automation (WDIO), Engram SDD persistence, AI Skills System

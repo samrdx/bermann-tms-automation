@@ -1,50 +1,35 @@
-# Bermann TMS - QA Automation Framework
+# Bermann TMS — QA Automation Framework
 
-Framework de automatizacion E2E para el sistema TMS (Transport Management System) de Bermann, utilizando Playwright y TypeScript.
+Framework E2E para el sistema TMS (Transport Management System) de Bermann, construido con Playwright + TypeScript. Cubre los flujo críticos de negocio: entidades, contratos, viajes, finanzas (prefactura/proforma) y última milla.
 
-**QA Environment:** <https://moveontruckqa.bermanntms.cl>
-**Demo Environment:** <https://demo.bermanntms.cl/>
-
-## Overview
-
-| Metric | Value |
-| --- | --- |
-| Automated Tests | 13 |
-| Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) |
-| Pass Rate | 100% (Chromium & Firefox) |
-| Parallel Execution | 2 browsers (Chromium, Firefox) |
-| Architecture | Page Object Model + Domain-Driven Modules |
-| Skills System | 16 AI-ready skills (TMS + SDD) |
+| Environment | URL |
+|---|---|
+| **QA** | <https://moveontruckqa.bermanntms.cl> |
+| **Demo** | <https://demo.bermanntms.cl> |
 
 ---
 
-## Project Status Dashboard (Updated: 2026-03-09)
+## Quick Overview
 
-| Category | Value | Last Updated |
-| --- | --- | --- |
-| Active Branch | main | 2026-03-09 |
-| Automated Tests | 13 (4 auth + 4 entities + 5 operations) | 2026-03-09 |
-| Completed Modules | 6 (auth, transport, commercial, contracts, planning, monitoring) | 2026-03-09 |
-| Pass Rate | 100% (Chromium & Firefox QA verified) | 2026-03-09 |
-| Operational Skills | 5 TMS, 9 SDD, 2 Generic | 2026-03-07 |
-| E2E Coverage | Entities -> Contracts -> Trips -> Monitoring (complete) | 2026-03-07 |
+| Métrica | Valor |
+|---|---|
+| Tests automatizados | **20+** |
+| Módulos | **9** (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla) |
+| Pass Rate | **100%** (Chromium & Firefox) |
+| Navegadores | Chromium + Firefox (WebKit removido por inestabilidad) |
+| Arquitectura | Page Object Model + Domain-Driven Modules |
+| Skills System | **18** skills AI-ready (TMS + SDD) |
+| CI/CD | GitHub Actions — PR Demo pipeline + Ultimamilla batch |
+| TypeScript | Strict mode, ES Modules, .js extensions |
 
 ---
-
-## Tech Stack
-
-- **Playwright** v1.58.0 - Browser automation
-- **TypeScript** v5.9.3 - Strict mode
-- **Winston** - Structured logging
-- **Allure Reports** - Professional test reporting
-- **Page Object Model** - Test architecture
-- **GitHub Actions** - CI/CD (Hybrid Workflow)
 
 ## Prerequisites
 
-- Node.js v20+
+- Node.js 20+
 - npm
-- Access to TMS environments (QA/Demo credentials)
+- Acceso a entornos TMS (QA/Demo)
+- Playwright browsers (`npx playwright install`)
 
 ## Quick Start
 
@@ -53,102 +38,301 @@ Framework de automatizacion E2E para el sistema TMS (Transport Management System
 git clone https://github.com/samrdx/bermann-tms-automation.git
 cd bermann-tms-automation
 
-# 2. Install dependencies
+# 2. Install
 npm install
 
-# 3. Configure environment
+# 3. Configure
 cp .env.example .env
-# Edit .env with your TMS credentials (TMS_USERNAME / TMS_PASSWORD)
+# Editar .env con credenciales TMS (TMS_USERNAME / TMS_PASSWORD)
 
 # 4. Install browsers
-npx playwright install
+npx playwright install chromium firefox
 
-# 5. Run a smoke test
-npm run test:auth:login
+# 5. Run smoke test
+npm run qa:smoke:01:transportista
 ```
+
+---
 
 ## Project Structure
 
 ```text
-qa-automation-framework/
-├── AGENTS.md                    # AI skills system index
-├── GEMINI.md                    # Agent assistance prompts (Full reference)
-├── CLOUD.md                     # CI/CD architecture decisions
-├── .github/workflows/           # GitHub Actions (Hybrid: Atomic + Legacy)
-├── skills/                      # AI agent skills (anti-hallucination)
-│   ├── tms-selectors/           # Selector priority & Confluence
-│   ├── tms-dropdowns/           # Bootstrap Select patterns
-│   └── ...                      # See AGENTS.md for full list
+bermann-tms-automation/
+├── AGENTS.md                        # AI skills system + auto-invoke rules
+├── CLAUDE.md / GEMINI.md            # Full project documentation for AI agents
+├── CLOUD.md                         # CI/CD architecture decisions
+├── .github/workflows/
+│   └── tests.yml                    # PR E2E Demo pipeline
+├── .agents/skills/                  # AI agent skills (18 skills)
+│   ├── tms-selectors/               # Selector priority & Confluence
+│   ├── tms-dropdowns/               # Bootstrap Select patterns
+│   ├── tms-atomic-e2e/              # Atomic E2E test patterns
+│   ├── tms-ultimamilla/             # Última Milla automation
+│   ├── jira-ticket-writer/          # Jira User Stories
+│   └── ...                          # See AGENTS.md for full list
 ├── src/
-│   ├── modules/                 # Domain-Driven Architecture
-│   │   ├── auth/                # Login, Dashboard
-│   │   ├── transport/           # Transportista, Conductor, Vehiculo
-│   │   ├── commercial/          # Cliente
-│   │   ├── contracts/           # Contratos
-│   │   ├── planning/            # Planificar/Asignar Viajes
-│   │   └── monitoring/          # Monitoreo (Finalizar Viajes)
-│   ├── core/                    # BasePage, BrowserManager
-│   └── ...
+│   ├── modules/                     # Domain-Driven Architecture
+│   │   ├── auth/                    # Login, Dashboard
+│   │   ├── transport/               # Transportista, Conductor, Vehiculo
+│   │   ├── commercial/              # Cliente
+│   │   ├── contracts/               # Contratos (Costo/Ingreso)
+│   │   ├── planning/                # Planificar/Asignar Viajes
+│   │   ├── monitoring/              # Monitoreo (Finalizar Viajes)
+│   │   ├── finanzas/                # Prefactura
+│   │   ├── ultimamilla/             # Pedidos, Asignación, Monitoreo UM
+│   │   └── configAdmin/             # Config: UnidadNegocio, TipoOperacion, etc.
+│   ├── core/                        # BasePage, BrowserManager
+│   ├── fixtures/                    # Playwright Custom Fixtures (DI)
+│   ├── utils/                       # Logger, RUT generator, entityTracker, NamingHelper
+│   └── config/                      # Credentials, environment
 ├── tests/
 │   ├── e2e/
-│   │   ├── suites/              # Setup and Atomic E2E flows
-│   │   └── modules/             # Individual module tests
-│   └── api-helpers/             # API helpers for entity creation
-├── last-run-data-chromium.json  # Worker-specific data (Chromium)
-├── last-run-data-firefox.json   # Worker-specific data (Firefox)
-├── docs/                        # Architecture, CI/CD, selectors
-├── reports/                     # Screenshots, videos
-└── logs/                        # Execution logs
+│   │   ├── auth/                    # Login, logout, negative, full-flow
+│   │   ├── modules/
+│   │   │   ├── 00-config/           # Config smoke tests (8 suites)
+│   │   │   ├── 01-entidades/        # Entity creation (transportista, cliente, etc.)
+│   │   │   ├── 02-operaciones/      # Operations (contratos, viajes, monitoreo)
+│   │   │   ├── 03-finanzas/         # Reserved
+│   │   │   └── ultimamilla/         # Última Milla (pedido, asignar, batch)
+│   │   └── suites/                  # Atomic E2E + Setup suites
+│   ├── api-helpers/                 # TmsApiClient, helpers, DataPathHelper
+│   └── helpers/
+├── scripts/                         # pw:run wrapper, CI validation, engram, SDD sync
+├── docs/                            # Architecture, CI/CD, selectors, maintenance
+├── tmsapp/mobile/                   # Mobile automation (WDIO)
+├── playwright/.auth/                # Auth state (user.json)
+├── last-run-data-{browser}.json     # Worker-specific data files
+└── .env                             # Credenciales (no versionado)
 ```
+
+---
 
 ## Running Tests
 
-### Multi-Environment Support
+### Multi-Environment
 
-Control the target environment using the `ENV` variable:
+Todas las pruebas soportan QA y DEMO vía variable `ENV`:
 
-- **QA (Default):** `npm run [script]` or `ENV=QA [script]`
-- **Demo:** `ENV=DEMO [script]`
+```bash
+npm run qa:smoke:01:transportista     # QA
+ENV=DEMO npm run demo:smoke:01:transportista  # Demo
+```
 
-### Common Scripts
+### Execution Wrapper
 
-| Category | Command | Description |
-| --- | --- | --- |
-| **Smoke / Auth** | `npm run test:auth` | Run all authentication tests |
-| **Atomic E2E** | `npm run test:qa:trip:full-flow` | Complete flow without state dependencies (QA) |
-| | `npm run test:demo:trip:full-flow` | Complete flow without state dependencies (Demo) |
-| **Legacy QA** | `npm run test:qa:legacy:setup` | Run base entities setup (Steps 1-4) |
-| | `npm run test:qa:flow:setup-to-viajes` | Setup -> Contratos -> Viajes |
-| **Reports** | `npm run allure:serve:qa` | Serve Allure report for QA |
-| | `npm run allure:serve:demo` | Serve Allure report for Demo |
-| | `npm run show-report` | Open standard Playwright HTML report |
-| **Debug** | `npm run test:ui` | Run with Playwright UI mode |
-| | `npm run test:debug` | Run with Playwright debugger |
+Todas las pruebas usan el wrapper `scripts/run-playwright-suite.mjs` vía `npm run pw:run`, que maneja:
+- Run locks para evitar colisiones CI
+- Limpieza automática de reportes
+- Proyectos específicos por entorno (chromium-qa, firefox-demo, etc.)
+
+### Smoke Tests (por paso)
+
+```bash
+# QA
+npm run qa:smoke:01:transportista    # Crear Transportista
+npm run qa:smoke:02:cliente          # Crear Cliente
+npm run qa:smoke:03:conductor        # Crear Conductor
+npm run qa:smoke:04:vehiculo         # Crear Vehiculo
+npm run qa:smoke:05:contract:cliente # Contrato Ingreso
+npm run qa:smoke:06:contract:transportista # Contrato Costo
+npm run qa:smoke:07:trip:planificar  # Planificar Viaje
+npm run qa:smoke:08:trip:asignar     # Asignar Viaje
+npm run qa:smoke:09:trip:finalizar   # Finalizar Viaje (Monitoreo)
+
+# Demo (mismos pasos, prefijo demo:)
+npm run demo:smoke:all               # Todos los pasos en secuencia
+```
+
+### Regression Suites
+
+```bash
+# QA
+npm run qa:regression:entities       # Transportista + Cliente + Conductor + Vehiculo
+npm run qa:regression:contracts      # Contratos Ingreso + Costo
+npm run qa:regression:trips          # Planificar + Asignar + Finalizar
+npm run qa:regression:ops            # Entities + Contracts + Trips
+npm run qa:regression:finanzas       # Prefactura + Proforma (E2E atómicos)
+npm run qa:regression:ultimamilla    # Asignar + Batch
+npm run qa:regression:ops:full       # Todo lo anterior + Allure report
+
+# Demo
+npm run demo:regression:ops:full
+```
+
+### Config Smoke (1 vez por sprint)
+
+```bash
+npm run qa:config:smoke:all          # 8 suites: unidad negocio, tipo operación, tipo servicio, tipo carga, capacidades, ruta, carga-setup, carga-crear
+npm run qa:config:sprint             # Fase 1 + Fase 2 completa
+```
+
+### Atomic E2E (independientes, sin JSON deps)
+
+Usan `OperationalDataLoader` para cargar datos seedeados de regresiones previas:
+
+```bash
+npm run qa:e2e:prefactura            # Crear Prefactura desde viaje finalizado
+npm run qa:e2e:proforma              # Crear Proforma desde viaje finalizado
+npm run qa:e2e:finanzas-full         # Prefactura + Proforma
+npm run qa:e2e:viajes-asignar        # Asignar viaje (E2E atómico)
+npm run qa:e2e:viajes-finalizar      # Finalizar viaje (E2E atómico)
+npm run qa:e2e:all                   # Todos los E2E atómicos
+```
+
+### Última Milla
+
+```bash
+npm run qa:smoke:ultimamilla                  # Crear pedido
+npm run qa:smoke:ultimamilla:asignar           # Asignar pedido (multi-browser)
+npm run qa:smoke:ultimamilla:batch             # Batch asignación
+ULTIMAMILLA_ENABLE_MUTATION=true npm run qa:smoke:ultimamilla:asignar  # Con mutación
+```
 
 ### Allure Reporting
 
-The framework uses Allure for professional result visualization.
-
 ```bash
-# Generate and open report (QA)
-npm run allure:generate:qa
-npm run allure:open:qa
-
-# Direct serve (QA)
-npm run allure:serve:qa
-
-# Full run: Clean + Test + Serve (Demo)
-npm run run:demo:e2e
+npm run allure:generate:qa          # Generar reporte HTML (QA)
+npm run allure:serve:qa             # Servir reporte en navegador (QA)
+npm run run:all:qa                  # Clean + Test + Generate + Open (QA)
+npm run run:all:demo                # Idem para Demo
 ```
 
-### Test Classification
+### Mobile (tmsapp)
 
-1. **Atomic Tests (Modern)**: Self-contained, handle their own auth/data, can run in parallel.
-2. **Legacy Tests (Sequential)**: Dependent on `base-entities.setup.ts`, read state from `last-run-data-{worker}.json`.
+```bash
+npm run mobile:test:smoke:auth      # Auth smoke en app mobile (WDIO)
+```
+
+### Legacy Seed
+
+```bash
+npm run qa:seed:legacy              # base-entities.setup.ts (crea todo el ecosistema)
+```
+
+---
+
+## CI/CD (GitHub Actions)
+
+Pipeline actual: **PR E2E Demo** (`.github/workflows/tests.yml`)
+
+| Job | Descripción | Timeout |
+|---|---|---|
+| `e2e-finanzas-full-demo` | Prefactura + Proforma E2E en Demo | 60 min |
+| `ultimamilla-batch-demo` | Batch asignación multi-browser + Allure report + GitHub Pages | 120 min |
+
+### Secrets Requeridos
+
+| Secret | Uso |
+|---|---|
+| `TMS_USER` | Usuario TMS |
+| `TMS_PASS` | Password TMS |
+| `BASE_URL` | URL base TMS |
+
+### Key Features
+
+- **Concurrency groups** — evita colisiones entre ejecuciones paralelas
+- **Allure artifacts** — publicados a GitHub Pages con 14 días de retención
+- **Preflight validation** — verifica scripts antes de ejecutar
+- **Allure pruning** — attachments pesados (>20MB) se eliminan automáticamente
+
+Para detalle completo: [CLOUD.md](CLOUD.md) y [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)
+
+---
+
+## Architecture
+
+### Modules
+
+| Módulo | Page Objects | Tests | Estado |
+|---|---|---|---|
+| auth | LoginPage, DashboardPage | 4 tests | ✅ |
+| transport | TransportistaPage, ConductorPage, VehiculoPage | 4 tests | ✅ |
+| commercial | ClientePage | 1 test | ✅ |
+| contracts | ContratosPage | 2 tests | ✅ |
+| planning | PlanificarPage, AsignarPage | 2 tests | ✅ |
+| monitoring | MonitoreoPage | 1 test | ✅ |
+| finanzas | PrefacturaPage | 3 E2E suites | ✅ |
+| configAdmin | UnidadNegocioPage, TipoOperacionPage, TipoServicioPage, TipoCargaPage, CapacidadesPage, RutaPage, CargaMasterPage, CrearCargaPage | 8 tests | ✅ |
+| ultimamilla | UltimaMillaFormPage, UltimaMillaPedidoIndexPage, UltimaMillaAsignarPage, UltimaMillaMonitoreoPage | 3 tests | ✅ |
+
+### Key Patterns
+
+1. **Page Object Model** — Una clase por página, selectores encapsulados
+2. **Atomic E2E** — Tests que cargan datos seedeados vía `OperationalDataLoader` en vez de crear su propio ecosistema
+3. **Legacy Sequential** — Tests que leen de `last-run-data-{browser}.json` y deben ejecutarse en orden
+4. **Worker-Specific JSON** — Cada browser tiene su propio JSON para evitar colisiones en paralelo
+5. **Entity Tracker** — `entityTracker` registra entidades creadas y genera resumen para Allure
+6. **Skills System** — AI lee skills autoritativas antes de generar código (~95% reducción de alucinaciones)
+
+### Data Flow (Legacy)
+
+```text
+auth.setup.ts → playwright/.auth/user.json
+     ↓
+base-entities.setup.ts (2 browsers en paralelo)
+     ↓
+last-run-data-{chromium,firefox}.json
+     ↓
+contrato-crear → contrato2cliente-crear
+     ↓
+viajes-planificar → viajes-asignar → viajes-monitoreo
+```
+
+### Data Flow (Atomic E2E)
+
+```text
+qa:regression:ops → crea seed data en JSON
+     ↓
+qa:e2e:prefactura → OperationalDataLoader.loadOrThrow() → ejecuta solo prefactura
+```
+
+Para detalle completo: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
+
+## AI Agent Integration
+
+Este proyecto usa un sistema de skills para garantizar código consistente y correcto:
+
+- **Entry point:** [AGENTS.md](AGENTS.md) — índice de skills y reglas de auto-invocación
+- **Skills:** [.agents/skills/](.agents/skills/) — 18 skills AI-ready
+- **Context docs:** [CLAUDE.md](CLAUDE.md), [GEMINI.md](GEMINI.md)
+- **Engram (memoria persistente):** Configuración híbrida en `openspec/config.yaml`
+
+| Documento | Propósito |
+|---|---|
+| `AGENTS.md` | Skills system + auto-invoke rules |
+| `CLAUDE.md` | Documentación completa del proyecto (agentes Claude) |
+| `GEMINI.md` | Espejo de CLAUDE.md para Gemini |
+
+---
+
+## Logs and Reports
+
+| Artifact | Location |
+|---|---|
+| Application logs | `logs/app.log` |
+| Error logs | `logs/errors.log` |
+| Screenshots (on failure) | `test-results-*/` |
+| Playwright HTML Report | `playwright-report-{env}/` |
+| Allure Report | `allure-report-{env}/` |
+| Allure Results | `allure-results-{env}/` |
+
+## Maintenance
+
+```bash
+npm run clean:reports                  # Limpiar reports y resultados
+npm run storage:maintenance            # Limpiar reports + npm cache + list browsers
+npx tsc --noEmit                       # Verificar compilación TypeScript
+```
+
+Ver [docs/REPO_MAINTENANCE_ROUTINE.md](docs/REPO_MAINTENANCE_ROUTINE.md) para rutina completa.
+
+---
 
 ## Environment Variables
 
-File: `.env` (never committed to Git)
+Archivo: `.env` (NUNCA versionar)
 
 ```env
 # TMS Environments
@@ -161,135 +345,52 @@ ENVIRONMENT=dev
 HEADLESS=false
 TIMEOUT=30000
 
-# Test Credentials (Standard)
-TMS_USERNAME=your_username
+# Credenciales
+TMS_USERNAME=your_user
 TMS_PASSWORD=your_password
+
+# Engram (SDD persistence)
+ENGRAM_BASE_URL=http://localhost:8080
+ENGRAM_PROJECT=bermann-tms-automation
 ```
 
-## CI/CD (GitHub Actions)
-
-The framework uses a **Hybrid Workflow** (`tests.yml`) that runs on every push:
-- **Atomic Job**: Runs Chromium independently.
-- **Legacy Job**: Runs sequential suites with strictly 1 worker.
-
-Artifacts (traces, videos) are retained for 7 days on failure.
-
-## Architecture
-
-- **Page Object Model** - One class per page, encapsulated selectors
-- **Domain-Driven Modules** - auth, transport, commercial, contracts, planning
-- **Worker-Specific JSON** - Each browser gets its own `last-run-data-{browser}.json` to prevent parallel data collisions
-- **Skills System** - AI reads authoritative docs before generating code (95% hallucination reduction)
-
-Data flow:
-
-```text
-auth.setup.ts -> playwright/.auth/user.json
-     |
-base-entities.setup.ts (3 browsers in parallel)
-     |
-last-run-data-{chromium,firefox,webkit}.json
-     |
-contrato-crear -> contrato2cliente-crear
-     |
-viajes-planificar -> viajes-asignar -> viajes-finalizar
-```
-
-For full architectural documentation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## AI Agent Integration
-
-This project uses a skills system to ensure consistent, correct AI-generated code:
-
-- **Entry point:** [AGENTS.md](AGENTS.md) - Skills index and auto-invoke rules
-- **Skills:** [skills/](skills/) - 5 TMS-specific skills (selectors, dropdowns, page objects, tests, data)
-- **Context docs:** [CLAUDE.md](CLAUDE.md) (Claude), [GEMINI.md](GEMINI.md) (Agent prompts)
-
-### Engram (Persistent Memory)
-
-This repository supports hybrid SDD persistence (OpenSpec + Engram).
-
-- Setup guide: `docs/ENGRAM_INTEGRATION.md`
-- Preflight check: `npm run engram:preflight`
-- Topic key helper: `npm run engram:topic-key -- <change-name> <artifact>`
-- Canonical OpenSpec pull: `npm run sdd:sync:pull`
-- Canonical OpenSpec push: `SDD_SYNC_MESSAGE="chore(openspec): sync change-x" npm run sdd:sync:push`
-
-Recommended mode is `hybrid`, configured in `openspec/config.yaml`.
-
-### SDD Artifact Sync (OpenSpec via Git)
-
-Use these scripts when you want the repository copy of `openspec/` to stay aligned across PCs without manual Git steps.
-
-- `npm run sdd:sync:pull` runs a fast-forward pull from `origin main` to bring the canonical SDD artifacts.
-- `npm run sdd:sync:push` stages only `openspec/`, skips the commit when there are no OpenSpec changes, and pushes the canonical branch without opening an editor.
-- `SDD_SYNC_MESSAGE` lets you override the commit message; default is `chore(openspec): sync SDD artifacts`.
-
-Examples:
-
-```bash
-# Bring the latest canonical artifacts from main
-npm run sdd:sync:pull
-
-# Persist current openspec/ changes with the default message
-npm run sdd:sync:push
-
-# Persist with an explicit message for the current change
-SDD_SYNC_MESSAGE="chore(openspec): sync engram hybrid docs" npm run sdd:sync:push
-```
-
-## Logs and Reports
-
-| Artifact | Location |
-| --- | --- |
-| Application logs | `logs/app.log` |
-| Error logs | `logs/errors.log` |
-| Screenshots | `reports/screenshots/` |
-| HTML Report | `playwright-report/` |
+---
 
 ## Contributing
 
 ### Branch Strategy
-
-- `main` - Production branch
-- `feature/module-name` - New features
-- `bugfix/issue-description` - Bug fixes
+- `main` — Producción
+- `feature/*` — Nuevas funcionalidades
+- `bugfix/*` — Correcciones
 
 ### Before Committing
-
 ```bash
-npx tsc --noEmit          # TypeScript compilation check
-npm run test:all           # Run all tests
+npx tsc --noEmit          # TypeScript check
+npm run qa:e2e:all        # Run atomic E2E
 git add <specific-files>
-git commit -m "Brief description"
-git push origin main
+git commit -m "feat(scope): description"  # Conventional commits
 ```
 
-### Daily Workflow (Multi-Site)
-
-```bash
-# When arriving
-git pull origin main
-npm run test:all
-
-# Before leaving
-git add .
-git commit -m "Day X: progress"
-git push origin main
-```
-
-Note: `.env` stays local and won't be overwritten by `git pull`.
-
-## Author
-
-**Samuel Rodriguez**
-
-- GitHub: [@samrdx](https://github.com/samrdx)
-
-## License
-
-Propiedad de Bermann - Uso interno exclusivo.
+### Docs
+| Documento | Contenido |
+|---|---|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Decisiones arquitectónicas |
+| [CLOUD.md](CLOUD.md) | CI/CD architecture |
+| [TEST-ACTIVES.md](docs/TEST-ACTIVES.md) | Estado de tests activos |
+| [CI_CD_SETUP.md](docs/CI_CD_SETUP.md) | Setup GitHub Actions |
+| [ENGRAM_INTEGRATION.md](docs/ENGRAM_INTEGRATION.md) | Engram/SDD persistence |
+| [REPO_MAINTENANCE_ROUTINE.md](docs/REPO_MAINTENANCE_ROUTINE.md) | Mantenimiento |
 
 ---
 
-**Last updated:** February 2026
+## Author
+
+**Samuel Rodriguez** — [@samrdx](https://github.com/samrdx)
+
+## License
+
+Propiedad de Bermann — Uso interno exclusivo.
+
+---
+
+*Última actualización: Mayo 2026*

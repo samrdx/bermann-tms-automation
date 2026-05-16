@@ -2,179 +2,159 @@
 
 ## Overview
 
-This project uses GitHub Actions for continuous integration with two workflow files serving different purposes. All CI runs on GitHub's free tier (2,000 minutes/month for private repos, unlimited for public).
+This project uses GitHub Actions for continuous integration. A single pipeline (`tests.yml`) runs on pull requests against the Demo environment, covering finanzas E2E and Última Milla batch flows. All runs use GitHub's free tier.
 
-## Why v1.58.0-jammy
-
-The Docker image `mcr.microsoft.com/playwright:v1.58.0-jammy` is used in `playwright.yml` because:
-
-- **Version pinning:** `v1.58.0` matches the exact `@playwright/test` version in `package.json`. Mismatched versions cause browser binary errors at runtime.
-- **Jammy base:** Ubuntu 22.04 LTS provides a stable, well-supported base image.
-- **Pre-installed browsers:** The container ships with Chromium, Firefox, and WebKit pre-installed, eliminating the `npx playwright install` step and saving ~60 seconds per run.
-- **Deterministic environment:** Container-based runs produce identical results regardless of GitHub's runner image updates.
-
-When upgrading Playwright, update both `package.json` and the Docker image tag in `playwright.yml` simultaneously.
+---
 
 ## Workflow Architecture
 
-### playwright.yml - Single Test Runner
+### tests.yml — PR E2E Demo Pipeline
 
-**Purpose:** Quick validation of the most complex end-to-end test (viajes-asignar).
-
-**Strategy:** Uses the Playwright Docker container directly, skipping Node.js setup entirely.
+**Purpose:** Validate critical business flows on every pull request using the Demo environment, avoiding collisions with shared QA data.
 
 ```text
-Trigger: push/PR to main or master
-Container: mcr.microsoft.com/playwright:v1.58.0-jammy (--ipc=host)
-Steps: checkout -> npm ci -> run viajes-asignar test -> upload report
-Timeout: 60 minutes
+Trigger: pull_request
+Jobs run in parallel (no dependencies between them)
 ```
 
-**Secrets used:**
+**Job 1: E2E Finanzas Full (Demo)**
 
-| Variable | Source |
-| --- | --- |
-| `BASE_URL` | `secrets.BASE_URL` |
-| `TMS_USER` | `secrets.TMS_USER` |
-| `TMS_PASS` | `secrets.TMS_PASS` |
+- Runs: `finanzas-prefactura-proforma-e2e.test.ts`
+- Browser: Chromium only
+- Timeout: 60 minutes
+- Preflight: `npm run ci:validate:workflow-scripts` checks script references
+- Concurrency: Grouped by workflow + branch ref to prevent parallel collisions
 
-**Key detail:** This workflow validates `BASE_URL` before running and fails fast if it's empty.
+**Job 2: Ultima Milla Batch (Demo)**
 
-### tests.yml - Hybrid Dual-Track
+- Runs: `pedido-asignar-batch.test.ts` (multi-browser: chromium → firefox serial)
+- Workers: 1 (sequential, required for batch isolation)
+- Timeout: 120 minutes
+- Environment: `ULTIMAMILLA_ENABLE_MUTATION=true`, `ULTIMAMILLA_BATCH_SIZE=8`
+- Seed: `npm run demo:seed:legacy` before batch test
+- Allure report generated + uploaded as artifact (14-day retention)
+- Allure attachments >20MB pruned automatically to stay within storage quota
+- Concurrency: `cancel-in-progress: true`
 
-**Purpose:** Run independent and dependent test suites in parallel for full coverage.
+### Previous Workflows (Removed)
 
-**Strategy:** Two jobs run simultaneously (`needs: []`), one for atomic flows, one for legacy sequential flows.
+- **playwright.yml** — Legacy single-test runner (viajes-asignar) using Docker container `mcr.microsoft.com/playwright:v1.58.0-jammy`. Removed in favor of consolidated PR pipeline.
+- **tests.yml hybrid track** — Previous version with atomic + legacy QA jobs. Consolidated to Demo-only to prevent data collisions on shared QA environment.
+
+---
+
+## Credential Mapping
+
+The pipeline maps a single pair of secrets to environment variable names:
 
 ```text
-Trigger: push to main/develop, PR to main, manual dispatch
+secrets.TMS_USER  →  TMS_USERNAME
+secrets.TMS_PASS  →  TMS_PASSWORD
 ```
 
-**Job 1: atomic-suite** (20 min timeout)
+Fallback `|| 'arivas'` allows CI to run without secrets configured.
 
-- Uses `actions/setup-node@v4` + `npm ci` + `npx playwright install --with-deps chromium`
-- Runs: `viajes-asignar.test.ts` (self-contained, no setup dependencies)
-- No Docker container (installs browsers on the fly)
-
-**Job 2: legacy-suite** (30 min timeout)
-
-- Same setup as atomic-suite
-- Runs 3 sequential stages:
-  1. `base-entities-chromium` project (creates Transportista, Cliente, Vehiculo, Conductor)
-  2. `contratos/` tests (depends on base entities, `--workers=1`)
-  3. `viajes-planificar.test.ts` (depends on contracts, `--workers=1`)
-
-Both jobs run in parallel, reducing total wall-clock time.
-
-### Credential Mapping
-
-The `tests.yml` workflow maps a single pair of secrets to multiple environment variable names for compatibility with different parts of the codebase:
-
-```text
-secrets.BASE_URL  ->  BASE_URL, BASE_URL_DEV
-secrets.TMS_USER  ->  TMS_USERNAME, TMS_USER, TEST_REGULAR_USER, USERNAME_DEV
-secrets.TMS_PASS  ->  TMS_PASSWORD, TMS_PASS, TEST_REGULAR_PASS, PASSWORD_DEV
-```
-
-Fallback values (`|| 'arivas'`) allow CI to run even without secrets configured (useful for forked repos or initial setup).
+---
 
 ## GitHub Actions Secrets
 
 ### Required Secrets
 
-| Secret | Used By | Purpose |
-| --- | --- | --- |
-| `TMS_USER` | All Workflows | TMS login username |
-| `TMS_PASS` | All Workflows | TMS login password |
-| `BASE_URL` | All Workflows | TMS base URL |
+| Secret | Purpose |
+|---|---|
+| `TMS_USER` | TMS login username |
+| `TMS_PASS` | TMS login password |
+| `BASE_URL` | TMS base URL |
 
 ### How to Configure
 
-1. Go to GitHub repository **Settings > Secrets and variables > Actions**
+1. Go to **Settings > Secrets and variables > Actions**
 2. Click **New repository secret**
-3. Add each secret above
+3. Add each secret
 
-See [docs/GITHUB_ACTIONS_SETUP.md](docs/GITHUB_ACTIONS_SETUP.md) for step-by-step instructions.
+---
 
-## Artifact Storage and Quota
+## Artifact Storage
 
-### Retention Policies
-
-| Workflow | Artifact Name | Contents | Retention |
-| --- | --- | --- | --- |
-| `playwright.yml` | `playwright-report` | HTML report | 7 days |
-| `tests.yml` | `report-atomic` | HTML report (atomic suite) | 7 days |
-| `tests.yml` | `report-legacy` | HTML report (legacy suite) | 7 days |
+| Workflow | Artifact | Contents | Retention |
+|---|---|---|---|
+| `tests.yml` (ultimamilla) | `allure-ultimamilla-batch-demo-*` | Allure HTML report | 14 days |
 
 ### Storage Considerations
 
-- **Free tier limit:** 500 MB artifact storage (shared across all workflows)
-- **Report size:** Each HTML report is approximately 2-5 MB
-- **Standardized Retention:** All reports are kept for 7 days to conserve space while allowing debugging.
-- **Traces/videos:** Currently NOT uploaded (only generated on failure locally). If enabling `trace: retain-on-failure` uploads, monitor storage carefully as traces can be 10-50 MB each.
-- **Cleanup:** GitHub automatically deletes artifacts after the retention period expires
+- **Free tier limit:** 500 MB artifact storage
+- **Allure pruning:** Attachments >20MB (`.zip`, `.webm`, `.mp4`) are deleted before upload
+- **GitHub Pages:** Allure reports deployable manually from workflow artifacts
+- **Cleanup:** GitHub auto-deletes after retention period
 
-### Reducing Storage Usage
-
-If approaching the 500 MB limit:
-1. Reduce retention days (currently 7)
-2. Only upload artifacts on failure (`if: failure()` instead of `if: always()`)
-3. Compress reports before upload
-4. Delete old artifacts manually via GitHub API or UI
+---
 
 ## CI vs Local Configuration
 
-Configuration in [playwright.config.ts](playwright.config.ts) adapts automatically based on the `CI` environment variable:
-
 | Setting | CI | Local |
-| --- | --- | --- |
+|---|---|---|
 | Workers | 1 | 3 |
 | Retries | 2 | 0 |
-| Test timeout | 180s | 60s |
-| Expect timeout | 20s | 10s |
-| Headless | always | configurable |
-| Browsers | Chromium only | Chromium + Firefox + WebKit |
+| Test timeout | 240s | 60s |
+| Headless | true | configurable |
+| Browsers | Chromium + Firefox | Chromium + Firefox |
 | Traces | retain-on-failure | retain-on-failure |
-| Screenshots | only-on-failure | only-on-failure |
 
-**Why 1 worker in CI:** Prevents database collisions from parallel entity creation on a shared QA environment. Locally, worker-specific JSON files (`last-run-data-{browser}.json`) isolate data per browser.
+---
 
 ## Docker Local Simulation
 
-To reproduce the CI environment locally (useful for debugging CI-only failures):
-
 ```bash
-# From Git Bash on Windows
-MSYS_NO_PATHCONV=1 docker run --rm -it \
-  -v "/$(pwd)":/work -w /work \
+# Reproduce CI environment locally
+docker run --rm -it \
+  -v "$(pwd)":/work -w /work \
   --ipc=host \
   mcr.microsoft.com/playwright:v1.58.0-jammy /bin/bash
 
-# Inside the container
+# Inside container
 npm ci
-npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-asignar.test.ts --project=chromium
+npx playwright test --project chromium-demo --workers 1
 ```
 
-Flags explained:
-- `MSYS_NO_PATHCONV=1` - Prevents Git Bash from mangling Unix paths on Windows
-- `--ipc=host` - Required for Chromium shared memory (prevents crashes)
-- `-v "/$(pwd)":/work` - Mounts project directory into the container
+---
+
+## Key Architectural Decisions
+
+### Why Demo-only in PR pipeline?
+
+The shared QA environment is used by multiple team members and external testers. Running PR validation on Demo avoids:
+- Data collisions from parallel entity creation
+- Interference with manual QA testing
+- Flaky failures from concurrent CI runs
+
+### Why Allure pruning?
+
+Allure captures screenshots and videos on failure. Multi-browser batch tests can produce 100+ MB of attachments. Pruning keeps artifacts under GitHub's 500 MB free tier limit.
+
+### Why concurrency groups?
+
+Without concurrency groups, two PRs opened close together would both seed legacy data and collide on shared entities. Grouping by workflow + ref serializes runs per branch.
+
+---
 
 ## Known Limitations
 
-1. **Single browser in CI:** Only Chromium is tested in CI. Firefox and WebKit are tested locally only.
-2. **No Docker Compose:** There is no `docker-compose.yml` for local CI reproduction with environment variables. The `docker run` command above is the manual equivalent.
-3. **Artifact overlap potential:** Both `atomic-suite` and `legacy-suite` write to `playwright-report/`, but they upload with different artifact names (`report-atomic`, `report-legacy`) so there's no overwrite.
-4. **Shared QA environment:** Tests run against a shared QA database. Parallel CI runs (e.g., from multiple PRs) could cause data collisions.
+1. **Demo-only validation:** PR pipeline tests only Demo, not QA. QA runs are triggered manually.
+2. **No matrix strategy:** Multi-browser runs (chromium + firefox) are serial, not parallel.
+3. **No Docker Compose:** No local CI reproduction with environment variables.
+4. **Shared Demo data:** Concurrent PR runs from different branches are still serialized per branch, but multiple branches targeting the same base can collide on Demo data.
+5. **No notifications:** Pipeline failures don't trigger Slack/email alerts.
+
+---
 
 ## Future Improvements
 
-- Add matrix strategy for multi-browser CI testing
-- Implement `docker-compose.yml` for local CI simulation with secrets
-- Add PR status comments with test results using `actions/github-script`
+- Add QA environment validation on merge to main
+- Implement matrix strategy for parallel multi-browser CI
+- Add `docker-compose.yml` for local CI simulation
 - Cache `node_modules` and Playwright browsers between runs
 - Add Slack/email notifications on failure
 
 ---
 
-**Last updated:** February 2026
+**Last updated:** May 2026

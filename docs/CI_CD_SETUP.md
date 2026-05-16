@@ -4,9 +4,12 @@
 
 ### Overview
 
-The project uses GitHub Actions for continuous integration testing. The workflow runs:
-- **Smoke tests:** Quick auth verification (~2 minutes)
-- **Full E2E tests:** Complete test suite (~10 minutes)
+The project uses GitHub Actions for continuous integration testing. The current pipeline (`tests.yml`) runs on pull requests against the Demo environment:
+
+- **E2E Finanzas Full:** Prefactura + Proforma validation (~60 min timeout)
+- **Ultima Milla Batch:** Multi-browser batch assignment with Allure reporting (~120 min timeout)
+
+See [CLOUD.md](../CLOUD.md) for the current CI/CD architecture.
 
 ---
 

@@ -79,3 +79,6 @@ engram/
 # Mobile automation generated artifacts
 tmsapp/mobile/app.apk
 tmsapp/mobile/artifacts/
+# Local Pi / Gentle AI runtime state
+.pi/
+.atl/
