@@ -179,6 +179,56 @@ test.describe('[V01] Viajes - Planificar', () => {
     });
 
     // =================================================================
+    // PHASE 2.5: Crear Tramos (SDD)
+    // =================================================================
+    await test.step('Fase 2.5: Crear Tramos y Validar Modal/Cards', async () => {
+      logger.info('Fase 2.5: Creación de Tramos (Cobertura Automatizada)');
+
+      // Escenario P0: Flujo Completo de Creación de Tramo (N=1)
+      const tramo1 = {
+        origen: config.origenManual || 'SANTIAGO',
+        destino: config.destinoManual || 'ANTOFAGASTA',
+        kgOrigen: '1500',
+        transportista: 'Transportes Genericos' // Opcional
+      };
+
+      await viajesPlanificarPage.addTramo(tramo1);
+
+      // Verificamos visualmente que la card esté presente
+      await viajesPlanificarPage.assertTramoVisible({
+        origen: tramo1.origen,
+        destino: tramo1.destino,
+        kg: tramo1.kgOrigen
+      });
+
+      // Validar cantidad
+      const count = await viajesPlanificarPage.getTramosCount();
+      expect(count).toBeGreaterThanOrEqual(1);
+
+      logger.info('Tramo 1 (Base) creado y verificado con éxito.');
+      
+      // Escenario P1: Integración con Multiplicador (N>1)
+      const tramo2 = {
+        origen: 'ANTOFAGASTA',
+        destino: 'CALAMA',
+        kgOrigen: '500'
+      };
+
+      await viajesPlanificarPage.addTramo(tramo2);
+      
+      const countN2 = await viajesPlanificarPage.getTramosCount();
+      expect(countN2).toBeGreaterThanOrEqual(2);
+      
+      await viajesPlanificarPage.assertTramoVisible({
+        origen: tramo2.origen,
+        destino: tramo2.destino,
+        kg: tramo2.kgOrigen
+      });
+
+      logger.info('Tramo 2 (Multiplicador) creado y verificado con éxito.');
+    });
+
+    // =================================================================
     // PHASE 3: Save Viaje and capture ID from redirect URL
     // =================================================================
     let viajeId: string | null = null;

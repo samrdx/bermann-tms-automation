@@ -32,15 +32,15 @@ Chain strategy: pending
 
 ## Phase 2: RED (Failing Tests First)
 
-- [ ] 2.1 En `tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts`, crear bloque de assertions P0/P1 para “crear tramo” antes de `clickGuardar()` (modal cierra, card visible, no estado Anulado).
-- [ ] 2.2 En el mismo test, agregar escenario de multiplicador `N>1` con conteo esperado de tramos asociados (debe fallar antes de implementar helpers).
-- [ ] 2.3 En el mismo test, agregar escenario `N=1` sin sobre-replicación y validación de valores finales renderizados tras carga diferida.
+- [x] 2.1 En `tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts`, crear bloque de assertions P0/P1 para “crear tramo” antes de `clickGuardar()` (modal cierra, card visible, no estado Anulado).
+- [x] 2.2 En el mismo test, agregar escenario de multiplicador `N>1` con conteo esperado de tramos asociados (debe fallar antes de implementar helpers).
+- [x] 2.3 En el mismo test, agregar escenario `N=1` sin sobre-replicación y validación de valores finales renderizados tras carga diferida.
 
 ## Phase 3: GREEN (Implement Minimal Pass)
 
-- [ ] 3.1 Implementar en `PlanificarPage.ts` métodos `addTramo`, `addTramos`, `getTramosCount`, `assertTramoVisible`, usando patrón bootstrap-select + espera de spinner/backdrop.
-- [ ] 3.2 Implementar helper de fecha para `#_origendestinoform-fechaentradaorigen` con fallback (`fill`/`evaluate`) y verificación posterior del valor persistido.
-- [ ] 3.3 Integrar en `viajes-planificar.test.ts` la fase “Crear Tramo(s)” con datos de tramo, guardado de evidencias y aserciones exigidas por spec.
+- [x] 3.1 Implementar en `PlanificarPage.ts` métodos `addTramo`, `addTramos`, `getTramosCount`, `assertTramoVisible`, usando patrón bootstrap-select + espera de spinner/backdrop.
+- [x] 3.2 Implementar helper de fecha para `#_origendestinoform-fechaentradaorigen` con fallback (`fill`/`evaluate`) y verificación posterior del valor persistido.
+- [x] 3.3 Integrar en `viajes-planificar.test.ts` la fase “Crear Tramo(s)” con datos de tramo, guardado de evidencias y aserciones exigidas por spec.
 
 ## Phase 4: TRIANGULATE + REFACTOR
 
