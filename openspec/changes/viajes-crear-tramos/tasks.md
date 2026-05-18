@@ -44,12 +44,12 @@ Chain strategy: pending
 
 ## Phase 4: TRIANGULATE + REFACTOR
 
-- [ ] 4.1 Parametrizar en `viajes-planificar.test.ts` dos variantes (`multiplicador=1` y `multiplicador=N`) para evitar duplicación y cubrir reglas de replicación.
-- [ ] 4.2 Refactorizar en `PlanificarPage.ts` helpers reutilizables de modal tramos (open/fill/confirm/wait) manteniendo logs Winston y `takeScreenshot()` en errores.
-- [ ] 4.3 Ajustar nombres/visibilidad de métodos públicos para mantener compatibilidad con fixtures existentes en `src/fixtures/base.ts`.
+- [x] 4.1 Parametrizar en `viajes-planificar.test.ts` dos variantes (`multiplicador=1` y `multiplicador=N`) para evitar duplicación y cubrir reglas de replicación.
+- [x] 4.2 Refactorizar en `PlanificarPage.ts` helpers reutilizables de modal tramos (open/fill/confirm/wait) manteniendo logs Winston y `takeScreenshot()` en errores.
+- [x] 4.3 Ajustar nombres/visibilidad de métodos públicos para mantener compatibilidad con fixtures existentes en `src/fixtures/base.ts`.
 
 ## Phase 5: Verification
 
-- [ ] 5.1 Ejecutar `npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts` en QA y guardar resultado/logs.
-- [ ] 5.2 Ejecutar `npx tsc --noEmit` para validar tipos tras cambios en POM y test.
-- [ ] 5.3 Verificar manualmente en reporte que cada escenario del spec (`P0 crear`, `P0 persistencia`, `P0 N`, `P1 N=1`, `P1 no Anulado`, `P1 dinámicos`) tenga evidencia de pass/fail.
+- [x] 5.1 Ejecutar `npx playwright test tests/e2e/modules/02-operaciones/viajes/viajes-planificar.test.ts` en QA y guardar resultado/logs.
+- [x] 5.2 Ejecutar `npx tsc --noEmit` para validar tipos tras cambios en POM y test.
+- [x] 5.3 Verificar manualmente en reporte que cada escenario del spec (`P0 crear`, `P0 persistencia`, `P0 N`, `P1 N=1`, `P1 no Anulado`, `P1 dinámicos`) tenga evidencia de pass/fail.

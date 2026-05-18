@@ -324,38 +324,69 @@ export class PlanificarPage extends BasePage {
 
   // --- MÉTODOS DE TRAMOS ---
 
+  async setFechaEntradaOrigen(fecha: string): Promise<void> {
+    logger.info(`Completando Fecha Entrada Origen (Tramo): ${fecha}`);
+    try {
+      const input = this.page.locator(this.selectors.modalTramoFechaEntradaOrigen);
+      const isReadonly = await input.evaluate((el: HTMLInputElement) => el.hasAttribute('readonly')).catch(() => false);
+
+      if (isReadonly) {
+        logger.info(`El input de fecha es readonly, usando inyección JS`);
+        await input.evaluate((el: HTMLInputElement, val) => {
+          el.value = val;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }, fecha);
+      } else {
+        await input.fill(fecha);
+      }
+      
+      // Verificación de persistencia en el input
+      const currentValue = await input.inputValue();
+      if (currentValue !== fecha) {
+         throw new Error(`La fecha ingresada (${fecha}) no coincide con el valor actual del input (${currentValue})`);
+      }
+    } catch (error) {
+      logger.error(`Error al ingresar fecha de entrada origen:`, error);
+      await this.takeScreenshot('error-fecha-tramo');
+      throw error;
+    }
+  }
+
   async addTramo(tramo: TramoInput): Promise<void> {
     logger.info(`Añadiendo Tramo: Origen ${tramo.origen} -> Destino ${tramo.destino}`);
     
-    // 1. Abrir Modal
-    await this.click(this.selectors.btnAbrirModalTramo);
-    await this.page.waitForSelector(this.selectors.modalTramoBody, { state: 'visible' });
-    await this.page.waitForTimeout(1000); // Animation stabilization
+    try {
+      // 1. Abrir Modal
+      await this.click(this.selectors.btnAbrirModalTramo);
+      await this.page.waitForSelector(this.selectors.modalTramoBody, { state: 'visible' });
+      await this.page.waitForTimeout(1000); // Animation stabilization
 
-    // 2. Completar campos base obligatorios
-    // Dependiendo del ambiente, podrían heredar de la vista padre.
-    // Si no heredan, aquí se deben llenar Tipo Operación, Servicio, etc.
+      // 3. Origen
+      await this.selectBootstrapDropdown(this.selectors.modalTramoOrigen, tramo.origen, 'Modal Tramo Origen');
+      if (tramo.fechaEntradaOrigen) {
+        await this.setFechaEntradaOrigen(tramo.fechaEntradaOrigen);
+      }
+      if (tramo.kgOrigen) {
+        await this.fill(this.selectors.modalTramoKgOrigen, tramo.kgOrigen);
+      }
+      
+      // 4. Destino
+      await this.selectBootstrapDropdown(this.selectors.modalTramoDestino, tramo.destino, 'Modal Tramo Destino');
+      if (tramo.kgDestino) {
+        await this.fill(this.selectors.modalTramoKgDestino, tramo.kgDestino);
+      }
 
-    // 3. Origen
-    await this.selectBootstrapDropdown(this.selectors.modalTramoOrigen, tramo.origen, 'Modal Tramo Origen');
-    if (tramo.fechaEntradaOrigen) {
-      await this.fill(this.selectors.modalTramoFechaEntradaOrigen, tramo.fechaEntradaOrigen);
+      // 5. Guardar (Crear viaje tramo)
+      const btnGuardarTramo = this.page.locator(this.selectors.btnModalTramoGuardar).or(this.page.locator('div.modal-footer button').nth(1));
+      await btnGuardarTramo.click();
+      await this.page.waitForSelector(this.selectors.modalTramoBody, { state: 'hidden' });
+      await this.page.waitForTimeout(1500); // Esperar que la UI re-renderice la card del tramo
+    } catch (error) {
+      logger.error(`Error durante addTramo (${tramo.origen} -> ${tramo.destino}):`, error);
+      await this.takeScreenshot('error-add-tramo');
+      throw error;
     }
-    if (tramo.kgOrigen) {
-      await this.fill(this.selectors.modalTramoKgOrigen, tramo.kgOrigen);
-    }
-    
-    // 4. Destino
-    await this.selectBootstrapDropdown(this.selectors.modalTramoDestino, tramo.destino, 'Modal Tramo Destino');
-    if (tramo.kgDestino) {
-      await this.fill(this.selectors.modalTramoKgDestino, tramo.kgDestino);
-    }
-
-    // 5. Guardar (Crear viaje tramo)
-    const btnGuardarTramo = this.page.locator(this.selectors.btnModalTramoGuardar).or(this.page.locator('div.modal-footer button').nth(1));
-    await btnGuardarTramo.click();
-    await this.page.waitForSelector(this.selectors.modalTramoBody, { state: 'hidden' });
-    await this.page.waitForTimeout(1500); // Esperar que la UI re-renderice la card del tramo
   }
 
   async addTramos(tramos: TramoInput[]): Promise<void> {
@@ -387,6 +418,10 @@ export class PlanificarPage extends BasePage {
         }
         if (tramo.transportista && !cardText.includes(tramo.transportista)) {
            throw new Error(`Tramo encontrado pero el Transportista [${tramo.transportista}] no es visible. Texto real: ${cardText}`);
+        }
+        // Assert we don't see Anulado in newly created tramo unless specifically creating an anulado one
+        if (cardText.includes('Anulado')) {
+           throw new Error(`El tramo recién creado aparece como "Anulado". Texto real: ${cardText}`);
         }
         break;
       }
