@@ -131,6 +131,13 @@ This document centralizes all CSS selectors used across the project's Page Objec
 | **btnDestino** | `button[data-id="_origendestinoform-destino"]` | Alta |
 | **btnGuardar** | `#btn_guardar_form` | Alta |
 | **fechaEntradaOrigen** | `#_origendestinoform-fechaentradaorigen` | Alta |
+| **btnAbrirModalTramo** | `button:has-text("Agregar Tramo")` | Media |
+| **modalTramoOrigen** | `button[data-id="drop_origin_zone_section"]` | Alta |
+| **modalTramoDestino** | `button[data-id="drop_destination_zone_section"]` | Alta |
+| **modalTramoFechaEntradaOrigen** | `#entryDateOrigin` | Alta |
+| **modalTramoKgOrigen** | `#txt_kg_origen_section` | Alta |
+| **modalTramoKgDestino** | `#txt_kg_destination_section` | Alta |
+| **btnModalTramoGuardar** | `div.modal-footer button:has-text("Crear viaje")` | Media |
 
 ## TransportistaFormPage
 

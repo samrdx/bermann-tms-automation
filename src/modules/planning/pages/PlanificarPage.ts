@@ -2,9 +2,24 @@ import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
 import { expect } from '@playwright/test';
 import { createLogger } from '../../../utils/logger.js';
-import { isDemoMode } from '../../../utils/env-helper.js';
 
 const logger = createLogger('PlanificarViajesPage');
+
+export interface TramoInput {
+  origen: string;
+  destino: string;
+  fechaEntradaOrigen?: string; // yyyy-mm-dd
+  kgOrigen?: string;
+  kgDestino?: string;
+  transportista?: string;
+}
+
+export interface TramoExpectedCard {
+  origen: string;
+  destino: string;
+  kg?: string;
+  transportista?: string;
+}
 
 export class PlanificarPage extends BasePage {
   private readonly selectors = {
@@ -30,6 +45,19 @@ export class PlanificarPage extends BasePage {
     // Origen/Destino
     btnOrigen: 'button[data-id="_origendestinoform-origen"]',
     btnDestino: 'button[data-id="_origendestinoform-destino"]',
+
+    // Modal Tramos
+    btnAbrirModalTramo: 'button:has-text("Agregar Tramo")',
+    modalTramoBody: 'div.modal-body',
+    modalTramoOrigen: 'button[data-id="drop_origin_zone_section"]',
+    modalTramoDestino: 'button[data-id="drop_destination_zone_section"]',
+    modalTramoFechaEntradaOrigen: '#entryDateOrigin',
+    modalTramoKgOrigen: '#txt_kg_origen_section',
+    modalTramoKgDestino: '#txt_kg_destination_section',
+    btnModalTramoGuardar: 'div.modal-footer button:has-text("Crear viaje")', // Alternativa: div.modal-footer button:nth-child(2)
+    
+    // Tramos Table/Cards (A ser validado visualmente)
+    tramosListItems: '.card-body', // Placeholder para la section donde se renderizan las cards
 
     // Acciones
     btnGuardar: '#btn_guardar_form',
@@ -173,8 +201,8 @@ export class PlanificarPage extends BasePage {
           select.value = target.value;
           select.dispatchEvent(new Event('change', { bubbles: true }));
           // Try to trigger bootstrap-select refresh if possible
-          try { (window as any).$(select).selectpicker('val', target.value); } catch (e) { }
-          try { (window as any).$(select).selectpicker('refresh'); } catch (e) { }
+          try { (window as any).$(select).selectpicker('val', target.value); } catch (e) { /* ignore */ }
+          try { (window as any).$(select).selectpicker('refresh'); } catch (e) { /* ignore */ }
         }
       }, { btnSel: btnSelector, text: optionText });
 
@@ -292,5 +320,77 @@ export class PlanificarPage extends BasePage {
   async isFormSaved(): Promise<boolean> {
     const url = this.page.url();
     return !url.includes('/viajes/crear') || url.includes('id=');
+  }
+
+  // --- MÉTODOS DE TRAMOS ---
+
+  async addTramo(tramo: TramoInput): Promise<void> {
+    logger.info(`Añadiendo Tramo: Origen ${tramo.origen} -> Destino ${tramo.destino}`);
+    
+    // 1. Abrir Modal
+    await this.click(this.selectors.btnAbrirModalTramo);
+    await this.page.waitForSelector(this.selectors.modalTramoBody, { state: 'visible' });
+    await this.page.waitForTimeout(1000); // Animation stabilization
+
+    // 2. Completar campos base obligatorios
+    // Dependiendo del ambiente, podrían heredar de la vista padre.
+    // Si no heredan, aquí se deben llenar Tipo Operación, Servicio, etc.
+
+    // 3. Origen
+    await this.selectBootstrapDropdown(this.selectors.modalTramoOrigen, tramo.origen, 'Modal Tramo Origen');
+    if (tramo.fechaEntradaOrigen) {
+      await this.fill(this.selectors.modalTramoFechaEntradaOrigen, tramo.fechaEntradaOrigen);
+    }
+    if (tramo.kgOrigen) {
+      await this.fill(this.selectors.modalTramoKgOrigen, tramo.kgOrigen);
+    }
+    
+    // 4. Destino
+    await this.selectBootstrapDropdown(this.selectors.modalTramoDestino, tramo.destino, 'Modal Tramo Destino');
+    if (tramo.kgDestino) {
+      await this.fill(this.selectors.modalTramoKgDestino, tramo.kgDestino);
+    }
+
+    // 5. Guardar (Crear viaje tramo)
+    const btnGuardarTramo = this.page.locator(this.selectors.btnModalTramoGuardar).or(this.page.locator('div.modal-footer button').nth(1));
+    await btnGuardarTramo.click();
+    await this.page.waitForSelector(this.selectors.modalTramoBody, { state: 'hidden' });
+    await this.page.waitForTimeout(1500); // Esperar que la UI re-renderice la card del tramo
+  }
+
+  async addTramos(tramos: TramoInput[]): Promise<void> {
+    for (const t of tramos) {
+      await this.addTramo(t);
+    }
+  }
+
+  async getTramosCount(): Promise<number> {
+    // Depende del HTML real, pero buscaremos contenedores que tengan texto de origen/destino
+    // o un selector más específico si se determina.
+    const cards = this.page.locator(this.selectors.tramosListItems).filter({ hasText: 'Tramo' });
+    return await cards.count();
+  }
+
+  async assertTramoVisible(tramo: TramoExpectedCard): Promise<void> {
+    logger.info(`Verificando tramo visible: ${tramo.origen} -> ${tramo.destino}`);
+    // Busca dentro de los contenedores posibles (ajustar .card o similar según la UI real)
+    const cards = this.page.locator(this.selectors.tramosListItems);
+    const count = await cards.count();
+    
+    let found = false;
+    for (let i = 0; i < count; i++) {
+      const cardText = await cards.nth(i).innerText();
+      if (cardText.includes(tramo.origen) && cardText.includes(tramo.destino)) {
+        found = true;
+        if (tramo.kg && !cardText.includes(tramo.kg)) {
+           throw new Error(`Tramo encontrado pero el KG [${tramo.kg}] no es visible. Texto real: ${cardText}`);
+        }
+        if (tramo.transportista && !cardText.includes(tramo.transportista)) {
+           throw new Error(`Tramo encontrado pero el Transportista [${tramo.transportista}] no es visible. Texto real: ${cardText}`);
+        }
+        break;
+      }
+    }
+    expect(found).toBeTruthy();
   }
 }

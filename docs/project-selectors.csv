@@ -112,3 +112,10 @@ ContratosFormPage,btnAddRuta,#btn_plus_ruta_715_19,Alta
 ContratosFormPage,inputTarifaViaje,#txt_tarifa_extra_715,Alta
 ContratosFormPage,inputTarifaConductor,#txt_tarifa_conductor_715,Alta
 PlanificarPage,fechaEntradaOrigen,#_origendestinoform-fechaentradaorigen,Alta
+PlanificarPage,btnAbrirModalTramo,button:has-text("Agregar Tramo"),Media
+PlanificarPage,modalTramoOrigen,button[data-id="drop_origin_zone_section"],Alta
+PlanificarPage,modalTramoDestino,button[data-id="drop_destination_zone_section"],Alta
+PlanificarPage,modalTramoFechaEntradaOrigen,#entryDateOrigin,Alta
+PlanificarPage,modalTramoKgOrigen,#txt_kg_origen_section,Alta
+PlanificarPage,modalTramoKgDestino,#txt_kg_destination_section,Alta
+PlanificarPage,btnModalTramoGuardar,div.modal-footer button:has-text("Crear viaje"),Media
