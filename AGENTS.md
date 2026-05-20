@@ -13,28 +13,29 @@
 
 ### TMS-Specific Skills
 
-| Skill              | Description                                     | URL                                                          |
-| ------------------ | ----------------------------------------------- | ------------------------------------------------------------ |
-| `tms-selectors`    | Confluence selector database, priority rules    | [SKILL.md](.agents/skills/tms-selectors/SKILL.md)           |
-| `tms-dropdowns`    | Bootstrap dropdown automation (proven patterns) | [SKILL.md](.agents/skills/tms-dropdowns/SKILL.md)           |
-| `tms-page-objects` | Page Object Model structure for TMS             | [SKILL.md](.agents/skills/tms-page-objects/SKILL.md)        |
-| `tms-tests`        | Test file structure, assertions, logging        | [SKILL.md](.agents/skills/tms-tests/SKILL.md)               |
-| `tms-data`         | Test data generation and management             | [SKILL.md](.agents/skills/tms-data/SKILL.md)                |
-| `tms-atomic-e2e`   | Atomic E2E tests (prefactura, proforma, viajes) | [SKILL.md](.agents/skills/tms-atomic-e2e/SKILL.md)         |
-| `tms-ultimamilla`  | Última Milla module (batch, asignar, monitoreo) | [SKILL.md](.agents/skills/tms-ultimamilla/SKILL.md)        |
-| `tms-commits`      | Professional commits with work-unit discipline  | [SKILL.md](.agents/skills/tms-commits/SKILL.md)            |
-| `jql-tickets`      | Provides JQL for tickets ready to test          | [SKILL.md](.agents/skills/jql-tickets/SKILL.md)             |
-| `jira-ticket-writer`| Jira QA automation User Stories & subtasks     | [SKILL.md](.agents/skills/jira-ticket-writer/SKILL.md)      |
+| Skill                | Description                                      | URL                                                    |
+| -------------------- | ------------------------------------------------ | ------------------------------------------------------ |
+| `tms-selectors`      | Confluence selector database, priority rules     | [SKILL.md](.agents/skills/tms-selectors/SKILL.md)      |
+| `tms-dropdowns`      | Bootstrap dropdown automation (proven patterns)  | [SKILL.md](.agents/skills/tms-dropdowns/SKILL.md)      |
+| `tms-page-objects`   | Page Object Model structure for TMS              | [SKILL.md](.agents/skills/tms-page-objects/SKILL.md)   |
+| `tms-tests`          | Test file structure, assertions, logging         | [SKILL.md](.agents/skills/tms-tests/SKILL.md)          |
+| `tms-data`           | Test data generation and management              | [SKILL.md](.agents/skills/tms-data/SKILL.md)           |
+| `tms-atomic-e2e`     | Atomic E2E tests (prefactura, proforma, viajes)  | [SKILL.md](.agents/skills/tms-atomic-e2e/SKILL.md)     |
+| `tms-ultimamilla`    | Última Milla module (batch, asignar, monitoreo)  | [SKILL.md](.agents/skills/tms-ultimamilla/SKILL.md)    |
+| `tms-commits`        | Professional commits with work-unit discipline   | [SKILL.md](.agents/skills/tms-commits/SKILL.md)        |
+| `tms-allure`         | Allure reporting & parameter conventions for TMS | [SKILL.md](.agents/skills/tms-allure/SKILL.md)         |
+| `jql-tickets`        | Provides JQL for tickets ready to test           | [SKILL.md](.agents/skills/jql-tickets/SKILL.md)        |
+| `jira-ticket-writer` | Jira QA automation User Stories & subtasks       | [SKILL.md](.agents/skills/jira-ticket-writer/SKILL.md) |
 
 ### Generic Skills
 
-| Skill        | Description               | URL                                            |
-| ------------ | ------------------------- | ---------------------------------------------- |
-| `playwright`    | Playwright best practices   | /mnt/skills/public/playwright/                   |
-| `playwright-cli`| Browser automation with CLI | [SKILL.md](.agents/skills/playwright-cli/SKILL.md) |
-| `docx`          | Word document automation    | /mnt/skills/public/docx/                           |
-| `xlsx`          | Excel automation            | /mnt/skills/public/xlsx/                           |
-| `pptx`          | PowerPoint automation       | /mnt/skills/public/pptx/                           |
+| Skill            | Description                 | URL                                                |
+| ---------------- | --------------------------- | -------------------------------------------------- |
+| `playwright`     | Playwright best practices   | /mnt/skills/public/playwright/                     |
+| `playwright-cli` | Browser automation with CLI | [SKILL.md](.agents/skills/playwright-cli/SKILL.md) |
+| `docx`           | Word document automation    | /mnt/skills/public/docx/                           |
+| `xlsx`           | Excel automation            | /mnt/skills/public/xlsx/                           |
+| `pptx`           | PowerPoint automation       | /mnt/skills/public/pptx/                           |
 
 ---
 
@@ -42,29 +43,30 @@
 
 When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
-| Action                                        | Skill                                        |
-| --------------------------------------------- | -------------------------------------------- |
-| Creating new Page Object for any TMS module   | `tms-page-objects`                           |
-| Working with Bootstrap Select dropdowns       | `tms-dropdowns`                              |
-| Selecting ANY element in TMS pages            | `tms-selectors`                              |
-| Writing new test file                         | `tms-tests`                                  |
-| Generating test data (contracts, users, dates)| `tms-data`                                   |
-| Handling date pickers or time fields          | `tms-dropdowns`                              |
-| Creating contract automation                  | `tms-selectors`, `tms-dropdowns`             |
-| Planificar viajes automation                  | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
-| Asignar viajes automation                     | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
-| Any cascading dropdown (tipo → transportista) | `tms-dropdowns`                              |
-| Debugging selector issues                     | `tms-selectors`                              |
-| Adding new module to framework                | `tms-page-objects`, `tms-tests`              |
-| Creating atomic E2E test (prefactura/proforma)| `tms-atomic-e2e`                             |
-| Working with Última Milla module              | `tms-ultimamilla`, `tms-selectors`, `tms-dropdowns` |
-| Creating Jira tickets or QA User Stories      | `jira-ticket-writer`                         |
-| Querying ready-to-test tickets                | `jql-tickets`                                |
-| Crear prefactura automation                   | `tms-atomic-e2e`, `tms-selectors`, `tms-dropdowns` |
-| Crear proforma automation                     | `tms-atomic-e2e`, `tms-selectors`, `tms-dropdowns` |
-| Última Milla batch/asignar automation         | `tms-ultimamilla`, `tms-selectors`, `tms-dropdowns` |
-| Config Admin module (unidad negocio, etc.)    | `tms-page-objects`, `tms-tests`, `tms-dropdowns` |
-| Committing changes, push, PR preparation      | `tms-commits`                                |
+| Action                                         | Skill                                                |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| Creating new Page Object for any TMS module    | `tms-page-objects`                                   |
+| Working with Bootstrap Select dropdowns        | `tms-dropdowns`                                      |
+| Selecting ANY element in TMS pages             | `tms-selectors`                                      |
+| Writing new test file                          | `tms-tests`                                          |
+| Generating test data (contracts, users, dates) | `tms-data`                                           |
+| Handling date pickers or time fields           | `tms-dropdowns`                                      |
+| Creating contract automation                   | `tms-selectors`, `tms-dropdowns`                     |
+| Planificar viajes automation                   | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
+| Asignar viajes automation                      | `tms-selectors`, `tms-page-objects`, `tms-dropdowns` |
+| Any cascading dropdown (tipo → transportista)  | `tms-dropdowns`                                      |
+| Debugging selector issues                      | `tms-selectors`                                      |
+| Adding new module to framework                 | `tms-page-objects`, `tms-tests`                      |
+| Creating atomic E2E test (prefactura/proforma) | `tms-atomic-e2e`                                     |
+| Working with Última Milla module               | `tms-ultimamilla`, `tms-selectors`, `tms-dropdowns`  |
+| Creating Jira tickets or QA User Stories       | `jira-ticket-writer`                                 |
+| Querying ready-to-test tickets                 | `jql-tickets`                                        |
+| Crear prefactura automation                    | `tms-atomic-e2e`, `tms-selectors`, `tms-dropdowns`   |
+| Crear proforma automation                      | `tms-atomic-e2e`, `tms-selectors`, `tms-dropdowns`   |
+| Última Milla batch/asignar automation          | `tms-ultimamilla`, `tms-selectors`, `tms-dropdowns`  |
+| Config Admin module (unidad negocio, etc.)     | `tms-page-objects`, `tms-tests`, `tms-dropdowns`     |
+| Allure reports / suite parameters              | `tms-allure`                                         |
+| Committing changes, push, PR preparation       | `tms-commits`                                        |
 
 ---
 
@@ -152,29 +154,29 @@ You are the ORCHESTRATOR for Spec-Driven Development. You coordinate the SDD wor
 
 ### SDD Commands
 
-| Command | Action |
-|---------|--------|
-| `/sdd:init` | Bootstrap openspec/ in current project |
-| `/sdd:explore <topic>` | Think through an idea (no files created) |
-| `/sdd:new <change-name>` | Start a new change (creates proposal) |
-| `/sdd:continue [change-name]` | Create next artifact in dependency chain |
-| `/sdd:ff [change-name]` | Fast-forward: create all planning artifacts |
-| `/sdd:apply [change-name]` | Implement tasks |
-| `/sdd:verify [change-name]` | Validate implementation |
-| `/sdd:archive [change-name]` | Sync specs + archive |
+| Command                       | Action                                      |
+| ----------------------------- | ------------------------------------------- |
+| `/sdd:init`                   | Bootstrap openspec/ in current project      |
+| `/sdd:explore <topic>`        | Think through an idea (no files created)    |
+| `/sdd:new <change-name>`      | Start a new change (creates proposal)       |
+| `/sdd:continue [change-name]` | Create next artifact in dependency chain    |
+| `/sdd:ff [change-name]`       | Fast-forward: create all planning artifacts |
+| `/sdd:apply [change-name]`    | Implement tasks                             |
+| `/sdd:verify [change-name]`   | Validate implementation                     |
+| `/sdd:archive [change-name]`  | Sync specs + archive                        |
 
 ### Command → Skill Mapping
 
-| Command | Skill to Invoke | Skill Path |
-|---------|----------------|------------|
-| `/sdd:init` | sdd-init | `~/.config/opencode/skills/sdd-init/SKILL.md` |
-| `/sdd:explore` | sdd-explore | `~/.config/opencode/skills/sdd-explore/SKILL.md` |
-| `/sdd:new` | sdd-explore → sdd-propose | `~/.config/opencode/skills/sdd-propose/SKILL.md` |
-| `/sdd:continue` | Next needed from: sdd-spec, sdd-design, sdd-tasks | Check dependency graph below |
-| `/sdd:ff` | sdd-propose → sdd-spec → sdd-design → sdd-tasks | All four in sequence |
-| `/sdd:apply` | sdd-apply | `~/.config/opencode/skills/sdd-apply/SKILL.md` |
-| `/sdd:verify` | sdd-verify | `~/.config/opencode/skills/sdd-verify/SKILL.md` |
-| `/sdd:archive` | sdd-archive | `~/.config/opencode/skills/sdd-archive/SKILL.md` |
+| Command         | Skill to Invoke                                   | Skill Path                                       |
+| --------------- | ------------------------------------------------- | ------------------------------------------------ |
+| `/sdd:init`     | sdd-init                                          | `~/.config/opencode/skills/sdd-init/SKILL.md`    |
+| `/sdd:explore`  | sdd-explore                                       | `~/.config/opencode/skills/sdd-explore/SKILL.md` |
+| `/sdd:new`      | sdd-explore → sdd-propose                         | `~/.config/opencode/skills/sdd-propose/SKILL.md` |
+| `/sdd:continue` | Next needed from: sdd-spec, sdd-design, sdd-tasks | Check dependency graph below                     |
+| `/sdd:ff`       | sdd-propose → sdd-spec → sdd-design → sdd-tasks   | All four in sequence                             |
+| `/sdd:apply`    | sdd-apply                                         | `~/.config/opencode/skills/sdd-apply/SKILL.md`   |
+| `/sdd:verify`   | sdd-verify                                        | `~/.config/opencode/skills/sdd-verify/SKILL.md`  |
+| `/sdd:archive`  | sdd-archive                                       | `~/.config/opencode/skills/sdd-archive/SKILL.md` |
 
 ### Available Skills
 
@@ -259,6 +261,7 @@ After each batch, show progress to user and ask to continue.
 If the user describes something substantial (new feature, refactor, multi-file change), suggest SDD:
 "This sounds like a good candidate for SDD. Want me to start with /sdd:new {suggested-name}?"
 Do NOT force SDD on small tasks (single file edits, quick fixes, questions)
+
 ---
 
 ## Quick Reference
@@ -297,7 +300,7 @@ Do NOT force SDD on small tasks (single file edits, quick fixes, questions)
 
 ## Resources
 
-- **Confluence Selectors:** <https://bermann.atlassian.net/wiki/spaces/QA/database/95125505>  
+- **Confluence Selectors:** <https://bermann.atlassian.net/wiki/spaces/QA/database/95125505>
 - **TMS QA Environment:** <https://moveontruckqa.bermanntms.cl>
 - **GitHub Repository:** <https://github.com/samrdx/bermann-tms-automation>
 - **Project Documentation:** README.md, CLAUDE.md, GEMINI.md
