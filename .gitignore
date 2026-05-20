@@ -82,3 +82,5 @@ tmsapp/mobile/artifacts/
 # Local Pi / Gentle AI runtime state
 .pi/
 .atl/
+.pi-lens/
+.playwright-cli/
