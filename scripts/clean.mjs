@@ -61,12 +61,23 @@ async function removeNestedPlaywrightArtifacts(targetPath) {
 async function listCleanableDirectories(cwdPath) {
   const entries = await readdir(cwdPath, { withFileTypes: true });
 
-  return entries
+  const dirs = entries
     .filter((entry) => entry.isDirectory() && CLEANABLE_DIR_NAME.test(entry.name))
     .map((entry) => ({
       name: entry.name,
       fullPath: path.join(cwdPath, entry.name),
     }));
+
+  // Opcionalmente agregar playwright/.data si CLEAN_DATA=true
+  if (String(process.env.CLEAN_DATA).toLowerCase() === 'true') {
+    const dataDir = path.join(cwdPath, 'playwright', '.data');
+    dirs.push({
+      name: '.data',
+      fullPath: dataDir
+    });
+  }
+
+  return dirs;
 }
 
 if (String(process.env.SKIP_CLEAN).toLowerCase() === 'true') {

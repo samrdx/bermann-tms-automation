@@ -1,4 +1,4 @@
-﻿import { BasePage } from '../../../core/BasePage.js';
+import { BasePage } from '../../../core/BasePage.js';
 import type { Locator, Page } from '@playwright/test';
 import { createLogger } from '../../../utils/logger.js';
 
@@ -524,7 +524,6 @@ export class CrearCargaPage extends BasePage {
   private async selectTipoOperacionWithProvidedSelectors(preferredText: string): Promise<boolean> {
     const candidates = [
       this.page.locator(`//span[normalize-space()="${preferredText}"]`).first(),
-      this.page.locator("//span[normalize-space()='Qa_to_standard_11170']").first(),
       this.page.locator(this.selectors.tipoOperacionProvidedCssFallback).first(),
     ];
 

@@ -52,7 +52,7 @@
     "qa:regression:ops": "npm run qa:regression:entities && npm run qa:regression:contracts && npm run qa:regression:trips",
     "qa:regression:finanzas": "npm run qa:e2e:prefactura -- --workers 1 && npm run qa:e2e:proforma -- --workers 1",
     "qa:regression:ultimamilla": "npm run qa:smoke:ultimamilla:asignar && npm run qa:smoke:ultimamilla:batch",
-    "qa:regression:ops:full": "npm run clean:reports && cross-env SKIP_CLEAN=true npm run qa:regression:ops && cross-env SKIP_CLEAN=true npm run qa:regression:finanzas && cross-env SKIP_CLEAN=true npm run qa:regression:ultimamilla && npm run allure:generate:qa",
+    "qa:regression:ops:full": "cross-env CLEAN_DATA=true npm run clean:reports && cross-env SKIP_CLEAN=true npm run qa:regression:ops && cross-env SKIP_CLEAN=true npm run qa:regression:finanzas && cross-env SKIP_CLEAN=true npm run qa:regression:ultimamilla && npm run allure:generate:qa",
     "// === DEMO | SMOKE ===": "",
     "demo:seed:legacy": "cross-env LEGACY_DATA_SOURCE=base npm run workflow:run -- --env DEMO --path tests/e2e/suites/base-entities.setup.ts",
     "demo:smoke:01:transportista": "cross-env LEGACY_DATA_SOURCE=entities npm run workflow:run -- --env DEMO --path tests/e2e/modules/01-entidades/transport/transportistas-crear.test.ts",

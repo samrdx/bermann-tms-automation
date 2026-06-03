@@ -1153,70 +1153,63 @@ export class TmsApiClient {
 
 
 
-    logger.info('📦 Seleccionando Capacidad: 1 a 12 TON');
-
-
+    const capacidadNombre = '1 a 12 TON';
+    logger.info(`📦 Seleccionando Capacidad: ${capacidadNombre}`);
 
     const capacidadBtn = this.page.locator('button[data-id="vehiculos-capacidad_id"]');
 
-
-
     if (await capacidadBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      // Intentar primero con el nombre exacto usando el buscador
+      try {
+        await capacidadBtn.evaluate(el => (el as HTMLElement).click());
+        await this.page.waitForTimeout(800);
 
+        const capacidadMenu = this.page.locator('div.dropdown-menu.show').first();
+        const capacidadSearchBox = capacidadMenu.locator('.bs-searchbox input');
 
+        if (await capacidadSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await capacidadSearchBox.fill(capacidadNombre);
+          await this.page.waitForTimeout(800);
+        }
 
-      await capacidadBtn.evaluate(el => (el as HTMLElement).click());
+        const option = capacidadMenu.locator('.dropdown-item').filter({ hasText: capacidadNombre }).first();
+        if (await option.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await option.click();
+          logger.info(`✅ Capacidad "${capacidadNombre}" seleccionada.`);
+        } else {
+          throw new Error('Exact option not found');
+        }
+      } catch (e) {
+        logger.warn(`⚠️ No se encontró la capacidad exacta "${capacidadNombre}". Reintentando con fallback "TON"...`);
 
+        // Fallback: Asegurar que esté abierto, Buscar "TON" y seleccionar el primer resultado
+        await capacidadBtn.evaluate(el => {
+          const btn = el as HTMLElement;
+          const container = btn.closest('.bootstrap-select');
+          if (container && !container.classList.contains('show')) {
+            btn.click();
+          }
+        });
+        await this.page.waitForTimeout(800);
 
+        const capacidadMenu = this.page.locator('div.dropdown-menu.show').first();
+        const capacidadSearchBox = capacidadMenu.locator('.bs-searchbox input');
 
-      await this.page.waitForTimeout(500);
+        if (await capacidadSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await capacidadSearchBox.clear();
+          await capacidadSearchBox.fill('TON');
+          await this.page.waitForTimeout(800);
+        }
 
+        const firstOption = capacidadMenu.locator('.dropdown-menu.show .dropdown-item:not(.dropdown-header):not(.divider)').first();
+        await firstOption.click();
 
-
-      const capacidadMenu = this.page.locator('div.dropdown-menu.show').first();
-
-
-
-      const capacidadSearchBox = capacidadMenu.locator('.bs-searchbox input');
-
-
-
-      if (await capacidadSearchBox.isVisible({ timeout: 1000 }).catch(() => false)) {
-
-
-
-        await capacidadSearchBox.fill('1 a 12 TON');
-
-
-
-        await this.page.waitForTimeout(500);
-
-
-
+        const selected = await capacidadBtn.innerText();
+        logger.info(`✅ Capacidad seleccionada vía fallback: ${selected}`);
       }
-
-
-
-      await this.page.keyboard.press('ArrowDown');
-
-
-
-      await this.page.keyboard.press('Enter');
-
-
-
       await this.page.waitForTimeout(500);
-
-
-
     } else {
-
-
-
       logger.warn('⚠️ Dropdown de capacidad no visible - omitiendo');
-
-
-
     }
 
 

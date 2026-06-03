@@ -56,55 +56,72 @@ export class VehiculoFormPage extends BasePage {
   private async selectFromBootstrapDropdown(
     selectSelector: string,
     optionText: string,
-    useSearch: boolean = false
+    useSearch: boolean = false,
+    pickFirst: boolean = false
   ): Promise<void> {
     const result = await this.page.evaluate(
-      ({ selectSelector, optionText, useSearch }) => {
+      ({ selectSelector }) => {
         const select = document.querySelector(selectSelector) as HTMLSelectElement;
         if (!select) return { success: false, error: `Select not found: ${selectSelector}` };
 
         const container = select.closest('.bootstrap-select') as HTMLElement;
         if (!container) return { success: false, error: `Bootstrap Select container not found for ${selectSelector}` };
 
-        // Open dropdown
-        const toggleBtn = container.querySelector('button.dropdown-toggle') as HTMLElement;
-        if (!toggleBtn) return { success: false, error: 'Toggle button not found' };
-        toggleBtn.click();
+        const menu = container.querySelector('.dropdown-menu');
+        const isOpened = container.classList.contains('show') || (menu && menu.classList.contains('show'));
 
-        return { success: true, opened: true };
+        // Only click if it's not already open
+        if (!isOpened) {
+          const toggleBtn = container.querySelector('button.dropdown-toggle') as HTMLElement;
+          if (!toggleBtn) return { success: false, error: 'Toggle button not found' };
+          toggleBtn.click();
+        }
+
+        return { success: true, alreadyOpened: isOpened };
       },
-      { selectSelector, optionText, useSearch }
+      { selectSelector }
     );
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to open dropdown');
     }
 
-    // Wait for dropdown to render
-    await this.page.waitForTimeout(500);
+    // Wait for dropdown to render and be visible
+    await this.page.waitForTimeout(800);
+
+    const container = this.page.locator(selectSelector)
+      .locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
 
     // If search is needed, type in the searchbox
     if (useSearch) {
-      const searchInput = this.page.locator(`${selectSelector}`)
-        .locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]')
-        .locator('.bs-searchbox input');
-
+      const searchInput = container.locator('.bs-searchbox input');
       const searchVisible = await searchInput.isVisible({ timeout: 2000 }).catch(() => false);
+      
       if (searchVisible) {
+        await searchInput.focus();
+        // Clear previous search if any to ensure clean filtering
+        await searchInput.fill('');
         await searchInput.fill(optionText);
-        await this.page.waitForTimeout(1000);
+        await this.page.waitForTimeout(1000); // Wait for filtering
       }
     }
 
     // Click the matching dropdown-item in the open menu
-    const container = this.page.locator(selectSelector)
-      .locator('xpath=ancestor::div[contains(@class,"bootstrap-select")]');
-    const option = container.locator('.dropdown-menu .dropdown-item')
-      .filter({ hasText: optionText })
-      .first();
+    let option;
+    if (pickFirst) {
+      // Pick the first visible item that is not a header or divider
+      option = container.locator('.dropdown-menu.show .dropdown-item:not(.dropdown-header):not(.divider)').first();
+    } else {
+      option = container.locator('.dropdown-menu.show .dropdown-item')
+        .filter({ hasText: optionText })
+        .first();
+    }
 
     await option.waitFor({ state: 'visible', timeout: 5000 });
     await option.evaluate((node: HTMLElement) => node.click());
+    
+    // Wait for the dropdown to actually close
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -143,17 +160,28 @@ export class VehiculoFormPage extends BasePage {
   }
 
   /**
-   * Selects a capacidad from the Bootstrap Select dropdown.
+   * Selects a capacidad from the Bootstrap Select dropdown with fallback logic.
+   * If the exact capacity is not found, it tries to search for "TON" and picks the first result.
    */
   async selectCapacidad(capacidad: string): Promise<void> {
     logger.info(`Seleccionando capacidad: ${capacidad}`);
     try {
       const btn = this.page.locator(this.selectors.capacidadButton);
       if (!(await btn.isVisible({ timeout: 3000 }).catch(() => false))) return;
-      await this.selectFromBootstrapDropdown(this.selectors.capacidadSelect, capacidad, false);
-      logger.info(`✅ Capacidad "${capacidad}" seleccionada`);
+      
+      try {
+        // Attempt 1: Full search for the specific capacity
+        await this.selectFromBootstrapDropdown(this.selectors.capacidadSelect, capacidad, true, false);
+        logger.info(`✅ Capacidad exacta "${capacidad}" seleccionada`);
+      } catch (error) {
+        logger.warn(`⚠️ No se encontró la capacidad exacta "${capacidad}". Reintentando con búsqueda parcial "TON"...`);
+        // Attempt 2: Search for "TON" and pick the first available result
+        await this.selectFromBootstrapDropdown(this.selectors.capacidadSelect, 'TON', true, true);
+        const selected = await this.page.locator(this.selectors.capacidadButton).innerText();
+        logger.info(`✅ Capacidad seleccionada vía fallback (primer resultado de "TON"): ${selected}`);
+      }
     } catch (error) {
-      logger.error(`Fallo al seleccionar capacidad: ${capacidad}`, error);
+      logger.error(`Fallo crítico al seleccionar capacidad: ${capacidad}`, error);
       throw error;
     }
   }

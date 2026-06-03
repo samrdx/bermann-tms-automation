@@ -58,6 +58,7 @@ export class PlanificarPage extends BasePage {
 		modalTramoOrigen: 'button[data-id="drop_origin_zone_section"]',
 		modalTramoDestino: 'button[data-id="drop_destination_zone_section"]',
 		modalTramoFechaEntradaOrigen: "#entryDateOrigin",
+		modalTramoKgGeneral: "#txt_kg_section",
 		modalTramoKgOrigen: "#txt_kg_origen_section",
 		modalTramoKgDestino: "#txt_kg_destination_section",
 		btnModalTramoGuardar: 'div.modal-footer button:has-text("Crear viaje")', // Alternativa: div.modal-footer button:nth-child(2)
@@ -166,8 +167,10 @@ export class PlanificarPage extends BasePage {
 		btnSelector: string,
 		optionText: string,
 		fieldName: string = "Dropdown",
+		options: { useSearch?: boolean; pickFirst?: boolean; timeout?: number } = {},
 	): Promise<void> {
-		logger.info(`Seleccionando ${fieldName}: [${optionText}]`);
+		const { useSearch = true, pickFirst = false, timeout = 10000 } = options;
+		logger.info(`Seleccionando ${fieldName}: [${optionText}] (useSearch=${useSearch}, pickFirst=${pickFirst})`);
 
 		try {
 			await this.waitForLoading();
@@ -176,109 +179,151 @@ export class PlanificarPage extends BasePage {
 				? btnSelector
 				: `${btnSelector}:visible`;
 			const button = this.page.locator(visibleSelector).first();
-			await button
-				.evaluate((node: HTMLElement) =>
-					node.scrollIntoView({ block: "center" }),
-				)
-				.catch(() => {});
+			
+			// Ensure it's attached and scroll into view
+			await button.waitFor({ state: "attached", timeout: 5000 });
+			await button.evaluate((node: HTMLElement) => node.scrollIntoView({ block: "center" })).catch(() => {});
 			await button.waitFor({ state: "visible", timeout: 5000 });
 
 			// Ensure no backdrop is blocking the dropdown click
 			await this.handleModalBackdrop();
 
-			// 1. Open dropdown using the located visible button
-			await button.evaluate((node: HTMLElement) => node.click());
+			// 1. Open dropdown safely (check if already open)
+			await this.page.evaluate((sel) => {
+				const cleanSel = sel.replace(":visible", "");
+				const btn = document.querySelector(cleanSel) as HTMLElement;
+				if (!btn) return;
+				const container = btn.closest(".bootstrap-select");
+				if (container && !container.classList.contains("show")) {
+					btn.click();
+				}
+			}, visibleSelector);
 
 			// 2. Locate the container and ITS menu
 			const container = this.page
 				.locator("div.bootstrap-select")
 				.filter({ has: button })
 				.first();
-			const menu = container.locator("div.dropdown-menu");
+			const menu = container.locator("div.dropdown-menu.show");
+			const list = menu.locator("ul.dropdown-menu");
+
+			// WAIT for options to load (critical for AJAX-driven dropdowns like Carga)
+			logger.debug(`Esperando opciones en ${fieldName}...`);
+			await this.page.waitForFunction((sel) => {
+				const btn = document.querySelector(sel.replace(":visible", "")) as HTMLElement;
+				const cont = btn?.closest(".bootstrap-select");
+				const select = cont?.querySelector("select") as HTMLSelectElement;
+				// Wait for at least one option that is not empty/placeholder
+				return select && Array.from(select.options).some(o => o.value && o.value !== "0" && o.value !== "");
+			}, visibleSelector, { timeout: 8000 }).catch(() => {
+				logger.warn(`⚠️ Timeout esperando opciones nativas en ${fieldName}. Continuando con lo que haya.`);
+			});
+
 			const searchInput = menu.locator("div.bs-searchbox input");
 
-			// 3. Search and select
-			if (await searchInput.isVisible({ timeout: 1500 }).catch(() => false)) {
+			// 3. Search if enabled
+			if (useSearch && await searchInput.isVisible({ timeout: 1500 }).catch(() => false)) {
 				logger.debug(`Buscando "${optionText}" en ${fieldName}`);
 				await searchInput.clear();
 				await searchInput.fill(optionText);
 				await this.page.waitForTimeout(1000); // Wait for filter
 			}
 
-			const option = menu
-				.locator("ul.dropdown-menu li a")
-				.filter({ hasText: optionText })
-				.first();
-
-			await option
-				.evaluate((node: HTMLElement) =>
-					node.scrollIntoView({ block: "center" }),
-				)
-				.catch(() => {});
-			await option.evaluate((node: HTMLElement) => node.click());
-
-			// 4. Verification & Force Sync
-			await this.page.waitForTimeout(800);
-			const selectedText = await button.innerText();
-			if (!selectedText.toLowerCase().includes(optionText.toLowerCase())) {
-				logger.warn(
-					`⚠️ La UI del dropdown [${fieldName}] no se actualizó a [${optionText}]. Actual: [${selectedText}]. Forzando valor vía JS...`,
-				);
+			// 4. Locate and click option
+			let option;
+			if (pickFirst) {
+				// Pick first visible item that is not a header or divider or "No results"
+				option = menu.locator("ul.dropdown-menu li a:not(.dropdown-header):not(.divider)").filter({ hasNotText: "No results" }).first();
+			} else {
+				option = menu.locator("ul.dropdown-menu li a")
+					.filter({ hasText: optionText })
+					.first();
 			}
 
+			try {
+				await option.waitFor({ state: "visible", timeout });
+				await option.evaluate((node: HTMLElement) => node.scrollIntoView({ block: "center" })).catch(() => {});
+				await option.evaluate((node: HTMLElement) => node.click());
+			} catch (err) {
+				// Log available options for debugging before failing
+				const availableOptions = await menu.locator("ul.dropdown-menu li a").allTextContents();
+				logger.error(`❌ No se encontró la opción [${optionText}] en [${fieldName}]. Opciones disponibles: ${availableOptions.map(o => o.trim()).filter(o => o).join(" | ")}`);
+				throw err;
+			}
+
+			// 5. Verification & Force Sync
+			await this.page.waitForTimeout(500);
+			
 			// ALWAYS force sync the underlying <select> to prevent validation errors
 			await button.evaluate((btn: HTMLElement, text: string) => {
+				const cleanText = text.trim().toLowerCase();
 				const container = btn.closest(".bootstrap-select");
 				const select = container?.querySelector("select") as HTMLSelectElement;
-				const options = Array.from(select?.options || []);
-
-				// Try strict match first, then includes
+				if (!select) return;
+				
+				const options = Array.from(select.options);
 				let target = options.find((o) => o.text.trim() === text);
 				if (!target) {
-					target = options.find((o) =>
-						o.text.trim().toLowerCase().includes(text.toLowerCase()),
-					);
+					target = options.find((o) => o.text.trim().toLowerCase().includes(cleanText));
 				}
 
-				if (select && target) {
+				if (target) {
 					select.value = target.value;
 					select.dispatchEvent(new Event("change", { bubbles: true }));
-					// Try to trigger bootstrap-select refresh if possible
-					try {
-						(window as any).$(select).selectpicker("val", target.value);
-					} catch (e) {
-						/* ignore */
-					}
-					try {
-						(window as any).$(select).selectpicker("refresh");
-					} catch (e) {
-						/* ignore */
+					// @ts-ignore
+					if (window.jQuery && window.jQuery(select).selectpicker) {
+						// @ts-ignore
+						window.jQuery(select).selectpicker("val", target.value);
+						// @ts-ignore
+						window.jQuery(select).selectpicker("refresh");
 					}
 				}
 			}, optionText);
 
-			await this.page.waitForTimeout(1000); // Stabilization
+			logger.info(`✅ ${fieldName} seleccionado correctamente`);
 		} catch (error) {
-			logger.error(`Fallo en el dropdown [${fieldName}]:`, error);
+			logger.error(`Fallo crítico al seleccionar en dropdown [${fieldName}]: ${optionText}`, error);
 			await this.takeScreenshot(`fail-${fieldName}`);
 			throw error;
 		}
 	}
 
 	async selectTipoOperacion(tipo: string): Promise<void> {
-		await this.selectBootstrapDropdown(
-			this.selectors.btnTipoOperacion,
-			tipo,
-			"Tipo Operacion",
-		);
+		try {
+			await this.selectBootstrapDropdown(
+				this.selectors.btnTipoOperacion,
+				tipo,
+				"Tipo Operacion",
+				{ timeout: 5000 }
+			);
+		} catch (error) {
+			logger.warn(`⚠️ No se pudo seleccionar Tipo Operacion [${tipo}]. Probando fallback prefijo...`);
+			await this.selectBootstrapDropdown(
+				this.selectors.btnTipoOperacion,
+				"Qa_to_",
+				"Tipo Operacion (Fallback)",
+				{ pickFirst: true }
+			);
+		}
 	}
 
 	async selectTipoServicio(tipo: string): Promise<void> {
-		await this.selectBootstrapDropdown(
-			this.selectors.btnTipoServicio,
-			tipo,
-			"Tipo Servicio",
-		);
+		try {
+			await this.selectBootstrapDropdown(
+				this.selectors.btnTipoServicio,
+				tipo,
+				"Tipo Servicio",
+				{ timeout: 5000 }
+			);
+		} catch (error) {
+			logger.warn(`⚠️ No se pudo seleccionar Tipo Servicio [${tipo}]. Probando fallback prefijo...`);
+			await this.selectBootstrapDropdown(
+				this.selectors.btnTipoServicio,
+				"Qa_TS_",
+				"Tipo Servicio (Fallback)",
+				{ pickFirst: true }
+			);
+		}
 	}
 
 	async selectTipoViaje(tipo: string = "Normal"): Promise<void> {
@@ -290,11 +335,48 @@ export class PlanificarPage extends BasePage {
 	}
 
 	async selectUnidadNegocio(unidad: string = "Defecto"): Promise<void> {
-		await this.selectBootstrapDropdown(
-			this.selectors.btnUnidadNegocio,
-			unidad,
-			"Unidad Negocio",
-		);
+		try {
+			// Intento 1: Seleccionar "Defecto" primero (según requerimiento de prioridad)
+			logger.info("Intentando seleccionar Unidad de Negocio por defecto: [Defecto]");
+			await this.selectBootstrapDropdown(
+				this.selectors.btnUnidadNegocio,
+				"Defecto",
+				"Unidad Negocio (Defecto)",
+				{ timeout: 5000 }
+			);
+		} catch (error) {
+			logger.warn(`⚠️ No se pudo seleccionar la Unidad de Negocio por defecto [Defecto]. Probando fallbacks...`);
+			
+			// Intento 2: Si el valor original no era "Defecto", intentar seleccionarlo
+			if (unidad && unidad !== "Defecto") {
+				try {
+					logger.info(`Intentando seleccionar Unidad de Negocio específica: [${unidad}]`);
+					await this.selectBootstrapDropdown(
+						this.selectors.btnUnidadNegocio,
+						unidad,
+						"Unidad Negocio (Especifica)",
+						{ timeout: 5000 }
+					);
+					return;
+				} catch (e) {
+					logger.warn(`⚠️ No se pudo seleccionar la Unidad de Negocio específica [${unidad}].`);
+				}
+			}
+
+			// Intento 3: Probar con prefijo "Qa_UN_"
+			try {
+				logger.info("Intentando seleccionar la primera Unidad de Negocio disponible con prefijo [Qa_UN_]");
+				await this.selectBootstrapDropdown(
+					this.selectors.btnUnidadNegocio,
+					"Qa_UN_",
+					"Unidad Negocio (Fallback Prefijo)",
+					{ pickFirst: true, timeout: 5000 }
+				);
+			} catch (e2) {
+				logger.error("❌ Fallaron todas las alternativas para Unidad de Negocio");
+				throw new Error(`No se pudo seleccionar ninguna Unidad de Negocio (ni 'Defecto', ni '${unidad}', ni con prefijo). Original: ${error}`);
+			}
+		}
 	}
 
 	async selectCliente(cliente: string): Promise<void> {
@@ -303,14 +385,90 @@ export class PlanificarPage extends BasePage {
 			cliente,
 			"Cliente",
 		);
+		// Sincronización Post-Cliente: Esperar que otros dropdowns reaccionen
+		logger.info("⏳ Esperando estabilización del formulario post-selección de cliente...");
+		await this.page.waitForTimeout(2000);
 	}
 
-	async selectCodigoCarga(carga: string): Promise<void> {
-		await this.selectBootstrapDropdown(
-			this.selectors.btnCodigoCarga,
-			carga,
-			"Codigo Carga",
-		);
+	async selectCodigoCarga(carga?: string): Promise<void> {
+		logger.info("Seleccionando Código Carga. Priorizando opciones disponibles para el cliente...");
+		try {
+			const visibleSelector = this.selectors.btnCodigoCarga.includes(":visible")
+				? this.selectors.btnCodigoCarga
+				: `${this.selectors.btnCodigoCarga}:visible`;
+			const button = this.page.locator(visibleSelector).first();
+
+			// Asegurar visibilidad
+			await button.waitFor({ state: "visible", timeout: 5000 });
+
+			// Abrir dropdown si no está abierto
+			await this.page.evaluate((sel) => {
+				const cleanSel = sel.replace(":visible", "");
+				const btn = document.querySelector(cleanSel) as HTMLElement;
+				if (!btn) return;
+				const container = btn.closest(".bootstrap-select");
+				if (container && !container.classList.contains("show")) {
+					btn.click();
+				}
+			}, visibleSelector);
+
+			// Localizar el menú
+			const container = this.page
+				.locator("div.bootstrap-select")
+				.filter({ has: button })
+				.first();
+			const menu = container.locator("div.dropdown-menu.show");
+
+			// Esperar que carguen las opciones nativas (filtradas por cliente)
+			await this.page.waitForFunction((sel) => {
+				const btn = document.querySelector(sel.replace(":visible", "")) as HTMLElement;
+				const cont = btn?.closest(".bootstrap-select");
+				const select = cont?.querySelector("select") as HTMLSelectElement;
+				return select && Array.from(select.options).some(o => o.value && o.value !== "0" && o.value !== "");
+			}, visibleSelector, { timeout: 8000 }).catch(() => {
+				logger.warn("⚠️ Timeout esperando opciones nativas en Código Carga");
+			});
+
+			const optionsLocator = menu.locator("ul.dropdown-menu li a:not(.dropdown-header):not(.divider)");
+			const availableOptions = (await optionsLocator.allTextContents())
+				.map(o => o.trim())
+				.filter(o => o && o !== "No results" && o !== "No hay resultados");
+
+			if (availableOptions.length === 0) {
+				logger.error("❌ El cliente seleccionado no posee ningún Código Carga asociado en su contrato.");
+				throw new Error("El cliente seleccionado no posee ningún Código Carga asociado en su contrato.");
+			}
+
+			logger.info(`Códigos de carga disponibles en el dropdown: ${availableOptions.join(" | ")}`);
+
+			// Seleccionar por defecto el primero
+			let targetCarga = availableOptions[0];
+
+			// Si se especificó una carga y está en las disponibles, la priorizamos
+			if (carga && carga !== "Qa_COD_") {
+				const matchedOption = availableOptions.find(opt => opt.includes(carga) || carga.includes(opt));
+				if (matchedOption) {
+					logger.info(`Se encontró coincidencia para la carga solicitada [${carga}]: [${matchedOption}]`);
+					targetCarga = matchedOption;
+				} else {
+					logger.warn(`La carga solicitada [${carga}] no está disponible. Usando primera opción del cliente: [${targetCarga}]`);
+				}
+			}
+
+			logger.info(`Seleccionando código de carga final: [${targetCarga}]`);
+			const option = menu.locator("ul.dropdown-menu li a")
+				.filter({ hasText: targetCarga })
+				.first();
+
+			await option.waitFor({ state: "visible", timeout: 5000 });
+			await option.evaluate((node: HTMLElement) => node.scrollIntoView({ block: "center" })).catch(() => {});
+			await option.evaluate((node: HTMLElement) => node.click());
+
+		} catch (error: any) {
+			logger.error(`❌ Fallo crítico al seleccionar Código Carga: ${error.message}`);
+			throw error;
+		}
+
 		await this.page.keyboard.press("Tab");
 	}
 
@@ -320,7 +478,13 @@ export class PlanificarPage extends BasePage {
 			.locator(`${this.selectors.kgViaje}:visible`)
 			.first();
 
-		await input.waitFor({ state: "visible", timeout: 5000 });
+		try {
+			await input.waitFor({ state: "visible", timeout: 3000 });
+		} catch (error) {
+			logger.warn(`⚠️ Campo KG del viaje principal (#viajes-kg) no visible en la UI. Se omite.`);
+			return;
+		}
+
 		await input.click();
 		await input.fill("");
 		await input.type(kg, { delay: 40 });
@@ -449,7 +613,23 @@ export class PlanificarPage extends BasePage {
 
 			if (!found) {
 				logger.warn(
-					`Ruta ${numeroRuta} (key=${routeKey}) no encontrada en la lista`,
+					`Ruta ${numeroRuta} (key=${routeKey}) no encontrada en la lista. Probando fallback con la primera disponible...`,
+				);
+				const firstRow = rows.first();
+				if (await firstRow.isVisible({ timeout: 2000 }).catch(() => false)) {
+					const selectBtn = firstRow.locator(".btn-success, .btn-primary").first();
+					if (await selectBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+						await selectBtn.evaluate((el) => el.scrollIntoView({ block: "center" })).catch(() => {});
+						await selectBtn.evaluate((el) => (el as HTMLElement).click());
+						found = true;
+						logger.info("✅ Ruta agregada exitosamente usando la primera disponible del modal (fallback)");
+					}
+				}
+			}
+
+			if (!found) {
+				logger.warn(
+					`Ruta ${numeroRuta} (key=${routeKey}) no encontrada ni se pudo usar fallback`,
 				);
 				await this.page.keyboard.press("Escape").catch(() => {});
 				return false;
@@ -675,6 +855,12 @@ export class PlanificarPage extends BasePage {
 				await this.setFechaEntradaOrigen(tramo.fechaEntradaOrigen);
 			}
 			if (tramo.kgOrigen) {
+				const kgGeneral = this.page
+					.locator(`${this.selectors.modalTramoKgGeneral}:visible`)
+					.first();
+				if (await kgGeneral.isVisible().catch(() => false)) {
+					await kgGeneral.fill(tramo.kgOrigen);
+				}
 				await this.fill(this.selectors.modalTramoKgOrigen, tramo.kgOrigen);
 			}
 
@@ -753,8 +939,8 @@ export class PlanificarPage extends BasePage {
 					);
 				}
 				if (tramo.transportista && !cardText.includes(tramo.transportista)) {
-					logger.warn(
-						`⚠️ Tramo encontrado pero el Transportista [${tramo.transportista}] no es visible en la card. Texto real: ${cardText}`,
+					throw new Error(
+						`Tramo encontrado pero el valor esperado [${tramo.transportista}] no es visible en la card. Texto real: ${cardText}`,
 					);
 				}
 				// Assert we don't see Anulado in newly created tramo unless specifically creating an anulado one

@@ -137,6 +137,17 @@ export default defineConfig({
       dependencies: ['Autorización'],
     },
 
+    // --- CONFIG SMOKE (Solo para seeding manual/scripts) ---
+    {
+      name: 'config-smoke-chromium',
+      testMatch: 'e2e/modules/00-config/config/**/*.test.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: `playwright/.auth/user-${envName}.json`,
+      },
+      dependencies: ['Autorización'],
+    },
+
     // --- MAIN TEST PROJECTS ---
     {
       name: `chromium-${envName}`,
