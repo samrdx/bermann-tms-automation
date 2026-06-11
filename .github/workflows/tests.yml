@@ -1,4 +1,4 @@
-name: PR QA Critical Flow
+name: QA PR SUITE
 
 on:
   pull_request:
@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  qa-critical-flow:
-    name: QA Critical Flow (PR)
+  qa-pr-suite:
+    name: QA PR SUITE
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
