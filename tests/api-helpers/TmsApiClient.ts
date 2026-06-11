@@ -43,7 +43,7 @@ export class TmsApiClient {
 
   async initialize(): Promise<void> {
 
-    logger.info(`✅ TmsApiClient inicializado`);
+    logger.info(`✅ Helper de seed por UI inicializado | entorno=${process.env.ENV || 'QA'} | baseUrl=${this.baseUrl}`);
 
   }
 

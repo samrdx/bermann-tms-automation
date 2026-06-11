@@ -17,6 +17,7 @@ const PROFORMA_ID_REGEX = /^\d+$/;
  *
  * Esta suite genera su propio ecosistema por UI automatizada y valida la cadena:
  * entidades -> contratos -> viaje -> asignación -> finalización -> prefactura -> proforma.
+ * No depende de archivos de seed compartidos: construye su contexto de negocio de forma autónoma.
  */
 test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
   test.setTimeout(720000);
@@ -24,9 +25,9 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
   test('Flujo encadenado: Finalizar viaje -> Prefactura -> Proforma', async ({ page }, testInfo) => {
     const startTime = Date.now();
 
-    await allure.epic('TMS E2E Flow');
-    await allure.feature('Modulo Finanzas');
-    await allure.story('Finalizar viaje -> Prefactura -> Proforma (mismo viaje)');
+    await allure.epic('TMS V1 PR Gate');
+    await allure.feature('Flujo crítico operativo-financiero');
+    await allure.story('Entidades -> Contratos -> Viaje -> Prefactura -> Proforma');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
 
     logger.fase(1, 'Preparación de ecosistema (UI seed)');
@@ -38,12 +39,38 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     const cliName = `${NamingHelper.getClienteName().nombre}_${runToken}`;
     const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
 
+    logger.info(`🧱 Contexto inicial del flujo: Transportista="${transName}" | Cliente="${cliName}" | Viaje="${nroViaje}"`);
+    await allure.parameter('Transportista', transName);
+    await allure.parameter('Cliente', cliName);
+    await allure.parameter('Nro Viaje', nroViaje);
+
     const transportistaId = await api.createTransportista(transName, generateValidChileanRUT());
     const clienteId = await api.createCliente(cliName);
     const patente = await api.createVehiculo(transName);
     const conductor = await api.createConductor(transName);
     const contratoVenta = await api.createContratoVenta(cliName, clienteId);
     const contratoCosto = await api.createContratoCosto(transName, transportistaId);
+
+    await allure.parameter('Patente', patente);
+    await allure.parameter('Conductor', conductor);
+    await allure.parameter('Contrato Venta ID', contratoVenta);
+    await allure.parameter('Contrato Costo ID', contratoCosto);
+
+    await testInfo.attach('📦 Contexto inicial del flujo', {
+      body: JSON.stringify({
+        ambiente: process.env.ENV || 'QA',
+        transportista: transName,
+        cliente: cliName,
+        nroViaje,
+        transportistaId,
+        clienteId,
+        patente,
+        conductor,
+        contratoVenta,
+        contratoCosto,
+      }, null, 2),
+      contentType: 'application/json',
+    });
 
     await test.step('Validar entidades base creadas antes del flujo encadenado', async () => {
       expect(transportistaId, `Transportista no creado correctamente para ${transName}`).toMatch(/^\d+$/);
@@ -59,6 +86,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     logger.success(`Viaje [${nroViaje}] planificado.`);
 
     logger.fase(2, 'Asignar y finalizar viaje');
+    logger.info(`🚚 Iniciando asignación del viaje "${nroViaje}" con transportista="${transName}", vehículo="${patente}" y conductor="${conductor}"`);
     const asignarPage = new AsignarPage(page);
     await asignarPage.navigate();
     await asignarPage.assignViaje(nroViaje, {
@@ -66,7 +94,6 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       vehiculoPrincipal: patente,
       conductor,
     });
-    await asignarPage.confirmarAsignacionSiApareceDialogo();
 
     const monitoreo = new MonitoreoPage(page);
     await monitoreo.navegar();
@@ -78,6 +105,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     let proformaId = 'N/A';
 
     logger.fase(3, 'Crear Prefactura del mismo viaje');
+    logger.info(`🧾 Iniciando generación de prefactura para cliente "${cliName}" y viaje "${nroViaje}"`);
     await test.step('Prefactura: filtrar por cliente y generar', async () => {
       await finanzasPage.navigateToCrear();
       await finanzasPage.filtrarViajesPorCliente(cliName);
@@ -85,8 +113,10 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       prefacturaId = await finanzasPage.buscarPrefacturaEnIndex(cliName);
       expect(prefacturaId, `ID de prefactura invalido para cliente ${cliName}`).toMatch(/^\d+$/);
     });
+    await allure.parameter('Prefactura ID', prefacturaId);
 
     logger.fase(4, 'Crear Proforma del mismo viaje');
+    logger.info(`🧾 Iniciando generación de proforma para transportista "${transName}" y viaje "${nroViaje}"`);
     await test.step('Proforma: filtrar por transportista y generar', async () => {
       await finanzasPage.navigateToProformaCrear();
       await finanzasPage.filtrarViajesPorTransportista(transName);
@@ -98,6 +128,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
         `ID de proforma invalido para transportista ${transName}. Debe cumplir ${PROFORMA_ID_REGEX}`,
       ).toMatch(PROFORMA_ID_REGEX);
     });
+    await allure.parameter('Proforma ID', proformaId);
 
     entityTracker.register({ type: 'Prefactura', name: 'Creada', id: prefacturaId, extra: `Viaje: ${nroViaje}` });
     entityTracker.register({ type: 'Proforma', name: 'Creada', id: proformaId, extra: `Viaje: ${nroViaje}` });
@@ -111,13 +142,23 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       contentType: 'text/plain',
     });
 
-    await allure.parameter('Transportista', transName);
-    await allure.parameter('Cliente', cliName);
-    await allure.parameter('Contrato Venta', contratoVenta);
-    await allure.parameter('Contrato Costo', contratoCosto);
-    await allure.parameter('Viaje', nroViaje);
-    await allure.parameter('Prefactura ID', prefacturaId);
-    await allure.parameter('Proforma ID', proformaId);
+    await testInfo.attach('📋 Resultado final del flujo crítico', {
+      body: JSON.stringify({
+        ambiente: process.env.ENV || 'QA',
+        transportista: transName,
+        cliente: cliName,
+        nroViaje,
+        patente,
+        conductor,
+        contratoVenta,
+        contratoCosto,
+        prefacturaId,
+        proformaId,
+        duracionSegundos: executionTime,
+      }, null, 2),
+      contentType: 'application/json',
+    });
+
     await allure.parameter('Estado Final', '✅ PREFACTURA + PROFORMA');
     await allure.parameter('Duracion (s)', executionTime);
 

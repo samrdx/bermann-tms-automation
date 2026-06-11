@@ -334,6 +334,10 @@ export class AsignarPage extends BasePage {
     }
   }
 
+  /**
+   * Asigna un viaje completo y resuelve el diálogo de confirmación si aparece
+   * durante el guardado.
+   */
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {
     logger.info(`=== Iniciando Asignación para ${nroViaje} (Modo Inyección) ===`);
     await this.selectViajeRow(nroViaje);
