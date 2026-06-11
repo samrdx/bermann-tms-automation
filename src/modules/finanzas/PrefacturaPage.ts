@@ -428,14 +428,15 @@ export class PrefacturaPage extends BasePage {
     logger.info('Haciendo clic en Guardar');
     await this.click(this.selectors.crear.btnGuardar);
 
-    // Validar SweetAlert o msj de éxito y la redirección
-    logger.info('Esperando redirección automática a /prefactura/index y mensaje de éxito');
-    await this.page.waitForURL('**/prefactura/index*', { timeout: 15000 });
+    // Validar señal de éxito y la navegación real de QA.
+    // En algunos casos el sistema redirige a /prefactura y no a /prefactura/index.
+    logger.info('Esperando navegación posterior al guardado hacia /prefactura o /prefactura/index');
+    await this.page.waitForURL(/\/prefactura(?:\/index)?(?:\?.*)?$/i, { timeout: 15000 });
     
     // Validar mensaje
     const successMsg = this.page.locator('text=/Prefactura creada con \\w*/i').first(); 
     await successMsg.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-        logger.warn('Mensaje de éxito no se mostró como texto, verificando redirección solamente...');
+        logger.warn('Mensaje de éxito no se mostró como texto, continuando con validación por navegación...');
     });
   }
 
@@ -452,6 +453,11 @@ export class PrefacturaPage extends BasePage {
 
     if (!normalizedCliente) {
       throw new Error('Nombre de cliente requerido para buscar prefactura en index.');
+    }
+
+    if (!/\/prefactura(?:\/index)?(?:\?.*)?$/i.test(this.page.url())) {
+      logger.info('La página actual no corresponde al listado de prefactura. Navegando al index...');
+      await this.navigateToIndex();
     }
 
     const maxAttempts = 4;
@@ -642,46 +648,59 @@ export class PrefacturaPage extends BasePage {
   // ==========================================
 
   /**
-   * Helper para select simples (< 20 options) usando JS fallback si falla la UI
+   * Helper para select simples (< 20 options) usando JS fallback si falla la UI.
+   *
+   * Usa evaluate click para abrir el dropdown (más confiable con Bootstrap Select
+   * que suele interceptar el click estándar de Playwright) y cae rápido a JS injection
+   * si la opción no aparece en 2s.
    */
   private async selectBootstrapOption(dataId: string, value: string): Promise<void> {
     try {
       const btn = this.page.locator(`button[data-id="${dataId}"]`);
-      await btn.waitFor({ state: 'visible', timeout: 5000 });
-      
-      /* Removed return early for Firefox robustness - always click to ensure events trigger */
-      await btn.click();
-      await this.page.waitForTimeout(1000); // Wait for menu to show
-      
-      // Intentar encontrar la opción de forma robusta
-      const option = this.page.locator(`div.show button[data-id="${dataId}"] + .dropdown-menu .dropdown-item, .dropdown.show .dropdown-item, .dropdown.show li a`)
+      await btn.waitFor({ state: 'attached', timeout: 5000 });
+
+      // Usar evaluate click directo — Bootstrap Select a veces ignora el click de PW
+      await btn.evaluate(el => (el as HTMLElement).click());
+      await this.page.waitForTimeout(800);
+
+      const option = this.page.locator(
+        `button[data-id="${dataId}"] + .dropdown-menu .dropdown-item, ` +
+        `.dropdown.show .dropdown-item, .dropdown.show li a`
+      )
         .filter({ hasText: new RegExp(`^${value}$`, 'i') })
         .first();
 
-      if (await option.isVisible({ timeout: 3000 })) {
-          await option.click();
-          await this.page.waitForTimeout(500);
-      } else {
-          throw new Error(`Opción "${value}" no visible en dropdown "${dataId}"`);
+      if (await option.isVisible({ timeout: 2000 })) {
+        await option.evaluate(el => (el as HTMLElement).click());
+        await this.page.waitForTimeout(500);
+        return;
       }
-    } catch (e: any) {
-      logger.warn(`selectBootstrapOption falló para "${dataId}" con valor "${value}": ${e.message}, usando fallback JS...`);
+
+      throw new Error(`Opción "${value}" no visible tras 2s`);
+    } catch {
+      logger.warn(`selectBootstrapOption: fallback JS para "${dataId}"="${value}"`);
       await this.page.evaluate(({ id, text }: { id: string; text: string }) => {
-        const select = (document.getElementById(id) || document.querySelector(`select[name="${id}"]`) || document.querySelector(`select#${id}`)) as HTMLSelectElement;
+        const select = (
+          document.getElementById(id) ||
+          document.querySelector(`select[name="${id}"]`) ||
+          document.querySelector(`select#${id}`)
+        ) as HTMLSelectElement | null;
         if (!select) return;
-        
-        const opt = Array.from(select.options).find(o => o.text.trim().toLowerCase() === text.trim().toLowerCase());
+
+        const opt = Array.from(select.options).find(
+          o => o.text.trim().toLowerCase() === text.trim().toLowerCase(),
+        );
         if (opt) {
-            select.value = opt.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
+          select.value = opt.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          // @ts-ignore
+          if (window.jQuery && window.jQuery(select).selectpicker) {
             // @ts-ignore
-            if (window.jQuery && window.jQuery(select).selectpicker) {
-              // @ts-ignore
-              window.jQuery(select).selectpicker('refresh');
-            }
+            window.jQuery(select).selectpicker('refresh');
+          }
         }
       }, { id: dataId, text: value });
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(800);
     }
   }
 

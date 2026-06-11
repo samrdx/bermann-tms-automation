@@ -30,94 +30,103 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     await allure.story('Entidades -> Contratos -> Viaje -> Prefactura -> Proforma');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
 
-    logger.fase(1, 'Preparación de ecosistema (UI seed)');
-    const api = new TmsApiClient(page);
-    await api.initialize();
-
     const runToken = (process.env.GITHUB_RUN_ID || `${Date.now()}`).slice(-6);
     const transName = `${NamingHelper.getTransportistaName().nombre}_${runToken}`;
     const cliName = `${NamingHelper.getClienteName().nombre}_${runToken}`;
     const nroViaje = String(Math.floor(100000 + Math.random() * 900000));
+
+    let transportistaId = '';
+    let clienteId = '';
+    let patente = '';
+    let conductor = '';
+    let contratoVenta = '';
+    let contratoCosto = '';
 
     logger.info(`🧱 Contexto inicial del flujo: Transportista="${transName}" | Cliente="${cliName}" | Viaje="${nroViaje}"`);
     await allure.parameter('Transportista', transName);
     await allure.parameter('Cliente', cliName);
     await allure.parameter('Nro Viaje', nroViaje);
 
-    const transportistaId = await api.createTransportista(transName, generateValidChileanRUT());
-    const clienteId = await api.createCliente(cliName);
-    const patente = await api.createVehiculo(transName);
-    const conductor = await api.createConductor(transName);
-    const contratoVenta = await api.createContratoVenta(cliName, clienteId);
-    const contratoCosto = await api.createContratoCosto(transName, transportistaId);
+    await test.step('Fase 1 — Preparar ecosistema (entidades + contratos)', async () => {
+      logger.fase(1, 'Preparación de ecosistema (UI seed)');
+      const seed = new TmsApiClient(page);
+      await seed.initialize();
 
-    await allure.parameter('Patente', patente);
-    await allure.parameter('Conductor', conductor);
-    await allure.parameter('Contrato Venta ID', contratoVenta);
-    await allure.parameter('Contrato Costo ID', contratoCosto);
+      transportistaId = await seed.createTransportista(transName, generateValidChileanRUT());
+      clienteId = await seed.createCliente(cliName);
+      patente = await seed.createVehiculo(transName);
+      conductor = await seed.createConductor(transName);
+      contratoVenta = await seed.createContratoVenta(cliName, clienteId);
+      contratoCosto = await seed.createContratoCosto(transName, transportistaId);
 
-    await testInfo.attach('📦 Contexto inicial del flujo', {
-      body: JSON.stringify({
-        ambiente: process.env.ENV || 'QA',
+      await allure.parameter('Patente', patente);
+      await allure.parameter('Conductor', conductor);
+      await allure.parameter('Contrato Venta ID', contratoVenta);
+      await allure.parameter('Contrato Costo ID', contratoCosto);
+
+      await testInfo.attach('📦 Contexto inicial del flujo', {
+        body: JSON.stringify({
+          ambiente: process.env.ENV || 'QA',
+          transportista: transName,
+          cliente: cliName,
+          nroViaje,
+          transportistaId,
+          clienteId,
+          patente,
+          conductor,
+          contratoVenta,
+          contratoCosto,
+        }, null, 2),
+        contentType: 'application/json',
+      });
+
+      expect(transportistaId, `Falló en Fase 1: Transportista no creado para ${transName}`).toMatch(/^\d+$/);
+      expect(clienteId, `Falló en Fase 1: Cliente no creado para ${cliName}`).toMatch(/^\d+$/);
+      expect(contratoVenta, `Falló en Fase 1: Contrato venta no creado para ${cliName}`).toMatch(/^\d+$/);
+      expect(contratoCosto, `Falló en Fase 1: Contrato costo no creado para ${transName}`).toMatch(/^\d+$/);
+      expect(patente, `Falló en Fase 1: Patente inválida para ${transName}`).toBeTruthy();
+      expect(conductor, `Falló en Fase 1: Conductor inválido para ${transName}`).toBeTruthy();
+
+      logger.info(`🧭 Planificando viaje [${nroViaje}] usando cliente ID [${clienteId}] para evitar selección stale.`);
+      await seed.createViaje(cliName, nroViaje, clienteId);
+      logger.success(`Viaje [${nroViaje}] planificado.`);
+    });
+
+    await test.step('Fase 2 — Asignar y finalizar viaje', async () => {
+      logger.fase(2, 'Asignar y finalizar viaje');
+      logger.info(`🚚 Iniciando asignación del viaje "${nroViaje}" con transportista="${transName}", vehículo="${patente}" y conductor="${conductor}"`);
+      const asignarPage = new AsignarPage(page);
+      await asignarPage.navigate();
+      await asignarPage.assignViaje(nroViaje, {
         transportista: transName,
-        cliente: cliName,
-        nroViaje,
-        transportistaId,
-        clienteId,
-        patente,
+        vehiculoPrincipal: patente,
         conductor,
-        contratoVenta,
-        contratoCosto,
-      }, null, 2),
-      contentType: 'application/json',
+      });
+
+      const monitoreo = new MonitoreoPage(page);
+      await monitoreo.navegar();
+      await monitoreo.finalizarViaje(nroViaje);
+      logger.success(`Viaje [${nroViaje}] finalizado.`);
     });
-
-    await test.step('Validar entidades base creadas antes del flujo encadenado', async () => {
-      expect(transportistaId, `Transportista no creado correctamente para ${transName}`).toMatch(/^\d+$/);
-      expect(clienteId, `Cliente no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
-      expect(contratoVenta, `Contrato venta no creado correctamente para ${cliName}`).toMatch(/^\d+$/);
-      expect(contratoCosto, `Contrato costo no creado correctamente para ${transName}`).toMatch(/^\d+$/);
-      expect(patente, `Patente de vehiculo inválida para ${transName}`).toBeTruthy();
-      expect(conductor, `Conductor inválido para ${transName}`).toBeTruthy();
-    });
-
-    logger.info(`🧭 Planificando viaje [${nroViaje}] usando cliente ID [${clienteId}] para evitar selección stale.`);
-    await api.createViaje(cliName, nroViaje, clienteId);
-    logger.success(`Viaje [${nroViaje}] planificado.`);
-
-    logger.fase(2, 'Asignar y finalizar viaje');
-    logger.info(`🚚 Iniciando asignación del viaje "${nroViaje}" con transportista="${transName}", vehículo="${patente}" y conductor="${conductor}"`);
-    const asignarPage = new AsignarPage(page);
-    await asignarPage.navigate();
-    await asignarPage.assignViaje(nroViaje, {
-      transportista: transName,
-      vehiculoPrincipal: patente,
-      conductor,
-    });
-
-    const monitoreo = new MonitoreoPage(page);
-    await monitoreo.navegar();
-    await monitoreo.finalizarViaje(nroViaje);
-    logger.success(`Viaje [${nroViaje}] finalizado.`);
 
     const finanzasPage = new PrefacturaPage(page);
     let prefacturaId = 'N/A';
     let proformaId = 'N/A';
 
-    logger.fase(3, 'Crear Prefactura del mismo viaje');
-    logger.info(`🧾 Iniciando generación de prefactura para cliente "${cliName}" y viaje "${nroViaje}"`);
-    await test.step('Prefactura: filtrar por cliente y generar', async () => {
+    await test.step('Fase 3 — Generar Prefactura', async () => {
+      logger.fase(3, 'Crear Prefactura del mismo viaje');
+      logger.info(`🧾 Iniciando generación de prefactura para cliente "${cliName}" y viaje "${nroViaje}"`);
       await finanzasPage.navigateToCrear();
       await finanzasPage.filtrarViajesPorCliente(cliName);
       await finanzasPage.generarPrefactura();
       prefacturaId = await finanzasPage.buscarPrefacturaEnIndex(cliName);
-      expect(prefacturaId, `ID de prefactura invalido para cliente ${cliName}`).toMatch(/^\d+$/);
+      expect(prefacturaId, `Falló en Fase 3: ID de prefactura inválido para cliente ${cliName}`).toMatch(/^\d+$/);
     });
     await allure.parameter('Prefactura ID', prefacturaId);
 
-    logger.fase(4, 'Crear Proforma del mismo viaje');
-    logger.info(`🧾 Iniciando generación de proforma para transportista "${transName}" y viaje "${nroViaje}"`);
-    await test.step('Proforma: filtrar por transportista y generar', async () => {
+    await test.step('Fase 4 — Generar Proforma', async () => {
+      logger.fase(4, 'Crear Proforma del mismo viaje');
+      logger.info(`🧾 Iniciando generación de proforma para transportista "${transName}" y viaje "${nroViaje}"`);
       await finanzasPage.navigateToProformaCrear();
       await finanzasPage.filtrarViajesPorTransportista(transName);
       await finanzasPage.assertGuardarDisabledWithoutViajes();
@@ -125,7 +134,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       proformaId = await finanzasPage.buscarProformaEnIndexPorTransportista(transName);
       expect(
         proformaId,
-        `ID de proforma invalido para transportista ${transName}. Debe cumplir ${PROFORMA_ID_REGEX}`,
+        `Falló en Fase 4: ID de proforma inválido para transportista ${transName}. Debe cumplir ${PROFORMA_ID_REGEX}`,
       ).toMatch(PROFORMA_ID_REGEX);
     });
     await allure.parameter('Proforma ID', proformaId);
