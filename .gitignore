@@ -32,7 +32,6 @@ Thumbs.db
 
 # IDEs
 .vscode/*
-!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -50,6 +49,7 @@ allure-report/
 allure-report-*/
 
 # Temporal & Worker Data
+.tmp/
 tmp/
 temp/
 *.tmp

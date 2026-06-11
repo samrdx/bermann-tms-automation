@@ -503,24 +503,25 @@ test.describe("Contracts - Validation", () => {
 
 ## NPM Scripts Pattern
 
-Add to `package.json`:
+Use existing scripts from `package.json`. Do not invent ad-hoc `test:*` aliases unless the team explicitly decides to add a new durable workflow.
 
-```json
-{
-  "scripts": {
-    "test:[module]:[action]": "cross-env HEADLESS=false tsx tests/[module]-[action].test.ts",
-    "test:[module]:[action]:headless": "cross-env HEADLESS=true tsx tests/[module]-[action].test.ts"
-  }
-}
+Current preferred patterns:
+
+```bash
+# V1 PR gate
+npm run typecheck
+npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
+
+# Atomic E2E suites
+npm run qa:e2e:all
+npm run demo:e2e:all
+
+# Module/smoke workflows
+npm run qa:smoke:01:transportista
+npm run qa:config:smoke:all
 ```
 
-**Examples:**
-
-```json
-"test:contratos:crear": "cross-env HEADLESS=false tsx tests/contratos-crear.test.ts",
-"test:viajes:planificar": "cross-env HEADLESS=false tsx tests/viajes-planificar.test.ts",
-"test:all": "cross-env HEADLESS=false tsx tests/*.test.ts"
-```
+If a new script is needed, add it to `package.json`, keep it routed through `npm run pw:run` when it launches Playwright, and verify it with `npm run ci:validate:workflow-scripts`.
 
 ---
 

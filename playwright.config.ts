@@ -19,7 +19,6 @@ const baseURL = ENV === 'DEMO'
 export default defineConfig({
   testDir: './tests',
   outputDir: `test-results-${envName}`,
-  testIgnore: ['**/examples/**'],
   fullyParallel: false,
 
   /* * CRÍTICO PARA CI:

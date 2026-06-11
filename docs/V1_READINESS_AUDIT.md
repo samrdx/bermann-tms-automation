@@ -10,16 +10,22 @@ Leave the project clean, realistic, and stable enough to ship a web automation V
 
 ### Overall verdict
 
-The repository has a solid structural base, but it is not yet ready to be called a clean V1.
+The repository now has a usable V1 PR gate, but the V1 cleanup is not fully closed.
 
-Main issues:
+Resolved for the first V1 gate:
 
-- CI/runtime configuration drift
-- legacy test coupling through JSON seed state
-- stale or duplicated documentation
-- tracked backup files inside source
-- large local artifact clutter
-- very heavy Git history
+- PR workflow is named `QA PR SUITE`
+- CI installs Chrome with `npx playwright install --with-deps chrome`
+- PR validation runs `npm run typecheck`
+- PR validation runs `npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1`
+- `qa:e2e:finanzas-full` has been hardened enough to act as the current golden QA PR suite
+
+Remaining V1 cleanup:
+
+- audit and onboarding docs still need to reflect the current state consistently
+- legacy tests still contain fixed waits, direct selectors, and JSON seed coupling
+- `TmsApiClient.ts` remains a large UI-driven seed helper with many fallbacks and waits
+- generated outputs/logs and Git history weight remain maintenance concerns
 
 ### What is healthy
 
@@ -31,7 +37,6 @@ Main issues:
 
 ### What is not healthy yet
 
-- `playwright.config.ts` runs with `channel: 'chrome'` while CI installs `chromium`
 - legacy tests depend on shared JSON files and execution order
 - foundational tests still contain fixed waits and direct selectors
 - docs are partially updated and partially stale
@@ -41,14 +46,10 @@ Main issues:
 
 Approximate workspace hotspots observed during audit:
 
-- `.git` -> ~8234.82 MB
-- `reports/` -> ~130.33 MB
+- `.git` -> ~8.04 GB after cleanup
 - `node_modules/` -> ~99.64 MB
-- `logs/` -> ~9.38 MB
-- `allure-report-qa/` -> ~7.11 MB
-- `playwright-report-qa/` -> ~6.54 MB
-- `allure-results-qa/` -> ~4.72 MB
-- `test-results-qa/` -> ~4.68 MB
+- working tree plus dependencies excluding `.git` -> ~101.96 MB
+- generated report/log directories -> cleaned locally and ignored
 - `src/` -> ~0.51 MB
 - `tests/` -> ~0.50 MB
 
@@ -57,20 +58,23 @@ Approximate workspace hotspots observed during audit:
 The project is not heavy because of source code. It is heavy because of:
 
 1. Git history
-2. Reports and test artifacts
-3. Logs
+2. Dependencies
+3. Generated reports/test artifacts when present
 4. Build/runtime outputs
+
+The current cleanup reduced working-tree clutter, but it does not shrink `.git` history. Any real reduction of the ~8 GB `.git` directory requires a separate Git history slimming plan.
 
 ## Key Findings
 
-### 1. CI/runtime mismatch
+### 1. CI/runtime alignment
 
-Current conflict:
+Current state:
 
 - `playwright.config.ts` uses `channel: 'chrome'`
-- `.github/workflows/tests.yml` installs `chromium`
+- `.github/workflows/tests.yml` installs Chrome with `npx playwright install --with-deps chrome`
+- PR execution still uses the historical Playwright project name `chromium-qa`, but the runtime truth is Chrome
 
-This is the most important blocker for a trustworthy V1 CI baseline.
+The runtime blocker is resolved for V1. The remaining concern is naming clarity in docs and future project names.
 
 ### 2. Foundational test debt
 
@@ -90,7 +94,9 @@ Main debt patterns:
 
 ### 3. Tracked redundant files
 
-Current tracked backup files:
+Resolved for V1: the tracked backup files were reviewed and removed because they were older snapshots superseded by the active Page Objects.
+
+Removed files:
 
 - `src/modules/commercial/pages/ClientePage.ts.backup`
 - `src/modules/contracts/pages/ContratosPage.ts.backup`
@@ -101,14 +107,25 @@ Stale or suspicious docs/scripts detected:
 
 - `tests/e2e/README.md`
 - `docs/CI_CD_SETUP.md`
-- `tests/run-all.ts`
 - `docs/ALLURE_REPORT_USAGE.md` (needs review)
-- `scripts/setup-env.sh` (needs review)
-- `scripts/extract-options.js` (needs review)
+
+Resolved stale tracked files:
+
+- `tests/run-all.ts` removed because it referenced scripts that no longer exist
+- `scripts/setup-env.sh` removed because environment setup is covered by `.env.example` + current docs
+- `scripts/extract-options.js` removed because it was an old hardcoded debug utility
+- `examples/` removed because it only contained stale placeholder documentation
+- `.github/agents/` removed because no workflow or active docs referenced those GitHub agent definitions
+- `.github/commands/` removed because no workflow or active docs referenced those Gemini command definitions
+- `.agent/` removed because the active repo standard is `.agents/skills/`
+- `scripts/fix-auth-imports.sh` removed because it was a one-off migration script and auth imports are already fixed
+- `.agents/skills/README.md` replaced with a concise project-specific skills index
 
 ## Candidates for Cleanup
 
 ### Safe local cleanup
+
+Resolved locally for this cleanup pass:
 
 - `reports/`
 - `logs/`
@@ -120,17 +137,32 @@ Stale or suspicious docs/scripts detected:
 - `playwright/.data/`
 - `playwright/.auth/`
 
+These are generated outputs and remain covered by `.gitignore`. They may reappear after local or CI test runs.
+
 ### Candidates to remove from tracked V1 scope
+
+Resolved for this cleanup pass:
 
 - `src/modules/commercial/pages/ClientePage.ts.backup`
 - `src/modules/contracts/pages/ContratosPage.ts.backup`
 - `tests/run-all.ts`
-- `tests/e2e/README.md`
+- `examples/`
+- `scripts/setup-env.sh`
+- `scripts/extract-options.js`
+- `.github/agents/`
+- `.github/commands/`
+- `.agent/`
+- `scripts/fix-auth-imports.sh`
 
 ### Candidates to quarantine from V1 scope
 
+Resolved for this cleanup pass:
+
 - `tests/experiments/`
 - `tests/exploration/`
+
+Still not in V1 scope:
+
 - `openspec/`
 - `tmsapp/mobile/`
 
@@ -138,15 +170,16 @@ Stale or suspicious docs/scripts detected:
 
 ### High risk
 
-1. Browser/runtime mismatch between local config and CI
-2. Legacy operational chain depending on shared JSON seed state
-3. Foundational tests with direct selectors and fixed waits
+1. Legacy operational chain depending on shared JSON seed state
+2. Foundational tests with direct selectors and fixed waits
+3. Large UI-driven seed helper surface in `TmsApiClient.ts`
 
 ### Medium risk
 
 4. Stale onboarding and CI docs
 5. Hardcoded credential fallbacks in code/workflow
 6. Inconsistent use of fixtures vs raw `@playwright/test`
+7. Historical `chromium-*` project naming while runtime uses Chrome
 
 ### Low but important
 
@@ -155,48 +188,49 @@ Stale or suspicious docs/scripts detected:
 
 ## Recommended Cleanup Order
 
-1. Align CI/runtime truth first
-2. Define V1 scope clearly
-3. Remove tracked backup/dead files
+1. Keep the current QA PR gate stable
+2. Update V1 documentation from verified repo reality
+3. Remove tracked backup/dead files after explicit approval
 4. Stabilize foundational legacy tests
-5. Clean workspace artifacts and logs
-6. Rewrite documentation from verified repo reality
+5. Reduce `TmsApiClient.ts` helper risk in small slices
+6. Clean workspace artifacts and logs
 7. Plan separate Git history slimming effort
 
 ## V1 Backlog
 
 ### Phase 1 — CI Truth
 
-1. Decide browser strategy: Chrome channel or Chromium bundle
-2. Align `playwright.config.ts`, workflow install step, and execution commands
-3. Define the minimum CI suite for V1
+1. [x] Decide browser strategy: Chrome channel
+2. [x] Align `playwright.config.ts`, workflow install step, and execution commands
+3. [x] Define the minimum CI suite for V1: `typecheck` + `qa:e2e:finanzas-full`
 
 ### Phase 2 — Repo Hygiene
 
-4. Remove tracked `*.backup` files
-5. Clean generated outputs and logs
-6. Review whether `.agent` and `.agents` both need to exist
+4. [x] Remove tracked `*.backup` files after explicit approval
+5. [x] Clean generated outputs and logs
+6. [x] Review whether `.agent` and `.agents` both need to exist
 
 ### Phase 3 — Test Stabilization
 
-7. Standardize test base usage
-8. Stabilize `tests/e2e/suites/base-entities.setup.ts`
-9. Refactor entity creation tests
-10. Refactor contracts flow
-11. Refactor `viajes-planificar` and `viajes-asignar`
+7. [ ] Standardize test base usage
+8. [ ] Stabilize `tests/e2e/suites/base-entities.setup.ts`
+9. [ ] Refactor entity creation tests
+10. [ ] Refactor contracts flow
+11. [ ] Refactor `viajes-planificar` and `viajes-asignar`
+12. [ ] Reduce high-risk waits/fallbacks in `tests/api-helpers/TmsApiClient.ts`
 
 ### Phase 4 — Documentation
 
-12. Rewrite `README.md`
-13. Rewrite `tests/e2e/README.md`
-14. Rewrite `docs/CI_CD_SETUP.md`
-15. Document V1 vs legacy explicitly
+13. [ ] Rewrite `README.md`
+14. [ ] Rewrite `tests/e2e/README.md`
+15. [ ] Rewrite `docs/CI_CD_SETUP.md`
+16. [x] Document V1 vs legacy explicitly in this audit
 
 ### Phase 5 — Maintenance
 
-16. Review credential fallback policy
-17. Review tooling scripts for one-off or stale behavior
-18. Create a separate maintenance task for `.git` history bloat
+17. [ ] Review credential fallback policy
+18. [ ] Review tooling scripts for one-off or stale behavior
+19. [ ] Create a separate maintenance task for `.git` history bloat
 
 ## Step 1 Status Log
 
@@ -205,9 +239,11 @@ Stale or suspicious docs/scripts detected:
 - Audit completed
 - V1 blockers identified
 - Browser decision confirmed: V1 standard is `channel: 'chrome'`
+- PR workflow aligned to Chrome install and QA finanzas full gate
+- `qa:e2e:finanzas-full` accepted as the current V1 golden PR suite
 - Legacy data map confirmed from code and scripts
-- No files deleted yet
-- Next active decision: browser alignment for CI truth
+- Tracked Page Object backup files reviewed and removed
+- Next active decision: choose the next stabilization slice
 
 ### Rule for this effort
 
@@ -614,6 +650,33 @@ Goal:
 - identify which workarounds are necessary
 - move repeated behaviors into reusable abstractions
 - reduce hidden flake behavior in the PR path
+
+#### Current risk inventory — `TmsApiClient.ts`
+
+`TmsApiClient.ts` is intentionally still in V1 scope because the golden PR suite uses it to build the business scenario through UI flows. The file is not an API client; it is a scenario/seed builder that drives TMS screens.
+
+Main risk groups found:
+
+| Risk group | Examples | V1 posture |
+| --- | --- | --- |
+| Timing buffers | `waitForTimeout(...)` after RUT input masks, Bootstrap Select cascades, grid searches, contract saves | Keep only when tied to known TMS async behavior; prefer named helpers over inline waits |
+| DOM-level fallbacks | `page.evaluate(...)` for save clicks, grid extraction, modal cleanup, selectpicker sync | Accept temporarily when documented as UI workaround; avoid adding new raw fallbacks inline |
+| Grid rescue logic | ID extraction by URL first, then index/grid search by RUT/name/data-key | Keep for V1 because redirects are inconsistent; consolidate patterns gradually |
+| Environment branches | QA/DEMO route, cargo, fecha vencimiento, unidad negocio behavior | Keep explicit; do not hide environment differences behind vague defaults |
+| Helper scope creep | Transportista, Cliente, Vehiculo, Conductor, Contrato, Viaje, prefactura/proforma support in one class | Split only in small slices; a full rewrite is too risky for the V1 gate |
+
+Recommended next stabilization slice:
+
+1. Do not rename the file yet.
+2. Extract only low-risk repeated primitives first:
+   - post-save detection
+   - modal/backdrop cleanup
+   - grid ID extraction
+   - Bootstrap Select synchronization
+3. Keep public method signatures stable so `qa:e2e:finanzas-full` does not need a large rewrite.
+4. After each extraction, run `npm run typecheck` and then the golden PR suite.
+
+Non-goal for V1: converting this helper into a clean architecture module in one pass. That would be arquitecturally nicer, but review-risky and likely to destabilize the gate.
 
 ### Phase 4 — observability and trust
 

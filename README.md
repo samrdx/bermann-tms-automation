@@ -1,6 +1,6 @@
 # Bermann TMS — QA Automation Framework
 
-Framework E2E para el sistema TMS (Transport Management System) de Bermann, construido con Playwright + TypeScript. Cubre los flujo críticos de negocio: entidades, contratos, viajes, finanzas (prefactura/proforma) y última milla.
+Framework E2E para el sistema TMS (Transport Management System) de Bermann, construido con Playwright + TypeScript. Cubre los flujos críticos de negocio: entidades, contratos, viajes, finanzas (prefactura/proforma) y última milla.
 
 | Environment | URL |
 |---|---|
@@ -11,15 +11,13 @@ Framework E2E para el sistema TMS (Transport Management System) de Bermann, cons
 
 ## Quick Overview
 
-| Métrica | Valor |
+| Área | Valor |
 |---|---|
-| Tests automatizados | **20+** |
 | Módulos | **9** (auth, transport, commercial, contracts, planning, monitoring, finanzas, configAdmin, ultimamilla) |
-| Pass Rate | **100%** (Chromium) |
-| Navegadores | Chromium (Firefox, WebKit removidos por eficiencia) |
+| Runtime web | Google Chrome (`channel: 'chrome'`) |
+| Playwright projects | `chromium-qa` / `chromium-demo` (nombres históricos) |
 | Arquitectura | Page Object Model + Domain-Driven Modules |
-| Skills System | **18** skills AI-ready (TMS + SDD) |
-| CI/CD | GitHub Actions — PR Demo pipeline + Ultimamilla batch |
+| CI/CD | GitHub Actions — `QA PR SUITE` |
 | TypeScript | Strict mode, ES Modules, .js extensions |
 
 ---
@@ -29,7 +27,7 @@ Framework E2E para el sistema TMS (Transport Management System) de Bermann, cons
 - Node.js 20+
 - npm
 - Acceso a entornos TMS (QA/Demo)
-- Playwright browsers (`npx playwright install`)
+- Google Chrome para Playwright (`npx playwright install chrome`)
 
 ## Quick Start
 
@@ -46,7 +44,7 @@ cp .env.example .env
 # Editar .env con credenciales TMS (TMS_USERNAME / TMS_PASSWORD)
 
 # 4. Install browser
-npx playwright install chromium
+npx playwright install chrome
 
 # 5. Run smoke test
 npm run qa:smoke:01:transportista
@@ -62,8 +60,8 @@ bermann-tms-automation/
 ├── CLAUDE.md / GEMINI.md            # Full project documentation for AI agents
 ├── CLOUD.md                         # CI/CD architecture decisions
 ├── .github/workflows/
-│   └── tests.yml                    # PR E2E Demo pipeline
-├── .agents/skills/                  # AI agent skills (18 skills)
+│   └── tests.yml                    # QA PR SUITE
+├── .agents/skills/                  # AI agent skills
 │   ├── tms-selectors/               # Selector priority & Confluence
 │   ├── tms-dropdowns/               # Bootstrap Select patterns
 │   ├── tms-atomic-e2e/              # Atomic E2E test patterns
@@ -123,7 +121,19 @@ ENV=DEMO npm run demo:smoke:01:transportista  # Demo
 Todas las pruebas usan el wrapper `scripts/run-playwright-suite.mjs` vía `npm run pw:run`, que maneja:
 - Run locks para evitar colisiones CI
 - Limpieza automática de reportes
-- Proyectos específicos por entorno (chromium-qa, chromium-demo, etc.)
+- Proyectos específicos por entorno (`chromium-qa`, `chromium-demo`, etc.)
+- Runtime real en Google Chrome (`channel: 'chrome'`), aunque los nombres de proyecto sigan usando `chromium-*`
+
+### V1 PR Gate
+
+El gate actual de pull requests está definido en `.github/workflows/tests.yml` como **QA PR SUITE**:
+
+```bash
+npm run typecheck
+npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
+```
+
+CI instala Chrome con `npx playwright install --with-deps chrome`. Los nombres `chromium-qa` y `chromium-demo` se mantienen por compatibilidad histórica; la ejecución real usa Chrome.
 
 ### Smoke Tests (por paso)
 
@@ -193,8 +203,6 @@ ULTIMAMILLA_ENABLE_MUTATION=true npm run qa:smoke:ultimamilla:asignar  # Con mut
 ```bash
 npm run allure:generate:qa          # Generar reporte HTML (QA)
 npm run allure:serve:qa             # Servir reporte en navegador (QA)
-npm run run:all:qa                  # Clean + Test + Generate + Open (QA)
-npm run run:all:demo                # Idem para Demo
 ```
 
 ### Mobile (tmsapp)
@@ -213,12 +221,11 @@ npm run qa:seed:legacy              # base-entities.setup.ts (crea todo el ecosi
 
 ## CI/CD (GitHub Actions)
 
-Pipeline actual: **PR E2E Demo** (`.github/workflows/tests.yml`)
+Workflow actual: **QA PR SUITE** (`.github/workflows/tests.yml`)
 
 | Job | Descripción | Timeout |
 |---|---|---|
-| `e2e-finanzas-full-demo` | Prefactura + Proforma E2E en Demo | 60 min |
-| `ultimamilla-batch-demo` | Batch asignación Chromium + Allure report + GitHub Pages | 120 min |
+| `qa-pr-suite` | TypeScript check + Finanzas Full E2E en QA | 60 min |
 
 ### Secrets Requeridos
 
@@ -226,16 +233,14 @@ Pipeline actual: **PR E2E Demo** (`.github/workflows/tests.yml`)
 |---|---|
 | `TMS_USER` | Usuario TMS |
 | `TMS_PASS` | Password TMS |
-| `BASE_URL` | URL base TMS |
 
 ### Key Features
 
-- **Concurrency groups** — evita colisiones entre ejecuciones paralelas
-- **Allure artifacts** — publicados a GitHub Pages con 14 días de retención
-- **Preflight validation** — verifica scripts antes de ejecutar
-- **Allure pruning** — attachments pesados (>20MB) se eliminan automáticamente
+- **Preflight validation** — verifica referencias a scripts antes de ejecutar
+- **Chrome runtime** — CI instala `chrome` y Playwright ejecuta con `channel: 'chrome'`
+- **Sequential gate** — finanzas full corre con `--workers 1` para reducir colisiones en datos legacy
 
-Para detalle completo: [CLOUD.md](CLOUD.md) y [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)
+Para detalle operativo: [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)
 
 ---
 
@@ -295,7 +300,7 @@ Para detalle completo: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 Este proyecto usa un sistema de skills para garantizar código consistente y correcto:
 
 - **Entry point:** [AGENTS.md](AGENTS.md) — índice de skills y reglas de auto-invocación
-- **Skills:** [.agents/skills/](.agents/skills/) — 18 skills AI-ready
+- **Skills:** [.agents/skills/](.agents/skills/) — skills AI-ready
 - **Context docs:** [CLAUDE.md](CLAUDE.md), [GEMINI.md](GEMINI.md)
 - **Engram (memoria persistente):** Configuración híbrida en `openspec/config.yaml`
 
@@ -323,7 +328,7 @@ Este proyecto usa un sistema de skills para garantizar código consistente y cor
 ```bash
 npm run clean:reports                  # Limpiar reports y resultados
 npm run storage:maintenance            # Limpiar reports + npm cache + list browsers
-npx tsc --noEmit                       # Verificar compilación TypeScript
+npm run typecheck                      # Verificar compilación TypeScript
 ```
 
 Ver [docs/REPO_MAINTENANCE_ROUTINE.md](docs/REPO_MAINTENANCE_ROUTINE.md) para rutina completa.
@@ -358,14 +363,9 @@ ENGRAM_PROJECT=bermann-tms-automation
 
 ## Contributing
 
-### Branch Strategy
-- `main` — Producción
-- `feature/*` — Nuevas funcionalidades
-- `bugfix/*` — Correcciones
-
 ### Before Committing
 ```bash
-npx tsc --noEmit          # TypeScript check
+npm run typecheck         # TypeScript check
 npm run qa:e2e:all        # Run atomic E2E
 git add <specific-files>
 git commit -m "feat(scope): description"  # Conventional commits

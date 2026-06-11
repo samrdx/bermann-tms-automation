@@ -93,10 +93,10 @@ These are the stable facts that current docs should reflect.
 
 - Main web automation stack: Playwright + TypeScript + Winston.
 - Supported web environments: `QA` and `DEMO`.
-- Web browser target: Chromium via Playwright project names like `chromium-qa` and `chromium-demo`.
+- Web browser target: Google Chrome via Playwright `channel: 'chrome'`; project names like `chromium-qa` and `chromium-demo` remain historical.
 - Auth setup project name in `playwright.config.ts`: `Autorización`.
 - Main workflow file: `.github/workflows/tests.yml`.
-- Current workflow runs two Demo PR jobs: `E2E Finanzas Full (DEMO)` and `Ultima Milla Batch (DEMO)`.
+- Current workflow is `QA PR SUITE` and runs `typecheck` + `qa:e2e:finanzas-full` on QA.
 - Skills live in `.agents/skills/`, not `skills/`.
 - The repo also contains mobile automation in `tmsapp/mobile/` using WDIO.
 

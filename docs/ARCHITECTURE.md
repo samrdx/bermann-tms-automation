@@ -829,7 +829,7 @@ test('Test Name', async ({ page }, testInfo) => {
 
 ### Trade-off 3: Skills System vs Traditional Documentation
 
-**What We Chose:** Skills system (AGENTS.md + skills/)
+**What We Chose:** Skills system (`AGENTS.md` + `.agents/skills/`)
 
 **Why:**
 - ✅ AI-readable (JSON-like structure)
@@ -848,15 +848,16 @@ test('Test Name', async ({ page }, testInfo) => {
 
 ## Evolution and Future Directions
 
-### Current State (February 2026)
+### Current State
 
-| Metric | Value |
+| Area | Current durable fact |
 |--------|-------|
-| Automated Tests | 13 |
-| Modules Complete | 5/5 |
-| Pass Rate | 100% |
-| Parallel Workers | 3 |
-| Skills | 5 |
+| Main web stack | Playwright + TypeScript + Winston |
+| Web environments | QA and DEMO |
+| Runtime browser | Google Chrome via Playwright `channel: 'chrome'` |
+| Main PR gate | `QA PR SUITE` |
+| PR gate commands | `npm run typecheck` + `npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1` |
+| Skills location | `.agents/skills/` |
 
 ---
 
@@ -932,29 +933,29 @@ test('Test Name', async ({ page }, testInfo) => {
 
 ## Appendix A: Key Metrics
 
-### Test Execution Performance
+### Test Execution Reference
 
-| Metric | Chromium |
-|--------|----------|
-| Base Entities Setup | 60s |
-| Contract Creation | 20s |
-| Trip Planning | 15s |
-| Trip Assignment | 10s |
-| **Total** | **105s** |
+The current V1 PR gate favors one stable critical path over broad coverage:
+
+```bash
+npm run typecheck
+npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
+```
+
+Execution time and pass rate should be taken from the latest CI run, not hardcoded in this document.
 
 ---
 
-### Code Quality Metrics
+### Code Quality Reference
 
-| Metric | Value |
-|--------|-------|
-| TypeScript Errors | 0 |
-| ESLint Warnings | 0 |
-| Test Pass Rate | 100% |
-| Code Coverage (Unit) | N/A (E2E focus) |
-| Page Objects | 9 |
-| Factories | 5 |
-| Skills | 5 |
+Use repository commands as the source of truth:
+
+```bash
+npm run typecheck
+npm run ci:validate:workflow-scripts
+```
+
+Do not document fixed TypeScript error counts, pass rates, or test counts unless they were verified in the same change.
 
 ---
 
@@ -1020,7 +1021,7 @@ test('Test Name', async ({ page }, testInfo) => {
 
 - [CLAUDE.md](../CLAUDE.md) - Project overview for AI assistants
 - [AGENTS.md](../AGENTS.md) - Skills system index
-- [skills/](../skills/) - Individual skill documentation
+- [.agents/skills/](../.agents/skills/) - Individual skill documentation
 - [README.md](../README.md) - Getting started guide
 
 ### External Resources
