@@ -311,12 +311,7 @@ export class AsignarPage extends BasePage {
     // FIX FIREFOX: Usar dispatchEvent en lugar de evaluate.click() 
     await btnGuardar.dispatchEvent('click');
     
-    // Esperar si aparece el bootbox
-    const btnConfirmar = this.page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
-    if (await btnConfirmar.isVisible({ timeout: 4000 }).catch(() => false)) {
-      logger.info('⚠️ Aceptando modal de confirmación en Guardar...');
-      await btnConfirmar.dispatchEvent('click');
-    }
+    await this.confirmarAsignacionSiApareceDialogo();
 
     // Wait for the modal or saving indicator to disappear or redirect to happen
     await Promise.all([
@@ -328,6 +323,15 @@ export class AsignarPage extends BasePage {
     
     // Additional wait to be safe, as sometimes UI is ready but DB record takes a sec
     await this.page.waitForTimeout(3000);
+  }
+
+  async confirmarAsignacionSiApareceDialogo(): Promise<void> {
+    const btnConfirmar = this.page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
+    if (await btnConfirmar.isVisible({ timeout: 4000 }).catch(() => false)) {
+      logger.info('⚠️ Aceptando diálogo de confirmación en asignación...');
+      await btnConfirmar.dispatchEvent('click');
+      await this.page.waitForTimeout(500);
+    }
   }
 
   async assignViaje(nroViaje: string, data: AsignacionData): Promise<boolean> {

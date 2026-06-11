@@ -12,6 +12,12 @@ import { NamingHelper } from '../../../src/utils/NamingHelper.js';
 const logger = createLogger('FinanzasPrefacturaProformaE2E');
 const PROFORMA_ID_REGEX = /^\d+$/;
 
+/**
+ * Flujo crítico happy path para el gate principal de PR en V1.
+ *
+ * Esta suite genera su propio ecosistema por UI automatizada y valida la cadena:
+ * entidades -> contratos -> viaje -> asignación -> finalización -> prefactura -> proforma.
+ */
 test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
   test.setTimeout(720000);
 
@@ -23,7 +29,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
     await allure.story('Finalizar viaje -> Prefactura -> Proforma (mismo viaje)');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
 
-    logger.fase(1, 'Preparacion de Datos (API)');
+    logger.fase(1, 'Preparación de ecosistema (UI seed)');
     const api = new TmsApiClient(page);
     await api.initialize();
 
@@ -60,11 +66,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
       vehiculoPrincipal: patente,
       conductor,
     });
-
-    const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar")').first();
-    if (await btnConfirmar.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await btnConfirmar.click();
-    }
+    await asignarPage.confirmarAsignacionSiApareceDialogo();
 
     const monitoreo = new MonitoreoPage(page);
     await monitoreo.navegar();

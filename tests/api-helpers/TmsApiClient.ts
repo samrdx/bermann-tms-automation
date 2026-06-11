@@ -16,6 +16,12 @@ import { NamingHelper } from '../../src/utils/NamingHelper.js';
 const STRICT_DROPDOWN_WAIT_MS = 15000;
 
 
+/**
+ * Helper histórico de seed por UI automatizada.
+ *
+ * A pesar del nombre, esta clase no crea entidades por API backend.
+ * Navega formularios TMS y genera datos por UI usando Playwright.
+ */
 export class TmsApiClient {
 
   private baseUrl: string;
