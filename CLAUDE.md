@@ -164,6 +164,7 @@ npm run show-report:qa
 - `playwright.config.ts` selects base URL from `ENV`.
 - The auth setup project is named `Autorización`.
 - Main test projects are `chromium-qa` and `chromium-demo`.
+- Runtime browser is Google Chrome via `channel: 'chrome'`; `chromium-*` project names are historical.
 - Config setup projects include `config-smoke-chromium`, `config-fase1-chromium`, and `config-fase2-chromium`.
 - Browser artifacts are retained on failure.
 
@@ -175,8 +176,8 @@ Current workflow file: `.github/workflows/tests.yml`
 
 Current pull request coverage:
 
-- `E2E Finanzas Full (DEMO)`
-- `Ultima Milla Batch (DEMO)`
+- `npm run typecheck`
+- `npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1`
 
 Do not document older CI behavior unless it still exists in `.github/workflows/`.
 
