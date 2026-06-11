@@ -102,14 +102,15 @@ test.describe("[V01] Viajes - Planificar", () => {
 			destinoManual: isDemo ? "Divisa" : "CXP ANTOFAGASTA",
 		};
 
-		const setupConfigPath = DataPathHelper.getSetupConfigDataPath(testInfo);
 		let setupConfig: any = {};
-		if (fs.existsSync(setupConfigPath)) {
+		const setupConfigPaths = DataPathHelper.getSetupConfigDataCandidatePaths(testInfo);
+		const setupConfigPath = setupConfigPaths.find((candidatePath) => fs.existsSync(candidatePath));
+		if (setupConfigPath) {
 			setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, "utf-8"));
 			logger.info(`📦 Setup config detectado: ${setupConfigPath}`);
 		} else {
 			logger.warn(
-				`⚠️ Setup config no encontrado en ${setupConfigPath}. Se usarán defaults.`,
+				`⚠️ Setup config no encontrado en ninguna ruta candidata. Se usarán defaults.`,
 			);
 		}
 

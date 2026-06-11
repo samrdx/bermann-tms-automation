@@ -16,6 +16,15 @@ import { NamingHelper } from '../../src/utils/NamingHelper.js';
 const STRICT_DROPDOWN_WAIT_MS = 15000;
 
 
+/**
+ * Helper histórico de seed por UI automatizada.
+ *
+ * A pesar del nombre, esta clase no crea entidades por API backend.
+ * Navega formularios TMS y genera datos por UI usando Playwright.
+ *
+ * TODO V1+: evaluar rename a un nombre que refleje su rol real como helper
+ * de construcción de escenarios por UI.
+ */
 export class TmsApiClient {
 
   private baseUrl: string;
@@ -37,8 +46,27 @@ export class TmsApiClient {
 
   async initialize(): Promise<void> {
 
-    logger.info(`✅ TmsApiClient inicializado`);
+    logger.info(`✅ Helper de seed por UI inicializado | entorno=${process.env.ENV || 'QA'} | baseUrl=${this.baseUrl}`);
 
+  }
+
+  private logInicioSeed(entidad: string, detalle: string): void {
+    logger.info(`🧱 Iniciando creación de ${entidad}: ${detalle}`);
+  }
+
+  private logResultadoSeed(entidad: string, detalle: string): void {
+    logger.success(`${entidad} creado correctamente: ${detalle}`);
+  }
+
+  private registrarViajePlanificado(nroViaje: string, clienteNombre: string, detalle: string): string {
+    this.logResultadoSeed('Viaje', `nro="${nroViaje}" | cliente="${clienteNombre}" | ${detalle}`);
+    entityTracker.register({
+      type: 'Viaje',
+      name: nroViaje,
+      asociado: clienteNombre,
+      estado: 'PLANIFICADO'
+    });
+    return nroViaje;
   }
 
   private generateRandomId(): string {
@@ -202,7 +230,7 @@ export class TmsApiClient {
   async createTransportista(nombre: string, documento: string): Promise<string> {
     const rut = documento; // Use the provided documento for form filling and later search
 
-    logger.info(`🚀 UI: Creando Transportista [${nombre}] RUT: [${rut}]`);
+    this.logInicioSeed('transportista', `nombre="${nombre}" | rut="${rut}"`);
 
     await this.page.goto(`${this.baseUrl}/transportistas/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -452,7 +480,7 @@ export class TmsApiClient {
       expectedTokens: [nombre],
     });
 
-    logger.info(`✅ Transportista creado: ${nombre} | ID: ${id}`);
+    this.logResultadoSeed('Transportista', `nombre="${nombre}" | id=${id}`);
     entityTracker.register({ type: 'Transportista', name: nombre, id: String(id) });
     return String(id);
   }
@@ -460,7 +488,7 @@ export class TmsApiClient {
   // --- 2. CLIENTE ---
   async createCliente(nombre: string): Promise<string> {
     const rut = generateValidChileanRUT();
-    logger.info(`🚀 UI: Creando Cliente [${nombre}] RUT: [${rut}]`);
+    this.logInicioSeed('cliente', `nombre="${nombre}" | rut="${rut}"`);
 
     await this.page.goto(`${this.baseUrl}/clientes/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -555,6 +583,7 @@ export class TmsApiClient {
       expectedId: id,
       expectedTokens: [nombre],
     });
+    this.logResultadoSeed('Cliente', `nombre="${nombre}" | id=${id}`);
     entityTracker.register({ type: 'Cliente', name: nombre, id: String(id) });
     return id;
   }
@@ -1056,7 +1085,7 @@ export class TmsApiClient {
 
 
 
-    logger.info(`🚛 UI: Creando Vehículo [${patente}] para Transportista: ${transportistaNombre}`);
+    this.logInicioSeed('vehículo', `patente="${patente}" | transportista="${transportistaNombre}"`);
 
 
 
@@ -1258,7 +1287,7 @@ export class TmsApiClient {
       expectedTokens: [patente, transportistaNombre],
     });
 
-    logger.info(`✅ Vehículo creado: ${patente} | ID: ${vehiculoId}`);
+    this.logResultadoSeed('Vehículo', `patente="${patente}" | id=${vehiculoId}`);
     entityTracker.register({
       type: 'Vehiculo',
       name: patente,
@@ -1287,7 +1316,7 @@ export class TmsApiClient {
 
     const clave = `pass${Math.floor(Math.random() * 100000)}`;
 
-    logger.info(`👨‍✈️ UI: Creando Conductor [${nombre}] para Transportista: ${transportistaNombre}`);
+    this.logInicioSeed('conductor', `nombre="${conductorDisplayName}" | transportista="${transportistaNombre}"`);
 
     await this.page.goto(`${this.baseUrl}/conductores/crear`);
 
@@ -1405,7 +1434,8 @@ export class TmsApiClient {
     });
 
     const currentUrl = this.page.url();
-    logger.info(`✅ Conductor guardado. URL actual: ${currentUrl}. ID: ${conductorId}`);
+    this.logResultadoSeed('Conductor', `nombre="${conductorDisplayName}" | id=${conductorId}`);
+    logger.info(`📍 Resultado de guardado del conductor | url="${currentUrl}" | id=${conductorId}`);
     entityTracker.register({
       type: 'Conductor',
       name: conductorDisplayName,
@@ -2105,16 +2135,22 @@ export class TmsApiClient {
   }
 
   async createContratoCosto(transportistaNombre: string, transportistaId?: string): Promise<string> {
-    return await this.fillGenericContract('1', transportistaNombre, 'contrato-transportista_id', transportistaId);
+    this.logInicioSeed('contrato de costo', `transportista="${transportistaNombre}"${transportistaId ? ` | id=${transportistaId}` : ''}`);
+    const contractId = await this.fillGenericContract('1', transportistaNombre, 'contrato-transportista_id', transportistaId);
+    this.logResultadoSeed('Contrato de costo', `transportista="${transportistaNombre}" | id=${contractId}`);
+    return contractId;
   }
 
   async createContratoVenta(clienteNombre: string, clienteId?: string): Promise<string> {
-    return await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id', clienteId);
+    this.logInicioSeed('contrato de venta', `cliente="${clienteNombre}"${clienteId ? ` | id=${clienteId}` : ''}`);
+    const contractId = await this.fillGenericContract('2', clienteNombre, 'contrato-cliente_id', clienteId);
+    this.logResultadoSeed('Contrato de venta', `cliente="${clienteNombre}" | id=${contractId}`);
+    return contractId;
   }
 
   // --- 6. PLANIFICAR VIAJE (FIX CARGA & AUTO-HEALING) ---
   async createViaje(clienteNombre: string, nroViaje: string, clienteId?: string) {
-    logger.info(`🚚 UI: Creando Viaje [${nroViaje}] para Cliente [${clienteNombre}]${clienteId ? ` (ID: ${clienteId})` : ''}`);
+    this.logInicioSeed('viaje', `nro="${nroViaje}" | cliente="${clienteNombre}"${clienteId ? ` | id=${clienteId}` : ''}`);
 
     await this.page.goto(`${this.baseUrl}/viajes/crear`);
     await this.page.waitForLoadState('networkidle');
@@ -2465,13 +2501,7 @@ export class TmsApiClient {
     const toastExacto = this.page.getByText('Viaje Creado con éxito', { exact: true });
     if (await toastExacto.isVisible({ timeout: 5000 }).catch(() => false)) {
       logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast exacto)`);
-      entityTracker.register({
-        type: 'Viaje',
-        name: nroViaje,
-        asociado: clienteNombre,
-        estado: 'PLANIFICADO'
-      });
-      return nroViaje;
+      return this.registrarViajePlanificado(nroViaje, clienteNombre, 'confirmado por toast exacto');
     }
 
     // Estrategia 2: Toast o alerta parcial
@@ -2479,8 +2509,7 @@ export class TmsApiClient {
     if (await toastAlt.isVisible({ timeout: 2000 }).catch(() => false)) {
       const text = await toastAlt.textContent().catch(() => '');
       logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast alt: "${text?.trim().substring(0, 60)}")`);
-      entityTracker.register({ type: 'Viaje', name: nroViaje });
-      return nroViaje;
+      return this.registrarViajePlanificado(nroViaje, clienteNombre, `confirmado por toast alternativo: ${text?.trim().substring(0, 60) || 'sin texto'}`);
     }
 
     // Verificar si hay error visible ANTES de ir a la grilla
@@ -2504,13 +2533,7 @@ export class TmsApiClient {
     // Si la URL cambió a /viajes/asignar, el viaje se creó correctamente
     if (currentUrl.includes('/viajes/asignar') || currentUrl.includes('/viajes/index')) {
       logger.info(`✅ Viaje [${nroViaje}] creado (redirect a ${currentUrl})`);
-      entityTracker.register({
-        type: 'Viaje',
-        name: nroViaje,
-        asociado: clienteNombre,
-        estado: 'PLANIFICADO'
-      });
-      return nroViaje;
+      return this.registrarViajePlanificado(nroViaje, clienteNombre, `confirmado por redirección a ${currentUrl}`);
     }
 
     // Estrategia 3.5: Si seguimos en /crear, reintentar guardado una vez con click DOM nativo
@@ -2539,15 +2562,13 @@ export class TmsApiClient {
       const retryToast = this.page.getByText('Viaje Creado con éxito', { exact: true });
       if (await retryToast.isVisible({ timeout: 4000 }).catch(() => false)) {
         logger.info(`✅ Viaje [${nroViaje}] creado exitosamente (toast exacto en reintento)`);
-        entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
-        return nroViaje;
+        return this.registrarViajePlanificado(nroViaje, clienteNombre, 'confirmado por toast exacto en reintento');
       }
 
       const retryUrl = this.page.url();
       if (retryUrl.includes('/viajes/asignar') || retryUrl.includes('/viajes/index')) {
         logger.info(`✅ Viaje [${nroViaje}] creado (redirect en reintento a ${retryUrl})`);
-        entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
-        return nroViaje;
+        return this.registrarViajePlanificado(nroViaje, clienteNombre, `confirmado por redirección en reintento a ${retryUrl}`);
       }
     }
 
@@ -2589,8 +2610,7 @@ export class TmsApiClient {
       const viajeRow = this.page.locator(`text="${nroViaje}"`);
       if (await viajeRow.isVisible({ timeout: 3000 }).catch(() => false)) {
         logger.info(`✅ Viaje [${nroViaje}] encontrado en grilla (intento ${attempt}, texto exacto)`);
-        entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
-        return nroViaje;
+        return this.registrarViajePlanificado(nroViaje, clienteNombre, `confirmado en grilla de asignación por texto exacto en intento ${attempt}`);
       }
 
       // Verificar por contenido de fila
@@ -2604,8 +2624,7 @@ export class TmsApiClient {
         }
         if (foundExact) {
           logger.info(`✅ Viaje [${nroViaje}] confirmado en grilla (intento ${attempt}, ${rowCount} filas)`);
-          entityTracker.register({ type: 'Viaje', name: nroViaje, asociado: clienteNombre, estado: 'PLANIFICADO' });
-          return nroViaje;
+          return this.registrarViajePlanificado(nroViaje, clienteNombre, `confirmado en grilla de asignación con ${rowCount} filas visibles en intento ${attempt}`);
         }
       }
 

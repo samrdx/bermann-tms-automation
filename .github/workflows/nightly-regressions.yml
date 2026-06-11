@@ -1,0 +1,66 @@
+name: Nightly QA Regressions
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-qa-regressions
+  cancel-in-progress: true
+
+jobs:
+  nightly-qa-regressions:
+    name: Nightly QA Regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preflight - Validate workflow script references
+        run: npm run ci:validate:workflow-scripts
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chrome
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Run QA regression ops
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
+          CI: true
+          ENV: QA
+        run: npm run qa:regression:ops
+
+      - name: Run QA regression finanzas
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
+          CI: true
+          ENV: QA
+        run: npm run qa:regression:finanzas
+
+      - name: Run QA regression ultima milla
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
+          ULTIMAMILLA_ENABLE_MUTATION: 'true'
+          CI: true
+          ENV: QA
+        run: npm run qa:regression:ultimamilla

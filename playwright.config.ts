@@ -76,8 +76,9 @@ export default defineConfig({
      */
     viewport: { width: 1920, height: 1080 },
 
-    /* Usar Chrome del sistema en lugar de Chromium bundleado.
-     * Necesario en CachyOS/Arch donde Playwright no tiene soporte oficial. */
+    /* Verdad V1 del proyecto: correr sobre Google Chrome (channel: 'chrome').
+     * Mantenemos los nombres históricos de proyecto `chromium-*` por compatibilidad
+     * con scripts y workflow mientras estabilizamos la migración semántica. */
     channel: 'chrome',
 
     actionTimeout: (process.env.CI || ENV === 'DEMO') ? 30 * 1000 : 10 * 1000,
@@ -149,6 +150,8 @@ export default defineConfig({
     },
 
     // --- MAIN TEST PROJECTS ---
+    // Nota: los nombres `chromium-*` se conservan temporalmente por compatibilidad,
+    // pero la ejecución real usa channel: 'chrome'.
     {
       name: `chromium-${envName}`,
       testMatch: [

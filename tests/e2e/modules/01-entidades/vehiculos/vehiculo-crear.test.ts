@@ -63,11 +63,15 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
 
             const fallbackCapacidad = isDemoMode() ? '1 a 12 TON' : '1 a 12 TON';
             let capacidad = fallbackCapacidad;
-            const setupConfigPath = DataPathHelper.getSetupConfigDataPath(testInfo);
-            if (fs.existsSync(setupConfigPath)) {
-                const setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, 'utf-8'));
-                if (setupConfig?.capacidad?.nombre) {
-                    capacidad = setupConfig.capacidad.nombre;
+            const setupConfigPaths = DataPathHelper.getSetupConfigDataCandidatePaths(testInfo);
+            for (const setupConfigPath of setupConfigPaths) {
+                if (fs.existsSync(setupConfigPath)) {
+                    const setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, 'utf-8'));
+                    if (setupConfig?.capacidad?.nombre) {
+                        capacidad = setupConfig.capacidad.nombre;
+                    }
+                    logger.info(`📦 Configuración de seed detectada: ${setupConfigPath}`);
+                    break;
                 }
             }
 

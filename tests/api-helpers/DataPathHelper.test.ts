@@ -59,7 +59,7 @@ test('returns ordered candidate metadata keyed by browser env and run id', () =>
 
     const candidates = DataPathHelper.getLegacyOperationalDataCandidates(createTestInfo('chromium') as never);
 
-    assert.equal(candidates.length, 2);
+    assert.equal(candidates.length, 4);
     assert.deepEqual(
         candidates.map(({ source, isPrimary, priority, lookupKey, seedCommand }) => ({
             isPrimary,
@@ -81,13 +81,29 @@ test('returns ordered candidate metadata keyed by browser env and run id', () =>
                 lookupKey: 'demo:batch-7',
                 priority: 1,
                 seedCommand: 'npm run demo:regression:entities',
+                source: 'entities'
+            },
+            {
+                isPrimary: false,
+                lookupKey: 'demo:batch-7',
+                priority: 2,
+                seedCommand: 'npm run demo:regression:entities',
+                source: 'base'
+            },
+            {
+                isPrimary: false,
+                lookupKey: 'demo:batch-7',
+                priority: 3,
+                seedCommand: 'npm run demo:regression:entities',
                 source: 'base'
             }
         ]
     );
 
-    assert.match(candidates[0].path, /legacy-entities-data-demo-batch-7\.json$/);
-    assert.match(candidates[1].path, /legacy-base-entities-data-demo-batch-7\.json$/);
+    assert.match(candidates[0].path, /smoke-seed-data-demo-batch-7\.json$/);
+    assert.match(candidates[1].path, /legacy-entities-data-demo-batch-7\.json$/);
+    assert.match(candidates[2].path, /e2e-seed-data-demo-batch-7\.json$/);
+    assert.match(candidates[3].path, /legacy-base-entities-data-demo-batch-7\.json$/);
     assert.deepEqual(
         DataPathHelper.getLegacyOperationalDataCandidatePaths(createTestInfo('chromium') as never),
         candidates.map((candidate) => candidate.path)
