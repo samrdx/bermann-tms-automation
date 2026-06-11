@@ -19,6 +19,7 @@ export interface LegacyOperationalDataLookupContext {
 export interface LegacyOperationalDataCandidate extends LegacyOperationalDataLookupContext {
     filename: string;
     isPrimary: boolean;
+    naming: 'v1' | 'legacy';
     path: string;
     priority: number;
     source: LegacyOperationalDataSource;
@@ -64,6 +65,34 @@ export class DataPathHelper {
         return path.join(this.ensureDataDir(), filename);
     }
 
+    private static buildSetupConfigFilename(env: string, naming: 'v1' | 'legacy' = 'v1'): string {
+        return naming === 'v1'
+            ? `config-seed-data-${env}.json`
+            : `setup-config-data-${env}.json`;
+    }
+
+    private static buildLegacyEntityFilename(env: string, runIdSuffix: string, naming: 'v1' | 'legacy' = 'v1'): string {
+        return naming === 'v1'
+            ? `smoke-seed-data-${env}${runIdSuffix}.json`
+            : `legacy-entities-data-${env}${runIdSuffix}.json`;
+    }
+
+    private static buildLegacyBaseFilename(env: string, runIdSuffix: string, naming: 'v1' | 'legacy' = 'v1'): string {
+        return naming === 'v1'
+            ? `e2e-seed-data-${env}${runIdSuffix}.json`
+            : `legacy-base-entities-data-${env}${runIdSuffix}.json`;
+    }
+
+    private static buildCargaSetupFilename(env?: string, naming: 'v1' | 'legacy' = 'v1'): string {
+        if (!env) {
+            return naming === 'v1' ? 'carga-seed-data.json' : 'carga_setup_data.json';
+        }
+
+        return naming === 'v1'
+            ? `carga-seed-data-${env}.json`
+            : `carga_setup_data-${env}.json`;
+    }
+
     /**
      * Map project names to consistent browser identifiers
      * This ensures that base-entities-chromium and chromium use the same data file
@@ -78,20 +107,27 @@ export class DataPathHelper {
      * Get browser-specific config setup data path.
      *
      * @param testInfo - Playwright TestInfo object containing project metadata
-     * @returns Absolute path like: /path/to/project/playwright/.data/setup-config-data-qa.json
+     * @returns Absolute path like: /path/to/project/playwright/.data/config-seed-data-qa.json
      *
      * @example
      * ```typescript
      * test('My test', async ({ page }, testInfo) => {
      *   const dataPath = DataPathHelper.getSetupConfigDataPath(testInfo);
-     *   // Result: /project/playwright/.data/setup-config-data-qa.json
+     *   // Result: /project/playwright/.data/config-seed-data-qa.json
      * });
      * ```
      */
     static getSetupConfigDataPath(testInfo: TestInfo): string {
         const env = this.getEnvName();
-        const filename = `setup-config-data-${env}.json`;
-        return this.buildDataPath(filename);
+        return this.buildDataPath(this.buildSetupConfigFilename(env, 'v1'));
+    }
+
+    static getSetupConfigDataCandidatePaths(testInfo: TestInfo): string[] {
+        const env = this.getEnvName();
+        return [
+            this.buildDataPath(this.buildSetupConfigFilename(env, 'v1')),
+            this.buildDataPath(this.buildSetupConfigFilename(env, 'legacy')),
+        ];
     }
 
     /**
@@ -110,7 +146,7 @@ export class DataPathHelper {
     static getLegacyEntityDataPath(testInfo: TestInfo): string {
         const env = this.getEnvName();
         const runIdSuffix = this.getLegacyRunIdSuffix();
-        return this.buildDataPath(`legacy-entities-data-${env}${runIdSuffix}.json`);
+        return this.buildDataPath(this.buildLegacyEntityFilename(env, runIdSuffix, 'v1'));
     }
 
     /**
@@ -120,14 +156,14 @@ export class DataPathHelper {
     static getLegacyBaseDataPath(testInfo: TestInfo): string {
         const env = this.getEnvName();
         const runIdSuffix = this.getLegacyRunIdSuffix();
-        return this.buildDataPath(`legacy-base-entities-data-${env}${runIdSuffix}.json`);
+        return this.buildDataPath(this.buildLegacyBaseFilename(env, runIdSuffix, 'v1'));
     }
 
     /**
      * Selector for operational tests (contratos/viajes/prefactura/ultimamilla).
      * LEGACY_DATA_SOURCE options:
-     * - entities (default): consume legacy-entities-data-*.json
-     * - base: consume legacy-base-entities-data-*.json
+     * - entities (default): consume smoke-seed-data-* (fallback legacy-entities-data-*)
+     * - base: consume e2e-seed-data-* (fallback legacy-base-entities-data-*)
      * Optional LEGACY_RUN_ID is honored by both sources.
      */
     static getLegacyOperationalDataPath(testInfo: TestInfo): string {
@@ -183,20 +219,28 @@ export class DataPathHelper {
             ? ['base', 'entities']
             : ['entities', 'base'];
 
-        return orderedSources.map((candidateSource, index) => {
-            const filename = candidateSource === 'base'
-                ? `legacy-base-entities-data-${context.env}${context.runIdSuffix}.json`
-                : `legacy-entities-data-${context.env}${context.runIdSuffix}.json`;
+        const namingOrder: Array<'v1' | 'legacy'> = ['v1', 'legacy'];
+        const candidates: LegacyOperationalDataCandidate[] = [];
 
-            return {
-                ...context,
-                filename,
-                isPrimary: index === 0,
-                path: this.buildDataPath(filename),
-                priority: index,
-                source: candidateSource
-            };
-        });
+        for (const candidateSource of orderedSources) {
+            for (const naming of namingOrder) {
+                const filename = candidateSource === 'base'
+                    ? this.buildLegacyBaseFilename(context.env, context.runIdSuffix, naming)
+                    : this.buildLegacyEntityFilename(context.env, context.runIdSuffix, naming);
+
+                candidates.push({
+                    ...context,
+                    filename,
+                    isPrimary: candidates.length === 0,
+                    naming,
+                    path: this.buildDataPath(filename),
+                    priority: candidates.length,
+                    source: candidateSource
+                });
+            }
+        }
+
+        return candidates;
     }
 
     /**
@@ -213,10 +257,10 @@ export class DataPathHelper {
 
     /**
      * Canonical setup artifact path requested by the Carga seeding flow.
-     * Output filename is fixed as "carga_setup_data.json".
+     * Output filename is fixed as "carga-seed-data.json".
      */
     static getCargaSetupDataPath(): string {
-        return this.buildDataPath('carga_setup_data.json');
+        return this.buildDataPath(this.buildCargaSetupFilename(undefined, 'v1'));
     }
 
     /**
@@ -225,7 +269,7 @@ export class DataPathHelper {
      */
     static getScopedCargaSetupDataPath(testInfo: TestInfo): string {
         const env = this.getEnvName();
-        return this.buildDataPath(`carga_setup_data-${env}.json`);
+        return this.buildDataPath(this.buildCargaSetupFilename(env, 'v1'));
     }
 
     /**

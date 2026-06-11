@@ -145,6 +145,8 @@ test('throws actionable missing-data error when no candidate is available', () =
             assert.match(error.message, /lookupKey=demo:missing-data/);
             assert.match(error.message, /requested=base-entities/);
             assert.match(error.message, /Seed prerequisite: npm run demo:seed:legacy/);
+            assert.match(error.message, /e2e-seed-data-demo-missing-data\.json/);
+            assert.match(error.message, /smoke-seed-data-demo-missing-data\.json/);
             assert.match(error.message, /legacy-base-entities-data-demo-missing-data\.json/);
             assert.match(error.message, /legacy-entities-data-demo-missing-data\.json/);
             return true;
