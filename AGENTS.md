@@ -33,6 +33,10 @@ These are the repo-local skills currently present under `.agents/skills/`.
 | --- | --- |
 | `jira-ticket-writer` | Jira-ready QA automation stories and subtasks |
 | `jql-tickets` | Ready-to-test JQL query |
+| `jira-qa-format` | Jira QA issue type formats (Test Set, Historia, Test Case) |
+| `atlassian-mcp` | Atlassian MCP integration for Jira and Confluence |
+| `jira-integration` | Jira REST API patterns for issue CRUD and search |
+| `jira-automation` | Jira Automation rules, sprint management, workflows |
 | `playwright-cli` | Browser automation from the CLI |
 | `skill-creator` | Creating or evolving repo-local skills |
 
@@ -70,6 +74,10 @@ Load the relevant skill before generating code.
 | Creating Jira QA automation tickets | `jira-ticket-writer` |
 | Getting ready-to-test ticket JQL | `jql-tickets` |
 | Running browser automation manually | `playwright-cli` |
+| Creating or documenting Jira QA issue formats | `jira-qa-format` |
+| Using Atlassian Jira/Confluence MCP | `atlassian-mcp` |
+| Doing Jira REST API work | `jira-integration` |
+| Setting up Jira Automation rules | `jira-automation` |
 | Starting or continuing SDD work | matching `sdd-*` skill |
 
 ---
