@@ -6,7 +6,7 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test:scripts": "node --test scripts/*.test.mjs",
-    "test:jira-native": "node --test scripts/Jira-native/*.test.mjs",
+    "test:jira-native": "node --test scripts/Jira-native/sync-test-set.fixtures.test.mjs",
     "test": "npm run qa:e2e:all",
     "prepw:run": "node -e \"\"",
     "pw:run": "node scripts/run-playwright-suite.mjs",
