@@ -1,0 +1,19 @@
+{
+  "parentKey": "TMSPROD-2999",
+  "parentSummary": "Validar deduplicacion de criterios",
+  "testSetKey": "QA-2999",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Criterios de Aceptacion" }] },
+      { "type": "bulletList", "content": [
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "El sistema permite filtrar resultados por cliente." }] }] },
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "El sistema permite filtrar resultados por cliente." }] }] },
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "El sistema permite limpiar filtros aplicados." }] }] }
+      ] }
+    ]
+  },
+  "currentDescription": { "type": "doc", "version": 1, "content": [{ "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Listado" }] }, { "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "TC1: Filtrar resultados por cliente" }] }] }] }] },
+  "expectedDescription": { "type": "doc", "version": 1, "content": [{ "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Listado" }] }, { "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "TC1: Filtrar resultados por cliente" }] }] }] }] }
+}

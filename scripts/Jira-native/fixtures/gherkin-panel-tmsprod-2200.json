@@ -1,0 +1,23 @@
+{
+  "parentKey": "TMSPROD-2200",
+  "parentSummary": "Filtro por numero de viaje en Listado de Viajes",
+  "testSetKey": "QA-2200",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Escenarios" }] },
+      { "type": "panel", "attrs": { "panelType": "info" }, "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ingresa numero de viaje existente Then el listado muestra solo viajes asociados" }] }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ingresa numero de viaje inexistente Then el listado muestra resultado vacio" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ingresa numero parcial Then el sistema filtra coincidencias visibles" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When limpia el filtro aplicado Then el listado vuelve a mostrar todos los viajes" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When aplica filtro y actualiza la vista Then el numero consultado se mantiene" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ingresa espacios alrededor del numero Then el sistema busca ignorando espacios" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ingresa letras en el filtro Then el sistema no retorna viajes invalidos" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When combina numero de viaje con estado Then el listado respeta ambos filtros" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When exporta resultados filtrados Then el archivo contiene solo viajes filtrados" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ordena la grilla filtrada Then el filtro por numero se conserva" }] },
+      { "type": "paragraph", "content": [{ "type": "text", "text": "Given usuario en pantalla Listado de Viajes When ingresa numero de viaje existente Then el listado muestra solo viajes asociados" }] }
+    ]
+  }
+}

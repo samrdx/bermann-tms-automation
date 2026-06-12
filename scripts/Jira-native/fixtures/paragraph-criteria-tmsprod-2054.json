@@ -1,0 +1,19 @@
+{
+  "parentKey": "TMSPROD-2054",
+  "parentSummary": "Crear y modificar reglas de temperatura de carga",
+  "testSetKey": "QA-2054",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Criterios de Aceptacion" }] },
+      { "type": "orderedList", "content": [
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Permite crear una regla de temperatura de carga con datos obligatorios completos." }] }] },
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Permite modificar el nombre de una regla existente." }] }] },
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Rechaza una regla sin temperatura minima obligatoria." }] }] },
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Valida que la temperatura maxima sea mayor que la minima." }] }] },
+        { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Muestra la regla creada en el listado de temperaturas de carga." }] }] }
+      ] }
+    ]
+  }
+}

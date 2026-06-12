@@ -53,6 +53,7 @@ allure-report-*/
 tmp/
 temp/
 *.tmp
+temp-*.json
 playwright/.data/
 
 # Test artifacts
@@ -84,3 +85,4 @@ tmsapp/mobile/artifacts/
 .atl/
 .pi-lens/
 .playwright-cli/
+skills-lock.json

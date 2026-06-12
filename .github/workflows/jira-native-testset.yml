@@ -1,0 +1,209 @@
+name: Jira Native Test Set Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      parentKey:
+        description: Jira parent issue key, for example TMSPROD-2177
+        required: true
+        type: string
+      mode:
+        description: Execution mode
+        required: true
+        default: full
+        type: choice
+        options:
+          - full
+          - dry-run
+          - validate-only
+      testSetKey:
+        description: Existing Test Set key, required only for validate-only
+        required: false
+        type: string
+  repository_dispatch:
+    types:
+      - jira-testset-ready
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jira-native-testset-${{ github.event.inputs.parentKey || github.event.client_payload.parentKey || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  create-validate-sync:
+    name: Create, validate, and sync Jira Test Set
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      JIRA_URL: ${{ secrets.JIRA_URL || secrets.JIRA_BASE_URL }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path -LiteralPath 'package-lock.json') {
+            npm ci
+          } else {
+            npm install
+          }
+
+      - name: Resolve trigger inputs
+        id: inputs
+        shell: pwsh
+        env:
+          DISPATCH_PARENT_KEY: ${{ github.event.client_payload.parentKey }}
+          DISPATCH_MODE: ${{ github.event.client_payload.mode }}
+          DISPATCH_TEST_SET_KEY: ${{ github.event.client_payload.testSetKey }}
+          MANUAL_PARENT_KEY: ${{ inputs.parentKey }}
+          MANUAL_MODE: ${{ inputs.mode }}
+          MANUAL_TEST_SET_KEY: ${{ inputs.testSetKey }}
+        run: |
+          $parentKey = if ($env:MANUAL_PARENT_KEY) { $env:MANUAL_PARENT_KEY } else { $env:DISPATCH_PARENT_KEY }
+          $mode = if ($env:MANUAL_MODE) { $env:MANUAL_MODE } elseif ($env:DISPATCH_MODE) { $env:DISPATCH_MODE } else { 'full' }
+          $testSetKey = if ($env:MANUAL_TEST_SET_KEY) { $env:MANUAL_TEST_SET_KEY } else { $env:DISPATCH_TEST_SET_KEY }
+
+          $parentKey = ($parentKey ?? '').Trim().ToUpperInvariant()
+          $mode = ($mode ?? 'full').Trim().ToLowerInvariant()
+          $testSetKey = ($testSetKey ?? '').Trim().ToUpperInvariant()
+
+          if (-not $parentKey) { throw 'Missing parentKey. Send workflow_dispatch input parentKey or repository_dispatch client_payload.parentKey.' }
+          if ($mode -notin @('full', 'dry-run', 'validate-only')) { throw "Unsupported mode '$mode'. Use full, dry-run, or validate-only." }
+          if ($mode -eq 'validate-only' -and -not $testSetKey) { throw 'validate-only mode requires testSetKey.' }
+
+          "parent_key=$parentKey" >> $env:GITHUB_OUTPUT
+          "mode=$mode" >> $env:GITHUB_OUTPUT
+          "test_set_key=$testSetKey" >> $env:GITHUB_OUTPUT
+
+      - name: Prepare Jira credentials
+        shell: pwsh
+        run: |
+          if (-not $env:JIRA_URL) { throw 'Missing JIRA_URL or JIRA_BASE_URL secret.' }
+          if (-not $env:JIRA_EMAIL) { throw 'Missing JIRA_EMAIL secret.' }
+          if (-not $env:JIRA_API_TOKEN) { throw 'Missing JIRA_API_TOKEN secret.' }
+
+          $lines = @(
+            "JIRA_URL=$($env:JIRA_URL.TrimEnd('/'))",
+            "JIRA_EMAIL=$env:JIRA_EMAIL",
+            "JIRA_API_TOKEN=$env:JIRA_API_TOKEN"
+          )
+          Set-Content -LiteralPath '.env' -Value $lines -Encoding utf8
+
+      - name: Prepare logs directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Path 'artifacts/jira-native' -Force | Out-Null
+
+      - name: Run offline Jira-native tests
+        shell: pwsh
+        run: |
+          $output = npm run test:jira-native 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/00-test-jira-native.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Validate existing Test Set
+        if: steps.inputs.outputs.mode == 'validate-only'
+        shell: pwsh
+        run: |
+          $testSetKey = '${{ steps.inputs.outputs.test_set_key }}'
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $output = npm run jira:validate -- $testSetKey $parentKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/10-validate-only.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Preview Test Set creation
+        if: steps.inputs.outputs.mode == 'dry-run'
+        shell: pwsh
+        run: |
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $output = PowerShell -NoProfile -ExecutionPolicy Bypass -File scripts\Jira-native\create-test-set.ps1 -ParentKey $parentKey -DryRun 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/10-create-dry-run.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Create Test Set
+        id: create
+        if: steps.inputs.outputs.mode == 'full'
+        shell: pwsh
+        run: |
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $output = pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\Jira-native\create-test-set.ps1 -ParentKey $parentKey 6>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/10-create-test-set.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+          $joined = $output -join "`n"
+          $matches = [regex]::Matches($joined, '(?m)^\s*(?:Test Set|Created):\s*(QA-\d+)\b')
+          if ($matches.Count -eq 0) { throw 'Could not extract created Test Set key from create-test-set output.' }
+
+          $testSetKey = $matches[$matches.Count - 1].Groups[1].Value
+          "test_set_key=$testSetKey" >> $env:GITHUB_OUTPUT
+          "TEST_SET_KEY=$testSetKey" >> $env:GITHUB_ENV
+
+      - name: Validate before sync
+        if: steps.inputs.outputs.mode == 'full'
+        shell: pwsh
+        run: |
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $output = npm run jira:validate -- $env:TEST_SET_KEY $parentKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/20-validate-before-sync.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Sync Test Set and comment result
+        if: steps.inputs.outputs.mode == 'full'
+        shell: pwsh
+        run: |
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $output = npm run jira:sync:comment -- $env:TEST_SET_KEY $parentKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/30-sync-comment.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Validate after sync
+        if: steps.inputs.outputs.mode == 'full'
+        shell: pwsh
+        run: |
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $output = npm run jira:validate -- $env:TEST_SET_KEY $parentKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/40-validate-after-sync.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Write run summary
+        if: always()
+        shell: pwsh
+        run: |
+          $parentKey = '${{ steps.inputs.outputs.parent_key }}'
+          $mode = '${{ steps.inputs.outputs.mode }}'
+          $testSetKey = if ($env:TEST_SET_KEY) { $env:TEST_SET_KEY } else { '${{ steps.inputs.outputs.test_set_key }}' }
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '## Jira-native Test Set automation'
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Parent: $parentKey"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Mode: $mode"
+          if ($testSetKey) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Test Set: $testSetKey" }
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Trigger: $env:GITHUB_EVENT_NAME"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '- Logs: uploaded as jira-native-testset-logs artifact'
+
+      - name: Upload Jira-native logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-native-testset-logs
+          path: artifacts/jira-native
+          if-no-files-found: warn
+          retention-days: 14

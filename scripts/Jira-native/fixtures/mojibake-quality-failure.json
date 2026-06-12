@@ -1,0 +1,13 @@
+{
+  "parentKey": "TMSPROD-2888",
+  "parentSummary": "Detectar mojibake en descripcion",
+  "testSetKey": "QA-2888",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Criterios de Aceptacion" }] },
+      { "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "La descripciÃ³n no debe contener caracteres corruptos." }] }] }] }
+    ]
+  }
+}

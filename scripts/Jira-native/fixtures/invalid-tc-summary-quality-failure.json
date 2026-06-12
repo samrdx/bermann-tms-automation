@@ -1,0 +1,14 @@
+{
+  "parentKey": "TMSPROD-2777",
+  "parentSummary": "Detectar summary invalido de Test Case",
+  "testSetKey": "QA-2777",
+  "testCaseSummaries": ["TC1 validar filtro sin formato Jira-native"],
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Criterios de Aceptacion" }] },
+      { "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "El sistema valida summaries de Test Case existentes." }] }] }] }
+    ]
+  }
+}
