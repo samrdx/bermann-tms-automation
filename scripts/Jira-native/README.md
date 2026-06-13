@@ -62,7 +62,7 @@ npm run jira:validate -- QA-782 TMSPROD-2054
 | `sync` | Llama `sync-test-set.ps1` sin flags de no-write. | Solo después de validar el plan. |
 | `sync-comment` | Llama `sync-test-set.ps1 -CommentResult`. | Cuando querés dejar auditoría visible en el Test Set. |
 
-Los comentarios de auditoría estructurados están en BETA y son opt-in: solo se publican con `sync-comment` / `-CommentResult`. `validate` y `dry-run` mantienen cero escrituras; si se combinan manualmente con `-CommentResult`, muestran que el comentario se habría publicado sin escribir en Jira. El rollout automático por Jira Automation existe como flujo asistido en `.github/workflows/jira-native-testset.yml`, activado al marcar el campo **Test Set Refining → OK** en el Test Set.
+Los comentarios de auditoría estructurados están en BETA y son opt-in: solo se publican con `sync-comment` / `-CommentResult`. `validate` y `dry-run` mantienen cero escrituras; si se combinan manualmente con `-CommentResult`, muestran que el comentario se habría publicado sin escribir en Jira. El rollout automático por Jira Automation existe como flujo asistido en `.github/workflows/jira-native-testset.yml`, activado al marcar el campo **Test Set Refining → OK** en un Test Set existente.
 
 ## Remediación de duplicados
 
@@ -92,7 +92,7 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 | --- | --- | --- |
 | `Cannot find .env file` | Falta `.env` o no está en una ruta conocida. | Crear `.env` con `JIRA_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`. |
 | `Test Set QA-xxx not found` | Key incorrecta o permisos insuficientes. | Verificar key, proyecto y permisos del token. |
-| `Could not find a linked User Story` | Falta link Jira `Test`. | Vincular la Historia o pasar `ParentIssueKey` como tercer argumento. |
+| `Could not find a linked User Story` | Falta link Jira `Test`. | Vincular el Test Set a la Historia/ticket fuente o pasar `ParentIssueKey` como tercer argumento. |
 | Se repite `would update Test Set description` | Jira normaliza ADF distinto al JSON local. | El diff lógico compara contenido semántico y evita falsos positivos por normalización ADF. |
 | Caracteres raros en consola | Encoding de terminal/PowerShell. | Usar terminal UTF-8 y preferir PowerShell moderno cuando sea posible. |
 | `401` o `403` | Token inválido o sin permisos. | Regenerar token y validar acceso al proyecto Jira. |
@@ -114,7 +114,9 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 
 ## Jira Automation asistida (V1)
 
-El workflow `.github/workflows/jira-native-testset.yml` permite disparar el flujo Jira-native desde GitHub Actions cuando se marca el campo **Test Set Refining → OK** en un Test Set. Es una automatización BETA asistida: crea el Test Set (si no existe), valida, sincroniza con comentario de auditoría y vuelve a validar. Si cualquier quality gate falla, el job falla y deja logs como artefacto para revisión manual.
+El workflow `.github/workflows/jira-native-testset.yml` permite disparar el flujo Jira-native desde GitHub Actions cuando se marca el campo **Test Set Refining → OK** en un Test Set. Es una automatización BETA asistida: valida el Test Set existente, sincroniza con comentario de auditoría y vuelve a validar. No crea un Test Set nuevo en este modo. Si cualquier quality gate falla, el job falla y deja logs como artefacto para revisión manual.
+
+La única precondición manual es que el Test Set esté vinculado a la Historia/ticket fuente mediante el link Jira correspondiente. El campo **Tarea original** no es una precondición manual: durante el sync, el script descubre el ticket fuente desde los links de Jira y completa o actualiza **Tarea original** automáticamente.
 
 ### Regla Jira sugerida
 
@@ -146,13 +148,13 @@ Payload:
 {
   "event_type": "jira-testset-ready",
   "client_payload": {
-    "parentKey": "{{issue.key}}",
-    "mode": "full"
+    "testSetKey": "{{issue.key}}",
+    "mode": "sync-existing"
   }
 }
 ```
 
-Para una ejecución manual desde GitHub Actions, usá `workflow_dispatch` con `parentKey`. El modo `dry-run` previsualiza creación sin escribir en Jira. El modo `validate-only` requiere `testSetKey` porque valida un Test Set existente.
+Para una ejecución manual desde GitHub Actions, usá `workflow_dispatch` con `parentKey` en los modos `full` y `dry-run`, o con `testSetKey` en los modos `validate-only` y `sync-existing`. El modo `dry-run` previsualiza creación sin escribir en Jira. El modo `sync-existing` no crea Test Sets: valida, sincroniza el Test Set indicado con comentario de auditoría y vuelve a validar.
 
 ### Secrets requeridos
 

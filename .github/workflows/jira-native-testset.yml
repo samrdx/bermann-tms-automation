@@ -5,7 +5,7 @@ on:
     inputs:
       parentKey:
         description: Jira parent issue key, for example TMSPROD-2177
-        required: true
+        required: false
         type: string
       mode:
         description: Execution mode
@@ -16,8 +16,9 @@ on:
           - full
           - dry-run
           - validate-only
+          - sync-existing
       testSetKey:
-        description: Existing Test Set key, required only for validate-only
+        description: Existing Test Set key, required for validate-only and sync-existing
         required: false
         type: string
   repository_dispatch:
@@ -28,12 +29,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: jira-native-testset-${{ github.event.inputs.parentKey || github.event.client_payload.parentKey || github.run_id }}
+  group: jira-native-testset-${{ github.event.inputs.parentKey || github.event.client_payload.parentKey || github.event.inputs.testSetKey || github.event.client_payload.testSetKey || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   create-validate-sync:
-    name: Create, validate, and sync Jira Test Set
+    name: Validate and sync Jira Test Set
     runs-on: windows-latest
     timeout-minutes: 30
     env:
@@ -80,9 +81,9 @@ jobs:
           $mode = ($mode ?? 'full').Trim().ToLowerInvariant()
           $testSetKey = ($testSetKey ?? '').Trim().ToUpperInvariant()
 
-          if (-not $parentKey) { throw 'Missing parentKey. Send workflow_dispatch input parentKey or repository_dispatch client_payload.parentKey.' }
-          if ($mode -notin @('full', 'dry-run', 'validate-only')) { throw "Unsupported mode '$mode'. Use full, dry-run, or validate-only." }
-          if ($mode -eq 'validate-only' -and -not $testSetKey) { throw 'validate-only mode requires testSetKey.' }
+          if ($mode -notin @('full', 'dry-run', 'validate-only', 'sync-existing')) { throw "Unsupported mode '$mode'. Use full, dry-run, validate-only, or sync-existing." }
+          if ($mode -in @('full', 'dry-run') -and -not $parentKey) { throw "$mode mode requires parentKey. Send workflow_dispatch input parentKey or repository_dispatch client_payload.parentKey." }
+          if ($mode -in @('validate-only', 'sync-existing') -and -not $testSetKey) { throw "$mode mode requires testSetKey. Send workflow_dispatch input testSetKey or repository_dispatch client_payload.testSetKey." }
 
           "parent_key=$parentKey" >> $env:GITHUB_OUTPUT
           "mode=$mode" >> $env:GITHUB_OUTPUT
@@ -120,9 +121,43 @@ jobs:
         run: |
           $testSetKey = '${{ steps.inputs.outputs.test_set_key }}'
           $parentKey = '${{ steps.inputs.outputs.parent_key }}'
-          $output = npm run jira:validate -- $testSetKey $parentKey 2>&1
+          if ($parentKey) {
+            $output = npm run jira:validate -- $testSetKey $parentKey 2>&1
+          } else {
+            $output = npm run jira:validate -- $testSetKey 2>&1
+          }
           $exitCode = $LASTEXITCODE
           $output | Tee-Object -FilePath 'artifacts/jira-native/10-validate-only.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Validate existing Test Set before sync
+        if: steps.inputs.outputs.mode == 'sync-existing'
+        shell: pwsh
+        run: |
+          $testSetKey = '${{ steps.inputs.outputs.test_set_key }}'
+          $output = npm run jira:validate -- $testSetKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/10-validate-existing-before-sync.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Sync existing Test Set and comment result
+        if: steps.inputs.outputs.mode == 'sync-existing'
+        shell: pwsh
+        run: |
+          $testSetKey = '${{ steps.inputs.outputs.test_set_key }}'
+          $output = npm run jira:sync:comment -- $testSetKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/20-sync-existing-comment.log'
+          if ($exitCode -ne 0) { exit $exitCode }
+
+      - name: Validate existing Test Set after sync
+        if: steps.inputs.outputs.mode == 'sync-existing'
+        shell: pwsh
+        run: |
+          $testSetKey = '${{ steps.inputs.outputs.test_set_key }}'
+          $output = npm run jira:validate -- $testSetKey 2>&1
+          $exitCode = $LASTEXITCODE
+          $output | Tee-Object -FilePath 'artifacts/jira-native/30-validate-existing-after-sync.log'
           if ($exitCode -ne 0) { exit $exitCode }
 
       - name: Preview Test Set creation
@@ -193,7 +228,7 @@ jobs:
           $testSetKey = if ($env:TEST_SET_KEY) { $env:TEST_SET_KEY } else { '${{ steps.inputs.outputs.test_set_key }}' }
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '## Jira-native Test Set automation'
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Parent: $parentKey"
+          if ($parentKey) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Parent: $parentKey" }
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Mode: $mode"
           if ($testSetKey) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Test Set: $testSetKey" }
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Trigger: $env:GITHUB_EVENT_NAME"
