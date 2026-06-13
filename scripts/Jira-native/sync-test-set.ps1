@@ -1177,8 +1177,20 @@ function Get-TestScenarios {
     if ($inCriteria -and $node.type -eq 'orderedList') {
       foreach ($item in $node.content) {
         if ($item.type -ne 'listItem') { continue }
-        $text = Normalize-Whitespace -Text (Get-AdfText -Nodes $item.content)
-        if ($text) { $criteriaTextBlocks += $text }
+        # Join sibling paragraphs with space so Gherkin keywords keep their word boundary
+        $paragraphTexts = @($item.content | Where-Object { $_.type -eq 'paragraph' } | ForEach-Object { Get-AdfText -Nodes $_.content })
+        $text = Normalize-Whitespace -Text ($paragraphTexts -join ' ')
+        if (-not $text) { continue }
+        # Process each listItem independently to avoid cross-contamination between criteria
+        $itemScenarios = @(Get-GherkinScenariosFromText -Text $text -StartNumber ($scenarioCount + 1))
+        if ($itemScenarios.Count -gt 0) {
+          foreach ($scenario in $itemScenarios) {
+            $scenarios += $scenario
+            $scenarioCount = $scenario.Number
+          }
+        } else {
+          $criteriaTextBlocks += $text
+        }
       }
     }
   }
