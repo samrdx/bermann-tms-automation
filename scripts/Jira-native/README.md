@@ -62,7 +62,7 @@ npm run jira:validate -- QA-782 TMSPROD-2054
 | `sync` | Llama `sync-test-set.ps1` sin flags de no-write. | Solo después de validar el plan. |
 | `sync-comment` | Llama `sync-test-set.ps1 -CommentResult`. | Cuando querés dejar auditoría visible en el Test Set. |
 
-Los comentarios de auditoría estructurados están en BETA y son opt-in: solo se publican con `sync-comment` / `-CommentResult`. `validate` y `dry-run` mantienen cero escrituras; si se combinan manualmente con `-CommentResult`, muestran que el comentario se habría publicado sin escribir en Jira. El rollout automático por Jira Automation existe como flujo asistido en `.github/workflows/jira-native-testset.yml`.
+Los comentarios de auditoría estructurados están en BETA y son opt-in: solo se publican con `sync-comment` / `-CommentResult`. `validate` y `dry-run` mantienen cero escrituras; si se combinan manualmente con `-CommentResult`, muestran que el comentario se habría publicado sin escribir en Jira. El rollout automático por Jira Automation existe como flujo asistido en `.github/workflows/jira-native-testset.yml`, activado al marcar el campo **Test Set Refining → OK** en el Test Set.
 
 ## Remediación de duplicados
 
@@ -102,7 +102,7 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 | Estado | Tarea | Motivo |
 | --- | --- | --- |
 | BETA done | Endurecer uso de `ValidateOnly` y `CommentResult`. | Ya existen modos sin escritura y comentario opt-in. |
-| Pendiente | Runner por webhook de Jira Automation. | Ejecutar validación/sync desde eventos Jira sin comandos manuales largos. |
+| V1 done | Runner por webhook de Jira Automation. | Trigger por campo **Test Set Refining → OK** (`customfield_11780`) via `repository_dispatch`. |
 | BETA done | Diff lógico de ADF. | Compara texto, secciones y Test Cases esperados para reducir falsos positivos por normalización de Jira. |
 | BETA done | Comentarios de auditoría estructurados. | Comentario ADF escaneable y opt-in vía `sync-comment`; Automation queda pendiente. |
 | Pendiente | Expandir mapper de escenarios de dominio. | Mejorar extracción para módulos y formatos de historias nuevos. |
@@ -112,14 +112,14 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 | BETA done | Tests CI/script para fixtures de extracción de escenarios. | `npm run test:jira-native` cubre extracción, deduplicación, naming, diff lógico y quality gates con fixtures locales. |
 | Pendiente | Normalización rica de español/acentos y guía UTF-8. | Reducir problemas por acentos, mojibake y consola Windows. |
 
-## Jira Automation asistida
+## Jira Automation asistida (V1)
 
-El workflow `.github/workflows/jira-native-testset.yml` permite disparar el flujo Jira-native desde GitHub Actions cuando Jira agrega el label `qa:testset:ready` a un ticket padre. Es una automatización BETA asistida: crea el Test Set, valida, sincroniza con comentario de auditoría y vuelve a validar. Si cualquier quality gate falla, el job falla y deja logs como artefacto para revisión manual.
+El workflow `.github/workflows/jira-native-testset.yml` permite disparar el flujo Jira-native desde GitHub Actions cuando se marca el campo **Test Set Refining → OK** en un Test Set. Es una automatización BETA asistida: crea el Test Set (si no existe), valida, sincroniza con comentario de auditoría y vuelve a validar. Si cualquier quality gate falla, el job falla y deja logs como artefacto para revisión manual.
 
 ### Regla Jira sugerida
 
-1. Trigger: `Issue updated` o `Field value changed` sobre `Labels`.
-2. Condition: el issue contiene el label `qa:testset:ready`.
+1. Trigger: `Field value changed` → campo **Test Set Refining** (`customfield_11780`).
+2. Condition: el nuevo valor del campo es `OK`.
 3. Action: `Send web request` hacia GitHub `repository_dispatch`.
 4. No agregues reglas que borren, cierren o reparen Test Cases automáticamente desde este trigger.
 
@@ -165,7 +165,7 @@ Para una ejecución manual desde GitHub Actions, usá `workflow_dispatch` con `p
 
 ### Guardrails BETA
 
-- El trigger recomendado es solo agregar `qa:testset:ready`; no debe mutar otros campos por su cuenta.
+- El trigger recomendado es marcar **Test Set Refining → OK**; no debe mutar otros campos por su cuenta.
 - El workflow ejecuta `npm run test:jira-native` antes de tocar Jira.
 - El sync real corre solo después de `jira:validate` exitoso.
 - El workflow vuelve a validar después del sync para detectar inconsistencias o problemas de idempotencia.
