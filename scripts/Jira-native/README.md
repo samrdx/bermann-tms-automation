@@ -135,7 +135,7 @@ Headers:
 
 ```text
 Accept: application/vnd.github+json
-Authorization: Bearer <GITHUB_REPOSITORY_DISPATCH_TOKEN>
+Authorization: Bearer <REPO_DISPATCH_TOKEN>
 X-GitHub-Api-Version: 2022-11-28
 Content-Type: application/json
 ```
@@ -158,7 +158,7 @@ Para una ejecución manual desde GitHub Actions, usá `workflow_dispatch` con `p
 
 | Secret | Uso |
 | --- | --- |
-| `GITHUB_REPOSITORY_DISPATCH_TOKEN` | Token usado por Jira Automation para llamar el endpoint de GitHub. En fine-grained PAT, necesita acceso al repo y permiso `Contents: Read and write` para `repository_dispatch`. |
+| `REPO_DISPATCH_TOKEN` | Token usado por Jira Automation para llamar el endpoint de GitHub. En fine-grained PAT, necesita acceso al repo y permiso `Contents: Read and write` para `repository_dispatch`. |
 | `JIRA_URL` o `JIRA_BASE_URL` | URL base de Jira, por ejemplo `https://bermann.atlassian.net`. |
 | `JIRA_EMAIL` | Email de la cuenta Jira usada por los scripts. |
 | `JIRA_API_TOKEN` | API token de Atlassian para la cuenta Jira. |
