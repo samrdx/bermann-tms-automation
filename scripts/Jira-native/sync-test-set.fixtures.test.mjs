@@ -103,4 +103,11 @@ test('cleans dangling endings and preserves Spanish Gherkin like BS-2667', () =>
   assert.match(tc1.Then, /visualiza correctamente la vista de Skyview/i);
   assert.doesNotMatch(tc1.Given, /funcionalidad de Dado Que/i);
   assert.doesNotMatch(tc1.When, /Dado que.*cuando/i);
+
+  const tc1UpdatePlan = analysis.TestCaseUpdatePlans.find((plan) => plan.Number === 1);
+  assert.ok(tc1UpdatePlan, 'TC1 update plan was not returned by fixture analysis');
+  assert.equal(tc1UpdatePlan.NeedsUpdate, true);
+  assert.equal(tc1UpdatePlan.SummaryChanged, false);
+  assert.equal(tc1UpdatePlan.DescriptionChanged, true);
+  assert.deepEqual(tc1UpdatePlan.Fields, ['description']);
 });

@@ -877,6 +877,42 @@ function Compare-TestSetDescriptionLogically {
   return @{ Comparable = $true; Equivalent = $false; Reason = ($reasons -join '; ') }
 }
 
+function Get-AdfDescriptionSemanticKey {
+  param($Description)
+
+  $doc = ConvertTo-AdfDocObject -Adf $Description
+  if ($doc -and $doc.content) {
+    return Normalize-SemanticText -Text (Get-AdfText -Nodes $doc.content)
+  }
+
+  if ($Description) { return Normalize-SemanticText -Text ([string]$Description) }
+  return ''
+}
+
+function Get-TestCaseUpdatePlan {
+  param(
+    [string]$CurrentSummary,
+    $CurrentDescription,
+    [string]$ExpectedSummary,
+    $ExpectedDescription
+  )
+
+  $summaryChanged = (Normalize-Whitespace -Text $CurrentSummary) -ne (Normalize-Whitespace -Text $ExpectedSummary)
+  $currentDescriptionKey = Get-AdfDescriptionSemanticKey -Description $CurrentDescription
+  $expectedDescriptionKey = Get-AdfDescriptionSemanticKey -Description $ExpectedDescription
+  $descriptionChanged = $currentDescriptionKey -ne $expectedDescriptionKey
+  $fields = @()
+  if ($summaryChanged) { $fields += 'summary' }
+  if ($descriptionChanged) { $fields += 'description' }
+
+  return @{
+    NeedsUpdate = $fields.Count -gt 0
+    SummaryChanged = $summaryChanged
+    DescriptionChanged = $descriptionChanged
+    Fields = $fields
+  }
+}
+
 # Build ADF paragraph node
 function New-AdfParagraph {
   param([string]$Text)
@@ -2089,6 +2125,30 @@ function Invoke-FixtureAnalysis {
   $qualityErrors += Test-TestCaseNamingQuality -ScenarioModel $scenarioModel
   $qualityErrors += Test-TestCaseSummaryQuality -Summaries (ConvertTo-StringArray -Value $fixture.testCaseSummaries)
 
+  $testCaseUpdatePlans = @()
+  if ($fixture.existingTestCases) {
+    foreach ($existingTestCase in @($fixture.existingTestCases)) {
+      $number = [int]$existingTestCase.number
+      $expectedScenario = @($scenarioModel | Where-Object { [int]$_.Number -eq $number } | Select-Object -First 1)
+      $expectedSummary = if ($existingTestCase.expectedSummary) { [string]$existingTestCase.expectedSummary } elseif ($expectedScenario.Count -gt 0) { [string]$expectedScenario[0].Summary } else { '' }
+      $plan = Get-TestCaseUpdatePlan `
+        -CurrentSummary ([string]$existingTestCase.currentSummary) `
+        -CurrentDescription $existingTestCase.currentDescription `
+        -ExpectedSummary $expectedSummary `
+        -ExpectedDescription $existingTestCase.expectedDescription
+
+      $testCaseUpdatePlans += @{
+        Number = $number
+        Key = [string]$existingTestCase.key
+        ExpectedSummary = $expectedSummary
+        NeedsUpdate = $plan.NeedsUpdate
+        SummaryChanged = $plan.SummaryChanged
+        DescriptionChanged = $plan.DescriptionChanged
+        Fields = $plan.Fields
+      }
+    }
+  }
+
   $diffResult = $null
   if ($fixture.currentDescription -and $fixture.expectedDescription) {
     $diffResult = Compare-TestSetDescriptionLogically -CurrentAdf $fixture.currentDescription -ExpectedAdf $fixture.expectedDescription
@@ -2106,6 +2166,7 @@ function Invoke-FixtureAnalysis {
     Summaries = @($scenarioModel | ForEach-Object { $_.Summary })
     ListItems = @($scenarioModel | ForEach-Object { $_.ListItem })
     GwtSteps = @($scenarioModel | ForEach-Object { @{ Number = $_.Number; Given = $_.Given; When = $_.When; Then = $_.Then } })
+    TestCaseUpdatePlans = $testCaseUpdatePlans
     QualityStatus = if ($qualityErrors.Count -eq 0) { 'OK' } else { 'FAIL' }
     QualityErrors = $qualityErrors
     Diff = $diffResult
@@ -2240,10 +2301,12 @@ $existingTcSummaries = @{}
 $existingTcSemanticKeys = @{}
 $existingTcDescriptions = @{}
 $existingTcByNumber = @{}
+$existingTcByKey = @{}
 if ($existingTcParsed.issues) {
   foreach ($issue in $existingTcParsed.issues) {
     $existingTcSummaries[$issue.fields.summary] = $issue.key
     $existingTcDescriptions[$issue.fields.summary] = $issue.fields.description
+    $existingTcByKey[$issue.key] = @{ Key = $issue.key; Summary = $issue.fields.summary; Description = $issue.fields.description }
     if ($issue.fields.summary -match '\|\s*TC(\d+)\s*:') {
       $tcNumberKey = [int]$Matches[1]
       if (-not $existingTcByNumber.ContainsKey($tcNumberKey)) {
@@ -2518,20 +2581,23 @@ for ($i = 0; $i -lt $scenarioModel.Count; $i++) {
   if ($existingTcSummaries.ContainsKey($tcSummary)) {
     $existingTcKey = $existingTcSummaries[$tcSummary]
     $currentTcDescription = $existingTcDescriptions[$tcSummary]
-    $currentDescriptionKey = Normalize-SemanticText -Text (Get-AdfText -Nodes $currentTcDescription.content)
-    $expectedDescriptionKey = Normalize-SemanticText -Text (Get-AdfText -Nodes $tcDescContent)
+    $tcUpdatePlan = Get-TestCaseUpdatePlan -CurrentSummary $tcSummary -CurrentDescription $currentTcDescription -ExpectedSummary $tcSummary -ExpectedDescription $tcDescriptionDoc
 
-    if ($currentDescriptionKey -ne $expectedDescriptionKey) {
+    if ($tcUpdatePlan.NeedsUpdate) {
+      $fieldLabel = $tcUpdatePlan.Fields -join '/'
       if ($noWrite) {
-        Write-Host "  ${auditLabel}: would update TC${tcNum} description on $existingTcKey" -ForegroundColor Yellow
+        Write-Host "  ${auditLabel}: would update TC${tcNum} $fieldLabel on $existingTcKey" -ForegroundColor Yellow
       } else {
-        $tcUpdateBody = @{ fields = @{ description = $tcDescriptionDoc } }
+        $tcUpdateFields = @{}
+        if ($tcUpdatePlan.SummaryChanged) { $tcUpdateFields.summary = $tcSummary }
+        if ($tcUpdatePlan.DescriptionChanged) { $tcUpdateFields.description = $tcDescriptionDoc }
+        $tcUpdateBody = @{ fields = $tcUpdateFields }
         $tcUpdateJson = $tcUpdateBody | ConvertTo-Json -Depth 20
         $tcUpdateFile = Join-Path -Path $env:TEMP -ChildPath "jira_tc_update_$(Get-Random).json"
         Save-JsonFile -Path $tcUpdateFile -Json $tcUpdateJson
         try {
           [void](Invoke-JiraPut -Url $baseUrl -Auth $auth -Endpoint "/rest/api/3/issue/$existingTcKey" -BodyFile $tcUpdateFile)
-          Write-Host "  Updated TC${tcNum}: $existingTcKey description" -ForegroundColor Green
+          Write-Host "  Updated TC${tcNum}: $existingTcKey $fieldLabel" -ForegroundColor Green
         } finally {
           if (Test-Path -LiteralPath $tcUpdateFile) { Remove-Item -LiteralPath $tcUpdateFile -Force }
         }
@@ -2546,16 +2612,22 @@ for ($i = 0; $i -lt $scenarioModel.Count; $i++) {
   if ($existingTcByNumber.ContainsKey([int]$tcNum)) {
     $existingByNumber = $existingTcByNumber[[int]$tcNum]
     $existingTcKey = $existingByNumber.Key
-    if ($noWrite) {
-      Write-Host "  ${auditLabel}: would update TC${tcNum} by number match $existingTcKey" -ForegroundColor Yellow
+    $tcUpdatePlan = Get-TestCaseUpdatePlan -CurrentSummary $existingByNumber.Summary -CurrentDescription $existingByNumber.Description -ExpectedSummary $tcSummary -ExpectedDescription $tcDescriptionDoc
+    if (-not $tcUpdatePlan.NeedsUpdate) {
+      Write-Host "  Skipped TC${tcNum}: already exists as $existingTcKey (number match)" -ForegroundColor Yellow
+    } elseif ($noWrite) {
+      Write-Host "  ${auditLabel}: would update TC${tcNum} $($tcUpdatePlan.Fields -join '/') by number match $existingTcKey" -ForegroundColor Yellow
     } else {
-      $tcUpdateBody = @{ fields = @{ summary = $tcSummary; description = $tcDescriptionDoc } }
+      $tcUpdateFields = @{}
+      if ($tcUpdatePlan.SummaryChanged) { $tcUpdateFields.summary = $tcSummary }
+      if ($tcUpdatePlan.DescriptionChanged) { $tcUpdateFields.description = $tcDescriptionDoc }
+      $tcUpdateBody = @{ fields = $tcUpdateFields }
       $tcUpdateJson = $tcUpdateBody | ConvertTo-Json -Depth 20
       $tcUpdateFile = Join-Path -Path $env:TEMP -ChildPath "jira_tc_update_$(Get-Random).json"
       Save-JsonFile -Path $tcUpdateFile -Json $tcUpdateJson
       try {
         [void](Invoke-JiraPut -Url $baseUrl -Auth $auth -Endpoint "/rest/api/3/issue/$existingTcKey" -BodyFile $tcUpdateFile)
-        Write-Host "  Updated TC${tcNum}: $existingTcKey summary/description (number match)" -ForegroundColor Green
+        Write-Host "  Updated TC${tcNum}: $existingTcKey $($tcUpdatePlan.Fields -join '/') (number match)" -ForegroundColor Green
       } finally {
         if (Test-Path -LiteralPath $tcUpdateFile) { Remove-Item -LiteralPath $tcUpdateFile -Force }
       }
@@ -2571,16 +2643,23 @@ for ($i = 0; $i -lt $scenarioModel.Count; $i++) {
 
   if ($semanticDuplicateKey) {
     $existingTcKey = $existingTcSemanticKeys[$semanticDuplicateKey]
-    if ($noWrite) {
-      Write-Host "  ${auditLabel}: would update semantically equivalent TC${tcNum} $existingTcKey" -ForegroundColor Yellow
+    $existingSemantic = $existingTcByKey[$existingTcKey]
+    $tcUpdatePlan = Get-TestCaseUpdatePlan -CurrentSummary $existingSemantic.Summary -CurrentDescription $existingSemantic.Description -ExpectedSummary $tcSummary -ExpectedDescription $tcDescriptionDoc
+    if (-not $tcUpdatePlan.NeedsUpdate) {
+      Write-Host "  Skipped TC${tcNum}: already exists as $existingTcKey (semantic match)" -ForegroundColor Yellow
+    } elseif ($noWrite) {
+      Write-Host "  ${auditLabel}: would update semantically equivalent TC${tcNum} $($tcUpdatePlan.Fields -join '/') on $existingTcKey" -ForegroundColor Yellow
     } else {
-      $tcUpdateBody = @{ fields = @{ summary = $tcSummary; description = $tcDescriptionDoc } }
+      $tcUpdateFields = @{}
+      if ($tcUpdatePlan.SummaryChanged) { $tcUpdateFields.summary = $tcSummary }
+      if ($tcUpdatePlan.DescriptionChanged) { $tcUpdateFields.description = $tcDescriptionDoc }
+      $tcUpdateBody = @{ fields = $tcUpdateFields }
       $tcUpdateJson = $tcUpdateBody | ConvertTo-Json -Depth 20
       $tcUpdateFile = Join-Path -Path $env:TEMP -ChildPath "jira_tc_update_$(Get-Random).json"
       Save-JsonFile -Path $tcUpdateFile -Json $tcUpdateJson
       try {
         [void](Invoke-JiraPut -Url $baseUrl -Auth $auth -Endpoint "/rest/api/3/issue/$existingTcKey" -BodyFile $tcUpdateFile)
-        Write-Host "  Updated TC${tcNum}: $existingTcKey summary/description" -ForegroundColor Green
+        Write-Host "  Updated TC${tcNum}: $existingTcKey $($tcUpdatePlan.Fields -join '/')" -ForegroundColor Green
       } finally {
         if (Test-Path -LiteralPath $tcUpdateFile) { Remove-Item -LiteralPath $tcUpdateFile -Force }
       }

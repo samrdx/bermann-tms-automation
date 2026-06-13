@@ -40,5 +40,40 @@
         ] }
       ] }
     ]
-  }
+  },
+  "existingTestCases": [
+    {
+      "number": 1,
+      "key": "QA-877",
+      "currentSummary": "QA-876 | TC1: Happy path - Seleccione o acceda a Skyview",
+      "currentDescription": {
+        "type": "doc",
+        "version": 1,
+        "content": [
+          { "type": "paragraph", "content": [{ "type": "text", "text": "ESCENARIO: Seleccione o acceda a Skyview" }] },
+          { "type": "panel", "content": [{ "type": "paragraph", "content": [
+            { "type": "text", "text": "Given que el usuario se encuentra en la funcionalidad de Dado Que El Usuario Ingresa Desde Su Cuenta Sso Personal y procede con la operacion indicada" },
+            { "type": "hardBreak" },
+            { "type": "text", "text": "When ejecuta la accion: Dado que el usuario ingresa desde su cuenta SSO personal y tiene agregado el cliente apllogistics, cuando seleccione o acceda a Skyview" },
+            { "type": "hardBreak" },
+            { "type": "text", "text": "Then Entonces el sistema debe permitir visualizar correctamente la vista de Skyview para el cliente apllogistics" }
+          ] }] }
+        ]
+      },
+      "expectedDescription": {
+        "type": "doc",
+        "version": 1,
+        "content": [
+          { "type": "paragraph", "content": [{ "type": "text", "text": "ESCENARIO: Seleccione o acceda a Skyview" }] },
+          { "type": "panel", "content": [{ "type": "paragraph", "content": [
+            { "type": "text", "text": "Given el usuario ingresa desde su cuenta SSO personal y tiene agregado el cliente apllogistics" },
+            { "type": "hardBreak" },
+            { "type": "text", "text": "When seleccione o acceda a Skyview" },
+            { "type": "hardBreak" },
+            { "type": "text", "text": "Then visualiza correctamente la vista de Skyview para el cliente apllogistics" }
+          ] }] }
+        ]
+      }
+    }
+  ]
 }
