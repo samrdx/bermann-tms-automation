@@ -621,6 +621,22 @@ function Get-GherkinScenariosFromText {
   return $results
 }
 
+function Complete-GherkinTextWithExpectedResult {
+  param([string]$Text, [string]$ExpectedResult)
+  $clean = Normalize-Whitespace -Text $Text
+  $expected = Normalize-Whitespace -Text $ExpectedResult
+  if (-not $clean -or -not $expected) { return $clean }
+  # Require Given/Dado to appear near start of text (sentence-initial) to avoid false positives like "el acceso fue dado al usuario cuando..."
+  $hasGivenStart = $clean -match '(?i)(?:^|\.\s+)(Given|Dado)\b'
+  $hasWhen       = $clean -match '(?i)\b(When|Cuando)\b'
+  $hasThen       = $clean -match '(?i)\b(Then|Entonces)\b'
+  if (-not $hasGivenStart -or -not $hasWhen -or $hasThen) { return $clean }
+  # Strip colon prefix like "Entonces:" before adding our own
+  if ($expected -notmatch '(?i)^(Then|Entonces)[:\s]') { $expected = "Entonces $expected" }
+  $clean = $clean.TrimEnd(' ', '.', ',', ';')
+  return "$clean, $expected"
+}
+
 function New-AcceptanceScenariosFromCriterionText {
   param(
     [string]$Text,
@@ -632,7 +648,8 @@ function New-AcceptanceScenariosFromCriterionText {
   $clean = Normalize-Whitespace -Text $Text
   if (-not $clean) { return @() }
 
-  $gherkinScenarios = @(Get-GherkinScenariosFromText -Text $clean -StartNumber $StartNumber)
+  $gherkinText = Complete-GherkinTextWithExpectedResult -Text $clean -ExpectedResult $ExpectedResult
+  $gherkinScenarios = @(Get-GherkinScenariosFromText -Text $gherkinText -StartNumber $StartNumber)
   if ($gherkinScenarios.Count -gt 0) {
     $converted = @()
     foreach ($scenario in $gherkinScenarios) {
@@ -1222,6 +1239,17 @@ function Get-RealisticGwt {
     [string]$ExpectedResult,
     [string]$Source
   )
+
+  $gherkinSource = Complete-GherkinTextWithExpectedResult -Text $Description -ExpectedResult $ExpectedResult
+  $parsedGherkin = @(Get-GherkinScenariosFromText -Text $gherkinSource -StartNumber 1)
+  if ($parsedGherkin.Count -gt 0) {
+    $firstGherkin = $parsedGherkin[0]
+    return @{
+      Given = $firstGherkin.Given
+      When = $firstGherkin.When
+      Then = $firstGherkin.Then
+    }
+  }
 
   $lower = $Description.ToLowerInvariant()
   $given = ''

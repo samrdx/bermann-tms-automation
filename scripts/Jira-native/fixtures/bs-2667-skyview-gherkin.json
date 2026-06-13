@@ -17,7 +17,7 @@
         { "type": "tableRow", "content": [
           { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "1" }] }] },
           { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Acceso a Skyview" }] }] },
-          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Dado que el usuario ingresa desde su cuenta SSO personal y tiene agregado el cliente apllogistics, cuando seleccione o acceda a Skyview, entonces visualiza correctamente la vista de Skyview para el cliente apllogistics." }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Dado que el usuario ingresa desde su cuenta SSO personal y tiene agregado el cliente apllogistics, cuando seleccione o acceda a Skyview." }] }] },
           { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Visualiza correctamente la vista de Skyview para el cliente apllogistics." }] }] }
         ] },
         { "type": "tableRow", "content": [
