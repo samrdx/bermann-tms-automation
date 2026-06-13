@@ -336,7 +336,23 @@ function Limit-TextAtWordBoundary {
   $cut = $clean.Substring(0, $MaxLength).TrimEnd(' ', '.', ',', ';', ':')
   $lastSpace = $cut.LastIndexOf(' ')
   if ($lastSpace -gt 20) { $cut = $cut.Substring(0, $lastSpace) }
-  return $cut.TrimEnd(' ', '.', ',', ';', ':')
+  return Repair-DanglingTextEnding -Text $cut
+}
+
+function Repair-DanglingTextEnding {
+  param([string]$Text)
+  $clean = Normalize-Whitespace -Text $Text
+  if (-not $clean) { return '' }
+
+  $clean = ($clean -replace '[\s\.,;:\-\u2013\u2014]+$', '').Trim()
+  $danglingPattern = '(?i)\s+(y\s+se|que\s+se|de\s+la|de\s+los|de\s+las|del|de|para|con|por|en|al|a|la|el|los|las|un|una|unos|unas|que|y|o|u|e|se)$'
+  while ($clean -match $danglingPattern) {
+    $next = (($clean -replace $danglingPattern, '') -replace '[\s\.,;:\-\u2013\u2014]+$', '').Trim()
+    if (-not $next -or $next -eq $clean) { break }
+    $clean = $next
+  }
+
+  return $clean
 }
 
 function Normalize-TestCaseDisplayTitle {
@@ -347,7 +363,7 @@ function Normalize-TestCaseDisplayTitle {
   $clean = $clean -replace '\s*;\s*', ' y '
   $clean = $clean -replace '\s*/\s*', ' y '
   $clean = $clean -replace '\s+', ' '
-  return $clean.Trim(' ', '.', ',', ';', ':')
+  return Repair-DanglingTextEnding -Text $clean
 }
 
 function Remove-GwtFragments {
@@ -486,10 +502,10 @@ function New-TestCaseScenarioModel {
   $model = @()
   foreach ($scenario in $Scenarios) {
     $typeLabel = Get-ScenarioTypeLabel -Scenario $scenario
-    $shortTitle = Get-ScenarioShortTitle -Scenario $scenario -Capability $Capability
-    $functionalDescription = Get-ScenarioFunctionalDescription -Scenario $scenario -ShortTitle $shortTitle
-    $summary = "$TestSetKey | TC$($scenario.Number): $typeLabel - $shortTitle"
-    $listItem = "TC$($scenario.Number): $functionalDescription"
+    $shortTitle = Repair-DanglingTextEnding -Text (Get-ScenarioShortTitle -Scenario $scenario -Capability $Capability)
+    $functionalDescription = Repair-DanglingTextEnding -Text (Get-ScenarioFunctionalDescription -Scenario $scenario -ShortTitle $shortTitle)
+    $summary = Repair-DanglingTextEnding -Text "$TestSetKey | TC$($scenario.Number): $typeLabel - $shortTitle"
+    $listItem = Repair-DanglingTextEnding -Text "TC$($scenario.Number): $functionalDescription"
 
     $model += @{
       Number = $scenario.Number
@@ -572,7 +588,7 @@ function Get-GherkinScenariosFromText {
   $source = ([string]$Text) -replace '(?i)(?<!^)(?=\b(Given|Dado|When|Cuando|Then|Entonces)\s+)', "`n"
   if (-not (Normalize-Whitespace -Text $source)) { return $results }
 
-  $pattern = '(?im)(^|[;\r\n])\s*(Given|Dado|When|Cuando|Then|Entonces|And|Y)\s+'
+  $pattern = '(?im)(^|[;,\r\n])\s*(Given|Dado|When|Cuando|Then|Entonces|And|Y)\s+'
   $matches = [regex]::Matches($source, $pattern)
   if ($matches.Count -eq 0) { return $results }
 
@@ -603,6 +619,42 @@ function Get-GherkinScenariosFromText {
   $lastScenario = New-GherkinScenario -Number $number -Steps $current
   if ($lastScenario) { $results += $lastScenario }
   return $results
+}
+
+function New-AcceptanceScenariosFromCriterionText {
+  param(
+    [string]$Text,
+    [int]$StartNumber,
+    [string]$Header = 'Criterio',
+    [string]$ExpectedResult = ''
+  )
+
+  $clean = Normalize-Whitespace -Text $Text
+  if (-not $clean) { return @() }
+
+  $gherkinScenarios = @(Get-GherkinScenariosFromText -Text $clean -StartNumber $StartNumber)
+  if ($gherkinScenarios.Count -gt 0) {
+    $converted = @()
+    foreach ($scenario in $gherkinScenarios) {
+      $copy = @{}
+      foreach ($property in $scenario.Keys) { $copy[$property] = $scenario[$property] }
+      if ($Header) { $copy.Header = $Header }
+      if ($ExpectedResult) { $copy.ExpectedResult = $ExpectedResult }
+      $converted += $copy
+    }
+    return $converted
+  }
+
+  $scenario = @{
+    Number = $StartNumber
+    Header = $Header
+    Description = $clean.Trim(' ', '.', ';', ':')
+    Given = ''
+    When = ''
+    Then = ''
+  }
+  if ($ExpectedResult) { $scenario.ExpectedResult = $ExpectedResult }
+  return @($scenario)
 }
 
 function Test-AcceptanceCriterionParagraph {
@@ -1024,39 +1076,26 @@ function Get-TestScenarios {
         if (($nonEmpty -join ' ') -match '(?i)^(Criterio|Descripci.n|Escenario|Resultado Esperado|Detalle / Escenario)$') { continue }
         if ($nonEmpty.Count -ge 4) {
           # 4 columns: number, criterio, detalle, resultado esperado
-          $scenarioCount++
-          $scenarios += @{
-            Number = $scenarioCount
-            Header = $nonEmpty[1]
-            Description = $nonEmpty[2]
-            Given = ''
-            When = ''
-            Then = ''
-            ExpectedResult = $nonEmpty[3]
+          $newScenarios = @(New-AcceptanceScenariosFromCriterionText -Text $nonEmpty[2] -StartNumber ($scenarioCount + 1) -Header $nonEmpty[1] -ExpectedResult $nonEmpty[3])
+          foreach ($scenario in $newScenarios) {
+            $scenarios += $scenario
+            $scenarioCount = $scenario.Number
           }
         } elseif ($nonEmpty.Count -eq 3) {
           # 3 columns: number, criterio, detalle
-          $scenarioCount++
-          $scenarios += @{
-            Number = $scenarioCount
-            Header = $nonEmpty[1]
-            Description = $nonEmpty[2]
-            Given = ''
-            When = ''
-            Then = ''
+          $newScenarios = @(New-AcceptanceScenariosFromCriterionText -Text $nonEmpty[2] -StartNumber ($scenarioCount + 1) -Header $nonEmpty[1])
+          foreach ($scenario in $newScenarios) {
+            $scenarios += $scenario
+            $scenarioCount = $scenario.Number
           }
         } else {
           # 2 columns: header, description (existing behavior)
           $description = $nonEmpty[1]
           if ($description) {
-            $scenarioCount++
-            $scenarios += @{
-              Number = $scenarioCount
-              Header = $nonEmpty[0]
-              Description = $description
-              Given = ''
-              When = ''
-              Then = ''
+            $newScenarios = @(New-AcceptanceScenariosFromCriterionText -Text $description -StartNumber ($scenarioCount + 1) -Header $nonEmpty[0])
+            foreach ($scenario in $newScenarios) {
+              $scenarios += $scenario
+              $scenarioCount = $scenario.Number
             }
           }
         }
@@ -1068,11 +1107,10 @@ function Get-TestScenarios {
         if ($item.type -ne 'listItem') { continue }
         $text = Get-AdfText -Nodes $item.content
         if ($text -and $text.Trim()) {
-          $scenarioCount++
-          $scenarios += @{
-            Number = $scenarioCount
-            Header = 'Criterio'
-            Description = $text.Trim()
+          $newScenarios = @(New-AcceptanceScenariosFromCriterionText -Text $text.Trim() -StartNumber ($scenarioCount + 1) -Header 'Criterio')
+          foreach ($scenario in $newScenarios) {
+            $scenarios += $scenario
+            $scenarioCount = $scenario.Number
           }
         }
       }
@@ -2067,6 +2105,7 @@ function Invoke-FixtureAnalysis {
     Scenarios = @($dedupedScenarios | ForEach-Object { Normalize-Whitespace -Text $_.Description })
     Summaries = @($scenarioModel | ForEach-Object { $_.Summary })
     ListItems = @($scenarioModel | ForEach-Object { $_.ListItem })
+    GwtSteps = @($scenarioModel | ForEach-Object { @{ Number = $_.Number; Given = $_.Given; When = $_.When; Then = $_.Then } })
     QualityStatus = if ($qualityErrors.Count -eq 0) { 'OK' } else { 'FAIL' }
     QualityErrors = $qualityErrors
     Diff = $diffResult

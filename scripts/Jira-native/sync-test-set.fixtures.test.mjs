@@ -79,3 +79,28 @@ test('flags invalid existing Test Case summaries', () => {
   assert.equal(analysis.QualityStatus, 'FAIL');
   assert.match(analysis.QualityErrors.join('\n'), /Existing Test Case summary does not match/);
 });
+
+test('cleans dangling endings and preserves Spanish Gherkin like BS-2667', () => {
+  const analysis = analyzeFixture('bs-2667-skyview-gherkin.json');
+
+  assert.equal(analysis.QualityStatus, 'OK', analysis.QualityErrors.join('\n'));
+  assert.equal(analysis.ScenarioCount, 4);
+
+  const danglingEnding = /\s(?:y(?:\s+se)?|de|con|para|por|en|al|a|la|el|los|las|un|una|que|se)$/i;
+  for (const text of [...analysis.Summaries, ...analysis.ListItems]) {
+    assert.doesNotMatch(text, danglingEnding, text);
+  }
+  assert.equal(
+    analysis.Summaries[2],
+    'QA-876 | TC3: Happy path - Recorren las funciones de Skyview disponibles para apllogistics',
+  );
+  assert.doesNotMatch(analysis.ListItems[2], /\sy\s+se$/i, analysis.ListItems[2]);
+
+  const tc1 = analysis.GwtSteps.find((step) => step.Number === 1);
+  assert.ok(tc1, 'TC1 GWT steps were not returned by fixture analysis');
+  assert.match(tc1.Given, /usuario ingresa desde su cuenta SSO personal/i);
+  assert.match(tc1.When, /seleccione o acceda a Skyview/i);
+  assert.match(tc1.Then, /visualiza correctamente la vista de Skyview/i);
+  assert.doesNotMatch(tc1.Given, /funcionalidad de Dado Que/i);
+  assert.doesNotMatch(tc1.When, /Dado que.*cuando/i);
+});

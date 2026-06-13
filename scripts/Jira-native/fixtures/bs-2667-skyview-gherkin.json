@@ -1,0 +1,44 @@
+{
+  "parentKey": "BS-2667",
+  "parentSummary": "Validar acceso a Skyview para cliente apllogistics",
+  "testSetKey": "QA-876",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Criterios de Aceptacion" }] },
+      { "type": "table", "content": [
+        { "type": "tableRow", "content": [
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "#" }] }] },
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Criterio" }] }] },
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Detalle" }] }] },
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Resultado Esperado" }] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "1" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Acceso a Skyview" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Dado que el usuario ingresa desde su cuenta SSO personal y tiene agregado el cliente apllogistics, cuando seleccione o acceda a Skyview, entonces visualiza correctamente la vista de Skyview para el cliente apllogistics." }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Visualiza correctamente la vista de Skyview para el cliente apllogistics." }] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "2" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Ingreso" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Ingresó correctamente a Skyview con el cliente apllogistics y se valida que la sesión cargue la información principal del portal." }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "La sesión queda activa y muestra la información principal del portal." }] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "3" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Funciones" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Recorren las funciones de Skyview disponibles para apllogistics y se confirma que cada opción habilitada responda correctamente." }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Cada opción habilitada responde correctamente." }] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "4" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Navegacion" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Valida navegación de Skyview para apllogistics con accesos directos visibles para usuarios autorizados con permisos del cliente." }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Los accesos directos visibles funcionan para usuarios autorizados." }] }] }
+        ] }
+      ] }
+    ]
+  }
+}
