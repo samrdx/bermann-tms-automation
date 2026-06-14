@@ -471,6 +471,37 @@ function Get-ScenarioShortTitle {
   return ConvertTo-TitleCaseInitial -Text $candidate
 }
 
+function Get-ScenarioOutcomeTitleSuffix {
+  param($Scenario)
+  $candidate = Remove-GwtFragments -Text $Scenario.Then
+  if (-not $candidate) { $candidate = Remove-GwtFragments -Text $Scenario.ExpectedResult }
+  if (-not $candidate -and $Scenario.Description -match ';\s*(.+)$') { $candidate = Remove-GwtFragments -Text $Matches[1] }
+  if (-not $candidate) { return '' }
+
+  $candidate = $candidate -replace '(?i)^(debe\s+)?(mostrar|muestra|visualizar|ver|cargar|desplegar|presentar|indicar|informar)\s+', ''
+  $candidate = $candidate -replace '(?i)^correctamente\s+', ''
+  $candidate = $candidate -replace '(?i)^(el|la|los|las)\s+', ''
+  $candidate = $candidate.Trim(' ', '.', ',', ';', ':')
+  $candidate = Normalize-TestCaseDisplayTitle -Text $candidate
+  $candidate = Limit-TextAtWordBoundary -Text $candidate -MaxLength 45
+  return ConvertTo-TitleCaseInitial -Text $candidate
+}
+
+function Get-ScenarioDisambiguatedShortTitle {
+  param($Scenario, [string]$ShortTitle)
+  $title = Normalize-Whitespace -Text $ShortTitle
+  $suffix = Get-ScenarioOutcomeTitleSuffix -Scenario $Scenario
+  if (-not $title -or -not $suffix) { return $title }
+
+  $titleKey = Normalize-SemanticText -Text $title
+  $suffixKey = Normalize-SemanticText -Text $suffix
+  if (-not $suffixKey -or $titleKey.Contains($suffixKey)) { return $title }
+
+  $baseMaxLength = [Math]::Max(25, 80 - $suffix.Length - 3)
+  $base = Limit-TextAtWordBoundary -Text $title -MaxLength $baseMaxLength
+  return Repair-DanglingTextEnding -Text "$base - $suffix"
+}
+
 function Get-ScenarioFunctionalDescription {
   param($Scenario, [string]$ShortTitle)
   $source = Normalize-Whitespace -Text "$($Scenario.Description) $($Scenario.When) $($Scenario.Then)"
@@ -507,10 +538,33 @@ function New-TestCaseScenarioModel {
     [array]$Scenarios
   )
 
-  $model = @()
+  $entries = @()
+  $shortTitleCounts = @{}
   foreach ($scenario in $Scenarios) {
     $typeLabel = Get-ScenarioTypeLabel -Scenario $scenario
     $shortTitle = Repair-DanglingTextEnding -Text (Get-ScenarioShortTitle -Scenario $scenario -Capability $Capability)
+    $shortTitleKey = Normalize-SemanticText -Text $shortTitle
+    if ($shortTitleKey) {
+      if (-not $shortTitleCounts.ContainsKey($shortTitleKey)) { $shortTitleCounts[$shortTitleKey] = 0 }
+      $shortTitleCounts[$shortTitleKey]++
+    }
+
+    $entries += @{
+      Scenario = $scenario
+      TypeLabel = $typeLabel
+      ShortTitle = $shortTitle
+      ShortTitleKey = $shortTitleKey
+    }
+  }
+
+  $model = @()
+  foreach ($entry in $entries) {
+    $scenario = $entry.Scenario
+    $typeLabel = $entry.TypeLabel
+    $shortTitle = $entry.ShortTitle
+    if ($entry.ShortTitleKey -and $shortTitleCounts[$entry.ShortTitleKey] -gt 1) {
+      $shortTitle = Get-ScenarioDisambiguatedShortTitle -Scenario $scenario -ShortTitle $shortTitle
+    }
     $functionalDescription = Repair-DanglingTextEnding -Text (Get-ScenarioFunctionalDescription -Scenario $scenario -ShortTitle $shortTitle)
     $summary = Repair-DanglingTextEnding -Text "$TestSetKey | TC$($scenario.Number): $typeLabel - $shortTitle"
     $listItem = Repair-DanglingTextEnding -Text "TC$($scenario.Number): $functionalDescription"

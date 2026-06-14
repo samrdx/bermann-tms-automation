@@ -22,6 +22,33 @@
             { "type": "text", "text": "When el usuario selecciona un icono de movimiento o detencion en Playback" },
             { "type": "text", "text": "Then el sistema muestra la informacion de nivel de combustible del evento seleccionado" }
           ] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "2" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Porcentaje de estanque en Playback" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [
+            { "type": "text", "text": "Given un evento de Playback con telemetria de estanque recibida" },
+            { "type": "text", "text": "When el usuario consulta un evento en Playback" },
+            { "type": "text", "text": "Then el sistema debe mostrar correctamente el porcentaje de nivel de estanque recibido" }
+          ] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "3" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Litros de estanque en Playback" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [
+            { "type": "text", "text": "Given un evento de Playback con telemetria de estanque recibida" },
+            { "type": "text", "text": "When el usuario consulta un evento en Playback" },
+            { "type": "text", "text": "Then el sistema debe mostrar correctamente los litros de nivel de estanque recibido" }
+          ] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "4" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Fecha de estanque en Playback" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [
+            { "type": "text", "text": "Given un evento de Playback con telemetria de estanque recibida" },
+            { "type": "text", "text": "When el usuario consulta un evento en Playback" },
+            { "type": "text", "text": "Then el sistema debe mostrar correctamente la fecha de recepcion de nivel de estanque" }
+          ] }] }
         ] }
       ] }
     ]
