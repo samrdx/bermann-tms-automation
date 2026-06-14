@@ -62,7 +62,7 @@ npm run jira:validate -- QA-782 TMSPROD-2054
 | `sync` | Llama `sync-test-set.ps1` sin flags de no-write. | Solo después de validar el plan. |
 | `sync-comment` | Llama `sync-test-set.ps1 -CommentResult`. | Cuando querés dejar auditoría visible en el Test Set. |
 
-Los comentarios de auditoría estructurados están en BETA y son opt-in: solo se publican con `sync-comment` / `-CommentResult`. `validate` y `dry-run` mantienen cero escrituras; si se combinan manualmente con `-CommentResult`, muestran que el comentario se habría publicado sin escribir en Jira. El rollout automático por Jira Automation existe como flujo asistido en `.github/workflows/jira-native-testset.yml`, activado al marcar el campo **Test Set Refining → OK** en un Test Set existente.
+Los comentarios de auditoría estructurados están en BETA y son opt-in: solo se publican con `sync-comment` / `-CommentResult`. `validate` y `dry-run` mantienen cero escrituras; si se combinan manualmente con `-CommentResult`, muestran que el comentario se habría publicado sin escribir en Jira. El rollout automático por Jira Automation existe como flujo asistido en `.github/workflows/jira-native-testset.yml`, activado al marcar el campo **Test Set Refining → OK** o **Test Set Refining → Resync** en un Test Set existente.
 
 ## Remediación de duplicados
 
@@ -105,6 +105,7 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 | V1 done | Runner por webhook de Jira Automation. | Trigger por campo **Test Set Refining → OK** (`customfield_11780`) via `repository_dispatch`. |
 | BETA done | Diff lógico de ADF. | Compara texto, secciones y Test Cases esperados para reducir falsos positivos por normalización de Jira. |
 | BETA done | Comentarios de auditoría estructurados. | Comentario ADF escaneable y opt-in vía `sync-comment`; Automation queda pendiente. |
+| V1 done | Opción **Resync** en Test Set Refining para re-sincronizar TS existentes sin desmarcar OK. | Workflow descheckea Resync automáticamente post-sync. |
 | Pendiente | Expandir mapper de escenarios de dominio. | Mejorar extracción para módulos y formatos de historias nuevos. |
 | BETA done (audit-only) | Comando de remediación de duplicados existentes. | `jira:duplicates` detecta duplicados históricos sin escrituras y recomienda revisión segura. |
 | BETA done | Comentario de recomendación para duplicados existentes. | `jira:duplicates:comment` publica solo comentario opt-in; `-DryRun` previsualiza sin escribir. |
@@ -114,16 +115,28 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 
 ## Jira Automation asistida (V1)
 
-El workflow `.github/workflows/jira-native-testset.yml` permite disparar el flujo Jira-native desde GitHub Actions cuando se marca el campo **Test Set Refining → OK** en un Test Set. Es una automatización BETA asistida: valida el Test Set existente, sincroniza con comentario de auditoría y vuelve a validar. No crea un Test Set nuevo en este modo. Si cualquier quality gate falla, el job falla y deja logs como artefacto para revisión manual.
+El workflow `.github/workflows/jira-native-testset.yml` permite disparar el flujo Jira-native desde GitHub Actions cuando se marca el campo **Test Set Refining** en un Test Set. Soporta dos triggers:
+
+| Checkbox | Comportamiento |
+| --- | --- |
+| **OK** | Sync normal: valida, sincroniza y comenta. |
+| **Resync** | Re-sync cuando el TS ya estaba en OK y necesita actualizarse (ej: se corrigió un bug de parsing). Corre el mismo flujo que OK pero después el workflow **descheckea Resync automáticamente** para que pueda volver a usarse. |
 
 La única precondición manual es que el Test Set esté vinculado a la Historia/ticket fuente mediante el link Jira correspondiente. El campo **Tarea original** no es una precondición manual: durante el sync, el script descubre el ticket fuente desde los links de Jira y completa o actualiza **Tarea original** automáticamente.
 
-### Regla Jira sugerida
+### Regla 1: OK (existente — no tocar)
 
 1. Trigger: `Field value changed` → campo **Test Set Refining** (`customfield_11780`).
-2. Condition: el nuevo valor del campo es `OK`.
+2. Condition: el cambio agregó `OK` al campo, no solo que el valor final contiene `OK`.
 3. Action: `Send web request` hacia GitHub `repository_dispatch`.
-4. No agregues reglas que borren, cierren o reparen Test Cases automáticamente desde este trigger.
+
+### Regla 2: Resync (nueva — crear)
+
+1. Trigger: `Field value changed` → campo **Test Set Refining** (`customfield_11780`).
+2. Condition: el cambio agregó `Resync` al campo, no solo que el valor final contiene `Resync`.
+3. Action: `Send web request` hacia GitHub `repository_dispatch`.
+
+No agregues reglas que borren, cierren o reparen Test Cases automáticamente desde este trigger. El cleanup de Resync lo hace el workflow automáticamente. Esto evita doble dispatch cuando el workflow limpia `Resync` y el campo queda nuevamente solo con `OK`.
 
 ### Web request a GitHub
 
@@ -154,6 +167,8 @@ Payload:
 }
 ```
 
+> El payload es idéntico para OK y Resync. El workflow usa el mismo modo `sync-existing` en ambos casos; la única diferencia es que tras un Resync exitoso, el workflow descheckea `Resync` automáticamente vía Jira API.
+
 Para una ejecución manual desde GitHub Actions, usá `workflow_dispatch` con `parentKey` en los modos `full` y `dry-run`, o con `testSetKey` en los modos `validate-only` y `sync-existing`. El modo `dry-run` previsualiza creación sin escribir en Jira. El modo `sync-existing` no crea Test Sets: valida, sincroniza el Test Set indicado con comentario de auditoría y vuelve a validar.
 
 ### Secrets requeridos
@@ -167,12 +182,13 @@ Para una ejecución manual desde GitHub Actions, usá `workflow_dispatch` con `p
 
 ### Guardrails BETA
 
-- El trigger recomendado es marcar **Test Set Refining → OK**; no debe mutar otros campos por su cuenta.
+- El trigger recomendado es marcar **Test Set Refining → OK** o **→ Resync**; no debe mutar otros campos por su cuenta.
 - El workflow ejecuta `npm run test:jira-native` antes de tocar Jira.
 - El sync real corre solo después de `jira:validate` exitoso.
 - El workflow vuelve a validar después del sync para detectar inconsistencias o problemas de idempotencia.
 - No hay deletes ni reparaciones ciegas. Las reglas de duplicados siguen siendo comandos separados con aprobación explícita.
 - En falla, revisar el resumen del job y el artefacto `jira-native-testset-logs` antes de reintentar.
+- El cleanup de Resync lo hace el workflow automáticamente: después del sync, lee el campo, filtra el option `Resync` y hace PUT si estaba presente.
 
 ## Referencia técnica
 

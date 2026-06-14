@@ -160,6 +160,40 @@ jobs:
           $output | Tee-Object -FilePath 'artifacts/jira-native/30-validate-existing-after-sync.log'
           if ($exitCode -ne 0) { exit $exitCode }
 
+      - name: Clear Resync flag after sync
+        if: steps.inputs.outputs.mode == 'sync-existing'
+        shell: pwsh
+        env:
+          RESYNC_OPTION_ID: '12381'
+        run: |
+          $testSetKey = '${{ steps.inputs.outputs.test_set_key }}'
+          $jiraUrl = "$env:JIRA_URL".TrimEnd('/')
+          $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${env:JIRA_EMAIL}:${env:JIRA_API_TOKEN}"))
+
+          $issue = Invoke-RestMethod -Uri "$jiraUrl/rest/api/3/issue/$testSetKey`?fields=customfield_11780" -Headers @{Authorization = "Basic $auth"} -ErrorAction Stop
+          $currentValues = $issue.fields.customfield_11780
+
+          if (-not $currentValues) {
+            Write-Host 'No values in Test Set Refining, nothing to clean.'
+            return
+          }
+
+          $hasResync = $currentValues | Where-Object { $_.id -eq $env:RESYNC_OPTION_ID }
+          if (-not $hasResync) {
+            Write-Host 'Resync not checked, no cleanup needed.'
+            return
+          }
+
+          $newValues = @(
+            $currentValues |
+              Where-Object { $_.id -ne $env:RESYNC_OPTION_ID } |
+              ForEach-Object { @{id = "$($_.id)"} }
+          )
+          $body = @{fields = @{customfield_11780 = $newValues}} | ConvertTo-Json -Depth 10 -Compress
+          Write-Host 'Removing Resync from Test Set Refining...'
+          Invoke-RestMethod -Uri "$jiraUrl/rest/api/3/issue/$testSetKey" -Method Put -Body $body -Headers @{Authorization = "Basic $auth"; 'Content-Type' = 'application/json'} -ErrorAction Stop | Out-Null
+          Write-Host 'Resync flag cleared successfully.'
+
       - name: Preview Test Set creation
         if: steps.inputs.outputs.mode == 'dry-run'
         shell: pwsh
