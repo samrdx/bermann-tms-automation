@@ -320,6 +320,14 @@ function Normalize-GherkinStepText {
   return $clean.TrimEnd('.')
 }
 
+function Repair-GluedGherkinKeywords {
+  param([string]$Text)
+  if (-not $Text) { return '' }
+  $clean = [string]$Text
+  $clean = $clean -creplace '(?<=[\p{L}\p{Nd}])(?=(Given|When|Then|And|Dado|Cuando|Entonces|Y)\s+)', "`n"
+  return $clean
+}
+
 function ConvertTo-TitleCaseInitial {
   param([string]$Text)
   $clean = Normalize-Whitespace -Text $Text
@@ -585,7 +593,8 @@ function New-GherkinScenario {
 function Get-GherkinScenariosFromText {
   param([string]$Text, [int]$StartNumber = 1)
   $results = @()
-  $source = ([string]$Text) -replace '(?i)(?<!^)(?=\b(Given|Dado|When|Cuando|Then|Entonces)\s+)', "`n"
+  $source = Repair-GluedGherkinKeywords -Text ([string]$Text)
+  $source = $source -replace '(?i)(?<!^)(?=\b(Given|Dado|When|Cuando|Then|Entonces)\s+)', "`n"
   if (-not (Normalize-Whitespace -Text $source)) { return $results }
 
   $pattern = '(?im)(^|[;,\r\n])\s*(Given|Dado|When|Cuando|Then|Entonces|And|Y)\s+'

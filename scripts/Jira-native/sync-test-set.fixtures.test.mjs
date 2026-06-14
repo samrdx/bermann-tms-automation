@@ -111,3 +111,24 @@ test('cleans dangling endings and preserves Spanish Gherkin like BS-2667', () =>
   assert.equal(tc1UpdatePlan.DescriptionChanged, true);
   assert.deepEqual(tc1UpdatePlan.Fields, ['description']);
 });
+
+test('parses glued English Gherkin keywords like BS-2668', () => {
+  const analysis = analyzeFixture('bs-2668-glued-english-gherkin.json');
+
+  assert.equal(analysis.QualityStatus, 'OK', analysis.QualityErrors.join('\n'));
+  assert.equal(analysis.ScenarioCount, 1);
+  assert.equal(
+    analysis.Summaries[0],
+    'QA-897 | TC1: Happy path - Selecciona un icono de movimiento o detencion en Playback',
+  );
+  assert.doesNotMatch(analysis.Summaries[0], /\b(Given|When|Then|And)\b|\w(?:Given|When|Then|And)\b/i);
+
+  const tc1 = analysis.GwtSteps.find((step) => step.Number === 1);
+  assert.ok(tc1, 'TC1 GWT steps were not returned by fixture analysis');
+  assert.match(tc1.Given, /vehiculo con CANBus activo/i);
+  assert.match(tc1.Given, /existe informacion de nivel de combustible/i);
+  assert.match(tc1.When, /selecciona un icono de movimiento o detencion en Playback/i);
+  assert.match(tc1.Then, /muestra la informacion de nivel de combustible del evento seleccionado/i);
+  assert.doesNotMatch(`${tc1.Given} ${tc1.When} ${tc1.Then}`, /\w(?:Given|When|Then|And)\b/i);
+  assert.doesNotMatch(tc1.Given, /funcionalidad de Given/i);
+});

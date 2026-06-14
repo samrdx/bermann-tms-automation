@@ -1,0 +1,29 @@
+{
+  "parentKey": "BS-2668",
+  "parentSummary": "Validar informacion de nivel de combustible en Playback",
+  "testSetKey": "QA-897",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      { "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "Criterios de Aceptacion" }] },
+      { "type": "table", "content": [
+        { "type": "tableRow", "content": [
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "#" }] }] },
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Criterio" }] }] },
+          { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Detalle" }] }] }
+        ] },
+        { "type": "tableRow", "content": [
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "1" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Nivel de combustible en Playback" }] }] },
+          { "type": "tableCell", "content": [{ "type": "paragraph", "content": [
+            { "type": "text", "text": "Given Un vehiculo con CANBus activo" },
+            { "type": "text", "text": "And existe informacion de nivel de combustible para el evento consultado" },
+            { "type": "text", "text": "When el usuario selecciona un icono de movimiento o detencion en Playback" },
+            { "type": "text", "text": "Then el sistema muestra la informacion de nivel de combustible del evento seleccionado" }
+          ] }] }
+        ] }
+      ] }
+    ]
+  }
+}
