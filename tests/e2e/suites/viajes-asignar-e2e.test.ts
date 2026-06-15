@@ -206,26 +206,7 @@ test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
 
 
         // --> FIX: Detectar y aceptar Modal de Confirmación "Estado Finalizado" <--
-
-        try {
-
-            // Buscamos botones comunes de confirmación (bootbox, sweetalert o nativos)
-
-            const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")').first();
-
-            if (await btnConfirmar.isVisible({ timeout: 5000 })) {
-
-                logger.info('⚠️ Modal confirmación detectado. Aceptando...');
-
-                await btnConfirmar.click();
-
-            }
-
-        } catch (e) {
-
-            logger.info('ℹ️ No apareció el modal de confirmación.');
-
-        }
+        await asignarPage.confirmarAsignacionSiApareceDialogo();
 
 
 

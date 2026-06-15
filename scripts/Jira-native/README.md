@@ -112,6 +112,7 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 | BETA done | CRUD aprobado para cerrar/etiquetar duplicados existentes. | `duplicates-close` con `-Approved` automático; transition + label + comentario de resumen; nunca hard delete; preview con `-Approved -DryRun`. |
 | BETA done | Tests CI/script para fixtures de extracción de escenarios. | `npm run test:jira-native` cubre extracción, deduplicación, naming, diff lógico y quality gates con fixtures locales. |
 | BETA done | Normalización rica de español/acentos y guía UTF-8. | Forzar UTF-8 en consola y lectura de `.env` para evitar mojibake en Windows. |
+| Pendiente | Parsing y soporte de tickets de tipo Bug/Fallo. | Soportar la extracción de escenarios desde la plantilla estándar de bugs (con buena data y con datos vacíos o incompleta) sin romper la sincronización. |
 
 ## Jira Automation asistida (V1)
 

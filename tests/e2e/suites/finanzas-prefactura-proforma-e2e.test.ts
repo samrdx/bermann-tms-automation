@@ -17,7 +17,7 @@ const PROFORMA_ID_REGEX = /^\d+$/;
  *
  * Esta suite genera su propio ecosistema por UI automatizada y valida la cadena:
  * entidades -> contratos -> viaje -> asignación -> finalización -> prefactura -> proforma.
- * No depende de archivos de seed compartidos: construye su contexto de negocio de forma autónoma.
+ * No depende de archivos de seed compartidos: construye su contexto de negocio de forma autónoma a través de flujos UI.
  */
 test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
   test.setTimeout(720000);

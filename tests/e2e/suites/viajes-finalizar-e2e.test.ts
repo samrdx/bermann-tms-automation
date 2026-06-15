@@ -19,7 +19,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     await allure.feature('Flujo Completo Atómico');
     await allure.story('Crear → Asignar → Finalizar Viaje');
     await allure.parameter('Ambiente', process.env.ENV || 'QA');
-    logger.fase(1, 'Preparación de Datos (API)');
+    logger.fase(1, 'Preparación de Datos (UI seed)');
 
     logger.paso('Creando ecosistema de datos de prueba...');
 
@@ -178,15 +178,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
     await guardarBtn.evaluate((el: HTMLElement) => el.click());
 
     // 1.4.8 Manejar modal de confirmación (bootbox / sweetalert)
-    try {
-      const btnConfirmar = page.locator('.bootbox-accept, button:has-text("Aceptar"), button:has-text("Confirmar")').first();
-      if (await btnConfirmar.isVisible({ timeout: 5000 })) {
-        logger.info('Modal de confirmación detectado. Aceptando...');
-        await btnConfirmar.evaluate((el: HTMLElement) => el.click());
-      }
-    } catch {
-      logger.info('No apareció modal de confirmación.');
-    }
+    await asignarPage.confirmarAsignacionSiApareceDialogo();
 
     // 1.4.9 Validar que NO aparezca error de "Sin Contrato"
     const errorContrato = page.locator('text="Transportista sin contrato"');

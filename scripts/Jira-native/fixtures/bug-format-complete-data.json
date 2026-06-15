@@ -1,0 +1,137 @@
+{
+  "parentKey": "BUG-1001",
+  "parentSummary": "La columna Temperatura actual no se refresca automáticamente",
+  "testSetKey": "QA-1001",
+  "description": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "🧠 Descripción del bug" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Cliente reporta que columna de Temperatura actual, no se actualiza cuando la plataforma hace el refresco, para poder visualizar la información nueva, debe actualizar manualmente el reporte" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "🧭 Prioridad" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Media 🟠" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "💥 Severidad" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": " Menor" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "🧩 Entorno" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Ambiente:  Producción" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Sistema operativo: Windows 11" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Navegador / App versión: Google Chrome 1" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Usuario / Rol: Admin" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "🔁 Pasos para reproducir" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Ingreso a Skyview" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Ingreso a Control de Temperatura" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Actualizar" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Resultado actual:" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "La plataforma no está actualizando automáticamente los datos de la columna Temperatura Actual, para visualizar la nueva temperatura de el reporte, hay que actualizar de forma manual en el botón superior" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Resultado esperado:" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Si se encuentra un nuevo evento de temperatura cuando se refresca la plataforma, este debe modificar a información de la grilla." }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "🧪 Datos de prueba utilizados" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          { "type": "text", "text": "Usuario: trastlogistics01 | Contraseña: Trast.2025* | Patente: GRFR-87" }
+        ]
+      }
+    ]
+  }
+}
