@@ -111,7 +111,7 @@ El script falla o avisa antes de escribir cuando detecta problemas relevantes:
 | BETA done | Comentario de recomendación para duplicados existentes. | `jira:duplicates:comment` publica solo comentario opt-in; `-DryRun` previsualiza sin escribir. |
 | BETA done | CRUD aprobado para cerrar/etiquetar duplicados existentes. | `duplicates-close` con `-Approved` automático; transition + label + comentario de resumen; nunca hard delete; preview con `-Approved -DryRun`. |
 | BETA done | Tests CI/script para fixtures de extracción de escenarios. | `npm run test:jira-native` cubre extracción, deduplicación, naming, diff lógico y quality gates con fixtures locales. |
-| Pendiente | Normalización rica de español/acentos y guía UTF-8. | Reducir problemas por acentos, mojibake y consola Windows. |
+| BETA done | Normalización rica de español/acentos y guía UTF-8. | Forzar UTF-8 en consola y lectura de `.env` para evitar mojibake en Windows. |
 
 ## Jira Automation asistida (V1)
 

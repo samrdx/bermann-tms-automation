@@ -44,6 +44,11 @@ param(
   [string]$ProjectKey = 'QA'
 )
 
+# --- UTF-8 encoding: ensure correct display of Spanish accents and emojis ---
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
+
 function Get-JiraAuthHeaders {
   param([string]$EnvFilePath)
   if (-not $EnvFilePath -or -not (Test-Path -LiteralPath $EnvFilePath)) {
@@ -58,7 +63,7 @@ function Get-JiraAuthHeaders {
   }
   if (-not (Test-Path -LiteralPath $EnvFilePath)) { throw 'Cannot find .env file' }
 
-  $lines = Get-Content -LiteralPath $EnvFilePath
+  $lines = Get-Content -LiteralPath $EnvFilePath -Encoding UTF8
   $urlLine = $lines | Where-Object { $_ -like 'JIRA_URL=*' } | Select-Object -First 1
   $emailLine = $lines | Where-Object { $_ -like 'JIRA_EMAIL=*' } | Select-Object -First 1
   $tokenLine = $lines | Where-Object { $_ -like 'JIRA_API_TOKEN=*' } | Select-Object -First 1

@@ -50,6 +50,11 @@ param(
   [switch]$AnalyzeFixture
 )
 
+# --- UTF-8 encoding: ensure correct display of Spanish accents and emojis ---
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
+
 $noWrite = $DryRun -or $ValidateOnly
 $auditLabel = if ($ValidateOnly) { 'VALIDATE ONLY' } elseif ($DryRun) { 'DRY RUN' } else { 'SYNC' }
 
@@ -66,7 +71,7 @@ function Get-JiraAuthHeaders {
     }
   }
   if (-not (Test-Path -LiteralPath $EnvFilePath)) { throw "Cannot find .env file" }
-  $lines = Get-Content -LiteralPath $EnvFilePath
+  $lines = Get-Content -LiteralPath $EnvFilePath -Encoding UTF8
   $url = ($lines | Where-Object { $_ -like 'JIRA_URL=*' } | Select-Object -First 1).Substring(9).Trim()
   $email = ($lines | Where-Object { $_ -like 'JIRA_EMAIL=*' } | Select-Object -First 1).Substring(11).Trim()
   $token = ($lines | Where-Object { $_ -like 'JIRA_API_TOKEN=*' } | Select-Object -First 1).Substring(15).Trim()
