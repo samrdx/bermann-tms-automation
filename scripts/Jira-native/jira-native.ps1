@@ -20,6 +20,11 @@ param(
   [string]$ParentIssueKey
 )
 
+# --- UTF-8 encoding: ensure correct display of Spanish accents and emojis ---
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
+
 function Show-Help {
   Write-Host 'Jira-native Test Set sync dispatcher' -ForegroundColor Cyan
   Write-Host ''
