@@ -40,27 +40,22 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
-      - name: Run QA regression ops
-        env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
-          CI: true
-          ENV: QA
-        run: npm run qa:regression:ops
-
-      - name: Run QA regression finanzas
-        env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
-          CI: true
-          ENV: QA
-        run: npm run qa:regression:finanzas
-
-      - name: Run QA regression ultima milla
+      - name: Run QA regressions unificados
         env:
           TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
           TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
           ULTIMAMILLA_ENABLE_MUTATION: 'true'
           CI: true
           ENV: QA
-        run: npm run qa:regression:ultimamilla
+        run: npm run qa:regression:ops:full
+
+      - name: Upload Allure Report and Playwright Evidences
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-qa-reports-${{ github.run_id }}
+          path: |
+            allure-report-qa/
+            test-results-qa/
+            logs/
+          retention-days: 7

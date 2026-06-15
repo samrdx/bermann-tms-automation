@@ -136,6 +136,27 @@ El helper `DataPathHelper` debe priorizar los nombres de archivos de pre-carga d
 - AND the second candidate MUST be the legacy name (e.g. `legacy-entities-data-qa.json`)
 - AND the same order MUST apply to base seed files.
 
+### REQ-10: Nightly Unified Execution
+
+El workflow de regresión nocturna MUST ejecutar el pipeline de regresión unificado para asegurar el correcto aislamiento y empaquetamiento final del reporte de Allure.
+
+#### Scenario: Running nightly QA regressions unified
+- GIVEN a scheduled trigger or manual execution of the nightly regressions workflow
+- WHEN the job runs on GitHub Actions
+- THEN it MUST execute the single unified command `npm run qa:regression:ops:full`
+- AND it MUST NOT call individual regression steps (`ops`, `finanzas`, `ultimamilla`) as separate runner commands.
+
+### REQ-11: Nightly Artifact Archiving
+
+El workflow de regresión nocturna MUST guardar y archivar los reportes de Allure y las evidencias visuales ante cualquier resultado de la ejecución (éxito o fallo).
+
+#### Scenario: Uploading HTML reports and Playwright media artifacts
+- GIVEN a completed run of `npm run qa:regression:ops:full`
+- WHEN the workflow runs its teardown phase
+- THEN it MUST upload `allure-report-qa/` directory containing the static HTML dashboard
+- AND it MUST upload `test-results-qa/` containing screenshots, traces, and videos of failed tests
+- AND this step MUST execute regardless of the test suite outcome (`always()`).
+
 ## Non-Requirements
 
 - No new massive test files MUST be created; the existing `viajes-finalizar-e2e.test.ts` SHALL be reused.
