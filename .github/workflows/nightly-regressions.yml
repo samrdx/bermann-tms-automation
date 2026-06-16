@@ -49,6 +49,15 @@ jobs:
           ENV: QA
         run: npm run qa:regression:ops:full
 
+      - name: Run QA Finanzas Full E2E (Critical Flow)
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
+          ULTIMAMILLA_ENABLE_MUTATION: 'true'
+          CI: true
+          ENV: QA
+        run: npm run qa:e2e:finanzas-full
+
       - name: Upload Allure Report and Playwright Evidences
         if: always()
         uses: actions/upload-artifact@v4

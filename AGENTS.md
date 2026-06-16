@@ -92,6 +92,7 @@ Load the relevant skill before generating code.
 6. Do not use `.fill()` on readonly date inputs unless the skill pattern explicitly allows it.
 7. Wait after cascading selections when the UI needs server-side refresh.
 8. Prefer stable, documented commands from `package.json` over ad-hoc Playwright CLI commands.
+9. Always execute SDD in `interactive` mode, using `hybrid` artifact store (both local files in `openspec/` and memory in `engram`), and checking PR sizes via `ask-on-risk` (400-line budget limit).
 
 ---
 
