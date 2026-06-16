@@ -8,7 +8,7 @@ const logger = createLogger("PlanificarViajesPage");
 export interface TramoInput {
 	origen: string;
 	destino: string;
-	fechaEntradaOrigen?: string; // yyyy-mm-dd
+	fechaEntradaOrigen?: string; // DD/MM/AAAA
 	kgOrigen?: string;
 	kgDestino?: string;
 	transportista?: string;
@@ -74,6 +74,7 @@ export class PlanificarPage extends BasePage {
 		// Acciones
 		btnGuardar: "#btn_guardar_form",
 		spinner: "#modalCargando",
+		multiplicadorRegistro: "#factor_multiplicador",
 	};
 
 	constructor(page: Page) {
@@ -120,6 +121,17 @@ export class PlanificarPage extends BasePage {
 		const nroViaje = nro || String(Math.floor(10000 + Math.random() * 90000));
 		logger.info(`Completando Nro Viaje: ${nroViaje}`);
 		await this.fill(this.selectors.nroViaje, nroViaje);
+	}
+
+	async setMultiplicador(n: number): Promise<void> {
+		logger.info(`Configurando Multiplicador de registro: ${n}`);
+		const input = this.page.locator(this.selectors.multiplicadorRegistro);
+		await input.waitFor({ state: "visible", timeout: 5000 });
+		await input.fill(String(n));
+		await input.dispatchEvent("change");
+		await input.blur();
+		const currentValue = await input.inputValue();
+		expect(Number(currentValue)).toBe(n);
 	}
 
 	private async waitForLoading(timeout: number = 20000): Promise<void> {
@@ -934,8 +946,8 @@ export class PlanificarPage extends BasePage {
 			if (cardText.includes(tramo.origen) && cardText.includes(tramo.destino)) {
 				found = true;
 				if (tramo.kg && !cardText.includes(tramo.kg)) {
-					logger.warn(
-						`⚠️ Tramo encontrado pero el KG [${tramo.kg}] no es visible en la card. Texto real: ${cardText}`,
+					throw new Error(
+						`❌ Tramo encontrado pero el KG esperado [${tramo.kg}] no está presente en la card. Texto real: ${cardText}`,
 					);
 				}
 				if (tramo.transportista && !cardText.includes(tramo.transportista)) {

@@ -289,6 +289,10 @@ test.describe("[V01] Viajes - Planificar", () => {
 			// We'll capture the ID from the first row of the grid instead
 			await viajesAsignarPage.navigate();
 
+			// Filtrar por cliente para mayor precisión
+			logger.info(`Filtrando grilla de asignación por cliente: ${clienteNombre}`);
+			await viajesAsignarPage.selectClienteFilter(clienteNombre);
+
 			let searchTerm = nroViaje;
 			let internalGridId: string | null = null;
 			if (isDemo) {
@@ -389,5 +393,202 @@ test.describe("[V01] Viajes - Planificar", () => {
 		logger.info(`   Ruta: ${config.ruta}`);
 		logger.info(`   Status: PLANIFICADO`);
 		logger.info("=".repeat(80));
+	});
+
+	test("Debe planificar un nuevo Viaje con multiplicador de registro = 2", async ({
+		viajesPlanificarPage,
+		viajesAsignarPage,
+		page,
+	}, testInfo) => {
+		const startTime = Date.now();
+		await allure.epic("TMS Legacy Flow");
+		await allure.feature("03-Viajes");
+		await allure.story("Planificar Viaje Multiplicador");
+
+		logger.info("=".repeat(80));
+		logger.info("Iniciando Paso 6: Planificar Viaje con Multiplicador = 2");
+		logger.info("=".repeat(80));
+
+		const {
+			data: operationalData,
+		} = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+			logger,
+			purpose: "planificar viaje multiplicador",
+		});
+
+		const clienteSource = operationalData.seededCliente || operationalData.cliente;
+		if (!clienteSource?.nombre) {
+			throw new Error("❌ Entidad no encontrada: Cliente.");
+		}
+
+		const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
+		const isDemo = process.env.ENV === "DEMO";
+		const clienteNombreFromData = clienteSource.nombreFantasia || clienteSource.nombre;
+
+		const defaults = {
+			tipoOperacion: isDemo ? "Distribución" : "Qa_to_std_",
+			tipoServicio: isDemo ? "Lcl" : "Qa_TS_",
+			tipoViaje: isDemo ? "DIRECTO" : "Normal",
+			unidadNegocio: isDemo ? "Defecto" : "Defecto",
+			cliente: clienteNombreFromData,
+			codigoCarga: isDemo ? "CONTENEDOR DRY" : "Qa_COD_",
+			ruta: isDemo ? "47" : "Qa_RT_",
+			origenManual: isDemo ? "233_CD SuperZoo_Quilicura" : "405_LA FARFANA_Pudahuel",
+			destinoManual: isDemo ? "Divisa" : "CXP ANTOFAGASTA",
+		};
+
+		let setupConfig: any = {};
+		const setupConfigPaths = DataPathHelper.getSetupConfigDataCandidatePaths(testInfo);
+		const setupConfigPath = setupConfigPaths.find((candidatePath) => fs.existsSync(candidatePath));
+		if (setupConfigPath) {
+			setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, "utf-8"));
+		}
+
+		const config = {
+			tipoOperacion: setupConfig?.seededTipoOperacion?.nombre || defaults.tipoOperacion,
+			tipoServicio: setupConfig?.seededTipoServicio?.nombre || defaults.tipoServicio,
+			tipoViaje: defaults.tipoViaje,
+			unidadNegocio: setupConfig?.unidadNegocio?.nombre || defaults.unidadNegocio,
+			cliente: clienteNombreFromData,
+			codigoCarga: setupConfig?.seededCarga?.codigo || defaults.codigoCarga,
+			ruta: setupConfig?.ruta?.nro || setupConfig?.ruta?.nombre || defaults.ruta,
+			origenManual: setupConfig?.ruta?.origen || defaults.origenManual,
+			destinoManual: setupConfig?.ruta?.destino || defaults.destinoManual,
+		};
+
+		await allure.parameter("Cliente", config.cliente);
+		await allure.parameter("Multiplicador", "2");
+		await allure.parameter("Ambiente", process.env.ENV || "QA");
+		await allure.attachment(
+			"Entidades Cargadas (JSON)",
+			JSON.stringify(
+				{
+					cliente: config.cliente,
+					clienteId: clienteSource.id,
+					multiplicador: 2,
+				},
+				null,
+				2,
+			),
+			"application/json",
+		);
+
+		await test.step("Fase 1: Navegar", async () => {
+			logger.info("Fase 1: Navegar a Planificar Viajes");
+			await viajesPlanificarPage.navigate();
+			logger.info("Navegación exitosa");
+		});
+
+		await test.step("Fase 2: Completar formulario", async () => {
+			logger.info("Fase 2: Completar formulario de viaje");
+			await viajesPlanificarPage.selectTipoOperacion(config.tipoOperacion);
+			await viajesPlanificarPage.selectTipoServicio(config.tipoServicio);
+			await viajesPlanificarPage.selectCliente(config.cliente);
+			await viajesPlanificarPage.selectTipoViaje(config.tipoViaje);
+			await viajesPlanificarPage.selectUnidadNegocio(config.unidadNegocio);
+			await viajesPlanificarPage.selectCodigoCarga();
+
+			let rutaAdded = false;
+			try {
+				rutaAdded = await viajesPlanificarPage.agregarRuta(config.ruta);
+			} catch (error) {
+				rutaAdded = await viajesPlanificarPage.agregarRuta("Qa_RT_");
+			}
+
+			if (!rutaAdded) {
+				if (config.origenManual) await viajesPlanificarPage.selectOrigen(config.origenManual);
+				if (config.destinoManual) await viajesPlanificarPage.selectDestino(config.destinoManual);
+			}
+
+			await viajesPlanificarPage.fillKgViaje("1");
+
+			// Agregar un Tramo para que el Multiplicador de Registro funcione
+			const today = new Date();
+			const dd = String(today.getDate()).padStart(2, '0');
+			const mm = String(today.getMonth() + 1).padStart(2, '0');
+			const yyyy = today.getFullYear();
+			const hoyStr = `${dd}/${mm}/${yyyy}`;
+			await viajesPlanificarPage.addTramo({
+				origen: config.origenManual,
+				destino: config.destinoManual,
+				fechaEntradaOrigen: hoyStr,
+				kgOrigen: "1",
+			});
+
+			// Configurar el Multiplicador de Registro en 2
+			await viajesPlanificarPage.setMultiplicador(2);
+			logger.info("Formulario completado con tramos y multiplicador = 2");
+		});
+
+		await test.step("Fase 3: Guardar Viaje", async () => {
+			logger.info("Fase 3: Guardar Viaje");
+			// Guardar (el sistema se queda en /viajes/crear con formulario limpio al usar multiplicador)
+			await viajesPlanificarPage.clickGuardar();
+			await page.waitForTimeout(5000); // Darle unos segundos al backend para completar la replicación
+			logger.info("Formulario guardado con éxito");
+		});
+
+		await test.step("Fase 4: Verificación", async () => {
+			logger.info("Fase 4: Verificación");
+			// Navegar a Asignar para verificar
+			await viajesAsignarPage.navigate();
+
+			// 1. Filtrar por Cliente en la grilla para mayor precisión
+			logger.info(`Filtrando grilla de asignación por cliente: ${config.cliente}`);
+			await viajesAsignarPage.selectClienteFilter(config.cliente);
+
+			// Obtener el ID del viaje más reciente de la primera fila (que será el duplicado)
+			const latestIdStr = await viajesAsignarPage.getFirstRowId();
+			if (!latestIdStr) {
+				throw new Error("❌ No se pudo obtener el ID de la primera fila en la grilla de Asignación.");
+			}
+
+			const duplicateId = latestIdStr;
+			const masterId = String(Number(duplicateId) - 1);
+			logger.info(`IDs identificados secuencialmente -> Maestro: ${masterId}, Duplicado: ${duplicateId}`);
+
+			await allure.parameter("ID Viaje Maestro", masterId);
+			await allure.parameter("ID Viaje Tramo", duplicateId);
+
+			// 2. Buscar y verificar el viaje duplicado en la grilla
+			const duplicateRow = await viajesAsignarPage.findViajeRow(duplicateId);
+			expect(duplicateRow).not.toBeNull();
+			if (duplicateRow) {
+				const role = await viajesAsignarPage.getRoleViaje(duplicateRow);
+				const maestroVal = await viajesAsignarPage.getViajeMaestroVal(duplicateRow);
+				logger.info(`✅ Viaje duplicado encontrado. Rol: "${role}", Viaje Maestro Val: "${maestroVal}"`);
+				expect(role).toBe("Viaje tramo");
+				expect(maestroVal).toBe(masterId);
+			}
+
+			// 3. Buscar y verificar el viaje maestro en la grilla
+			const masterRow = await viajesAsignarPage.findViajeRow(masterId);
+			expect(masterRow).not.toBeNull();
+			if (masterRow) {
+				const role = await viajesAsignarPage.getRoleViaje(masterRow);
+				const maestroVal = await viajesAsignarPage.getViajeMaestroVal(masterRow);
+				logger.info(`✅ Viaje maestro encontrado. Rol: "${role}", Viaje Maestro Val: "${maestroVal}"`);
+				expect(role).toBe("Viaje maestro");
+				expect(maestroVal === "-" || maestroVal === "").toBe(true);
+			}
+
+			entityTracker.register({
+				type: "Viaje (Maestro)",
+				name: `Maestro #${masterId}`,
+				id: masterId,
+				asociado: config.cliente,
+				estado: "PLANIFICADO",
+			});
+			entityTracker.register({
+				type: "Viaje (Tramo)",
+				name: `Tramo #${duplicateId}`,
+				id: duplicateId,
+				asociado: config.cliente,
+				estado: "PLANIFICADO",
+			});
+		});
+
+		const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
+		logger.info(`Test de Multiplicador finalizado con éxito en ${executionTime}s`);
 	});
 });

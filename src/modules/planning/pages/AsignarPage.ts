@@ -18,14 +18,17 @@ export class AsignarPage extends BasePage {
     assignment: {
       btnGuardar: "#btn_guardar_form",
     },
+    btnFiltroCliente: 'button[data-id="cliente"]',
     table: {
       container: '#tabla_asignar',
       rows: '#tabla_asignar tbody tr',
       nroViajeColumn: 2,
-      vehiculoUnoColumn: 3,
-      transportistaColumn: 11,
+      vehiculoUnoColumn: 11,
+      transportistaColumn: 10,
       conductorColumn: 12,
-      estadoViajeColumn: 13,
+      estadoViajeColumn: 14,
+      roleViajeColumn: 4,
+      viajeMaestroColumn: 5,
     },
   };
 
@@ -91,12 +94,16 @@ export class AsignarPage extends BasePage {
       return rows.first();
     }
 
-    const searchLower = nroViaje.toLowerCase();
     for (let i = 0; i < rowCount; i++) {
       const row = rows.nth(i);
-      const text = (await row.innerText()).toLowerCase();
-      if (text.includes(searchLower)) {
-        logger.info(`✅ Viaje ${nroViaje} encontrado por coincidencia de texto en la fila ${i + 1}`);
+      const idCell = row.locator('td').nth(1);
+      const rowId = (await idCell.innerText()).trim();
+
+      const nroCell = row.locator('td').nth(this.selectors.table.nroViajeColumn);
+      const rowNro = (await nroCell.innerText()).trim();
+
+      if (rowId === nroViaje || rowNro === nroViaje) {
+        logger.info(`✅ Viaje ${nroViaje} encontrado por coincidencia exacta en fila ${i + 1} (ID: ${rowId}, Nro: ${rowNro})`);
         return row;
       }
     }
@@ -397,10 +404,73 @@ export class AsignarPage extends BasePage {
     return null;
   }
 
+  async getRoleViaje(row: Locator): Promise<string> {
+    const cell = row.locator('td').nth(this.selectors.table.roleViajeColumn);
+    return (await cell.innerText()).trim();
+  }
+
+  async getViajeMaestroVal(row: Locator): Promise<string> {
+    const cell = row.locator('td').nth(this.selectors.table.viajeMaestroColumn);
+    return (await cell.innerText()).trim();
+  }
+
   // --- Métodos de Verificación ---
   async verifyViajeAsignado(searchTerm: string): Promise<boolean> {
     await this.navigate();
     const row = await this.findViajeRow(searchTerm);
     return !!row;
+  }
+
+  async selectClienteFilter(cliente: string): Promise<void> {
+    logger.info(`Filtrando la grilla por cliente: ${cliente}`);
+    try {
+      const btn = this.page.locator(this.selectors.btnFiltroCliente);
+      await btn.waitFor({ state: 'visible', timeout: 8000 });
+      // Usar dispatchEvent click para evitar intercepciones
+      await btn.dispatchEvent('click');
+      await this.page.waitForTimeout(1000);
+
+      // El contenedor dropdown para bootstrap-select
+      const dropdownContainer = btn.locator('xpath=ancestor::div[contains(@class, "bootstrap-select")][1]');
+      const searchBox = dropdownContainer.locator('.bs-searchbox input[type="text"]');
+      
+      if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await searchBox.fill(cliente);
+        await this.page.waitForTimeout(800); // Wait for filtering
+      }
+
+      const optionsList = dropdownContainer.locator('ul.dropdown-menu.inner');
+      const targetOption = optionsList.locator('li:not(.disabled) a').filter({ hasText: cliente }).first();
+      await targetOption.waitFor({ state: 'visible', timeout: 5000 });
+      
+      // Click usando evaluate para evitar intercepciones físicas del searchbox
+      await targetOption.evaluate(el => (el as HTMLElement).click());
+      logger.info(`Opción del cliente seleccionada en dropdown: ${cliente}`);
+      await this.page.waitForTimeout(800);
+
+      // Cerrar el dropdown enviando Escape si es que quedó abierto
+      await this.page.keyboard.press('Escape');
+      await this.page.waitForTimeout(500);
+
+      // Click en el botón Buscar para aplicar el filtro
+      const btnBuscar = this.page.locator('a#buscar, button#buscar, #buscar').first();
+      await btnBuscar.waitFor({ state: 'visible', timeout: 5000 }).catch(() => logger.warn('⚠️ Botón Buscar no visible en timeout'));
+      
+      if (await btnBuscar.isVisible()) {
+        logger.info('Haciendo clic en el botón Buscar...');
+        await btnBuscar.dispatchEvent('click');
+      } else {
+        logger.warn('⚠️ Botón Buscar no visible, forzando Enter...');
+        await this.page.keyboard.press('Enter');
+      }
+
+      await this.page.waitForLoadState('networkidle').catch(() => {});
+      await this.page.waitForTimeout(2500);
+      logger.info(`✅ Filtro de cliente aplicado correctamente para: ${cliente}`);
+    } catch (error) {
+      logger.error(`Error al filtrar por cliente:`, error);
+      await this.takeScreenshot('error-filtro-cliente');
+      throw error;
+    }
   }
 }
