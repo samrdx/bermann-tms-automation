@@ -2,6 +2,7 @@ import { test, expect } from "../../../../../src/fixtures/base.js";
 import { logger } from "../../../../../src/utils/logger.js";
 import { DataPathHelper } from "../../../../api-helpers/DataPathHelper.js";
 import { OperationalDataLoader } from "../../../../api-helpers/OperationalDataLoader.js";
+import { ClienteHelper } from "../../../../api-helpers/ClienteHelper.js";
 import fs from "fs";
 import { allure } from "allure-playwright";
 import { entityTracker } from "../../../../../src/utils/entityTracker.js";
@@ -45,42 +46,46 @@ test.describe("[V01] Viajes - Planificar", () => {
 		logger.info(
 			"Cargando datos de entidades existentes del JSON específico del worker...",
 		);
-		const {
-			data: operationalData,
-			candidate,
-			usedFallback,
-		} = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+		const loadResult = OperationalDataLoader.load<Record<string, any>>(testInfo, {
 			logger,
 			purpose: "planificar viaje",
 		});
-		const dataPath = candidate.path;
-		logger.info(
-			`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`,
-		);
+		
+		let operationalData = loadResult?.data || {};
+		const dataPath = loadResult?.candidate?.path || DataPathHelper.getLegacyEntityDataPath(testInfo);
+		logger.info(`📦 Data operacional seleccionada: ${dataPath}`);
 
 		// Prefer seededCliente (set by cliente-crear.test.ts OR base-entities.setup.ts).
 		// Fall back to legacy `cliente` key for backward compatibility.
-		const clienteSource =
+		let clienteSource =
 			operationalData.seededCliente || operationalData.cliente;
-		if (!clienteSource?.nombre) {
-			throw new Error(
-				"❌ Entidad no encontrada: Cliente.\n" +
-					"Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly",
-			);
+		let clienteNombreFromData = clienteSource?.nombreFantasia || clienteSource?.nombre;
+
+		if (!clienteNombreFromData) {
+			logger.info("⚠️ Cliente no encontrado en el JSON de datos. Autogenerando uno bajo demanda vía UI...");
+			const generated = await ClienteHelper.createClienteViaUI(page);
+			clienteSource = generated;
+			clienteNombreFromData = generated.nombreFantasia || generated.nombre;
+
+			// Escribir el cliente autogenerado en el JSON del worker para asegurar sinergia
+			const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, "utf-8")) : {};
+			currentData.seededCliente = clienteSource;
+			fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), "utf-8");
+			logger.info(`✅ Cliente autogenerado guardado exitosamente en ${dataPath}`);
+		} else {
+			logger.info(`📦 Usando cliente cargado: "${clienteNombreFromData}" (ID: ${clienteSource.id})`);
 		}
 
 		logger.info("✅ Todos los prerrequisitos validados");
-		logger.info("Entidades cargadas:");
 		logger.info(
-			`   Cliente source: ${operationalData.seededCliente ? "seededCliente ✅" : "cliente (fallback) ⚠️"}`,
+			`   Cliente source: ${operationalData.seededCliente ? "seededCliente ✅" : "cliente (fallback) ⚠️"}`
 		);
-		logger.info(`   Cliente: ${clienteSource.nombre}`);
+		logger.info(`   Cliente: ${clienteNombreFromData}`);
 		logger.info("");
 
 		// Test data
 		const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
 		const isDemo = process.env.ENV === "DEMO";
-		const clienteNombreFromData =
 			clienteSource.nombreFantasia || clienteSource.nombre;
 
 		// =================================================================
@@ -409,21 +414,34 @@ test.describe("[V01] Viajes - Planificar", () => {
 		logger.info("Iniciando Paso 6: Planificar Viaje con Multiplicador = 2");
 		logger.info("=".repeat(80));
 
-		const {
-			data: operationalData,
-		} = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+		const loadResult = OperationalDataLoader.load<Record<string, any>>(testInfo, {
 			logger,
 			purpose: "planificar viaje multiplicador",
 		});
+		
+		let operationalData = loadResult?.data || {};
+		const dataPath = loadResult?.candidate?.path || DataPathHelper.getLegacyEntityDataPath(testInfo);
 
-		const clienteSource = operationalData.seededCliente || operationalData.cliente;
-		if (!clienteSource?.nombre) {
-			throw new Error("❌ Entidad no encontrada: Cliente.");
+		let clienteSource = operationalData.seededCliente || operationalData.cliente;
+		let clienteNombreFromData = clienteSource?.nombreFantasia || clienteSource?.nombre;
+
+		if (!clienteNombreFromData) {
+			logger.info("⚠️ Cliente no encontrado en el JSON de datos. Autogenerando uno bajo demanda vía UI...");
+			const generated = await ClienteHelper.createClienteViaUI(page);
+			clienteSource = generated;
+			clienteNombreFromData = generated.nombreFantasia || generated.nombre;
+
+			// Escribir el cliente autogenerado en el JSON del worker para asegurar sinergia
+			const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, "utf-8")) : {};
+			currentData.seededCliente = clienteSource;
+			fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), "utf-8");
+			logger.info(`✅ Cliente autogenerado guardado exitosamente en ${dataPath}`);
+		} else {
+			logger.info(`📦 Usando cliente cargado: "${clienteNombreFromData}" (ID: ${clienteSource.id})`);
 		}
 
 		const nroViaje = String(Math.floor(10000 + Math.random() * 90000));
 		const isDemo = process.env.ENV === "DEMO";
-		const clienteNombreFromData = clienteSource.nombreFantasia || clienteSource.nombre;
 
 		const defaults = {
 			tipoOperacion: isDemo ? "Distribución" : "Qa_to_std_",
