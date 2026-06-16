@@ -2,6 +2,9 @@ import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
+import { TransportistaHelper } from '../../../../api-helpers/TransportistaHelper.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import * as fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
 
@@ -30,24 +33,34 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
     logger.info('='.repeat(80));
 
     // ---------------------------------------------------------------
-    // PHASE 1: Load seeded data
+    // PHASE 1: Load seeded data (with on-demand auto-generation fallback)
     // ---------------------------------------------------------------
-    const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+    const loadResult = OperationalDataLoader.load<Record<string, any>>(testInfo, {
       logger,
       purpose: 'contrato tipo costo'
     });
-    const dataPath = candidate.path;
-    logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
+    
+    let operationalData = loadResult?.data || {};
+    const dataPath = loadResult?.candidate?.path || DataPathHelper.getLegacyEntityDataPath(testInfo);
+    logger.info(`📦 Data operacional seleccionada: ${dataPath}`);
 
-    const transportista = operationalData.seededTransportista || operationalData.transportista;
-    if (!transportista?.nombre) {
-      throw new Error(`'seededTransportista' or 'transportista' not found in ${dataPath}. Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly`);
+    let transportista = operationalData.seededTransportista || operationalData.transportista;
+    let transportistaNombre = transportista?.nombre;
+
+    if (!transportistaNombre) {
+      logger.info('⚠️ Transportista no encontrado en el JSON de datos. Autogenerando uno bajo demanda vía UI...');
+      const generated = await TransportistaHelper.createTransportistaViaUI(page);
+      transportista = generated;
+      transportistaNombre = generated.nombre;
+
+      // Escribir el transportista autogenerado en el JSON del worker para asegurar sinergia
+      const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+      currentData.seededTransportista = transportista;
+      fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+      logger.info(`✅ Transportista autogenerado guardado exitosamente en ${dataPath}`);
+    } else {
+      logger.info(`📦 Usando transportista cargado: "${transportistaNombre}" (ID: ${transportista.id})`);
     }
-    if (!operationalData.seededTransportista) {
-      logger.warn(`⚠️ Usando transportista fallback desde key legacy 'transportista' en ${dataPath}`);
-    }
-    const transportistaNombre = transportista.nombre as string;
-    logger.info(`📦 Transportista: "${transportistaNombre}" (ID: ${transportista.id})`);
 
     const nroContrato = String(Date.now()).slice(-6);
     logger.info(`📝 Nro Contrato: ${nroContrato}`);
@@ -140,10 +153,11 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
           logger.info(`⌨️ Buscando por transportista: ${transportistaNombre}`);
           await searchInput.clear();
           await searchInput.fill(transportistaNombre);
-          await page.waitForTimeout(2000); // DataTables filter
 
           const contractRow = page.locator('table tbody tr').filter({ hasText: transportistaNombre }).first();
-          const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
+          // Esperar dinámicamente a que la fila sea visible (auto-waiting de DataTables)
+          await expect(contractRow).toBeVisible({ timeout: 10000 });
+          const isVisible = true;
 
           if (isVisible) {
             logger.info(`✅ Contrato ${nroContrato} encontrado en el índice!`);

@@ -2,6 +2,8 @@ import { test, expect } from '../../../../../src/fixtures/base.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
+import { ClienteHelper } from '../../../../api-helpers/ClienteHelper.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import { config } from '../../../../../src/config/environment.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
@@ -35,28 +37,35 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         logger.info('='.repeat(80));
 
         // =================================================================
-        // PHASE 1: Load Data
+        // PHASE 1: Load Data (with on-demand auto-generation fallback)
         // =================================================================
         logger.info('📋 Fase 1: Cargando datos del cliente sembrado...');
-        const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+        const loadResult = OperationalDataLoader.load<Record<string, any>>(testInfo, {
             logger,
             purpose: 'contrato tipo venta'
         });
-        const dataPath = candidate.path;
-        logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
+        
+        let operationalData = loadResult?.data || {};
+        const dataPath = loadResult?.candidate?.path || DataPathHelper.getLegacyEntityDataPath(testInfo);
+        logger.info(`📦 Data operacional seleccionada: ${dataPath}`);
 
-        const cliente = operationalData.seededCliente || operationalData.cliente;
-        if (!cliente) {
-            throw new Error(
-                `'seededCliente' or 'cliente' not found in ${dataPath}.\n` +
-                `Run seed flow first (entities or base) and set LEGACY_DATA_SOURCE accordingly.`
-            );
+        let cliente = operationalData.seededCliente || operationalData.cliente;
+        let clienteNombre = cliente?.nombreFantasia || cliente?.nombre;
+
+        if (!clienteNombre) {
+            logger.info('⚠️ Cliente no encontrado en el JSON de datos. Autogenerando uno bajo demanda vía UI...');
+            const generated = await ClienteHelper.createClienteViaUI(page);
+            cliente = generated;
+            clienteNombre = generated.nombreFantasia || generated.nombre;
+
+            // Escribir el cliente autogenerado en el JSON del worker para asegurar sinergia
+            const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+            currentData.seededCliente = cliente;
+            fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+            logger.info(`✅ Cliente autogenerado guardado exitosamente en ${dataPath}`);
+        } else {
+            logger.info(`📦 Usando cliente: "${clienteNombre}" (ID: ${cliente.id})`);
         }
-        if (!operationalData.seededCliente) {
-            logger.warn(`⚠️ Usando cliente fallback desde key legacy 'cliente' en ${dataPath}`);
-        }
-        const clienteNombre = cliente.nombreFantasia || cliente.nombre;
-        logger.info(`📦 Usando cliente: "${clienteNombre}" (ID: ${cliente.id})`);
 
         await allure.parameter('Cliente', clienteNombre);
         await allure.parameter('Cliente ID', String(cliente.id));
@@ -114,29 +123,35 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             logger.info(`🔍 Intentando verificar el contrato ${attempt}/${maxAttempts}...`);
 
-            await page.goto('/contrato/index');
-            await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
+            try {
+                await page.goto('/contrato/index');
+                await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => logger.warn('⚠️ networkidle timeout, continuing...'));
 
-            const searchInput = page.locator('input[type="search"]').first();
-            await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+                const searchInput = page.locator('input[type="search"]').first();
+                await searchInput.waitFor({ state: 'visible', timeout: 10000 });
 
-            logger.info(`⌨️ Buscando por cliente: ${clienteNombre}`);
-            await searchInput.clear();
-            await searchInput.fill(clienteNombre);
-            await page.waitForTimeout(2000); // DataTables filter
+                logger.info(`⌨️ Buscando por cliente: ${clienteNombre}`);
+                await searchInput.clear();
+                await searchInput.fill(clienteNombre);
 
-            contractRow = page.locator('table tbody tr').filter({ hasText: clienteNombre }).first();
-            const isVisible = await contractRow.isVisible({ timeout: 5000 }).catch(() => false);
+                contractRow = page.locator('table tbody tr').filter({ hasText: clienteNombre }).first();
+                // Esperar dinámicamente a que la fila sea visible (auto-waiting de DataTables)
+                await expect(contractRow).toBeVisible({ timeout: 10000 });
+                const isVisible = true;
 
-            if (isVisible) {
-                logger.info(`✅ Contrato ${nroContrato} encontrado en el índice!`);
-                found = true;
-                break;
-            } else {
-                logger.warn(`⚠️ Contrato ${nroContrato} no encontrado en este intento.`);
-                if (attempt < maxAttempts) {
-                    await page.waitForTimeout(3000); // Wait before reload
+                if (isVisible) {
+                    logger.info(`✅ Contrato ${nroContrato} encontrado en el índice!`);
+                    found = true;
+                    break;
+                } else {
+                    logger.warn(`⚠️ Contrato ${nroContrato} no encontrado en este intento.`);
+                    if (attempt < maxAttempts) {
+                        await page.waitForTimeout(3000); // Wait before reload
+                    }
                 }
+            } catch (e) {
+                logger.warn(`⚠️ Error durante el intento de verificación ${attempt}: ${e instanceof Error ? e.message : String(e)}`);
+                if (attempt < maxAttempts) await page.waitForTimeout(3000);
             }
         }
 
