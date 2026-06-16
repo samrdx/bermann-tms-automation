@@ -64,6 +64,7 @@ PlanificarPage,tablaRutas,#tabla-rutas tbody tr,Baja
 PlanificarPage,btnOrigen,button[data-id="_origendestinoform-origen"],Alta
 PlanificarPage,btnDestino,button[data-id="_origendestinoform-destino"],Alta
 PlanificarPage,btnGuardar,#btn_guardar_form,Alta
+PlanificarPage,multiplicadorRegistro,#factor_multiplicador,Alta
 TransportistaFormPage,nombre,#transportistas-nombre,Alta
 TransportistaFormPage,razonSocial,#transportistas-razon_social,Alta
 TransportistaFormPage,documento,#transportistas-documento,Alta
