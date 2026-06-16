@@ -60,12 +60,12 @@ export class TransportistaHelper {
             // Redirected to Index or other page - Execute Grid Rescue
             logger.info('⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...');
 
-            // Ensure we are on the index page for grid search
+            // Ensure we are on the index page for grid search and it is fully loaded
             if (!currentUrl.includes('/transportistas/index')) {
                 await page.goto(`${baseUrl}/transportistas/index`);
-                await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Tiempo de espera de red agotado durante la navegación al índice.'));
-                await page.waitForTimeout(2000);
             }
+            await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Tiempo de espera de red agotado en index de transportistas.'));
+            await page.waitForTimeout(1500); // Estabilidad para que jQuery/DataTables bindeen los eventos del DOM
 
             // STRATEGY: Search by name using #search + #buscar
             // TMS transportista index has NO per-column filters (no RUT filter),

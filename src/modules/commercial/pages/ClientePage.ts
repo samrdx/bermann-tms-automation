@@ -163,7 +163,14 @@ export class ClienteFormPage extends BasePage {
 
   async isFormSaved(): Promise<boolean> {
     try {
-      await this.page.waitForTimeout(2000);
+      // Esperar inteligentemente a que cambie la URL de redirección post-guardado
+      await this.page.waitForURL(
+        (url) =>
+          url.pathname.includes("/clientes/index") ||
+          url.pathname.includes("/clientes/ver") ||
+          url.pathname.includes("/clientes/view"),
+        { timeout: 10000 }
+      );
       const url = this.page.url();
       return (
         url.includes("/clientes/index") ||
@@ -171,7 +178,7 @@ export class ClienteFormPage extends BasePage {
         url.includes("/clientes/view")
       );
     } catch (error) {
-      logger.error("Fallo al verificar si el formulario se guardó", error);
+      logger.error("Fallo al verificar si el formulario se guardó por timeout de redirección", error);
       return false;
     }
   }

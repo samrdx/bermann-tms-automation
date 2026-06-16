@@ -219,10 +219,17 @@ export class VehiculoFormPage extends BasePage {
 
   async isFormSaved(): Promise<boolean> {
     try {
-      await this.page.waitForTimeout(2000);
+      // Esperar inteligentemente a que cambie la URL de redirección post-guardado
+      await this.page.waitForURL(
+        (url) =>
+          url.pathname.includes('/vehiculos/index') ||
+          url.pathname.includes('/vehiculos/ver'),
+        { timeout: 15000 }
+      );
       const url = this.page.url();
       return url.includes('/vehiculos/index') || url.includes('/vehiculos/ver');
     } catch (error) {
+      logger.error('Fallo al esperar redirección post-guardado de vehículo', error);
       return false;
     }
   }

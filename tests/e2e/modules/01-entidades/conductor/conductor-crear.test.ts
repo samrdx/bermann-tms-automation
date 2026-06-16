@@ -103,7 +103,6 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
             const expectedEmail = await page.locator('#conductores-email').inputValue().catch(() => '');
 
             await conductorPage.clickGuardar();
-            await page.waitForTimeout(2000);
             const isSaved = await conductorPage.isFormSaved();
             
             if (!isSaved) {

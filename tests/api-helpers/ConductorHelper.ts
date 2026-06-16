@@ -93,7 +93,6 @@ export class ConductorHelper {
         await conductorPage.clickGuardar();
         
         // Verify success via URL redirection or success message
-        await page.waitForTimeout(2000);
         if (!await conductorPage.isFormSaved()) {
              logger.warn('⚠️ Es posible que el guardado del conductor haya fallado o la redirección sea lenta.');
         } else {

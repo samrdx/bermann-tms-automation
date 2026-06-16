@@ -51,7 +51,6 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
       await transportistaPage.fillRazonSocial(testData.razonSocial);
       await transportistaPage.fillDocumento(testData.documento);
       await transportistaPage.selectTipoTransportista(testData.tipo);
-      await page.waitForTimeout(500);
 
       await transportistaPage.selectRandomLocationCascade();
 
@@ -65,7 +64,6 @@ test.describe('[E01] Entidades - Crear Transportista', () => {
     await test.step('Fase 3: Guardar', async () => {
       logger.info('💾 Fase 3: Guardar transportista');
       await transportistaPage.clickGuardar();
-      await page.waitForTimeout(5000);
       logger.info('✅ Guardado iniciado');
     });
 

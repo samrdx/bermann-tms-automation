@@ -212,11 +212,18 @@ export class TransportistaFormPage extends BasePage {
 
   async isFormSaved(): Promise<boolean> {
     try {
-      await this.page.waitForTimeout(2000);
+      // Esperar inteligentemente a que cambie la URL de redirección post-guardado
+      await this.page.waitForURL(
+        (url) =>
+          url.pathname.includes('/transportistas/index') ||
+          url.pathname.includes('/transportistas/ver') ||
+          url.pathname.includes('/transportistas/view'),
+        { timeout: 10000 }
+      );
       const url = this.page.url();
       return url.includes('/transportistas/index') || url.includes('/transportistas/ver') || url.includes('/transportistas/view');
     } catch (error) {
-      logger.error('Fallo al verificar si el formulario se guardó', error);
+      logger.error('Fallo al verificar si el formulario se guardó por timeout de redirección', error);
       return false;
     }
   }

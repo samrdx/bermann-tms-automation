@@ -251,11 +251,12 @@ export class ClienteHelper {
             // Redirected to Index or other page - Execute Grid Rescue
             logger.info('⚠️ No se encuentra en la página de ver/editar. Ejecutando Rescate de Grilla...');
 
-            // Ensure we are on the index page
+            // Ensure we are on the index page and fully loaded
             if (!currentUrl.includes('/clientes/index')) {
                 await page.goto(`${baseUrl}/clientes/index`, { waitUntil: 'load', timeout: 30000 });
-                await page.waitForTimeout(2000);
             }
+            await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => logger.warn('Tiempo de espera de red agotado en index de clientes.'));
+            await page.waitForTimeout(1500); // Estabilidad para que jQuery/DataTables bindeen los eventos del DOM
 
             // PRIMARY STRATEGY: Search by RUT
             const cleanRut = rut.replace(/[.-]/g, '');

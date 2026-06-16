@@ -51,16 +51,12 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
             await vehiculoPage.fillPatente(patente);
             await vehiculoPage.fillMuestra(patente);
 
-            await page.waitForTimeout(1000); // Resilience: Wait for dropdown interactivity
             await vehiculoPage.selectTransportista(seededTransportista.nombre);
 
             await vehiculoPage.selectTipoVehiculo('TRACTO');
 
             // Verify TRACTO is selected
             expect(await vehiculoPage.getSelectedTipoVehiculo()).toContain('TRACTO');
-
-            await page.waitForTimeout(1000);
-
             const fallbackCapacidad = isDemoMode() ? '1 a 12 TON' : '1 a 12 TON';
             let capacidad = fallbackCapacidad;
             const setupConfigPaths = DataPathHelper.getSetupConfigDataCandidatePaths(testInfo);
@@ -96,7 +92,6 @@ test.describe('[E03] Entidades - Crear Vehículo', () => {
             const expectedMuestra = await page.locator('#vehiculos-muestra').inputValue().catch(() => '');
 
             await vehiculoPage.clickGuardar();
-            await page.waitForTimeout(2000);
             const isSaved = await vehiculoPage.isFormSaved();
             expect(isSaved).toBeTruthy();
 

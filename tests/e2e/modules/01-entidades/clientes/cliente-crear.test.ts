@@ -49,7 +49,6 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
       await clientePage.fillRut(testData.rut);
       await clientePage.fillNombreFantasia(testData.nombreFantasia);
       await clientePage.selectTipoCliente(testData.tipoCliente);
-      await page.waitForTimeout(500);
 
       await clientePage.selectRandomLocationCascade();
 
@@ -65,7 +64,6 @@ test.describe('[E02] Entidades - Crear Cliente', () => {
     await test.step('Fase 3: Guardar', async () => {
       logger.info('💾 FASE 3: Guardar Cliente');
       await clientePage.clickGuardar();
-      await page.waitForTimeout(5000);
       logger.info('✅ Guardar iniciado');
     });
 

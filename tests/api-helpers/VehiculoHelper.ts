@@ -45,9 +45,6 @@ export class VehiculoHelper {
         // Using RAMPLA as a standard type for integration tests
         await vehiculoPage.selectTipoVehiculo('RAMPLA');
 
-        // Wait for cascading dropdown
-        await page.waitForTimeout(1500);
-
         // Select Tipo Rampla (conditional field)
         await vehiculoPage.selectTipoRampla('Plana');
 
@@ -58,8 +55,6 @@ export class VehiculoHelper {
         // 6. Save
         await vehiculoPage.clickGuardar();
 
-        // Verify success via URL redirection
-        await page.waitForTimeout(2000);
         if (!await vehiculoPage.isFormSaved()) {
             logger.warn('⚠️ Es posible que el guardado del vehículo haya fallado o la redirección sea lenta.');
         } else {
