@@ -94,6 +94,7 @@ Load the relevant skill before generating code.
 8. Prefer stable, documented commands from `package.json` over ad-hoc Playwright CLI commands.
 9. Always execute SDD in `interactive` mode, using `hybrid` artifact store (both local files in `openspec/` and memory in `engram`), and checking PR sizes via `ask-on-risk` (400-line budget limit).
 10. Maintain `openspec/` structure strictly: central specs in `openspec/specs/` MUST follow the modular numbering (`00-config`, `01-entidades`, `02-operaciones`, `03-finanzas`, `05-ci-cd`, `99-utilidades`). Active changes reside in `openspec/changes/` and MUST be moved to `openspec/changes/archive/` prefixed with `YYYY-MM-DD-` upon completion.
+11. Never execute `git push` without presenting a summary of accomplishments and remaining work, and obtaining explicit user authorization first.
 
 ---
 
