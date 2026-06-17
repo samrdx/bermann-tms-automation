@@ -25,13 +25,13 @@ const STRICT_DROPDOWN_WAIT_MS = 15000;
  * TODO V1+: evaluar rename a un nombre que refleje su rol real como helper
  * de construcción de escenarios por UI.
  */
-export class TmsApiClient {
+export class TmsScenarioBuilder {
 
   private baseUrl: string;
 
   constructor(private page: Page) {
     // IMPORTANT: Use the same URL resolution logic as playwright.config.ts
-    // to ensure TmsApiClient navigates to the same domain as the storageState cookies.
+    // to ensure TmsScenarioBuilder navigates to the same domain as the storageState cookies.
     // playwright.config.ts uses ENV (not BASE_URL) to pick the environment URL.
     // Using BASE_URL directly can cause a domain mismatch (e.g. BASE_URL=demo but
     // storageState cookies are for QA), which silently redirects to /login.

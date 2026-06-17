@@ -1,7 +1,7 @@
 import { test, expect } from '../../../src/fixtures/base.js';
 import { MonitoreoPage } from '../../../src/modules/monitoring/pages/MonitoreoPage.js';
 import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
-import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
+import { TmsScenarioBuilder } from '../../api-helpers/TmsScenarioBuilder.js';
 import { createLogger } from '../../../src/utils/logger.js';
 import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 import { allure } from 'allure-playwright';
@@ -23,7 +23,7 @@ test.describe('[E2E] Viajes - Flujo Completo (Atómico)', () => {
 
     logger.paso('Creando ecosistema de datos de prueba...');
 
-    const api = new TmsApiClient(page);
+    const api = new TmsScenarioBuilder(page);
     await api.initialize();
 
     // Nombres usando el NamingHelper para mantener el estandar Qa_

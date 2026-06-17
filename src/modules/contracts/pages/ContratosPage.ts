@@ -192,6 +192,13 @@ export class ContratosFormPage extends BasePage {
         await this.selectCliente(entityNombre);
       }
 
+      // Wait for any AJAX cascades triggered by selecting the entity to finish (especially in Demo)
+      logger.info('⏳ Esperando que se completen las peticiones de red por cascada de entidad...');
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        logger.warn('⚠️ Timeout esperando networkidle tras seleccionar entidad');
+      });
+      await this.page.waitForTimeout(1500); // Buffer post-cascade
+
       // 5. [DEMO ONLY] Set Fecha vencimiento via daypicker
       if (isDemoMode()) {
         logger.info('📅 [DEMO] Seleccionando Fecha de vencimiento: 31/12/2026');
@@ -631,13 +638,48 @@ export class ContratosFormPage extends BasePage {
         logger.warn('⚠️ Botón de Unidad de negocio no visible — saltando');
         return;
       }
+      logger.info(`Seleccionando Unidad de negocio "${value}" vía UI...`);
       await btn.click();
-      await this.page.waitForTimeout(400);
-      await this.page.click(
-        `.bootstrap-select.show .dropdown-menu .dropdown-item:has-text("${value}")`
-      );
-      await this.page.waitForTimeout(300);
-      logger.info(`✅ Unidad de negocio establecida en "${value}"`);
+      await this.page.waitForTimeout(500);
+      const option = this.page.locator(`.bootstrap-select.show .dropdown-menu .dropdown-item`).filter({ hasText: value }).first();
+      await option.waitFor({ state: 'visible', timeout: 5000 });
+      await option.click();
+      await this.page.waitForTimeout(500);
+
+      // Verify and use JS fallback if it was not set or got reset
+      const isSet = await this.page.evaluate((expectedVal) => {
+        const select = document.getElementById('drop_business_unit') as HTMLSelectElement;
+        if (!select) return false;
+        const text = select.options[select.selectedIndex]?.text || '';
+        return text.includes(expectedVal);
+      }, value);
+
+      if (!isSet) {
+        logger.warn(`⚠️ Unidad de negocio no quedó seleccionada vía UI. Aplicando fallback JS para establecerla en "${value}"...`);
+        await this.page.evaluate((expectedVal) => {
+          const selectId = 'drop_business_unit';
+          const select = document.getElementById(selectId) as HTMLSelectElement;
+          if (select) {
+            const opt = Array.from(select.options).find(o => o.text.includes(expectedVal));
+            if (opt) {
+              select.value = opt.value;
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              // @ts-ignore
+              const $ = window.jQuery;
+              if ($ && $(`#${selectId}`).selectpicker) {
+                $(`#${selectId}`).selectpicker('refresh');
+              }
+            }
+          }
+        }, value);
+        await this.page.waitForTimeout(500);
+      }
+
+      const finalCheck = await this.page.evaluate(() => {
+        const select = document.getElementById('drop_business_unit') as HTMLSelectElement;
+        return select ? select.options[select.selectedIndex]?.text : 'NOT FOUND';
+      });
+      logger.info(`✅ Unidad de negocio final: "${finalCheck}"`);
     } catch (error) {
       logger.error('Fallo al seleccionar Unidad de negocio', error);
       await this.takeScreenshot('unidad-negocio-error');
@@ -683,7 +725,11 @@ export class ContratosFormPage extends BasePage {
       // @ts-ignore
       if (typeof $ !== 'undefined') {
         // @ts-ignore
-        $('.modal').modal('hide');
+        const $modals = $('.modal.show');
+        if ($modals.length > 0) {
+          // @ts-ignore
+          $modals.modal('hide');
+        }
       }
 
       // Manual cleanup of modal classes and backdrop

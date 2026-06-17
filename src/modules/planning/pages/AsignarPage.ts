@@ -396,21 +396,29 @@ export class AsignarPage extends BasePage {
     return true;
   }
 
-  async getFirstRowId(): Promise<string | null> {
-    const firstRowIdCell = this.page.locator('#tabla_asignar tbody tr:first-child td').nth(1);
-    if (await firstRowIdCell.isVisible()) {
-      return (await firstRowIdCell.innerText()).trim();
+  async getRowIdByIndex(index: number): Promise<string | null> {
+    const rowIdCell = this.page.locator('#tabla_asignar tbody tr').nth(index).locator('td').nth(1);
+    if (await rowIdCell.isVisible({ timeout: 5000 }).catch(() => false)) {
+      return (await rowIdCell.innerText()).trim();
     }
     return null;
   }
 
+  async getFirstRowId(): Promise<string | null> {
+    return this.getRowIdByIndex(0);
+  }
+
   async getRoleViaje(row: Locator): Promise<string> {
-    const cell = row.locator('td').nth(this.selectors.table.roleViajeColumn);
+    const isDemo = process.env.ENV?.toUpperCase() === 'DEMO';
+    const colIndex = isDemo ? 3 : this.selectors.table.roleViajeColumn;
+    const cell = row.locator('td').nth(colIndex);
     return (await cell.innerText()).trim();
   }
 
   async getViajeMaestroVal(row: Locator): Promise<string> {
-    const cell = row.locator('td').nth(this.selectors.table.viajeMaestroColumn);
+    const isDemo = process.env.ENV?.toUpperCase() === 'DEMO';
+    const colIndex = isDemo ? 4 : this.selectors.table.viajeMaestroColumn;
+    const cell = row.locator('td').nth(colIndex);
     return (await cell.innerText()).trim();
   }
 

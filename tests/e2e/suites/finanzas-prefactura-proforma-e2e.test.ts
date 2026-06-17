@@ -2,7 +2,7 @@ import { test, expect } from '../../../src/fixtures/base.js';
 import { MonitoreoPage } from '../../../src/modules/monitoring/pages/MonitoreoPage.js';
 import { PrefacturaPage } from '../../../src/modules/finanzas/PrefacturaPage.js';
 import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
-import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
+import { TmsScenarioBuilder } from '../../api-helpers/TmsScenarioBuilder.js';
 import { createLogger } from '../../../src/utils/logger.js';
 import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 import { allure } from 'allure-playwright';
@@ -49,7 +49,7 @@ test.describe('[E2E] Finanzas - Prefactura + Proforma (Mismo Viaje)', () => {
 
     await test.step('Fase 1 — Preparar ecosistema (entidades + contratos)', async () => {
       logger.fase(1, 'Preparación de ecosistema (UI seed)');
-      const seed = new TmsApiClient(page);
+      const seed = new TmsScenarioBuilder(page);
       await seed.initialize();
 
       transportistaId = await seed.createTransportista(transName, generateValidChileanRUT());

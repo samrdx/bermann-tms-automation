@@ -1,6 +1,6 @@
 import { test, expect } from '../../../src/fixtures/base.js';
 import { AsignarPage } from '../../../src/modules/planning/pages/AsignarPage.js';
-import { TmsApiClient } from '../../api-helpers/TmsApiClient.js';
+import { TmsScenarioBuilder } from '../../api-helpers/TmsScenarioBuilder.js';
 import { logger } from '../../../src/utils/logger.js';
 import { generateValidChileanRUT } from '../../../src/utils/rutGenerator.js';
 
@@ -9,7 +9,7 @@ test.describe('Viajes - Asignar (Business Logic Workflow)', () => {
 
     test('Should assign Trip to Transportista (Full Contract Setup)', async ({ page }) => {
         test.setTimeout(300000);
-        const api = new TmsApiClient(page);
+        const api = new TmsScenarioBuilder(page);
         await api.initialize();
 
         // 1. Definir nombres únicos

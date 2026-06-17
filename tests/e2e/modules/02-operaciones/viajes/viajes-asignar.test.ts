@@ -1,7 +1,14 @@
 import { test, expect } from '../../../../../src/fixtures/base.js';
 import { AsignarPage } from '../../../../../src/modules/planning/pages/AsignarPage.js';
+import { PlanificarPage } from '../../../../../src/modules/planning/pages/PlanificarPage.js';
+import { ContratosFormPage } from '../../../../../src/modules/contracts/pages/ContratosPage.js';
 import { logger } from '../../../../../src/utils/logger.js';
 import { OperationalDataLoader } from '../../../../api-helpers/OperationalDataLoader.js';
+import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
+import { TransportistaHelper } from '../../../../api-helpers/TransportistaHelper.js';
+import { VehiculoHelper } from '../../../../api-helpers/VehiculoHelper.js';
+import { ConductorHelper } from '../../../../api-helpers/ConductorHelper.js';
+import { ClienteHelper } from '../../../../api-helpers/ClienteHelper.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
@@ -38,41 +45,174 @@ test.describe('[V02] Viajes - Asignar', () => {
         logger.info('='.repeat(80));
 
         // =================================================================
-        // PHASE 1: Load JSON Data
+        // PHASE 1: Load JSON Data (with on-demand auto-generation fallback)
         // =================================================================
         logger.info('Fase 1: Cargando datos del JSON...');
-        const { data: operationalData, candidate, usedFallback } = OperationalDataLoader.loadOrThrow<Record<string, any>>(testInfo, {
+        const loadResult = OperationalDataLoader.load<Record<string, any>>(testInfo, {
             logger,
             purpose: 'asignar viaje'
         });
-        const dataPath = candidate.path;
-        logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
+        
+        let operationalData = loadResult?.data || {};
+        const dataPath = loadResult?.candidate?.path || DataPathHelper.getLegacyEntityDataPath(testInfo);
+        logger.info(`📦 Data operacional seleccionada: ${dataPath}`);
 
-        const seededTransportista = operationalData.seededTransportista;
-        if (!seededTransportista?.nombre) {
-            throw new Error('❌ Missing: seededTransportista. Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first');
+        // 1. Ensure Transportista (with contract Costo!)
+        let seededTransportista = operationalData.seededTransportista;
+        let transNombre = seededTransportista?.nombre;
+
+        if (!transNombre) {
+            logger.info('⚠️ Transportista no encontrado en el JSON de datos. Autogenerando uno bajo demanda vía UI...');
+            const generated = await TransportistaHelper.createTransportistaViaUI(page);
+            seededTransportista = generated;
+            transNombre = generated.nombre;
+
+            // Escribir el transportista autogenerado en el JSON del worker para asegurar sinergia
+            const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+            currentData.seededTransportista = seededTransportista;
+            fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+            logger.info(`✅ Transportista autogenerado guardado exitosamente en ${dataPath}`);
+
+            // Crear un contrato tipo Costo para este transportista para que no falle con "Transportista sin contrato"
+            logger.info(`📝 Creando contrato Costo para el transportista autogenerado ${transNombre}...`);
+            const contratosPage = new ContratosFormPage(page);
+            const nroContrato = String(Date.now()).slice(-6);
+            await contratosPage.fillBasicContractInfo(nroContrato, transNombre);
+            await contratosPage.addSpecificRouteAndCargo('20000', '50000');
+            await contratosPage.saveAndExtractId();
+            logger.info(`✅ Contrato Costo creado exitosamente para ${transNombre}`);
+        } else {
+            logger.info(`📦 Usando transportista cargado: "${transNombre}" (ID: ${seededTransportista.id})`);
         }
 
-        // Prioritize seededVehiculo/seededConductor associated with seededTransportista
-        const vehiculo = operationalData.seededVehiculo || operationalData.vehiculo;
-        if (!vehiculo?.patente) {
-            throw new Error('❌ Missing: vehiculo/seededVehiculo. Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first');
+        // 2. Ensure Vehiculo linked to Transportista
+        let vehiculo = operationalData.seededVehiculo || operationalData.vehiculo;
+        let patente = vehiculo?.patente;
+
+        if (!patente) {
+            logger.info(`⚠️ Vehículo no encontrado en el JSON de datos. Autogenerando uno bajo demanda para el transportista: ${transNombre}...`);
+            const generated = await VehiculoHelper.createVehiculoViaUI(page, transNombre);
+            vehiculo = generated;
+            patente = generated.patente;
+
+            const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+            currentData.seededVehiculo = vehiculo;
+            fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+            logger.info(`✅ Vehículo autogenerado guardado exitosamente en ${dataPath}`);
+        } else {
+            logger.info(`📦 Usando vehículo cargado: "${patente}"`);
         }
 
-        const conductor = operationalData.seededConductor || operationalData.conductor;
-        if (!conductor?.nombre) {
-            throw new Error('❌ Missing: conductor/seededConductor. Set LEGACY_DATA_SOURCE correctly and run the corresponding seed flow first');
+        // 3. Ensure Conductor linked to Transportista
+        let conductor = operationalData.seededConductor || operationalData.conductor;
+        let conductorNombre = conductor?.nombre;
+
+        if (!conductorNombre) {
+            logger.info(`⚠️ Conductor no encontrado en el JSON de datos. Autogenerando uno bajo demanda para el transportista: ${transNombre}...`);
+            const generated = await ConductorHelper.createConductorViaUI(page, transNombre);
+            conductor = generated;
+            conductorNombre = generated.nombre;
+
+            const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+            currentData.seededConductor = conductor;
+            fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+            logger.info(`✅ Conductor autogenerado guardado exitosamente en ${dataPath}`);
+        } else {
+            logger.info(`📦 Usando conductor cargado: "${conductor.nombre} ${conductor.apellido || ''}"`);
         }
 
-        const viaje = operationalData.viaje;
-        if (!viaje?.nroViaje) {
-            throw new Error('❌ Missing: viaje.nroViaje. Run planificar first in the selected legacy data source');
+        const conductorFull = `${conductor.nombre} ${conductor.apellido || ''}`.trim();
+
+        // 4. Ensure Cliente (needed for planning trip)
+        let cliente = operationalData.seededCliente || operationalData.cliente;
+        let clienteNombre = cliente?.nombreFantasia || cliente?.nombre;
+
+        if (!clienteNombre) {
+            logger.info('⚠️ Cliente no encontrado en el JSON de datos. Autogenerando uno bajo demanda para planificar el viaje...');
+            const generated = await ClienteHelper.createClienteViaUI(page);
+            cliente = generated;
+            clienteNombre = generated.nombreFantasia || generated.nombre;
+
+            const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+            currentData.seededCliente = cliente;
+            fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+            logger.info(`✅ Cliente autogenerado guardado exitosamente en ${dataPath}`);
         }
 
-        const transNombre = seededTransportista.nombre as string;
-        const patente = vehiculo.patente as string;
-        const conductorFull = `${conductor.nombre} ${conductor.apellido}`.trim();
-        const nroViaje = viaje.nroViaje as string;
+        // 5. Ensure Viaje (planificado)
+        let viaje = operationalData.viaje;
+        let nroViaje = viaje?.nroViaje;
+
+        if (!nroViaje) {
+            logger.info('⚠️ Viaje no encontrado en el JSON de datos. Planificando uno bajo demanda vía UI...');
+            const planificarPage = new PlanificarPage(page);
+            const nroViajeGen = String(Math.floor(10000 + Math.random() * 90000));
+            
+            // Planificar usando la lógica simplificada de viajes-planificar
+            await planificarPage.navigate();
+            await planificarPage.fillNroViaje(nroViajeGen);
+
+            const isDemoEnv = process.env.ENV === "DEMO";
+            const defaults = {
+                tipoOperacion: isDemoEnv ? "Distribución" : "Qa_to_std_",
+                tipoServicio: isDemoEnv ? "Lcl" : "Qa_TS_",
+                tipoViaje: isDemoEnv ? "DIRECTO" : "Normal",
+                unidadNegocio: isDemoEnv ? "Defecto" : "Defecto",
+                cliente: clienteNombre,
+                codigoCarga: isDemoEnv ? "CONTENEDOR DRY" : "Qa_COD_",
+                ruta: isDemoEnv ? "47" : "Qa_RT_",
+                origenManual: isDemoEnv ? "233_CD SuperZoo_Quilicura" : "405_LA FARFANA_Pudahuel",
+                destinoManual: isDemoEnv ? "Divisa" : "CXP ANTOFAGASTA",
+            };
+
+            await planificarPage.selectTipoOperacion(defaults.tipoOperacion);
+            await planificarPage.selectTipoServicio(defaults.tipoServicio);
+            await planificarPage.selectCliente(defaults.cliente);
+            await planificarPage.selectTipoViaje(defaults.tipoViaje);
+            await planificarPage.selectUnidadNegocio(defaults.unidadNegocio);
+            await planificarPage.selectCodigoCarga();
+            
+            let rutaAdded = false;
+            try {
+                rutaAdded = await planificarPage.agregarRuta(defaults.ruta);
+            } catch {
+                rutaAdded = await planificarPage.agregarRuta("Qa_RT_");
+            }
+            if (!rutaAdded) {
+                await planificarPage.selectOrigen(defaults.origenManual);
+                await planificarPage.selectDestino(defaults.destinoManual);
+            }
+            await planificarPage.fillKgViaje("1");
+
+            // Click Guardar
+            await Promise.all([
+                page.waitForNavigation({ waitUntil: 'networkidle', timeout: 45000 }).catch(() => null),
+                planificarPage.clickGuardar()
+            ]);
+
+            const finalUrl = page.url();
+            let viajeId: string | null = null;
+            const urlMatch = finalUrl.match(/\/viajes\/(?:editar|ver)\/(\d+)/);
+            if (urlMatch) {
+                viajeId = urlMatch[1];
+            }
+
+            nroViaje = nroViajeGen;
+            viaje = {
+                nroViaje: nroViaje,
+                id: viajeId || '',
+                cliente: clienteNombre,
+                ruta: defaults.ruta,
+                status: 'PLANIFICADO'
+            };
+
+            const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+            currentData.viaje = viaje;
+            fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+            logger.info(`✅ Viaje autogenerado y planificado: ${nroViaje} (id=${viajeId}). Guardado en ${dataPath}`);
+        } else {
+            logger.info(`📦 Usando viaje cargado: "${nroViaje}"`);
+        }
 
         // In Demo the grid filters by internal ID (viaje.id), not by the user-visible nroViaje.
         // viaje.id is saved by viajes-planificar.test.ts when running in Demo.

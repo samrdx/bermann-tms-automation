@@ -8,7 +8,7 @@ import {
 } from '../../src/utils/rutGenerator.js';
 import { config } from '../../src/config/environment.js';
 import { TransportistaFormPage } from '../../src/modules/transport/pages/TransportistaPage.js';
-import { TmsApiClient } from './TmsApiClient.js';
+import { TmsScenarioBuilder } from './TmsScenarioBuilder.js';
 import { isDemoMode } from '../../src/utils/env-helper.js';
 import { NamingHelper } from '../../src/utils/NamingHelper.js';
 

@@ -778,7 +778,8 @@ export class PlanificarPage extends BasePage {
 	): Promise<string | null> {
 		const btn = this.page.locator(`${btnSelector}:visible`).first();
 		const value = (await btn.innerText().catch(() => "")).trim();
-		if (!value || value.toLowerCase().includes("seleccionar")) {
+		const valLower = value.toLowerCase();
+		if (!value || valLower.includes("seleccionar") || valLower.includes("seleccione") || valLower.includes("select")) {
 			return null;
 		}
 		return value;

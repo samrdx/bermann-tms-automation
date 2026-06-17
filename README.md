@@ -93,7 +93,7 @@ bermann-tms-automation/
 │   │   │   ├── 03-finanzas/         # Reserved
 │   │   │   └── ultimamilla/         # Última Milla (pedido, asignar, batch)
 │   │   └── suites/                  # Atomic E2E + Setup suites
-│   ├── api-helpers/                 # TmsApiClient, helpers, DataPathHelper
+│   ├── api-helpers/                 # TmsScenarioBuilder, helpers, DataPathHelper
 │   └── helpers/
 ├── scripts/                         # pw:run wrapper, CI validation, engram, SDD sync
 ├── docs/                            # Architecture, CI/CD, selectors, maintenance
