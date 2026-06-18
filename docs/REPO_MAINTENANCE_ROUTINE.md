@@ -54,7 +54,7 @@ npm run storage:pw:browsers:refresh
 Qué hace:
 - verifica y limpia cache npm
 - desinstala browsers de Playwright
-- reinstala `chromium` y `firefox`
+- reinstala `chromium` (utilizado para soporte y debug local, mientras que el estándar de ejecución de pruebas es Google Chrome)
 - vuelve a listar instalaciones activas
 
 Señales típicas para usarla:
