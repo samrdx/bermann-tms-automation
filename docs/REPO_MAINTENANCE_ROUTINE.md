@@ -175,3 +175,37 @@ npm run show-report:demo
 - Semanal: `npm run storage:maintenance`
 - Si algo se rompe sin explicación: `npm run storage:clean:npm && npm run storage:pw:browsers:refresh`
 - Antes de una corrida importante: limpieza diaria + mantenimiento semanal; sumá refresh de browsers sólo si hubo inestabilidad
+
+## 8. Mantenimiento del Historial de Git (Slimming)
+
+El directorio `.git` puede acumular un peso significativo a lo largo del tiempo debido a archivos binarios grandes temporales o trazas pesadas que fueron comiteadas en el pasado.
+
+### Diagnóstico de tamaño
+
+Para auditar cuáles son los objetos o directorios que más pesan en la base de datos de Git:
+
+```bash
+# Contar el espacio del pack actual
+git count-objects -vH
+```
+
+### Rutina de compactación básica (Segura)
+
+Ejecutar de forma manual cada semestre o tras grandes limpiezas de archivos del workspace:
+
+```bash
+# Limpiar referencias muertas y compactar el histórico
+git gc --prune=now --aggressive
+```
+
+### Reducción agresiva (Avanzado)
+
+Si se detectan archivos binarios grandes en el histórico que ya fueron eliminados del árbol activo pero siguen existiendo en el historial, se debe coordinar con el equipo para ejecutar `git-filter-repo` (se requiere instalación externa de Python + git-filter-repo):
+
+```bash
+# Ejemplo para remover un archivo/directorio pesado del histórico de todas las ramas
+git filter-repo --path ruta/del/archivo-o-carpeta --invert-paths
+```
+
+> [!WARNING]
+> La re-escritura del histórico altera los hashes de los commits. Se debe realizar con las ramas protegidas deshabilitadas temporalmente y coordinar con el equipo para clonar de nuevo o hacer un `git pull --rebase` forzado tras el push final.

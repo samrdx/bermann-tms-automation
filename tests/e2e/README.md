@@ -17,7 +17,7 @@ e2e/
 
 ## V1 PR Gate
 
-El workflow `.github/workflows/tests.yml` se llama **QA PR SUITE** y corre:
+El workflow `.github/workflows/qa-pr-suite.yml` se llama **QA PR SUITE** y corre:
 
 ```bash
 npm run typecheck

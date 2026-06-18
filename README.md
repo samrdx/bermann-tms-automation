@@ -126,7 +126,7 @@ Todas las pruebas usan el wrapper `scripts/run-playwright-suite.mjs` vía `npm r
 
 ### V1 PR Gate
 
-El gate actual de pull requests está definido en `.github/workflows/tests.yml` como **QA PR SUITE**:
+El gate actual de pull requests está definido en `.github/workflows/qa-pr-suite.yml` como **QA PR SUITE**:
 
 ```bash
 npm run typecheck

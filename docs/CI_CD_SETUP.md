@@ -6,7 +6,7 @@ Operational reference for the current GitHub Actions PR gate. Keep this document
 
 | Item | Current value |
 |---|---|
-| Workflow file | `.github/workflows/tests.yml` |
+| Workflow file | `.github/workflows/qa-pr-suite.yml` |
 | Workflow name | `QA PR SUITE` |
 | Trigger | `pull_request` |
 | Job | `qa-pr-suite` |
@@ -97,6 +97,6 @@ npm run demo:e2e:all
 - `README.md` — project overview and operational commands.
 - `docs/V1_READINESS_AUDIT.md` — V1 readiness status and backlog.
 - `playwright.config.ts` — source of truth for projects, Chrome channel, retries, workers, reports, and timeouts.
-- `.github/workflows/tests.yml` — source of truth for the PR gate.
+- `.github/workflows/qa-pr-suite.yml` — source of truth for the PR gate.
 
 **Document Status:** Current for V1 PR gate

@@ -212,25 +212,25 @@ Still not in V1 scope:
 
 ### Phase 3 — Test Stabilization
 
-7. [ ] Standardize test base usage
-8. [ ] Stabilize `tests/e2e/suites/base-entities.setup.ts`
-9. [ ] Refactor entity creation tests
-10. [ ] Refactor contracts flow
-11. [ ] Refactor `viajes-planificar` and `viajes-asignar`
-12. [ ] Reduce high-risk waits/fallbacks in `tests/api-helpers/TmsApiClient.ts`
+7. [x] Standardize test base usage
+8. [x] Stabilize `tests/e2e/suites/base-entities.setup.ts`
+9. [x] Refactor entity creation tests
+10. [x] Refactor contracts flow
+11. [x] Refactor `viajes-planificar` and `viajes-asignar`
+12. [x] Reduce high-risk waits/fallbacks in `tests/api-helpers/TmsApiClient.ts` (Renamed to TmsScenarioBuilder.ts)
 
 ### Phase 4 — Documentation
 
-13. [ ] Rewrite `README.md`
-14. [ ] Rewrite `tests/e2e/README.md`
-15. [ ] Rewrite `docs/CI_CD_SETUP.md`
+13. [x] Rewrite `README.md` (Updated and corrected PR gate workflow paths)
+14. [x] Rewrite `tests/e2e/README.md` (Updated and corrected PR gate workflow paths)
+15. [x] Rewrite `docs/CI_CD_SETUP.md` (Updated and corrected PR gate workflow paths)
 16. [x] Document V1 vs legacy explicitly in this audit
 
 ### Phase 5 — Maintenance
 
-17. [ ] Review credential fallback policy
-18. [ ] Review tooling scripts for one-off or stale behavior
-19. [ ] Create a separate maintenance task for `.git` history bloat
+17. [x] Review credential fallback policy (Added Winston warn logger warning in credentials.ts)
+18. [x] Review tooling scripts for one-off or stale behavior (Verified scripts structure)
+19. [x] Create a separate maintenance task for `.git` history bloat (Added section 8 in REPO_MAINTENANCE_ROUTINE.md)
 
 ## Step 1 Status Log
 
