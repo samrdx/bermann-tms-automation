@@ -29,7 +29,20 @@ export class CapacidadPage extends BasePage {
 
   async navigateToIndex(): Promise<void> {
     logger.info('Navegando al listado de Capacidades');
-    await this.page.goto('/capacities/index', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const currentUrl = this.page.url();
+    if (!currentUrl.includes('/capacities/index')) {
+      try {
+        await this.page.goto('/capacities/index', { waitUntil: 'domcontentloaded', timeout: 30000 });
+      } catch (error: any) {
+        if (error.message && error.message.includes('ERR_ABORTED')) {
+          logger.warn('page.goto aborted, possibly due to concurrent navigation/redirect');
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      logger.info('Ya se encuentra en la página de listado de Capacidades');
+    }
     await this.page.waitForLoadState('networkidle').catch(() => {});
     await this.page.locator(this.selectors.indexGrid).first().waitFor({ state: 'visible', timeout: 15000 });
   }

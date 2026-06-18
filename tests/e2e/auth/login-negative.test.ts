@@ -1,14 +1,13 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
+import { test, expect } from '../../../src/fixtures/base.js';
 import { logger } from '../../../src/utils/logger.js';
 
-test('Should reject invalid credentials', async ({ page }) => {
+test('Should reject invalid credentials', async ({ loginPage, page }) => {
     logger.info('='.repeat(60));
     logger.info('🚀 Iniciando Test Negativo de Login');
     logger.info('='.repeat(60));
 
     // PHASE 0: Setup
-    const loginPage = new LoginPage(page);
+    // loginPage is automatically injected as a fixture
 
     // PHASE 1: Navigate
     logger.info('\n🧭 FASE 1: Navegar al Login');

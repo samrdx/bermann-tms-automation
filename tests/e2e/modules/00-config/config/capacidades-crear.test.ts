@@ -1,7 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../../../src/fixtures/base.js';
 import { CapacidadPage } from '../../../../../src/modules/transport/pages/CapacidadPage.js';
-import { LoginPage } from '../../../../../src/modules/auth/pages/LoginPage.js';
-import { getTestUser } from '../../../../../src/config/credentials.js';
 import { createLogger } from '../../../../../src/utils/logger.js';
 import { allure } from 'allure-playwright';
 
@@ -9,19 +7,15 @@ const logger = createLogger('CapacidadesTest');
 
 test.describe('[CONFIG04] - Capacidades', () => {
   let capacidadPage: CapacidadPage;
-  const user = getTestUser('admin');
   const env = process.env.ENV || 'QA';
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ capacidadPage: capPage }) => {
     await allure.epic('TMS Config Flow');
     await allure.feature('01-Configuracion');
     await allure.story('Capacidades');
     await allure.parameter('Ambiente', env.toUpperCase());
 
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await loginPage.login(user.username, user.password);
-    capacidadPage = new CapacidadPage(page);
+    capacidadPage = capPage;
   });
 
   test('Crear Capacidad de Valor Único', async ({ page }) => {

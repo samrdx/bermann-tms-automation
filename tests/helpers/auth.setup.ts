@@ -1,6 +1,5 @@
 
-import { test as setup, expect } from '@playwright/test';
-import { LoginPage } from '../../src/modules/auth/pages/LoginPage.js';
+import { test as setup, expect } from '../../src/fixtures/base.js';
 import { getTestUser } from '../../src/config/credentials.js';
 import path from 'path';
 import fs from 'fs';
@@ -8,7 +7,7 @@ import fs from 'fs';
 const envName = (process.env.ENV || 'QA').toLowerCase();
 const authFile = path.resolve(`playwright/.auth/user-${envName}.json`);
 
-setup('authenticate', async ({ page }) => {
+setup('authenticate', async ({ page, loginPage }) => {
     // Ensure the auth directory exists
     const authDir = path.dirname(authFile);
     if (!fs.existsSync(authDir)) {
@@ -18,8 +17,6 @@ setup('authenticate', async ({ page }) => {
     // Use environment variables if provided, otherwise fallback to existing credentials logic
     const username = process.env.TMS_USER || getTestUser('regular').username;
     const password = process.env.TMS_PASS || getTestUser('regular').password;
-
-    const loginPage = new LoginPage(page);
 
     // Perform login
     await loginPage.login(username, password);

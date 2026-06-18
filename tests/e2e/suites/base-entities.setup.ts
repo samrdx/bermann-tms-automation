@@ -1,6 +1,5 @@
-import { test } from '../../../src/fixtures/base.js';
+import { test, expect } from '../../../src/fixtures/base.js';
 import { logger } from '../../../src/utils/logger.js';
-import { LoginPage } from '../../../src/modules/auth/pages/LoginPage.js';
 import { DataPathHelper } from '../../api-helpers/DataPathHelper.js';
 import fs from 'fs';
 import path from 'path';
@@ -11,7 +10,6 @@ import { TransportistaHelper } from '../../api-helpers/TransportistaHelper.js';
 import { ClienteHelper } from '../../api-helpers/ClienteHelper.js';
 import { VehiculoHelper } from '../../api-helpers/VehiculoHelper.js';
 import { ConductorHelper } from '../../api-helpers/ConductorHelper.js';
-import { getTestUser } from '../../../src/config/credentials.js';
 
 /**
  * Base Operational Suite - Steps 1-4
@@ -40,13 +38,12 @@ test.describe('Base Operational Suite - Entity Creation', () => {
         }
 
         // =================================================================
-        // PASO 0: Login
+        // PASO 0: Login (Heredado de storageState)
         // =================================================================
-        logger.info('🔐 PASO 0: Autenticando...');
-        const loginPage = new LoginPage(page);
-        const user = getTestUser('admin');
-        await loginPage.loginAndWaitForDashboard(user.username, user.password);
-        logger.info(`✅ Paso 0 Completado - Autenticado como ${user.username}`);
+        logger.info('🔐 PASO 0: Cargando Dashboard desde StorageState...');
+        await page.goto('/');
+        await expect(page.locator('.logo-min')).toBeVisible({ timeout: 15000 });
+        logger.info(`✅ Paso 0 Completado - Dashboard cargado correctamente`);
         logger.info('');
 
         // Data structure for export

@@ -133,7 +133,10 @@ export default defineConfig({
     {
       name: 'base-entities-chromium',
       testMatch: 'e2e/suites/base-entities.setup.ts',
-      use: devices['Desktop Chrome'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: `playwright/.auth/user-${envName}.json`,
+      },
       dependencies: ['Autorización'],
     },
 
