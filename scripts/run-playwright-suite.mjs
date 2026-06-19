@@ -354,10 +354,16 @@ export function runPlaywrightSuite(args, { runCommand = run } = {}) {
   try {
     const directories = getReportDirectories(parsedArgs.envName);
 
-    cleanDir(directories.testResultsDir);
-    cleanDir(directories.playwrightReportDir);
-    cleanDir(directories.allureResultsDir);
-    cleanDir(directories.allureReportDir);
+    const skipClean = String(process.env.SKIP_CLEAN || '').toLowerCase() === 'true';
+
+    if (skipClean) {
+      console.info('[run-playwright-suite] SKIP_CLEAN=true; preserving existing report artifacts.');
+    } else {
+      cleanDir(directories.testResultsDir);
+      cleanDir(directories.playwrightReportDir);
+      cleanDir(directories.allureResultsDir);
+      cleanDir(directories.allureReportDir);
+    }
 
     const runningInCi = String(process.env.CI || '').toLowerCase() === 'true';
     const testArgs = buildPlaywrightTestArgs(parsedArgs, { runningInCi });

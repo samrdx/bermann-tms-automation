@@ -40,23 +40,34 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
-      - name: Run QA regressions unificados
+      - name: Run QA full regression single-browser
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
           ULTIMAMILLA_ENABLE_MUTATION: 'true'
+          ULTIMAMILLA_BATCH_SIZE: '3'
           CI: true
           ENV: QA
-        run: npm run qa:regression:ops:full
+        run: npm run qa:regression:full:single
 
       - name: Run QA Finanzas Full E2E (Critical Flow)
+        timeout-minutes: 45
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
-          ULTIMAMILLA_ENABLE_MUTATION: 'true'
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
+          SKIP_CLEAN: 'true'
           CI: true
           ENV: QA
-        run: npm run qa:e2e:finanzas-full
+        run: npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
+
+      - name: Generate QA Allure report
+        if: always()
+        run: |
+          if [ -d allure-results-qa ]; then
+            npm run allure:generate:qa
+          else
+            echo "No allure-results-qa directory found; skipping report generation."
+          fi
 
       - name: Upload Allure Report and Playwright Evidences
         if: always()
