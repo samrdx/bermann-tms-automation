@@ -36,8 +36,20 @@ jobs:
 
       - name: Run E2E Finanzas Full (QA)
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USER || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASS || 'srodriguez' }}
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME || 'srodriguez' }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
           CI: true
           ENV: QA
         run: npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
+
+      - name: Upload PR Playwright/Allure evidences
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-pr-evidences-${{ github.run_id }}
+          path: |
+            allure-results-qa/
+            test-results-qa/
+            playwright-report-qa/
+            logs/
+          retention-days: 7

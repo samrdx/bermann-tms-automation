@@ -9,17 +9,6 @@ const logger = createLogger('UltimaMilla-AsignarPedidoBatch');
 const DEFAULT_BATCH_SIZE = 8;
 const BATCH_ADDRESSES = [
   'Argomedo 344, Santiago, Chile',
-  'Av. Providencia 1208, Providencia, Chile',
-  'Apoquindo 4500, Las Condes, Chile',
-  'Santa Rosa 1240, Santiago, Chile',
-  'Avenida Grecia 2000, Ñuñoa, Chile',
-  'Neptuno 1314B, 9080679 Cerro Navia, Región Metropolitana',
-  'Av. 5 de Abril 5940, 9160000 Estación Central, Región Metropolitana',
-  'Placer 698, Santiago, Región Metropolitana',
-  'Av. Mariano Sánchez Fontecilla 12000, 7941197 Peñalolén, Región Metropolitana',
-  'Av. Padre Hurtado Sur 875, 7571626 Las Condes, Región Metropolitana',
-  'Av. Larraín 5862, 7870154 La Reina, Región Metropolitana',
-  'Av. Macul 6402, La Florida, Peñalolén, Región Metropolitana',
 ] as const;
 const MAX_DISTINCT_BASE_ADDRESSES = BATCH_ADDRESSES.length;
 
@@ -110,7 +99,7 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
 
     logger.info('🚀 Inicio — Última Milla asignación batch de pedidos');
     logger.info(
-      `🧾 Contexto: cliente=${clienteObjetivo} | unidadNegocio=Defecto -> ${unidadNegocioSecundaria || 'primera disponible UI'} | batchSize=${batchSize} | pedidos=[${executionSummary.createdOrders.join(' | ')}]`
+      `🧾 Contexto: cliente=${clienteObjetivo} | unidadNegocio=Defecto -> ${unidadNegocioSecundaria || 'primera disponible UI'} | fecha=UI default date | batchSize=${batchSize} | pedidos=[${executionSummary.createdOrders.join(' | ')}]`
     );
 
     await allure.parameter('Ambiente', (process.env.ENV || 'QA').trim().toUpperCase());
@@ -265,7 +254,7 @@ test.describe('Última Milla - Asignación batch de pedidos', () => {
         let tripId: string | null = null;
 
         try {
-          tripId = await ultimaMillaPedidoIndexPage.extractTripIdFromResults(firstOrderCode);
+          tripId = await ultimaMillaPedidoIndexPage.extractTripIdFromResults(firstOrderCode, { fecha: createCurrentDate() });
           logger.success(`Trip ID batch resuelto desde UI /order/index: ${tripId}`);
         } catch (error) {
           logger.warn('No se pudo resolver Trip ID batch desde /order/index; evaluando fallback de createTrip.', error);
@@ -400,6 +389,14 @@ function resolveBatchSize(rawValue: string | undefined): number {
   return parsedValue;
 }
 
+function createCurrentDate(): string {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
 function pickRandomTerminalStatus(): TerminalStatus {
   const randomIndex = Math.floor(Math.random() * TERMINAL_STATUSES.length);
   return TERMINAL_STATUSES[randomIndex];
@@ -408,8 +405,8 @@ function pickRandomTerminalStatus(): TerminalStatus {
 function resolveExpectedTripConfiguration(): { operation: string; service: string } {
   const isDemo = (process.env.ENV || 'QA').trim().toUpperCase() === 'DEMO';
   return {
-    operation: isDemo ? 'Cristales' : 'defecto',
-    service: isDemo ? 'Roundtrip' : 'defecto',
+    operation: isDemo ? 'Cristales' : 'Qa_to_std_',
+    service: isDemo ? 'Roundtrip' : 'Qa_TS_',
   };
 }
 

@@ -652,6 +652,8 @@ export class UltimaMillaAsignarPage extends BasePage {
         );
       } else {
         logger.warn('POST /order/createtrip no expuso Trip ID utilizable en body/headers/request.');
+        logger.warn(`createTrip response snippet: ${extractedTripData.responseSnippet || '<empty>'}`);
+        logger.warn(`createTrip request snippet: ${extractedTripData.requestSnippet || '<empty>'}`);
       }
 
       const refreshResponse = await refreshResponsePromise;

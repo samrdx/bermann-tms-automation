@@ -185,7 +185,8 @@ test.describe('Última Milla - Asignación de Pedido', () => {
           // Try with more attempts and longer poll intervals
           tripId = await ultimaMillaPedidoIndexPage.extractTripIdFromResults(executionSummary.pedido, {
             maxAttempts: 12,
-            pollIntervalMs: 3000
+            pollIntervalMs: 3000,
+            fecha: createCurrentDate(),
           });
           logger.success(`Trip ID resuelto desde UI /order/index: ${tripId}`);
         } catch (error) {
@@ -257,6 +258,14 @@ function logExecutionSummary(summary: ExecutionSummary): void {
 
 function formatSummaryValue(value: string | undefined): string {
   return value?.trim() ? value : 'N/A';
+}
+
+function createCurrentDate(): string {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  return `${day}-${month}-${year}`;
 }
 
 function loadOperationalData(testInfo: Parameters<typeof DataPathHelper.getLegacyOperationalDataPath>[0]): OperationalData {

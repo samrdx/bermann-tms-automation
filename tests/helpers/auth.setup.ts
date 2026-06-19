@@ -15,8 +15,8 @@ setup('authenticate', async ({ page, loginPage }) => {
     }
 
     // Use environment variables if provided, otherwise fallback to existing credentials logic
-    const username = process.env.TMS_USER || getTestUser('regular').username;
-    const password = process.env.TMS_PASS || getTestUser('regular').password;
+    const username = process.env.TMS_USERNAME || getTestUser('regular').username;
+    const password = process.env.TMS_PASSWORD || getTestUser('regular').password;
 
     // Perform login
     await loginPage.login(username, password);

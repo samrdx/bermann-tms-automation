@@ -39,8 +39,8 @@ Configure repository secrets under `GitHub Repository -> Settings -> Secrets and
 
 | Secret | Used for |
 |---|---|
-| `TMS_USER` | TMS username for the QA PR gate |
-| `TMS_PASS` | TMS password for the QA PR gate |
+| `TMS_USERNAME` | TMS username for the QA PR gate |
+| `TMS_PASSWORD` | TMS password for the QA PR gate |
 
 The workflow currently includes fallback credentials for the gate environment. Prefer secrets for operational use.
 
@@ -80,7 +80,7 @@ The current PR workflow does not publish a GitHub Pages Allure report.
 | TypeScript step fails | Run `npm run typecheck` locally. |
 | Browser launch fails in CI | Confirm the workflow still installs `chrome`, not only `chromium`. |
 | Test data collision or legacy DB instability | Keep the gate command on `--workers 1`. |
-| Auth failure | Verify `TMS_USER` / `TMS_PASS` secrets and QA login availability. |
+| Auth failure | Verify `TMS_USERNAME` / `TMS_PASSWORD` secrets and QA login availability. |
 
 ## Useful Commands
 
