@@ -221,7 +221,7 @@ npm run qa:seed:legacy              # base-entities.setup.ts (crea todo el ecosi
 
 ## CI/CD (GitHub Actions)
 
-Workflow actual: **QA PR SUITE** (`.github/workflows/tests.yml`)
+Workflow actual: **QA PR SUITE** (`.github/workflows/qa-pr-suite.yml`)
 
 | Job | Descripción | Timeout |
 |---|---|---|
@@ -231,8 +231,8 @@ Workflow actual: **QA PR SUITE** (`.github/workflows/tests.yml`)
 
 | Secret | Uso |
 |---|---|
-| `TMS_USER` | Usuario TMS |
-| `TMS_PASS` | Password TMS |
+| `TMS_USERNAME` | Usuario TMS |
+| `TMS_PASSWORD` | Password TMS |
 
 ### Key Features
 
