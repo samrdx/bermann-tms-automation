@@ -55,14 +55,12 @@ Approximate workspace hotspots observed during audit:
 
 ### Weight conclusion
 
-The project is not heavy because of source code. It is heavy because of:
+El proyecto no es pesado por el código fuente, sino por el historial acumulado en la base de datos de Git.
 
-1. Git history
-2. Dependencies
-3. Generated reports/test artifacts when present
-4. Build/runtime outputs
+Cualquier reducción real del directorio `.git` (~8.04 GB) requiere una tarea planificada de limpieza con `git-filter-repo` para purgar binarios históricos.
 
-The current cleanup reduced working-tree clutter, but it does not shrink `.git` history. Any real reduction of the ~8 GB `.git` directory requires a separate Git history slimming plan.
+> [!NOTE]
+> **Decisión de Estabilización V1:** Se intentó realizar una compactación agresiva local (`git gc --prune=now --aggressive`), pero se abortó de manera segura a las 20 horas de ejecución debido a la lentitud del procesamiento en máquinas locales de desarrollo. Esta tarea de reducción de historial queda pospuesta en el **Backlog Post-V1** para ejecutarse mediante re-escritura controlada de la historia en una ventana de mantenimiento futuro.
 
 ## Key Findings
 
