@@ -84,10 +84,7 @@ export class UltimaMillaFormPage extends BasePage {
         await this.fill(this.selectors.telefono, data.telefono);
 
         if (data.fechaEntrega) {
-            await this.fill(this.selectors.fechaEntrega, data.fechaEntrega);
-            await this.page.locator('h4:has-text("Pedido")').first().click();
-            await this.page.keyboard.press('Escape'); // Cerrar el datepicker overlay
-            await this.page.waitForTimeout(500);
+            await this.setDateInput(this.selectors.fechaEntrega, data.fechaEntrega);
         }
 
         await this.selectUnidadNegocio(options?.unidadNegocio, options?.unidadNegocioFallback);
@@ -294,9 +291,24 @@ export class UltimaMillaFormPage extends BasePage {
 
     async fillFechaEntrega(fecha: string): Promise<void> {
         logger.info(`Validando completado: completando fecha de entrega: ${fecha}`);
-        await this.fill(this.selectors.fechaEntrega, fecha);
-        await this.page.locator('h4:has-text("Pedido")').first().click(); // Click out to trigger validation/blur
-        await this.page.keyboard.press('Escape'); // Cerrar explícitamente el datepicker
+        await this.setDateInput(this.selectors.fechaEntrega, fecha);
+    }
+
+    private async setDateInput(selector: string, value: string): Promise<void> {
+        await this.page.locator(selector).waitFor({ state: 'visible', timeout: 5000 });
+        await this.page.evaluate(({ selector: inputSelector, value: inputValue }) => {
+            const input = document.querySelector(inputSelector) as HTMLInputElement | null;
+            if (!input) {
+                throw new Error(`No se encontró el input de fecha ${inputSelector}`);
+            }
+
+            input.removeAttribute('readonly');
+            input.value = inputValue;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.dispatchEvent(new Event('blur', { bubbles: true }));
+        }, { selector, value });
+        await this.page.keyboard.press('Escape').catch(() => undefined);
         await this.page.waitForTimeout(500);
     }
 

@@ -16,6 +16,7 @@ export interface PedidoIndexSearchResult {
 export interface PedidoIndexTripLookupOptions {
   maxAttempts?: number;
   pollIntervalMs?: number;
+  fecha?: string;
 }
 
 /**
@@ -33,6 +34,9 @@ export interface PedidoIndexTripLookupOptions {
 export class UltimaMillaPedidoIndexPage extends BasePage {
   private readonly selectors = {
     searchInput: '#txt_search',
+    dateFrom: 'input[placeholder="Desde"]',
+    dateTo: 'input[placeholder="Hasta"]',
+    btnSearch: '#btn_search',
     table: '#tabla_data',
     rows: '#tabla_data tbody tr',
     info: '#tabla_data_info',
@@ -54,14 +58,18 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
     });
   }
 
-  async searchByOrderCode(orderCode: string): Promise<void> {
+  async searchByOrderCode(orderCode: string, options: PedidoIndexTripLookupOptions = {}): Promise<void> {
     await this.withActionScreenshot('ultimamilla-pedido-index-search-error', async () => {
-      logger.info(`Buscando pedido en /order/index. codigo=${orderCode}`);
+      logger.info(`Buscando pedido en /order/index. codigo=${orderCode} | fecha=${options.fecha || 'UI default date'}`);
 
       await this.page.locator(this.selectors.searchInput).waitFor({
         state: 'visible',
         timeout: 10000,
       });
+
+      if (options.fecha) {
+        await this.setDateRange(options.fecha);
+      }
 
       const searchResponsePromise = this.page
         .waitForResponse(
@@ -82,18 +90,22 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
         input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
         input.dispatchEvent(new Event('change', { bubbles: true }));
 
-        const windowWithDatatable = window as Window & {
-          datatable?: {
-            search?: (term: string) => { draw?: () => void };
-            draw?: () => void;
-          };
-        };
-
-        windowWithDatatable.datatable?.search?.(value)?.draw?.();
-        windowWithDatatable.datatable?.draw?.();
       }, { selector: this.selectors.searchInput, value: orderCode.trim() });
 
-      await searchResponsePromise;
+      const searchButton = this.page.locator(this.selectors.btnSearch);
+      if (await searchButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await searchButton.click();
+      } else {
+        await this.page.keyboard.press('Enter');
+      }
+
+      const response = await searchResponsePromise;
+      if (response) {
+        const responseText = await response.text().catch(() => '');
+        logger.info(`Búsqueda /order/search ejecutada. status=${response.status()} url=${response.url()} body=${this.createSnippet(responseText, 500) || '<empty>'}`);
+      } else {
+        logger.warn('No se capturó respuesta POST /order/search al buscar pedido en /order/index.');
+      }
       await this.waitForResultsToSettle();
     });
   }
@@ -109,7 +121,7 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         logger.info(`Resolviendo Trip ID por UI. codigo=${orderCode} | intento=${attempt}/${maxAttempts}`);
-        await this.searchByOrderCode(orderCode);
+        await this.searchByOrderCode(orderCode, options);
 
         const matches = await this.getVisibleResults();
         const exactMatch = matches.find(result => this.normalizeValue(result.orderCode) === normalizedOrderCode);
@@ -176,6 +188,34 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
       },
       { timeout: 10000 }
     );
+  }
+
+  private async setDateRange(fecha: string): Promise<void> {
+    await this.page.evaluate(({ fromSelector, toSelector, value }) => {
+      const setDate = (selector: string) => {
+        const input = document.querySelector(selector) as HTMLInputElement | null;
+        if (!input) {
+          return false;
+        }
+
+        input.removeAttribute('readonly');
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+        return true;
+      };
+
+      const fromApplied = setDate(fromSelector);
+      const toApplied = setDate(toSelector);
+      if (!fromApplied || !toApplied) {
+        throw new Error(`No se pudo configurar rango de fecha en /order/index. desde=${fromApplied} hasta=${toApplied}`);
+      }
+    }, {
+      fromSelector: this.selectors.dateFrom,
+      toSelector: this.selectors.dateTo,
+      value: fecha,
+    });
   }
 
   private async getVisibleResults(): Promise<PedidoIndexSearchResult[]> {
@@ -337,6 +377,10 @@ export class UltimaMillaPedidoIndexPage extends BasePage {
 
   private normalizeValue(value: string): string {
     return value.replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  private createSnippet(value: string, maxLength = 300): string {
+    return value.replace(/\s+/g, ' ').trim().slice(0, maxLength);
   }
 
   protected async withActionScreenshot<T>(screenshotName: string, action: () => Promise<T>): Promise<T> {
