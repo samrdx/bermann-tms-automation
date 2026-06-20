@@ -138,6 +138,7 @@
     "// === SDD | ARTIFACT SYNC ===": "",
     "sdd:sync:pull": "git pull --ff-only origin main",
     "sdd:sync:push": "node scripts/sdd/sync-push.mjs",
+    "setup:work": "node scripts/setup-work.cjs",
     "engram:preflight": "node scripts/engram/preflight.mjs",
     "engram:topic-key": "node scripts/engram/topic-key.mjs",
     "mobile:wdio": "npm --prefix ./tmsapp/mobile run wdio",

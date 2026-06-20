@@ -43,3 +43,18 @@ rules:
     - Compare implementation against every spec scenario
   archive:
     - Warn before merging destructive deltas (large removals)
+
+testing:
+  runner: playwright
+  run_command: npm run test
+  typecheck_command: npm run typecheck
+  strict_tdd: true
+  capabilities:
+    - name: E2E Browser Testing
+      description: Desktop Chrome multi-environment web automation with Playwright.
+    - name: Setup Chains
+      description: Setup-dependency chaining (authorization, master config, base entities).
+    - name: Reporting
+      description: HTML, JSON, and Allure test reports.
+    - name: Code Verification
+      description: TypeScript strict typechecking (tsc --noEmit).
