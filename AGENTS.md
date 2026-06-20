@@ -95,6 +95,7 @@ Load the relevant skill before generating code.
 9. Always execute SDD in `interactive` mode, using `hybrid` artifact store (both local files in `openspec/` and memory in `engram`), and checking PR sizes via `ask-on-risk` (400-line budget limit).
 10. Maintain `openspec/` structure strictly: central specs in `openspec/specs/` MUST follow the modular numbering (`00-config`, `01-entidades`, `02-operaciones`, `03-finanzas`, `05-ci-cd`, `99-utilidades`). Active changes reside in `openspec/changes/` and MUST be moved to `openspec/changes/archive/` prefixed with `YYYY-MM-DD-` upon completion.
 11. Never execute `git push` without presenting a summary of accomplishments and remaining work, and obtaining explicit user authorization first.
+12. Git Branching Protocol: Before starting any new task, work item, or feature, the agent MUST run a command to check the current branch (e.g., `git branch` or `git status`). The agent MUST state the active branch to the user and ask: "Estamos en la rama <nombre>. ¿Querés que cree una nueva rama para este trabajo o preferís seguir trabajando en la rama actual?". The agent MUST NOT write any code until the branch state is confirmed or the new branch is created.
 
 ---
 
