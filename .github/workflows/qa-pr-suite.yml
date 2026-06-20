@@ -34,10 +34,26 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
+      - name: Preflight - Validate required TMS secrets
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD }}
+        run: |
+          missing=0
+          if [ -z "${TMS_USERNAME:-}" ]; then
+            echo "::error::GitHub secret TMS_USERNAME is required."
+            missing=1
+          fi
+          if [ -z "${TMS_PASSWORD:-}" ]; then
+            echo "::error::GitHub secret TMS_PASSWORD is required."
+            missing=1
+          fi
+          exit "$missing"
+
       - name: Run E2E Finanzas Full (QA)
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USERNAME || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD }}
           CI: true
           ENV: QA
         run: npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1

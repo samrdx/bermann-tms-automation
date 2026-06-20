@@ -40,10 +40,26 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
+      - name: Preflight - Validate required TMS secrets
+        env:
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD }}
+        run: |
+          missing=0
+          if [ -z "${TMS_USERNAME:-}" ]; then
+            echo "::error::GitHub secret TMS_USERNAME is required."
+            missing=1
+          fi
+          if [ -z "${TMS_PASSWORD:-}" ]; then
+            echo "::error::GitHub secret TMS_PASSWORD is required."
+            missing=1
+          fi
+          exit "$missing"
+
       - name: Run QA full regression single-browser
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USERNAME || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD }}
           ULTIMAMILLA_ENABLE_MUTATION: 'true'
           ULTIMAMILLA_BATCH_SIZE: '3'
           CI: true
@@ -53,8 +69,8 @@ jobs:
       - name: Run QA Finanzas Full E2E (Critical Flow)
         timeout-minutes: 45
         env:
-          TMS_USERNAME: ${{ secrets.TMS_USERNAME || 'srodriguez' }}
-          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
+          TMS_USERNAME: ${{ secrets.TMS_USERNAME }}
+          TMS_PASSWORD: ${{ secrets.TMS_PASSWORD }}
           SKIP_CLEAN: 'true'
           CI: true
           ENV: QA

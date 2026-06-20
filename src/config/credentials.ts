@@ -1,7 +1,11 @@
-import { logger } from '../utils/logger.js';
+export function requiredEnv(name: string): string {
+  const value = process.env[name]?.trim();
 
-if (!process.env.TMS_USERNAME || !process.env.TMS_PASSWORD) {
-  logger.warn('⚠️ [credentials] Las variables de entorno TMS_USERNAME o TMS_PASSWORD no están definidas. Usando credenciales por defecto (srodriguez) como fallback.');
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
 }
 
 export interface TestUser {
@@ -13,24 +17,24 @@ export interface TestUser {
 
 export const TEST_USERS: Record<string, TestUser> = {
   admin: {
-    username: process.env.TMS_USERNAME || 'srodriguez',
-    password: process.env.TMS_PASSWORD || 'srodriguez',
+    get username() { return requiredEnv('TMS_USERNAME'); },
+    get password() { return requiredEnv('TMS_PASSWORD'); },
     role: 'admin',
     description: 'Admin User'
   },
   
   regular: {
-    username: process.env.TMS_USERNAME || 'srodriguez', 
-    password: process.env.TMS_PASSWORD || 'srodriguez',
+    get username() { return requiredEnv('TMS_USERNAME'); },
+    get password() { return requiredEnv('TMS_PASSWORD'); },
     role: 'user',
     description: 'Regular User'
   },
   
   viewer: {
-    username: process.env.TEST_VIEWER_USER || 'viewer_test',
-    password: process.env.TEST_VIEWER_PASS || 'Viewer123!',
+    get username() { return requiredEnv('TEST_VIEWER_USER'); },
+    get password() { return requiredEnv('TEST_VIEWER_PASS'); },
     role: 'viewer',
-    description: 'Usuario solo lectura para tests'
+    description: 'Read-only user for tests'
   }
 };
 
