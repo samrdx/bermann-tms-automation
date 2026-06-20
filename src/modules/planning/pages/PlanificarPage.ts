@@ -476,6 +476,41 @@ export class PlanificarPage extends BasePage {
 			await option.evaluate((node: HTMLElement) => node.scrollIntoView({ block: "center" })).catch(() => {});
 			await option.evaluate((node: HTMLElement) => node.click());
 
+			// Keep the native select in sync. TMS saveTrip() validates the underlying
+			// #viajes-carga_id value and runs onchange handlers such as buscarUnidadMedida().
+			await button.evaluate((btn: HTMLElement, text: string) => {
+				const cleanText = text.trim().toLowerCase();
+				const container = btn.closest(".bootstrap-select");
+				const select = container?.querySelector("select") as HTMLSelectElement | null;
+				if (!select) return;
+
+				const target = Array.from(select.options).find((opt) => {
+					const optionText = opt.text.trim();
+					return (
+						optionText === text ||
+						optionText.toLowerCase().includes(cleanText)
+					);
+				});
+
+				if (!target) return;
+
+				select.value = target.value;
+				select.dispatchEvent(new Event("input", { bubbles: true }));
+				select.dispatchEvent(new Event("change", { bubbles: true }));
+				select.dispatchEvent(new Event("blur", { bubbles: true }));
+
+				const win = window as unknown as {
+					jQuery?: ((element: HTMLSelectElement) => {
+						selectpicker?: (action: string, value?: string) => void;
+					});
+				};
+				const jqSelect = win.jQuery?.(select);
+				jqSelect?.selectpicker?.("val", target.value);
+				jqSelect?.selectpicker?.("refresh");
+			}, targetCarga);
+
+			await this.page.waitForTimeout(800);
+
 		} catch (error: any) {
 			logger.error(`❌ Fallo crítico al seleccionar Código Carga: ${error.message}`);
 			throw error;
@@ -493,7 +528,25 @@ export class PlanificarPage extends BasePage {
 		try {
 			await input.waitFor({ state: "visible", timeout: 3000 });
 		} catch (error) {
-			logger.warn(`⚠️ Campo KG del viaje principal (#viajes-kg) no visible en la UI. Se omite.`);
+			logger.warn(`⚠️ Campo KG del viaje principal (#viajes-kg) no visible en la UI. Forzando valor para validación de saveTrip().`);
+			await this.page.evaluate(({ selector, val }: { selector: string; val: string }) => {
+				const el = document.querySelector(selector) as HTMLInputElement | null;
+				if (!el) return;
+				el.value = val;
+				el.dispatchEvent(new Event("input", { bubbles: true }));
+				el.dispatchEvent(new Event("change", { bubbles: true }));
+				el.dispatchEvent(new Event("blur", { bubbles: true }));
+			}, { selector: this.selectors.kgViaje, val: kg });
+
+			const hiddenValue = await this.page
+				.locator(this.selectors.kgViaje)
+				.inputValue()
+				.catch(() => "");
+			if (hiddenValue.trim() !== kg) {
+				throw new Error(
+					`No se pudo forzar KG del viaje oculto. Esperado: [${kg}] | Actual: [${hiddenValue}]`,
+				);
+			}
 			return;
 		}
 
