@@ -85,6 +85,14 @@ jobs:
           if ($mode -in @('full', 'dry-run') -and -not $parentKey) { throw "$mode mode requires parentKey. Send workflow_dispatch input parentKey or repository_dispatch client_payload.parentKey." }
           if ($mode -in @('validate-only', 'sync-existing') -and -not $testSetKey) { throw "$mode mode requires testSetKey. Send workflow_dispatch input testSetKey or repository_dispatch client_payload.testSetKey." }
 
+          $issueKeyPattern = '^[A-Z][A-Z0-9]+-\d+$'
+          if ($parentKey -and $parentKey -notmatch $issueKeyPattern) {
+            throw "Invalid parentKey format. Expected Jira issue key, got '$parentKey'."
+          }
+          if ($testSetKey -and $testSetKey -notmatch $issueKeyPattern) {
+            throw "Invalid testSetKey format. Expected Jira issue key, got '$testSetKey'."
+          }
+
           "parent_key=$parentKey" >> $env:GITHUB_OUTPUT
           "mode=$mode" >> $env:GITHUB_OUTPUT
           "test_set_key=$testSetKey" >> $env:GITHUB_OUTPUT
