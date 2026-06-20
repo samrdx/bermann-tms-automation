@@ -96,6 +96,10 @@ Load the relevant skill before generating code.
 10. Maintain `openspec/` structure strictly: central specs in `openspec/specs/` MUST follow the modular numbering (`00-config`, `01-entidades`, `02-operaciones`, `03-finanzas`, `05-ci-cd`, `99-utilidades`). Active changes reside in `openspec/changes/` and MUST be moved to `openspec/changes/archive/` prefixed with `YYYY-MM-DD-` upon completion.
 11. Never execute `git push` without presenting a summary of accomplishments and remaining work, and obtaining explicit user authorization first.
 12. Git Branching Protocol: Before starting any new task, work item, or feature, the agent MUST run a command to check the current branch (e.g., `git branch` or `git status`). The agent MUST state the active branch to the user and ask: "Estamos en la rama <nombre>. ¿Querés que cree una nueva rama para este trabajo o preferís seguir trabajando en la rama actual?". The agent MUST NOT write any code until the branch state is confirmed or the new branch is created.
+13. Parallel Agent Branching & Commit Conventions: To enable seamless parallel development across multiple agents (OpenCode = OC, Claude = CL, Antigravity = AGY) working on independent features, the following standards MUST be followed:
+    - Branch naming format: `feat/<agent-prefix>-<feature-name>` (e.g., `feat/agy-viajes`, `feat/cl-proforma`, `feat/oc-prefactura`).
+    - Commit message format: `<agent-prefix> | <conventional-commit>` (e.g., `oc | feat(finanzas): add seed data`, `cl | feat(pom): implement proforma page`, `agy | test(e2e): add regression scenarios`).
+    - Daily Sync Rule: Before starting any code block, the agent MUST run `git fetch origin && git merge origin/main` to pull updates from main and resolve conflicts early.
 
 ---
 
