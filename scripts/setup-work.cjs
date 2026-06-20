@@ -32,7 +32,7 @@ if (fs.existsSync(localOpencodeJson)) {
 
 // 2. Ajustar rutas dinámicamente dentro de opencode.json
 try {
-  console.log('🔄 Ajustando rutas absolutas en opencode.json...');
+  console.log('🔄 Ajustando rutas absolutas en opencode.json global...');
   let jsonContent = fs.readFileSync(opencodeJsonPath, 'utf8');
   
   // Reemplazar rutas de usuario viejas (Samuel) con las del nuevo perfil
@@ -50,7 +50,19 @@ try {
   jsonContent = jsonContent.replace(new RegExp(oldProj, 'g'), () => currentDir);
   
   fs.writeFileSync(opencodeJsonPath, jsonContent, 'utf8');
-  console.log('✅ Rutas de opencode.json ajustadas con éxito.');
+  console.log('✅ Rutas de opencode.json global ajustadas con éxito.');
+
+  // Si existe un opencode.json local en la raíz, ajustar también sus rutas para evitar errores
+  if (fs.existsSync(localOpencodeJson)) {
+    console.log('🔄 Ajustando rutas absolutas en opencode.json local de la raíz...');
+    let localContent = fs.readFileSync(localOpencodeJson, 'utf8');
+    localContent = localContent.replace(new RegExp(oldUserEscaped, 'g'), () => userProfile.replace(/\//g, '\\\\'));
+    localContent = localContent.replace(new RegExp(oldUser, 'g'), () => userProfile);
+    localContent = localContent.replace(new RegExp(oldProjEscaped, 'g'), () => currentDir.replace(/\//g, '\\\\'));
+    localContent = localContent.replace(new RegExp(oldProj, 'g'), () => currentDir);
+    fs.writeFileSync(localOpencodeJson, localContent, 'utf8');
+    console.log('✅ Rutas de opencode.json local ajustadas con éxito.');
+  }
 } catch (err) {
   console.error('❌ Error al actualizar opencode.json:', err.message);
   process.exit(1);
