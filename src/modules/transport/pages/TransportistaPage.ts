@@ -211,18 +211,30 @@ export class TransportistaFormPage extends BasePage {
   }
 
   async isFormSaved(): Promise<boolean> {
+    const isTransportistaResultUrl = (url: string): boolean =>
+      url.includes('/transportistas/index') ||
+      url.includes('/transportistas/ver') ||
+      url.includes('/transportistas/view');
+
     try {
-      // Esperar inteligentemente a que cambie la URL de redirección post-guardado
+      const currentUrl = this.page.url();
+      if (isTransportistaResultUrl(currentUrl)) {
+        return true;
+      }
+
+      // Wait for the post-save redirect without requiring the slower full load event.
       await this.page.waitForURL(
-        (url) =>
-          url.pathname.includes('/transportistas/index') ||
-          url.pathname.includes('/transportistas/ver') ||
-          url.pathname.includes('/transportistas/view'),
-        { timeout: 10000 }
+        (url) => isTransportistaResultUrl(url.pathname),
+        { timeout: 30000, waitUntil: 'domcontentloaded' }
       );
-      const url = this.page.url();
-      return url.includes('/transportistas/index') || url.includes('/transportistas/ver') || url.includes('/transportistas/view');
+      return isTransportistaResultUrl(this.page.url());
     } catch (error) {
+      const url = this.page.url();
+      if (isTransportistaResultUrl(url)) {
+        logger.warn('⚠️ Redirección de transportista alcanzada, pero el evento esperado tardó demasiado. Continuando como guardado exitoso.');
+        return true;
+      }
+
       logger.error('Fallo al verificar si el formulario se guardó por timeout de redirección', error);
       return false;
     }

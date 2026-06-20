@@ -106,9 +106,20 @@ test.describe('[V02] Viajes - Asignar', () => {
         // 3. Ensure Conductor linked to Transportista
         let conductor = operationalData.seededConductor || operationalData.conductor;
         let conductorNombre = conductor?.nombre;
+        const conductorTransportista = conductor?.transportistaNombre || conductor?.transportista;
+        const conductorBelongsToTransportista = !conductorTransportista ||
+            conductorTransportista.toUpperCase().includes(transNombre.toUpperCase()) ||
+            transNombre.toUpperCase().includes(conductorTransportista.toUpperCase());
 
-        if (!conductorNombre) {
-            logger.info(`⚠️ Conductor no encontrado en el JSON de datos. Autogenerando uno bajo demanda para el transportista: ${transNombre}...`);
+        if (!conductorNombre || !conductorBelongsToTransportista) {
+            if (!conductorNombre) {
+                logger.info(`⚠️ Conductor no encontrado en el JSON de datos. Autogenerando uno bajo demanda para el transportista: ${transNombre}...`);
+            } else {
+                logger.warn(
+                    `⚠️ Conductor "${conductorNombre}" pertenece a "${conductorTransportista}" y no al transportista actual "${transNombre}". ` +
+                    'Autogenerando conductor compatible...'
+                );
+            }
             const generated = await ConductorHelper.createConductorViaUI(page, transNombre);
             conductor = generated;
             conductorNombre = generated.nombre;
@@ -118,7 +129,7 @@ test.describe('[V02] Viajes - Asignar', () => {
             fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
             logger.info(`✅ Conductor autogenerado guardado exitosamente en ${dataPath}`);
         } else {
-            logger.info(`📦 Usando conductor cargado: "${conductor.nombre} ${conductor.apellido || ''}"`);
+            logger.info(`📦 Usando conductor cargado: "${conductor.nombre} ${conductor.apellido || ''}" para transportista "${transNombre}"`);
         }
 
         const conductorFull = `${conductor.nombre} ${conductor.apellido || ''}`.trim();
@@ -435,7 +446,17 @@ test.describe('[V02] Viajes - Asignar', () => {
             }
 
             const rowText = await viajeRow.innerText();
-            const isAsignado = rowText.toLowerCase().includes('asignado');
+            const normalizedRowText = rowText.toLowerCase();
+            const isAsignadoParcial = normalizedRowText.includes('asignado parcial');
+            const isAsignado = normalizedRowText.includes('asignado') && !isAsignadoParcial;
+
+            if (isAsignadoParcial) {
+                throw new Error(
+                    `❌ Viaje [${searchId}] quedó en estado "Asignado Parcial". ` +
+                    `Verificar que conductor "${conductorFull}" pertenezca al transportista "${transNombre}" y se haya persistido.`
+                );
+            }
+
             logger.info(`✅ Viaje [${searchId}] confirmado en grilla. Estado Asignado: ${isAsignado}`);
 
             entityTracker.register({
