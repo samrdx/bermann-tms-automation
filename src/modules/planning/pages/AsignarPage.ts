@@ -36,10 +36,47 @@ export class AsignarPage extends BasePage {
     super(page);
   }
 
+  async adjustDateFilter(): Promise<void> {
+    logger.info('Ajustando rango de fechas para incluir hoy y mañana...');
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const formatDate = (date: Date) => {
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    };
+
+    const desdeStr = formatDate(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)); // 7 días atrás
+    const hastaStr = formatDate(tomorrow);
+
+    await this.page.evaluate(({ desde, hasta }) => {
+      const setDate = (selector: string, val: string) => {
+        const input = document.querySelector(selector) as HTMLInputElement | null;
+        if (!input) return false;
+        input.removeAttribute('readonly');
+        input.value = val;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+        return true;
+      };
+      setDate('#desde', desde);
+      setDate('input[placeholder="Desde"]', desde);
+      setDate('#hasta', hasta);
+      setDate('input[placeholder="Hasta"]', hasta);
+    }, { desde: desdeStr, hasta: hastaStr });
+
+    await this.page.waitForTimeout(500);
+  }
+
   async navigate(): Promise<void> {
     logger.info('Navegando a la página de Asignar Viajes');
     await this.page.goto('/viajes/asignar');
     await this.page.waitForLoadState('networkidle');
+    await this.adjustDateFilter();
   }
 
   // --- BÚSQUEDA ROBUSTA DE FILA ---
