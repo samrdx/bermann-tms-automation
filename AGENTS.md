@@ -95,11 +95,21 @@ Load the relevant skill before generating code.
 9. Always execute SDD in `interactive` mode, using `hybrid` artifact store (both local files in `openspec/` and memory in `engram`), and checking PR sizes via `ask-on-risk` (400-line budget limit).
 10. Maintain `openspec/` structure strictly: central specs in `openspec/specs/` MUST follow the modular numbering (`00-config`, `01-entidades`, `02-operaciones`, `03-finanzas`, `05-ci-cd`, `99-utilidades`). Active changes reside in `openspec/changes/` and MUST be moved to `openspec/changes/archive/` prefixed with `YYYY-MM-DD-` upon completion.
 11. Never execute `git push` without presenting a summary of accomplishments and remaining work, and obtaining explicit user authorization first.
-12. Git Branching Protocol: Before starting any new task, work item, or feature, the agent MUST run a command to check the current branch (e.g., `git branch` or `git status`). The agent MUST state the active branch to the user and ask: "Estamos en la rama <nombre>. ¿Querés que cree una nueva rama para este trabajo o preferís seguir trabajando en la rama actual?". The agent MUST NOT write any code until the branch state is confirmed or the new branch is created.
+12. Morning Start & Context Preflight: At the start of the day or session, the agent MUST inspect Engram (`mem_search`/`mem_context`) and the `openspec/changes/` directory to discover what task was in progress. The agent MUST state the active branch and active task to the user, and ask: "Estamos en la rama `<nombre>` trabajando en `<tarea>`. ¿Querés que sigamos con este trabajo o preferís que cree una nueva rama para otra tarea?". If continuing, the agent MUST automatically run `git checkout <rama>` to enter the branch. If starting a new task, the agent MUST suggest a new branch name according to Rule 13 (e.g. `feat/agy-<nueva-tarea>`) and check it out automatically after confirmation. The agent MUST NOT write code until the branch state is confirmed.
 13. Parallel Agent Branching & Commit Conventions: To enable seamless parallel development across multiple agents (OpenCode = OC, Claude = CL, Antigravity = AGY) working on independent features, the following standards MUST be followed:
     - Branch naming format: `feat/<agent-prefix>-<feature-name>` (e.g., `feat/agy-viajes`, `feat/cl-proforma`, `feat/oc-prefactura`).
     - Commit message format: `<agent-prefix> | <conventional-commit>` (e.g., `oc | feat(finanzas): add seed data`, `cl | feat(pom): implement proforma page`, `agy | test(e2e): add regression scenarios`).
     - Daily Sync Rule: Before starting any code block, the agent MUST run `git fetch origin && git merge origin/main` to pull updates from main and resolve conflicts early.
+14. Dependency & Environment Sync (npm install): 
+    - The agent MUST automatically run `npm install` at the start of the daily session and whenever `package.json` changes (e.g. after branch checkouts, merging `origin/main` or pulling).
+    - Periodically (every 4 hours of active work), the agent should run a quick check by executing `npm install` and `npm run typecheck` to verify that local dependencies and code types are perfectly synchronized and compilation is intact, alerting the user immediately if another agent introduced type errors.
+15. GitHub PR Automation: Pull Requests are not automatically created on GitHub by `git push`. Therefore, immediately after a successful `git push` and user approval, the agent MUST offer to automatically run `gh pr create` (using the GitHub CLI) to create a draft or final PR, or generate a direct PR creation URL if the CLI is not available.
+16. Post-Merge Auto-Cleanup & Sync: When the user merges a PR, the agent MUST automatically detect this or act upon user confirmation to clean up the workspace by running:
+    1. Check out main: `git checkout main`
+    2. Pull updates: `git pull origin main`
+    3. Delete the local merged branch: `git branch -d <nombre-rama>` (safely)
+    4. Sync packages: `npm install`
+    This ensures the local workspace returns to main and updates all dependencies automatically without leaving dead branches behind.
 
 ---
 
