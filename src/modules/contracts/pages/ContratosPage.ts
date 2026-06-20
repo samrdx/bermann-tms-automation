@@ -276,13 +276,47 @@ export class ContratosFormPage extends BasePage {
       logger.info('✅ Modal de rutas visible');
       await this.page.waitForTimeout(1000);
 
-      // Step B: Select the route
+      // Step B: Select the route with a robust fallback to the first available route
+      const specificRouteBtn = this.page.locator(rc.routeButtonSelector);
+      const isSpecificRouteVisible = await specificRouteBtn.isVisible().catch(() => false);
+
+      if (!isSpecificRouteVisible) {
+        logger.warn(`⚠️ Ruta específica ${rc.routeButtonSelector} no visible en el modal. Buscando primera ruta disponible...`);
+        const firstRouteBtn = this.page.locator('#modal_rutas a[id^="btn_plus_"], #modalRutas a[id^="btn_plus_"], .modal.show a[id^="btn_plus_"]').first();
+        const firstRouteId = await firstRouteBtn.getAttribute('id').catch(() => null);
+        if (firstRouteId) {
+          const routeId = firstRouteId.replace('btn_plus_', '');
+          logger.info(`📌 Fallback: usando ruta ID=${routeId}`);
+
+          // Re-bind configuration dynamically
+          rc.routeId = routeId;
+          rc.routeButtonSelector = `a#btn_plus_${routeId}`;
+          rc.addCargoButtonSelector = `#btn_click_${routeId}`;
+
+          const cargoLocatorPattern = `[id^="btn_plus_ruta_${routeId}_"]`;
+          const firstCargoBtn = this.page.locator(`#modal_rutas ${cargoLocatorPattern}, #modalRutas ${cargoLocatorPattern}, .modal.show ${cargoLocatorPattern}`).first();
+          const firstCargoIdAttr = await firstCargoBtn.getAttribute('id').catch(() => null);
+          if (firstCargoIdAttr) {
+            rc.cargoButtonSelector = `a#${firstCargoIdAttr}`;
+            logger.info(`📌 Fallback: usando cargo selector=${rc.cargoButtonSelector}`);
+          } else {
+            rc.cargoButtonSelector = `a#btn_plus_ruta_${routeId}_1`;
+            logger.warn(`⚠️ No se pudo obtener ID del botón de carga, usando fallback: ${rc.cargoButtonSelector}`);
+          }
+
+          rc.tarifaViajeSelector = `#txt_tarifa_extra_${routeId}`;
+          rc.tarifaConductorSelector = `#txt_tarifa_conductor_${routeId}`;
+          rc.tarifaClienteSelector = isDemoMode() ? null : `#txt_tarifa_cliente_${routeId}`;
+        } else {
+          throw new Error('No se encontraron rutas disponibles en el modal de rutas');
+        }
+      }
+
       logger.info(`Seleccionando Ruta ${rc.routeId}`);
       const btnRoute = this.page.locator(rc.routeButtonSelector);
-      if (await btnRoute.isVisible()) {
-        await btnRoute.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
-        await this.click(rc.routeButtonSelector, true);
-      }
+      await btnRoute.waitFor({ state: 'visible', timeout: 5000 });
+      await btnRoute.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
+      await this.click(rc.routeButtonSelector, true);
       await this.page.waitForTimeout(1000);
 
       // Step B.5: Close the routes modal via "Cerrar" button
