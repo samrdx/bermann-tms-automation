@@ -39,15 +39,15 @@ try {
   const oldUser = 'C:/Users/Samuel';
   const oldUserEscaped = 'C:\\\\Users\\\\Samuel';
   
-  jsonContent = jsonContent.replace(new RegExp(oldUserEscaped, 'g'), userProfile.replace(/\//g, '\\\\'));
-  jsonContent = jsonContent.replace(new RegExp(oldUser, 'g'), userProfile);
+  jsonContent = jsonContent.replace(new RegExp(oldUserEscaped, 'g'), () => userProfile.replace(/\//g, '\\\\'));
+  jsonContent = jsonContent.replace(new RegExp(oldUser, 'g'), () => userProfile);
   
   // Reemplazar rutas del proyecto viejas con la ubicación actual del repositorio
   const oldProj = 'C:/projects/bermann-tms-automation';
   const oldProjEscaped = 'C:\\\\projects\\\\bermann-tms-automation';
   
-  jsonContent = jsonContent.replace(new RegExp(oldProjEscaped, 'g'), currentDir.replace(/\//g, '\\\\'));
-  jsonContent = jsonContent.replace(new RegExp(oldProj, 'g'), currentDir);
+  jsonContent = jsonContent.replace(new RegExp(oldProjEscaped, 'g'), () => currentDir.replace(/\//g, '\\\\'));
+  jsonContent = jsonContent.replace(new RegExp(oldProj, 'g'), () => currentDir);
   
   fs.writeFileSync(opencodeJsonPath, jsonContent, 'utf8');
   console.log('✅ Rutas de opencode.json ajustadas con éxito.');
