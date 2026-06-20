@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RUN_LOCK_TIMEOUT_MS = 120_000;
@@ -209,10 +209,39 @@ function getReportDirectories(envName) {
   };
 }
 
+function resolveNpxCliPath(env = process.env) {
+  const candidates = [
+    env.npm_execpath ? join(dirname(env.npm_execpath), 'npx-cli.js') : null,
+    join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npx-cli.js'),
+  ].filter(Boolean);
+
+  return candidates.find((candidatePath) => existsSync(candidatePath)) ?? null;
+}
+
+export function resolveExecutableCommand(command, commandArgs = [], options = {}) {
+  const platform = options.platform ?? process.platform;
+  // Explicit null means "don't attempt resolution"; undefined means "try to resolve"
+  const npxCliPath =
+    options.npxCliPath !== undefined ? options.npxCliPath : resolveNpxCliPath(options.env ?? process.env);
+
+  if (platform === 'win32' && command === 'npx') {
+    if (!npxCliPath) {
+      throw new Error('Unable to locate npx-cli.js for shell-free Windows execution. Run this script through npm or install npm with Node.js.');
+    }
+
+    return {
+      command: process.execPath,
+      commandArgs: [npxCliPath, ...commandArgs],
+    };
+  }
+
+  return { command, commandArgs };
+}
+
 function run(command, commandArgs, extraEnv = {}) {
-  const result = spawnSync(command, commandArgs, {
+  const resolvedCommand = resolveExecutableCommand(command, commandArgs);
+  const result = spawnSync(resolvedCommand.command, resolvedCommand.commandArgs, {
     stdio: 'inherit',
-    shell: process.platform === 'win32',
     env: {
       ...process.env,
       ...extraEnv,

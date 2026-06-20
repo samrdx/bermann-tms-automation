@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   buildPlaywrightTestArgs,
   parseRunPlaywrightSuiteArgs,
+  resolveExecutableCommand,
 } from './run-playwright-suite.mjs';
 
 test('builds Playwright command with test paths before project flags', () => {
@@ -71,5 +72,39 @@ test('rejects unsupported environments early', () => {
   assert.throws(
     () => parseRunPlaywrightSuiteArgs(['--env', 'staging']),
     /Invalid --env value: "STAGING"/,
+  );
+});
+
+test('resolves npx executable without requiring a shell on Windows', () => {
+  assert.deepEqual(
+    resolveExecutableCommand('npx', ['playwright', 'test'], {
+      platform: 'win32',
+      npxCliPath: 'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npx-cli.js',
+    }),
+    {
+      command: process.execPath,
+      commandArgs: ['C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npx-cli.js', 'playwright', 'test'],
+    },
+  );
+
+  assert.deepEqual(resolveExecutableCommand('npx', ['--version'], { platform: 'linux' }), {
+    command: 'npx',
+    commandArgs: ['--version'],
+  });
+
+  assert.deepEqual(resolveExecutableCommand('node', ['--version'], { platform: 'win32' }), {
+    command: 'node',
+    commandArgs: ['--version'],
+  });
+});
+
+test('fails clearly when Windows npx shell-free execution cannot be resolved', () => {
+  assert.throws(
+    () => resolveExecutableCommand('npx', ['playwright'], {
+      platform: 'win32',
+      npxCliPath: null,
+      env: { npm_execpath: '' },
+    }),
+    /Unable to locate npx-cli\.js/,
   );
 });
