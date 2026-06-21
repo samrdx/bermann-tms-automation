@@ -101,6 +101,8 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
             const expectedApellido = await page.locator('#conductores-apellido').inputValue().catch(() => '');
             const expectedRut = await page.locator('#conductores-documento').inputValue().catch(() => '');
             const expectedEmail = await page.locator('#conductores-email').inputValue().catch(() => '');
+            const expectedUsuario = await page.locator('#conductores-usuario').inputValue().catch(() => '');
+            const expectedClave = await page.locator('#conductores-clave').inputValue().catch(() => '');
 
             await conductorPage.clickGuardar();
             const isSaved = await conductorPage.isFormSaved();
@@ -132,6 +134,8 @@ test.describe('[E04] Entidades - Crear Conductor', () => {
                     apellido: expectedApellido,
                     rut: expectedRut,
                     email: expectedEmail,
+                    usuario: expectedUsuario,
+                    clave: expectedClave,
                     transportistaNombre: transportistaName
                 };
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');

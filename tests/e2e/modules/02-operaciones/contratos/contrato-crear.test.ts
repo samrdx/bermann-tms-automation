@@ -7,6 +7,7 @@ import { DataPathHelper } from '../../../../api-helpers/DataPathHelper.js';
 import * as fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
+import { HappyTruthGenerator } from '../../../../helpers/happy-truth-generator.js';
 
 /**
  * Contract Creation - Tipo Costo (Seeded Transportista)
@@ -101,10 +102,11 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
     // ---------------------------------------------------------------
     // PHASE 3: Add route + tariffs
     // ---------------------------------------------------------------
+    let routeId = '';
     await test.step('Fase 3: Agregar ruta 715 y tarifas', async () => {
       logger.info('Fase 3: Agregando ruta 715 con tarifas 20000 / 50000...');
-      await contratosPage.addSpecificRouteAndCargo('20000', '50000');
-      logger.info('✅ Ruta y tarifas agregadas');
+      routeId = await contratosPage.addSpecificRouteAndCargo('20000', '50000');
+      logger.info(`✅ Ruta y tarifas agregadas. Route ID: ${routeId}`);
     });
 
     // ---------------------------------------------------------------
@@ -198,6 +200,21 @@ test.describe('[C01] Contratos - Tipo Costo', () => {
         id: finalContractId,
         asociado: transportistaNombre
       });
+
+      // Save contratoTransportista and run generator
+      const isDemo = (process.env.ENV || 'QA').toUpperCase() === 'DEMO';
+      const currentData = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath, 'utf-8')) : {};
+      currentData.contratoTransportista = {
+        id: finalContractId,
+        nroContrato: nroContrato,
+        type: 'ruta',
+        routes: [routeId],
+        expirationDate: isDemo ? '31/12/2026' : 'Indefinida'
+      };
+      fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf-8');
+      logger.info(`✅ contratoTransportista guardado exitosamente en ${dataPath}`);
+
+      HappyTruthGenerator.generate(testInfo);
     });
 
     logger.info('='.repeat(80));
