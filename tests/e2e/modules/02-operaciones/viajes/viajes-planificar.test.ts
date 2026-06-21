@@ -56,6 +56,16 @@ async function hasPlanificarSaveSuccessSignal(page: Page): Promise<boolean> {
 	}).catch(() => false);
 }
 
+async function waitForPlanificarSaveSuccessSignal(page: Page, timeout = 15000): Promise<boolean> {
+	return page.waitForFunction(() => {
+		const visibleText = (document.body.innerText || "").replace(/\s+/g, " ").trim();
+		return /viaje\s+creado\s+con\s+[ée]xito/i.test(visibleText)
+			|| /creado\s+con\s+[ée]xito/i.test(visibleText);
+	}, null, { timeout })
+		.then(() => true)
+		.catch(() => hasPlanificarSaveSuccessSignal(page));
+}
+
 /**
  * Step 6: Planificar Viaje (Trip Planning)
  *
@@ -354,8 +364,8 @@ test.describe("[V01] Viajes - Planificar", () => {
 			}
 
 			if (!viajeId && finalUrl.includes("/viajes/crear")) {
+				const hasSuccessSignal = await waitForPlanificarSaveSuccessSignal(page);
 				const diagnostics = await collectPlanificarSaveDiagnostics(page);
-				const hasSuccessSignal = await hasPlanificarSaveSuccessSignal(page);
 
 				if (hasSuccessSignal) {
 					logger.warn(

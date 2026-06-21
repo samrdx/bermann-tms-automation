@@ -434,11 +434,38 @@ export class AsignarPage extends BasePage {
   }
 
   async getRowIdByIndex(index: number): Promise<string | null> {
-    const rowIdCell = this.page.locator('#tabla_asignar tbody tr').nth(index).locator('td').nth(1);
-    if (await rowIdCell.isVisible({ timeout: 5000 }).catch(() => false)) {
-      return (await rowIdCell.innerText()).trim();
+    logger.info(`Esperando ID de fila ${index + 1} en grilla de Asignación...`);
+
+    const rowId = await this.page.waitForFunction(
+      ({ rowSelector, rowIndex }) => {
+        const rows = Array.from(document.querySelectorAll<HTMLTableRowElement>(rowSelector))
+          .filter((row) => {
+            const text = (row.textContent || '').replace(/\s+/g, ' ').trim();
+            return text.length > 0
+              && !/cargando|procesando|processing|no hay datos|sin resultados/i.test(text);
+          });
+
+        const row = rows[rowIndex];
+        if (!row) return null;
+
+        const cells = Array.from(row.querySelectorAll<HTMLTableCellElement>('td'));
+        const idText = (cells[1]?.textContent || '').trim();
+        return /^\d+$/.test(idText) ? idText : null;
+      },
+      { rowSelector: this.selectors.table.rows, rowIndex: index },
+      { timeout: 15000 },
+    )
+      .then((handle) => handle.jsonValue() as Promise<string | null>)
+      .catch(() => null);
+
+    if (!rowId) {
+      const visibleRows = await this.page.locator(this.selectors.table.rows).count().catch(() => 0);
+      logger.warn(`No se pudo obtener ID de fila ${index + 1} en Asignación. Filas visibles: ${visibleRows}`);
+      return null;
     }
-    return null;
+
+    logger.info(`✅ ID de fila ${index + 1} obtenido en Asignación: ${rowId}`);
+    return rowId;
   }
 
   async getFirstRowId(): Promise<string | null> {
