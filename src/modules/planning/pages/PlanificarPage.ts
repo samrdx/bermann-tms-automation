@@ -661,15 +661,17 @@ export class PlanificarPage extends BasePage {
 				logger.warn(
 					`Ruta ${numeroRuta} (key=${routeKey}) no encontrada en la lista. Probando fallback con la primera disponible...`,
 				);
-				const firstRow = rows.first();
-				if (await firstRow.isVisible({ timeout: 2000 }).catch(() => false)) {
+				try {
+					const firstRow = rows.first();
+					await firstRow.waitFor({ state: 'attached', timeout: 5000 });
 					const selectBtn = firstRow.locator(".btn-success, .btn-primary").first();
-					if (await selectBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-						await selectBtn.evaluate((el) => el.scrollIntoView({ block: "center" })).catch(() => {});
-						await selectBtn.evaluate((el) => (el as HTMLElement).click());
-						found = true;
-						logger.info("✅ Ruta agregada exitosamente usando la primera disponible del modal (fallback)");
-					}
+					await selectBtn.waitFor({ state: 'visible', timeout: 3000 });
+					await selectBtn.evaluate((el) => el.scrollIntoView({ block: "center" })).catch(() => {});
+					await selectBtn.evaluate((el) => (el as HTMLElement).click());
+					found = true;
+					logger.info("✅ Ruta agregada exitosamente usando la primera disponible del modal (fallback)");
+				} catch (fallbackErr) {
+					logger.warn(`Fallback a primera ruta no funcionó: no hay filas visibles en la tabla de rutas`);
 				}
 			}
 

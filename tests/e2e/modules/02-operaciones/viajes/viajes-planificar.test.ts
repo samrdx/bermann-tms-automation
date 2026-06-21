@@ -149,7 +149,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 			unidadNegocio: isDemo ? "Defecto" : "Defecto",
 			cliente: clienteNombreFromData,
 			codigoCarga: isDemo ? "CONTENEDOR DRY" : "Qa_COD_",
-			ruta: isDemo ? "47" : "Qa_RT_",
+			ruta: isDemo ? "47" : "1413",
 			origenManual: isDemo
 				? "233_CD SuperZoo_Quilicura"
 				: "405_LA FARFANA_Pudahuel",
@@ -164,7 +164,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 			logger.info(`📦 Setup config detectado: ${setupConfigPath}`);
 		} else {
 			logger.warn(
-				`⚠️ Setup config no encontrado en ninguna ruta candidata. Se usarán defaults.`,
+				`⚠️ Setup config no encontrado en ninguna ruta candidata. Se intentará usar la primera ruta disponible del modal, no Origen/Destino estáticos.`,
 			);
 		}
 
@@ -524,7 +524,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 			unidadNegocio: isDemo ? "Defecto" : "Defecto",
 			cliente: clienteNombreFromData,
 			codigoCarga: isDemo ? "CONTENEDOR DRY" : "Qa_COD_",
-			ruta: isDemo ? "47" : "Qa_RT_",
+			ruta: isDemo ? "47" : "1413",
 			origenManual: isDemo ? "233_CD SuperZoo_Quilicura" : "405_LA FARFANA_Pudahuel",
 			destinoManual: isDemo ? "Divisa" : "CXP ANTOFAGASTA",
 		};
