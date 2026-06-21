@@ -110,6 +110,7 @@ Load the relevant skill before generating code.
     3. Delete the local merged branch: `git branch -d <nombre-rama>` (safely)
     4. Sync packages: `npm install`
     This ensures the local workspace returns to main and updates all dependencies automatically without leaving dead branches behind.
+17. Prohibited Direct Pushes to Main: The agent MUST NEVER commit or push code directly to the `main` branch. All features, bugfixes, or registry enhancements must be developed in dedicated agent feature branches (following Rule 13 naming e.g., `feat/agy-<name>`) and integrated into `main` exclusively through GitHub Pull Requests (PRs). Pushing directly to `main` is strictly prohibited as it is a critical bad engineering practice that compromises stability.
 
 ---
 

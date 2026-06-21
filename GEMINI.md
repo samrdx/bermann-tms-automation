@@ -53,6 +53,7 @@ Avoid documenting volatile claims like pass rate percentages, exact test totals,
 - `jql-tickets`
 - `playwright-cli`
 - `skill-creator`
+- `create-pr-from-spec`
 
 ### SDD
 
