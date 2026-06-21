@@ -2,6 +2,8 @@ import { BasePage } from '../../../core/BasePage.js';
 import type { Page } from 'playwright';
 import { createLogger } from '../../../utils/logger.js';
 import { isDemoMode } from '../../../utils/env-helper.js';
+import fs from 'fs';
+import path from 'path';
 
 const logger = createLogger('ContratosFormPage');
 
@@ -18,6 +20,7 @@ interface RouteConfig {
   tarifaViajeSelector: string;
   tarifaConductorSelector: string | null;
   tarifaClienteSelector: string | null;
+  cargoSearchTerm?: string;
 }
 
 export class ContratosFormPage extends BasePage {
@@ -276,12 +279,46 @@ export class ContratosFormPage extends BasePage {
       logger.info('✅ Modal de rutas visible');
       await this.page.waitForTimeout(1000);
 
-      // Step B: Select the route with a robust fallback to the first available route
-      const specificRouteBtn = this.page.locator(rc.routeButtonSelector);
-      const isSpecificRouteVisible = await specificRouteBtn.isVisible().catch(() => false);
+      // Search for the route in the modal's search input to filter it and make it visible
+      const modalSearch = this.page.locator('#modal_rutas .dataTables_filter input, #modalRutas .dataTables_filter input, .modal.show input[type="search"], .modal.show .dataTables_filter input').first();
+      if (await modalSearch.isVisible({ timeout: 2000 }).catch(() => false)) {
+        logger.info(`⌨️ Filtrando modal de rutas por ID: ${rc.routeId}`);
+        await modalSearch.clear();
+        await modalSearch.fill(rc.routeId);
+        await this.page.waitForTimeout(1000); // Wait for DataTable to filter
+      }
+
+      // Step B: Select the route by finding the row containing the route number
+      let specificRouteBtn = this.page.locator(
+        `#modal_rutas tr:has-text("${rc.routeId}") a[id^="btn_plus_"], ` +
+        `#modalRutas tr:has-text("${rc.routeId}") a[id^="btn_plus_"], ` +
+        `.modal.show tr:has-text("${rc.routeId}") a[id^="btn_plus_"]`
+      ).first();
+      let isSpecificRouteVisible = await specificRouteBtn.isVisible().catch(() => false);
 
       if (!isSpecificRouteVisible) {
-        logger.warn(`⚠️ Ruta específica ${rc.routeButtonSelector} no visible en el modal. Buscando primera ruta disponible...`);
+        // Fallback search by ID selector directly in case rc.routeId was already a database ID
+        specificRouteBtn = this.page.locator(`a#btn_plus_${rc.routeId}`).first();
+        isSpecificRouteVisible = await specificRouteBtn.isVisible().catch(() => false);
+      }
+
+      if (isSpecificRouteVisible) {
+        const fullId = await specificRouteBtn.getAttribute('id').catch(() => null);
+        if (fullId) {
+          const dbRouteId = fullId.replace('btn_plus_', '');
+          logger.info(`🎯 Encontrada ruta con número/código ${rc.routeId} -> ID de Base de Datos: ${dbRouteId}`);
+
+          // Re-bind configuration dynamically with the correct database ID
+          rc.routeId = dbRouteId;
+          rc.routeButtonSelector = `a#btn_plus_${dbRouteId}`;
+          rc.addCargoButtonSelector = `#btn_click_${dbRouteId}`;
+          rc.cargoButtonSelector = `#modalCargas a[id^="btn_plus_ruta_${dbRouteId}_"], .modal.show a[id^="btn_plus_ruta_${dbRouteId}_"]`;
+          rc.tarifaViajeSelector = `#txt_tarifa_extra_${dbRouteId}`;
+          rc.tarifaConductorSelector = `#txt_tarifa_conductor_${dbRouteId}`;
+          rc.tarifaClienteSelector = isDemoMode() ? null : `#txt_tarifa_cliente_${dbRouteId}`;
+        }
+      } else {
+        logger.warn(`⚠️ Ruta específica con número/código ${rc.routeId} no visible en el modal. Buscando primera ruta disponible...`);
         const firstRouteBtn = this.page.locator('#modal_rutas a[id^="btn_plus_"], #modalRutas a[id^="btn_plus_"], .modal.show a[id^="btn_plus_"]').first();
         const firstRouteId = await firstRouteBtn.getAttribute('id').catch(() => null);
         if (firstRouteId) {
@@ -292,18 +329,7 @@ export class ContratosFormPage extends BasePage {
           rc.routeId = routeId;
           rc.routeButtonSelector = `a#btn_plus_${routeId}`;
           rc.addCargoButtonSelector = `#btn_click_${routeId}`;
-
-          const cargoLocatorPattern = `[id^="btn_plus_ruta_${routeId}_"]`;
-          const firstCargoBtn = this.page.locator(`#modal_rutas ${cargoLocatorPattern}, #modalRutas ${cargoLocatorPattern}, .modal.show ${cargoLocatorPattern}`).first();
-          const firstCargoIdAttr = await firstCargoBtn.getAttribute('id').catch(() => null);
-          if (firstCargoIdAttr) {
-            rc.cargoButtonSelector = `a#${firstCargoIdAttr}`;
-            logger.info(`📌 Fallback: usando cargo selector=${rc.cargoButtonSelector}`);
-          } else {
-            rc.cargoButtonSelector = `a#btn_plus_ruta_${routeId}_1`;
-            logger.warn(`⚠️ No se pudo obtener ID del botón de carga, usando fallback: ${rc.cargoButtonSelector}`);
-          }
-
+          rc.cargoButtonSelector = `#modalCargas a[id^="btn_plus_ruta_${routeId}_"], .modal.show a[id^="btn_plus_ruta_${routeId}_"]`;
           rc.tarifaViajeSelector = `#txt_tarifa_extra_${routeId}`;
           rc.tarifaConductorSelector = `#txt_tarifa_conductor_${routeId}`;
           rc.tarifaClienteSelector = isDemoMode() ? null : `#txt_tarifa_cliente_${routeId}`;
@@ -342,13 +368,30 @@ export class ContratosFormPage extends BasePage {
       });
       logger.info('✅ Modal de carga visible');
 
+      // Search/filter the cargo modal if cargoSearchTerm is defined
+      const cargoSearchTerm = rc.cargoSearchTerm || 'Qa_';
+      const cargoSearchInput = this.page.locator('#modalCargas .dataTables_filter input, .modal.show input[type="search"]').first();
+      if (await cargoSearchInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+        logger.info(`⌨️ Filtrando modal de cargas por: ${cargoSearchTerm}`);
+        await cargoSearchInput.clear();
+        await cargoSearchInput.fill(cargoSearchTerm);
+        await this.page.waitForTimeout(1000); // Wait for DataTable to filter
+      }
+
       // Step C.5: Select the specific cargo
-      logger.info(`Seleccionando Carga vía: ${rc.cargoButtonSelector}`);
-      const btnCargo = this.page.locator(rc.cargoButtonSelector);
+      const cargoSelector = `#modalCargas tr:has-text("${cargoSearchTerm}") a[id^="btn_plus_ruta_${rc.routeId}_"], ` +
+        `.modal.show tr:has-text("${cargoSearchTerm}") a[id^="btn_plus_ruta_${rc.routeId}_"], ` +
+        `#modalCargas a[id^="btn_plus_ruta_${rc.routeId}_"]:visible, ` +
+        `.modal.show a[id^="btn_plus_ruta_${rc.routeId}_"]:visible`;
+
+      logger.info(`Seleccionando Carga vía: ${cargoSelector}`);
+      const btnCargo = this.page.locator(cargoSelector).first();
       await btnCargo.waitFor({ state: 'visible', timeout: 5000 });
       if (await btnCargo.isVisible()) {
         await btnCargo.evaluate((node: HTMLElement) => node.scrollIntoView({ block: 'center' })).catch(() => { });
-        await this.click(rc.cargoButtonSelector, true);
+        await btnCargo.click({ force: true }).catch(async () => {
+          await btnCargo.evaluate((node: HTMLElement) => (node as HTMLElement).click());
+        });
       }
       await this.page.waitForTimeout(500);
 
@@ -738,14 +781,31 @@ export class ContratosFormPage extends BasePage {
       };
     }
     // QA (default)
+    let routeId = '1413';
+    try {
+      const configPath = path.join(process.cwd(), 'playwright', '.data', 'config-seed-data-qa.json');
+      if (fs.existsSync(configPath)) {
+        const configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        if (configData?.ruta?.nombre) {
+          routeId = configData.ruta.nombre;
+          logger.info(`📌 getRouteConfig: Usando ruta dinámica (nombre) ${routeId} desde config-seed-data-qa.json`);
+        } else if (configData?.ruta?.nro) {
+          routeId = configData.ruta.nro;
+          logger.info(`📌 getRouteConfig: Usando ruta dinámica (nro) ${routeId} desde config-seed-data-qa.json`);
+        }
+      }
+    } catch (e) {
+      logger.warn(`⚠️ getRouteConfig: No se pudo leer config-seed-data-qa.json, usando default 1413: ${e}`);
+    }
+
     return {
-      routeId: '1413',
-      routeButtonSelector: 'a#btn_plus_1413',
-      addCargoButtonSelector: '#btn_click_1413',
-      cargoButtonSelector: 'a#btn_plus_ruta_1413_2',
-      tarifaViajeSelector: '#txt_tarifa_extra_1413',
-      tarifaConductorSelector: '#txt_tarifa_conductor_1413',
-      tarifaClienteSelector: '#txt_tarifa_cliente_1413',
+      routeId,
+      routeButtonSelector: `a#btn_plus_${routeId}`,
+      addCargoButtonSelector: `#btn_click_${routeId}`,
+      cargoButtonSelector: `#modalCargas a[id^="btn_plus_ruta_"], .modal.show a[id^="btn_plus_ruta_"]`,
+      tarifaViajeSelector: `#txt_tarifa_extra_${routeId}`,
+      tarifaConductorSelector: `#txt_tarifa_conductor_${routeId}`,
+      tarifaClienteSelector: `#txt_tarifa_cliente_${routeId}`,
     };
   }
 

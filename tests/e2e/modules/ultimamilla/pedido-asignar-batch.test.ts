@@ -6,7 +6,7 @@ import fs from 'fs';
 import { allure } from 'allure-playwright';
 
 const logger = createLogger('UltimaMilla-AsignarPedidoBatch');
-const DEFAULT_BATCH_SIZE = 8;
+const DEFAULT_BATCH_SIZE = 3;
 const BATCH_ADDRESSES = [
   'Argomedo 344, Santiago, Chile',
 ] as const;

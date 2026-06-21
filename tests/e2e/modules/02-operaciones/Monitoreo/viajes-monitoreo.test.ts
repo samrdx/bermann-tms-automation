@@ -35,18 +35,29 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
         });
         const dataPath = candidate.path;
         logger.info(`📦 Data operacional seleccionada: ${dataPath} (source=${candidate.source}; fallback=${usedFallback})`);
+        const viajeId = operationalData.viaje?.id;
         const nroViaje = operationalData.viaje?.nroViaje;
+        const searchIdentifier = viajeId || nroViaje;
 
-        if (!nroViaje) {
-            throw new Error('❌ Missing: viaje.nroViaje in JSON. Run planificar/asignar first in the selected legacy data source');
+        if (!searchIdentifier) {
+            throw new Error('❌ Missing: viaje.id or viaje.nroViaje in JSON. Run planificar/asignar first in the selected legacy data source');
         }
 
-        logger.info(`✅ Viaje cargado: ${nroViaje}`);
+        logger.info(`✅ Viaje cargado: id=${viajeId || 'N/A'} | nroViaje=${nroViaje || 'N/A'}`);
+        logger.info(`🔎 Identificador de búsqueda en Monitoreo: ${searchIdentifier}`);
 
-        await allure.parameter('Nro Viaje', String(nroViaje));
+        if (viajeId) {
+            await allure.parameter('ID Viaje', String(viajeId));
+        }
+        if (nroViaje) {
+            await allure.parameter('Nro Viaje', String(nroViaje));
+        }
+        await allure.parameter('Identificador búsqueda Monitoreo', String(searchIdentifier));
         await allure.parameter('Ambiente', process.env.ENV || 'QA');
         await allure.attachment('Monitoreo Data', JSON.stringify({
+            IdViaje: viajeId,
             NroViaje: nroViaje,
+            SearchIdentifier: searchIdentifier,
         }, null, 2), 'application/json');
 
         // PHASE 2: Navigation to Monitoreo
@@ -58,9 +69,9 @@ test.describe('[V03] Viajes - Finalizar (Monitoreo)', () => {
         });
 
         // PHASE 3: Search and Finalize
-        await test.step(`Fase 3: Finalizando Viaje ${nroViaje}`, async () => {
-            logger.info(`🔍 Buscando y finalizando viaje: ${nroViaje}`);
-            await monitoreo.finalizarViaje(nroViaje);
+        await test.step(`Fase 3: Finalizando Viaje ${searchIdentifier}`, async () => {
+            logger.info(`🔍 Buscando y finalizando viaje: ${searchIdentifier} (id=${viajeId || 'N/A'}, nroViaje=${nroViaje || 'N/A'})`);
+            await monitoreo.finalizarViaje(searchIdentifier);
             logger.info('✅ Comando de finalización ejecutado');
         });
 

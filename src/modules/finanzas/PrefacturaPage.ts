@@ -88,6 +88,26 @@ export class PrefacturaPage extends BasePage {
     return this.getAgregarViajeButton();
   }
 
+  private async setDatePickerValue(inputSelector: string, value: string): Promise<void> {
+    await this.page.evaluate(({ selector, dateValue }) => {
+      const input = document.querySelector(selector) as HTMLInputElement | null;
+      if (!input) {
+        throw new Error(`Date input not found: ${selector}`);
+      }
+
+      input.removeAttribute('readonly');
+      input.value = dateValue;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.dispatchEvent(new Event('blur', { bubbles: true }));
+    }, { selector: inputSelector, dateValue: value });
+
+    const actualValue = await this.page.locator(inputSelector).inputValue().catch(() => '');
+    if (actualValue !== value) {
+      throw new Error(`Expected ${inputSelector} to be "${value}" but got "${actualValue}"`);
+    }
+  }
+
   // ==========================================
   // NAVEGACIÓN
   // ==========================================
@@ -130,17 +150,8 @@ export class PrefacturaPage extends BasePage {
     // Asegurar rango de fechas amplio (Desde: 01/01/2026) usando evaluate por robustez
     logger.info('Asegurando rango de fechas...');
     
-    await this.page.evaluate(() => {
-        const desde = document.getElementById('desde') as HTMLInputElement;
-        if (desde) {
-            desde.value = '01/01/2026';
-            desde.dispatchEvent(new Event('input', { bubbles: true }));
-            desde.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    }).catch((e: unknown) => logger.warn(`No se pudo usar JS para #desde: ${String(e)}`));
-    
-    await this.page.locator('#desde').fill('01/01/2026', { force: true }).catch(() => {});
-    await this.page.keyboard.press('Tab');
+    await this.setDatePickerValue('#desde', '01/01/2026');
+    await this.setDatePickerValue('#hasta', '31/12/2026');
     await this.page.keyboard.press('Escape'); // Cerramos cualquier datepicker que pueda quedar abierto
     await this.page.waitForTimeout(500);
 
@@ -206,17 +217,8 @@ export class PrefacturaPage extends BasePage {
   async filtrarViajesPorTransportista(transportistaName: string): Promise<void> {
     logger.info(`🚚 Buscando viajes para transportista: ${transportistaName}`);
 
-    await this.page.evaluate(() => {
-      const desde = document.getElementById('desde') as HTMLInputElement | null;
-      if (desde) {
-        desde.value = '01/01/2026';
-        desde.dispatchEvent(new Event('input', { bubbles: true }));
-        desde.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    }).catch((error: unknown) => logger.warn(`No se pudo establecer #desde con JS: ${String(error)}`));
-
-    await this.page.locator('#desde').fill('01/01/2026', { force: true }).catch(() => {});
-    await this.page.keyboard.press('Tab');
+    await this.setDatePickerValue('#desde', '01/01/2026');
+    await this.setDatePickerValue('#hasta', '31/12/2026');
     await this.page.keyboard.press('Escape');
     await this.page.waitForTimeout(500);
 

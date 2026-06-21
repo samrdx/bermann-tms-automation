@@ -287,6 +287,8 @@ test.describe("[V01] Viajes - Planificar", () => {
 		// =================================================================
 		// PHASE 4: Verification
 		// =================================================================
+		let internalGridId: string | null = null;
+
 		await test.step("Fase 4: Verificación", async () => {
 			logger.info("Fase 4: Verificación");
 
@@ -299,7 +301,6 @@ test.describe("[V01] Viajes - Planificar", () => {
 			await viajesAsignarPage.selectClienteFilter(clienteNombre);
 
 			let searchTerm = nroViaje;
-			let internalGridId: string | null = null;
 			if (isDemo) {
 				internalGridId = await viajesAsignarPage.getFirstRowId();
 				logger.info(
@@ -335,21 +336,13 @@ test.describe("[V01] Viajes - Planificar", () => {
 
 			await allure.parameter("Nro Viaje Maestro", searchTerm);
 
-
-
-			// Save internal grid ID for subsequent tests (e.g., asignar)
-			if (isDemo && internalGridId) {
-				operationalData.viaje = {
-					...operationalData.viaje,
-					id: internalGridId,
-				};
-				fs.writeFileSync(
-					dataPath,
-					JSON.stringify(operationalData, null, 2),
-					"utf-8",
-				);
+			// Save internal grid ID for subsequent tests (e.g., asignar/monitoreo)
+			const verifiedGridId = await viajesAsignarPage.getFirstRowId();
+			if (verifiedGridId) {
+				internalGridId = verifiedGridId;
+				await allure.parameter("ID interno Viaje", internalGridId);
 				logger.info(
-					`✅ ID interno de la grilla guardado en JSON: viaje.id = ${internalGridId}`,
+					`✅ ID interno de la grilla capturado: viaje.id = ${internalGridId}`,
 				);
 			}
 
@@ -369,10 +362,13 @@ test.describe("[V01] Viajes - Planificar", () => {
 
 		operationalData.viaje = {
 			...operationalData.viaje,
+			...(internalGridId ? { id: internalGridId } : {}),
 			nroViaje: nroViaje,
 			cliente: clienteNombre,
 			ruta: config.ruta,
 			status: "PLANIFICADO",
+			prefacturado: false,
+			proformado: false,
 		};
 
 		fs.writeFileSync(
@@ -381,6 +377,9 @@ test.describe("[V01] Viajes - Planificar", () => {
 			"utf-8",
 		);
 		logger.info(`Saved viaje.nroViaje: ${nroViaje}`);
+		if (internalGridId) {
+			logger.info(`Saved viaje.id: ${internalGridId}`);
+		}
 
 		// =================================================================
 		// FINAL SUMMARY
