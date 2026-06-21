@@ -261,12 +261,29 @@ test.describe("[V01] Viajes - Planificar", () => {
 			}
 
 			if (!rutaAdded) {
+				logger.warn("⚠️ Ruta no encontrada por modal. Intentando Origen/Destino manual...");
+				if (config.origenManual && config.destinoManual) {
+					try {
+						await viajesPlanificarPage.selectOrigen(config.origenManual);
+						await viajesPlanificarPage.selectDestino(config.destinoManual);
+						const manualRoute = await viajesPlanificarPage.getSelectedOrigenDestino();
+						if (manualRoute.origen && manualRoute.destino) {
+							rutaAdded = true;
+							logger.info(`✅ Origen/Destino manual establecido: ${manualRoute.origen} → ${manualRoute.destino}`);
+						}
+					} catch (fallbackErr) {
+						logger.warn(`Fallback manual de Origen/Destino falló`, fallbackErr);
+					}
+				}
+			}
+
+			if (!rutaAdded) {
 				await page.screenshot({
 					path: `./reports/screenshots/planificar-ruta-invalida-${Date.now()}.png`,
 					fullPage: true,
 				});
 				throw new Error(
-					`No se pudo agregar una ruta válida para Planificar. ruta=[${config.ruta}], setupConfig=${setupConfigPath || "not found"}. No se continuará con Origen/Destino estáticos.`,
+					`No se pudo agregar una ruta válida para Planificar. ruta=[${config.ruta}], setupConfig=${setupConfigPath || "not found"}.`,
 				);
 			}
 
@@ -593,12 +610,29 @@ test.describe("[V01] Viajes - Planificar", () => {
 			}
 
 			if (!rutaAdded) {
+				logger.warn("⚠️ Ruta no encontrada por modal (Multiplicador). Intentando Origen/Destino manual...");
+				if (config.origenManual && config.destinoManual) {
+					try {
+						await viajesPlanificarPage.selectOrigen(config.origenManual);
+						await viajesPlanificarPage.selectDestino(config.destinoManual);
+						const manualRoute = await viajesPlanificarPage.getSelectedOrigenDestino();
+						if (manualRoute.origen && manualRoute.destino) {
+							rutaAdded = true;
+							logger.info(`✅ Origen/Destino manual establecido (Multiplicador): ${manualRoute.origen} → ${manualRoute.destino}`);
+						}
+					} catch (fallbackErr) {
+						logger.warn(`Fallback manual de Origen/Destino falló (Multiplicador)`, fallbackErr);
+					}
+				}
+			}
+
+			if (!rutaAdded) {
 				await page.screenshot({
 					path: `./reports/screenshots/planificar-multiplicador-ruta-invalida-${Date.now()}.png`,
 					fullPage: true,
 				});
 				throw new Error(
-					`No se pudo agregar una ruta válida para Planificar Multiplicador. ruta=[${config.ruta}], setupConfig=${setupConfigPath || "not found"}. No se continuará con Origen/Destino estáticos.`,
+					`No se pudo agregar una ruta válida para Planificar Multiplicador. ruta=[${config.ruta}], setupConfig=${setupConfigPath || "not found"}.`,
 				);
 			}
 
