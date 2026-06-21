@@ -8,6 +8,7 @@ import { config } from '../../../../../src/config/environment.js';
 import fs from 'fs';
 import { allure } from 'allure-playwright';
 import { entityTracker } from '../../../../../src/utils/entityTracker.js';
+import { HappyTruthGenerator } from '../../../../helpers/happy-truth-generator.js';
 
 /**
  * Contract Creation - Tipo Venta (Uses Seeded Cliente)
@@ -104,8 +105,9 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         // =================================================================
         logger.info('📋 Fase 5: Agregando ruta 715 + carga 715_19 con tarifas...');
         // For Venta, we want to fill conductor(20000), viaje(50000) AND total(50000)
-        await contratosPage.addSpecificRouteAndCargo('20000', '50000', '50000');
-        logger.info('✅ Ruta y tarifas agregadas');
+        let routeId = '';
+        routeId = await contratosPage.addSpecificRouteAndCargo('20000', '50000', '50000');
+        logger.info(`✅ Ruta y tarifas agregadas. Route ID: ${routeId}`);
 
         // =================================================================
         // PHASE 6: Save Full Contract (with tarifas)
@@ -184,9 +186,18 @@ test.describe('[C02] Contratos - Tipo Venta', () => {
         // PHASE 8: Persist to JSON
         // =================================================================
         logger.info('📋 Fase 8: Persistiendo datos del contrato en JSON...');
-        operationalData.contratoCliente = { id: finalId, nroContrato: nroContrato };
+        const isDemo = (process.env.ENV || 'QA').toUpperCase() === 'DEMO';
+        operationalData.contratoCliente = {
+            id: finalId,
+            nroContrato: nroContrato,
+            type: 'ruta',
+            routes: [routeId],
+            expirationDate: isDemo ? '31/12/2026' : 'Indefinida'
+        };
         fs.writeFileSync(dataPath, JSON.stringify(operationalData, null, 2), 'utf-8');
         logger.info(`✅ Datos de contratoCliente guardados en ${dataPath}`);
+
+        HappyTruthGenerator.generate(testInfo);
 
         // =================================================================
         // SUMMARY

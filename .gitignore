@@ -86,3 +86,6 @@ tmsapp/mobile/artifacts/
 .pi-lens/
 .playwright-cli/
 skills-lock.json
+
+# Manual Happy Paths
+docs/manual-happy-paths.md

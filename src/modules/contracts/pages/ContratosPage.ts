@@ -260,7 +260,7 @@ export class ContratosFormPage extends BasePage {
     tarifaConductor: string,
     tarifaViaje: string,
     tarifaTotal?: string
-  ): Promise<void> {
+  ): Promise<string> {
     const rc = this.getRouteConfig();
     logger.info(`🛣️ Añadiendo Ruta ${rc.routeId} (ambiente ${isDemoMode() ? 'DEMO' : 'QA'})`);
 
@@ -433,6 +433,7 @@ export class ContratosFormPage extends BasePage {
       await this.forceCloseModal();
 
       logger.info(`✅ Ruta ${rc.routeId} y carga añadidas exitosamente`);
+      return rc.routeId;
     } catch (error) {
       logger.error('Fallo al añadir ruta y carga', error);
       await this.takeScreenshot('add-route-cargo-error');
