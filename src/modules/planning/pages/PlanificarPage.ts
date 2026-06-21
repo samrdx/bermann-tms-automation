@@ -629,27 +629,8 @@ export class PlanificarPage extends BasePage {
 				);
 
 				logger.info("Esperando a que Origen/Destino se completen...");
-				await this.page
-					.waitForFunction(
-						() => {
-							const o = document.querySelector(
-								'button[data-id="_origendestinoform-origen"]',
-							) as HTMLElement;
-							const d = document.querySelector(
-								'button[data-id="_origendestinoform-destino"]',
-							) as HTMLElement;
-							return (
-								o &&
-								o.innerText.trim() !== "Seleccione" &&
-								d &&
-								d.innerText.trim() !== "Seleccione"
-							);
-						},
-						{ timeout: 10000 },
-					)
-					.catch(() => {
-						logger.warn("⚠️ Origen/Destino no se completaron después de 10s");
-					});
+				const origenDestinoCompletos = await this.waitForOrigenDestinoCompletos();
+				if (!origenDestinoCompletos) return false;
 
 				return true;
 			}
@@ -702,27 +683,8 @@ export class PlanificarPage extends BasePage {
 
 			// CRITICAL: Wait for Origen/Destino to populate after modal selection
 			logger.info("Esperando a que Origen/Destino se completen...");
-			await this.page
-				.waitForFunction(
-					() => {
-						const o = document.querySelector(
-							'button[data-id="_origendestinoform-origen"]',
-						) as HTMLElement;
-						const d = document.querySelector(
-							'button[data-id="_origendestinoform-destino"]',
-						) as HTMLElement;
-						return (
-							o &&
-							o.innerText.trim() !== "Seleccione" &&
-							d &&
-							d.innerText.trim() !== "Seleccione"
-						);
-					},
-					{ timeout: 10000 },
-				)
-				.catch(() => {
-					logger.warn("⚠️ Origen/Destino no se completaron después de 10s");
-				});
+			const origenDestinoCompletos = await this.waitForOrigenDestinoCompletos();
+			if (!origenDestinoCompletos) return false;
 
 			return true;
 		} catch (e) {
@@ -746,6 +708,13 @@ export class PlanificarPage extends BasePage {
 			destino,
 			"Destino",
 		);
+	}
+
+	async getSelectedOrigenDestino(): Promise<{ origen: string | null; destino: string | null }> {
+		return {
+			origen: await this.getBootstrapButtonValue(this.selectors.btnOrigen),
+			destino: await this.getBootstrapButtonValue(this.selectors.btnDestino),
+		};
 	}
 
 	async clickGuardar(): Promise<void> {
@@ -797,15 +766,18 @@ export class PlanificarPage extends BasePage {
 		}
 	}
 
-	private async acceptTramoWarningIfPresent(): Promise<void> {
+	private async acceptTramoWarningIfPresent(timeout = 2000): Promise<boolean> {
 		const warningModal = this.page
 			.locator(".modal.show")
 			.filter({ has: this.page.locator("button", { hasText: "Aceptar" }) })
 			.filter({ has: this.page.locator("button", { hasText: "Cancelar" }) })
 			.first();
 
-		const isWarningVisible = await warningModal.isVisible().catch(() => false);
-		if (!isWarningVisible) return;
+		const isWarningVisible = await warningModal
+			.waitFor({ state: "visible", timeout })
+			.then(() => true)
+			.catch(() => false);
+		if (!isWarningVisible) return false;
 
 		logger.info(
 			"⚠️ Modal de advertencia de tramos detectado. Aceptando para continuar...",
@@ -816,26 +788,113 @@ export class PlanificarPage extends BasePage {
 			.first();
 		await btnAceptar.click();
 
-		await warningModal
+		const hidden = await warningModal
 			.waitFor({ state: "hidden", timeout: 10000 })
+			.then(() => true)
 			.catch(() => {
-				logger.warn(
-					"⚠️ El modal de advertencia no se ocultó a tiempo, continuando...",
-				);
+				return false;
 			});
+		if (!hidden) {
+			await this.takeScreenshot("tramo-warning-still-visible");
+			throw new Error(
+				"El modal de advertencia de tramos siguió visible después de hacer clic en Aceptar.",
+			);
+		}
 		await this.page.waitForTimeout(800);
+		return true;
 	}
 
 	private async getBootstrapButtonValue(
 		btnSelector: string,
 	): Promise<string | null> {
-		const btn = this.page.locator(`${btnSelector}:visible`).first();
-		const value = (await btn.innerText().catch(() => "")).trim();
-		const valLower = value.toLowerCase();
-		if (!value || valLower.includes("seleccionar") || valLower.includes("seleccione") || valLower.includes("select")) {
+		const state = await this.page.evaluate((selector) => {
+			const isPlaceholder = (raw: string | null | undefined) => {
+				const value = (raw || "").replace(/\s+/g, " ").trim().toLowerCase();
+				return !value
+					|| /^(seleccione|seleccione\.\.\.|seleccionar|select|nothing selected|nada seleccionado|ninguno|sin seleccionar)$/i.test(value)
+					|| value.includes("seleccionar")
+					|| value.includes("seleccione")
+					|| value.includes("nothing selected")
+					|| value.includes("nada seleccionado");
+			};
+
+			const buttons = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+			const button = buttons.find((candidate) => {
+				const style = window.getComputedStyle(candidate);
+				const rect = candidate.getBoundingClientRect();
+				return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+			});
+
+			if (!button) return { text: "", value: "", valid: false };
+
+			const dataId = button.getAttribute("data-id") || "";
+			const select = dataId
+				? document.getElementById(dataId) as HTMLSelectElement | null
+					|| document.querySelector(`select[name="${dataId}"]`) as HTMLSelectElement | null
+				: null;
+			const selectedOptionText = select?.options[select.selectedIndex]?.text || "";
+			const buttonText = button.querySelector(".filter-option-inner-inner")?.textContent || button.textContent || "";
+			const displayText = selectedOptionText.trim() || buttonText.trim();
+			const selectedValue = select?.value?.trim() || "";
+
+			const validText = !isPlaceholder(displayText);
+			const validValue = select ? Boolean(selectedValue) : true;
+
+			return { text: displayText.trim(), value: selectedValue, valid: validText && validValue };
+		}, btnSelector).catch(() => ({ text: "", value: "", valid: false }));
+
+		if (!state.valid) {
 			return null;
 		}
-		return value;
+		return state.text;
+	}
+
+	private async waitForOrigenDestinoCompletos(timeout = 10000): Promise<boolean> {
+		return this.page
+			.waitForFunction(
+				({ origenSelector, destinoSelector }) => {
+					const isPlaceholder = (raw: string | null | undefined) => {
+						const value = (raw || "").replace(/\s+/g, " ").trim().toLowerCase();
+						return !value
+							|| /^(seleccione|seleccione\.\.\.|seleccionar|select|nothing selected|nada seleccionado|ninguno|sin seleccionar)$/i.test(value)
+							|| value.includes("seleccionar")
+							|| value.includes("seleccione")
+							|| value.includes("nothing selected")
+							|| value.includes("nada seleccionado");
+					};
+
+					const getSelectionState = (selector: string) => {
+						const buttons = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+						const button = buttons.find((candidate) => {
+							const style = window.getComputedStyle(candidate);
+							const rect = candidate.getBoundingClientRect();
+							return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+						});
+						if (!button) return false;
+
+						const dataId = button.getAttribute("data-id") || "";
+						const select = dataId
+							? document.getElementById(dataId) as HTMLSelectElement | null
+								|| document.querySelector(`select[name="${dataId}"]`) as HTMLSelectElement | null
+							: null;
+						const selectedOptionText = select?.options[select.selectedIndex]?.text || "";
+						const buttonText = button.querySelector(".filter-option-inner-inner")?.textContent || button.textContent || "";
+						const displayText = selectedOptionText.trim() || buttonText.trim();
+						const selectedValue = select?.value?.trim() || "";
+
+						return !isPlaceholder(displayText) && (select ? Boolean(selectedValue) : true);
+					};
+
+					return getSelectionState(origenSelector) && getSelectionState(destinoSelector);
+				},
+				{ origenSelector: this.selectors.btnOrigen, destinoSelector: this.selectors.btnDestino },
+				{ timeout },
+			)
+			.then(() => true)
+			.catch(() => {
+				logger.warn("⚠️ Origen/Destino no se completaron con valores válidos después de 10s");
+				return false;
+			});
 	}
 
 	private async syncMainSelectionsToTramoModal(): Promise<void> {
@@ -889,23 +948,39 @@ export class PlanificarPage extends BasePage {
 		);
 
 		try {
-			// 1. Abrir flujo de modal
-			await this.click(this.selectors.btnAbrirModalTramo);
-			await this.acceptTramoWarningIfPresent();
-
-			// 2. Esperar modal real de tramos (usar botón visible para evitar clones ocultos)
 			const tramoOrigenBtnVisible = this.page
 				.locator(`${this.selectors.modalTramoOrigen}:visible`)
 				.first();
-			const tramoVisibleNow = await tramoOrigenBtnVisible
-				.isVisible()
-				.catch(() => false);
-			if (!tramoVisibleNow) {
-				// En algunos flujos, tras aceptar advertencia hay que reintentar abrir el modal de tramo
+			let tramoModalReady = false;
+
+			for (let attempt = 1; attempt <= 2; attempt++) {
 				await this.click(this.selectors.btnAbrirModalTramo);
-				await this.acceptTramoWarningIfPresent();
+				const acceptedWarning = await this.acceptTramoWarningIfPresent();
+				tramoModalReady = await tramoOrigenBtnVisible
+					.waitFor({ state: "visible", timeout: acceptedWarning ? 7000 : 5000 })
+					.then(() => true)
+					.catch(() => false);
+
+				if (tramoModalReady) break;
+				if (attempt === 1) {
+					logger.warn(
+						"⚠️ El modal de tramo no quedó visible después del primer intento. Reintentando una vez...",
+					);
+				}
 			}
-			await tramoOrigenBtnVisible.waitFor({ state: "visible", timeout: 10000 });
+
+			if (!tramoModalReady) {
+				const warningStillVisible = await this.page
+					.locator(".modal.show")
+					.filter({ has: this.page.locator("button", { hasText: "Aceptar" }) })
+					.isVisible()
+					.catch(() => false);
+				throw new Error(
+					warningStillVisible
+						? "No se pudo abrir el modal de tramo porque la advertencia sigue visible."
+						: "No se pudo abrir el modal de tramo después de aceptar la advertencia y reintentar una vez.",
+				);
+			}
 			await this.page.waitForTimeout(800); // Animation stabilization
 
 			// 2.5. Replicar datos obligatorios del viaje principal en el modal de tramo
