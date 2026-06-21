@@ -1,4 +1,5 @@
 import { test, expect } from "../../../../../src/fixtures/base.js";
+import type { Page } from "@playwright/test";
 import { logger } from "../../../../../src/utils/logger.js";
 import { DataPathHelper } from "../../../../api-helpers/DataPathHelper.js";
 import { OperationalDataLoader } from "../../../../api-helpers/OperationalDataLoader.js";
@@ -6,6 +7,54 @@ import { ClienteHelper } from "../../../../api-helpers/ClienteHelper.js";
 import fs from "fs";
 import { allure } from "allure-playwright";
 import { entityTracker } from "../../../../../src/utils/entityTracker.js";
+
+async function collectPlanificarSaveDiagnostics(page: Page): Promise<string> {
+	const diagnostics = await page.evaluate(() => {
+		const isVisible = (element: Element) => {
+			const style = window.getComputedStyle(element);
+			const box = element.getBoundingClientRect();
+			return style.visibility !== "hidden" && style.display !== "none" && box.width > 0 && box.height > 0;
+		};
+
+		const messageSelectors = [
+			".help-block",
+			".invalid-feedback",
+			".alert",
+			".toast",
+			".toast-message",
+			".swal2-html-container",
+			".bootbox-body",
+			".modal.show .modal-body",
+			'[role="alert"]',
+		];
+		const messages = Array.from(document.querySelectorAll(messageSelectors.join(",")))
+			.filter(isVisible)
+			.map((el) => (el.textContent || "").replace(/\s+/g, " ").trim())
+			.filter(Boolean);
+
+		const invalidFields = Array.from(
+			document.querySelectorAll(".has-error input, .has-error select, [aria-invalid='true'], .is-invalid"),
+		).map((el) => {
+			const input = el as HTMLInputElement | HTMLSelectElement;
+			return input.id || input.name || input.getAttribute("data-id") || input.outerHTML.slice(0, 120);
+		});
+
+		return {
+			messages: Array.from(new Set(messages)),
+			invalidFields: Array.from(new Set(invalidFields)),
+		};
+	});
+
+	return `url=${page.url()} | messages=${diagnostics.messages.join(" | ") || "none"} | invalidFields=${diagnostics.invalidFields.join(" | ") || "none"}`;
+}
+
+async function hasPlanificarSaveSuccessSignal(page: Page): Promise<boolean> {
+	return page.evaluate(() => {
+		const visibleText = (document.body.innerText || "").replace(/\s+/g, " ").trim();
+		return /viaje\s+creado\s+con\s+[ée]xito/i.test(visibleText)
+			|| /creado\s+con\s+[ée]xito/i.test(visibleText);
+	}).catch(() => false);
+}
 
 /**
  * Step 6: Planificar Viaje (Trip Planning)
@@ -100,7 +149,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 			unidadNegocio: isDemo ? "Defecto" : "Defecto",
 			cliente: clienteNombreFromData,
 			codigoCarga: isDemo ? "CONTENEDOR DRY" : "Qa_COD_",
-			ruta: isDemo ? "47" : "Qa_RT_",
+			ruta: isDemo ? "47" : "1413",
 			origenManual: isDemo
 				? "233_CD SuperZoo_Quilicura"
 				: "405_LA FARFANA_Pudahuel",
@@ -115,7 +164,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 			logger.info(`📦 Setup config detectado: ${setupConfigPath}`);
 		} else {
 			logger.warn(
-				`⚠️ Setup config no encontrado en ninguna ruta candidata. Se usarán defaults.`,
+				`⚠️ Setup config no encontrado en ninguna ruta candidata. Se intentará usar la primera ruta disponible del modal, no Origen/Destino estáticos.`,
 			);
 		}
 
@@ -208,18 +257,24 @@ test.describe("[V01] Viajes - Planificar", () => {
 			try {
 				rutaAdded = await viajesPlanificarPage.agregarRuta(config.ruta);
 			} catch (error) {
-				logger.warn(`⚠️ Error al agregar ruta específica [${config.ruta}]. Probando con prefijo Qa_RT_...`);
-				rutaAdded = await viajesPlanificarPage.agregarRuta("Qa_RT_");
+				logger.error(`❌ Error al agregar ruta configurada [${config.ruta}]`, error);
 			}
 
 			if (!rutaAdded) {
-				logger.warn(
-					"⚠️ La adición de la ruta falló o se omitió, aplicando el fallback manual de Origen/Destino...",
+				await page.screenshot({
+					path: `./reports/screenshots/planificar-ruta-invalida-${Date.now()}.png`,
+					fullPage: true,
+				});
+				throw new Error(
+					`No se pudo agregar una ruta válida para Planificar. ruta=[${config.ruta}], setupConfig=${setupConfigPath || "not found"}. No se continuará con Origen/Destino estáticos.`,
 				);
-				if (config.origenManual)
-					await viajesPlanificarPage.selectOrigen(config.origenManual);
-				if (config.destinoManual)
-					await viajesPlanificarPage.selectDestino(config.destinoManual);
+			}
+
+			const selectedRoute = await viajesPlanificarPage.getSelectedOrigenDestino();
+			if (!selectedRoute.origen || !selectedRoute.destino) {
+				throw new Error(
+					`Ruta agregada sin Origen/Destino válidos. origen=[${selectedRoute.origen || "empty"}], destino=[${selectedRoute.destino || "empty"}], ruta=[${config.ruta}]`,
+				);
 			}
 
 			// 7.5 KG del viaje maestro (después de ruta para evitar reset automático)
@@ -277,6 +332,26 @@ test.describe("[V01] Viajes - Planificar", () => {
 				} else {
 					logger.warn(
 						"⚠️ No se pudo capturar el ID del viaje. La prueba de asignación buscará por nroViaje.",
+					);
+				}
+			}
+
+			if (!viajeId && finalUrl.includes("/viajes/crear")) {
+				const diagnostics = await collectPlanificarSaveDiagnostics(page);
+				const hasSuccessSignal = await hasPlanificarSaveSuccessSignal(page);
+
+				if (hasSuccessSignal) {
+					logger.warn(
+						`⚠️ Guardado confirmado por mensaje de éxito, pero sin redirect/ID. Se continuará buscando por nroViaje. ${diagnostics}`,
+					);
+				} else {
+					logger.error(`❌ Guardado de Planificar no confirmado: ${diagnostics}`);
+					await page.screenshot({
+						path: `./reports/screenshots/planificar-save-not-confirmed-${Date.now()}.png`,
+						fullPage: true,
+					});
+					throw new Error(
+						`Guardado de Planificar no confirmado. La URL sigue en /viajes/crear y no se capturó ID. ${diagnostics}`,
 					);
 				}
 			}
@@ -449,7 +524,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 			unidadNegocio: isDemo ? "Defecto" : "Defecto",
 			cliente: clienteNombreFromData,
 			codigoCarga: isDemo ? "CONTENEDOR DRY" : "Qa_COD_",
-			ruta: isDemo ? "47" : "Qa_RT_",
+			ruta: isDemo ? "47" : "1413",
 			origenManual: isDemo ? "233_CD SuperZoo_Quilicura" : "405_LA FARFANA_Pudahuel",
 			destinoManual: isDemo ? "Divisa" : "CXP ANTOFAGASTA",
 		};
@@ -459,6 +534,11 @@ test.describe("[V01] Viajes - Planificar", () => {
 		const setupConfigPath = setupConfigPaths.find((candidatePath) => fs.existsSync(candidatePath));
 		if (setupConfigPath) {
 			setupConfig = JSON.parse(fs.readFileSync(setupConfigPath, "utf-8"));
+			logger.info(`📦 Setup config detectado: ${setupConfigPath}`);
+		} else {
+			logger.warn(
+				`⚠️ Setup config no encontrado en ninguna ruta candidata. Se intentará usar la primera ruta disponible del modal, no Origen/Destino estáticos.`,
+			);
 		}
 
 		const config = {
@@ -509,12 +589,24 @@ test.describe("[V01] Viajes - Planificar", () => {
 			try {
 				rutaAdded = await viajesPlanificarPage.agregarRuta(config.ruta);
 			} catch (error) {
-				rutaAdded = await viajesPlanificarPage.agregarRuta("Qa_RT_");
+				logger.error(`❌ Error al agregar ruta configurada [${config.ruta}]`, error);
 			}
 
 			if (!rutaAdded) {
-				if (config.origenManual) await viajesPlanificarPage.selectOrigen(config.origenManual);
-				if (config.destinoManual) await viajesPlanificarPage.selectDestino(config.destinoManual);
+				await page.screenshot({
+					path: `./reports/screenshots/planificar-multiplicador-ruta-invalida-${Date.now()}.png`,
+					fullPage: true,
+				});
+				throw new Error(
+					`No se pudo agregar una ruta válida para Planificar Multiplicador. ruta=[${config.ruta}], setupConfig=${setupConfigPath || "not found"}. No se continuará con Origen/Destino estáticos.`,
+				);
+			}
+
+			const selectedRoute = await viajesPlanificarPage.getSelectedOrigenDestino();
+			if (!selectedRoute.origen || !selectedRoute.destino) {
+				throw new Error(
+					`Ruta agregada sin Origen/Destino válidos para Multiplicador. origen=[${selectedRoute.origen || "empty"}], destino=[${selectedRoute.destino || "empty"}], ruta=[${config.ruta}]`,
+				);
 			}
 
 			await viajesPlanificarPage.fillKgViaje("1");
@@ -526,8 +618,8 @@ test.describe("[V01] Viajes - Planificar", () => {
 			const yyyy = today.getFullYear();
 			const hoyStr = `${dd}/${mm}/${yyyy}`;
 			await viajesPlanificarPage.addTramo({
-				origen: config.origenManual,
-				destino: config.destinoManual,
+				origen: selectedRoute.origen,
+				destino: selectedRoute.destino,
 				fechaEntradaOrigen: hoyStr,
 				kgOrigen: "1",
 			});
