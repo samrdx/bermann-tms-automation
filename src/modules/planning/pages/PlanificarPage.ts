@@ -606,23 +606,23 @@ export class PlanificarPage extends BasePage {
 			// We look for the route in the table
 			const rows = this.page.locator(this.selectors.tablaRutas);
 
-			// Si existe buscador en el modal, validar que esté limpio (no buscamos por texto)
+			// Buscador DataTables: escribir el routeKey para filtrar (server-side)
+			// así la tabla muestra las rutas que coinciden
 			const searchBox = this.page.locator(
 				"#modalRutasSugeridas .dataTables_filter input",
 			);
 			if (await searchBox.isVisible({ timeout: 2000 }).catch(() => false)) {
-				const currentFilter = await searchBox.inputValue().catch(() => "");
-				if (currentFilter.trim().length > 0) {
-					await searchBox.clear();
-					await this.page.waitForTimeout(500);
-				}
+				await searchBox.clear();
+				await searchBox.fill(routeKey);
+				await this.page.waitForTimeout(1500); // Esperar filtro DataTables
+				logger.info(`🔍 Buscador de rutas filtrado por: ${routeKey}`);
 			}
 
 			// Botón directo de agregar ruta por fila
 			const quickAddBtn = this.page
 				.locator(`//tr[td[contains(., '${routeKey}')]]//i`)
 				.first();
-			if (await quickAddBtn.isVisible({ timeout: 2500 }).catch(() => false)) {
+			if (await quickAddBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
 				await quickAddBtn.click();
 				logger.info(
 					`Ruta [${numeroRuta}] agregada por botón rápido del modal (key=${routeKey})`,
