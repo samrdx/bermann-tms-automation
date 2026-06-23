@@ -96,20 +96,82 @@ async function collectPlanificarSaveDiagnostics(page: Page): Promise<string> {
 
 async function hasPlanificarSaveSuccessSignal(page: Page): Promise<boolean> {
 	return page.evaluate(() => {
-		const visibleText = (document.body.innerText || "").replace(/\s+/g, " ").trim();
-		return /viaje\s+creado\s+con\s+[ée]xito/i.test(visibleText)
-			|| /creado\s+con\s+[ée]xito/i.test(visibleText);
+		const isVisible = (element: Element) => {
+			const style = window.getComputedStyle(element);
+			const box = element.getBoundingClientRect();
+			return style.visibility !== "hidden" && style.display !== "none" && box.width > 0 && box.height > 0;
+		};
+		const successText = /viaje\s+(?:creado|guardado)\s+con\s+[ée]xito|viaje\s+planificado\s+con\s+[ée]xito/i;
+		return Array.from(document.querySelectorAll(".toast-success, .alert-success, .swal2-success, [data-notify], .swal-title, .swal2-title, .swal2-html-container"))
+			.some((el) => isVisible(el) && successText.test((el.textContent || "").replace(/\s+/g, " ").trim()));
 	}).catch(() => false);
 }
 
-async function waitForPlanificarSaveSuccessSignal(page: Page, timeout = 15000): Promise<boolean> {
-	return page.waitForFunction(() => {
-		const visibleText = (document.body.innerText || "").replace(/\s+/g, " ").trim();
-		return /viaje\s+creado\s+con\s+[ée]xito/i.test(visibleText)
-			|| /creado\s+con\s+[ée]xito/i.test(visibleText);
-	}, null, { timeout })
+async function confirmPlanificarSave(page: Page, clickSave: () => Promise<void>, timeout = 25000): Promise<{ confirmed: boolean; viaResponse: boolean; finalUrl: string }> {
+	const viaResponse = false;
+	const acceptedPostSaveRoute = /\/viajes\/(?:asignar|index|editar|ver)(?=[/?#]|$)/;
+	const redirectPromise = page.waitForURL(acceptedPostSaveRoute, { timeout })
 		.then(() => true)
-		.catch(() => hasPlanificarSaveSuccessSignal(page));
+		.catch(() => false);
+	const messagePromise = page.waitForFunction(() => {
+			const successText = /viaje\s+(?:creado|guardado)\s+con\s+[ée]xito|viaje\s+planificado\s+con\s+[ée]xito/i;
+			const successNode = Array.from(document.querySelectorAll(".toast-success, .alert-success, .swal2-success, [data-notify], .swal-title, .swal2-title, .swal2-html-container"))
+				.find((el) => {
+					const style = window.getComputedStyle(el);
+					const box = el.getBoundingClientRect();
+					const text = (el.textContent || "").replace(/\s+/g, " ").trim();
+					return style.visibility !== "hidden" && style.display !== "none" && box.width > 0 && box.height > 0
+						&& successText.test(text);
+				});
+			return !!successNode;
+		}, null, { timeout }).then(() => true).catch(() => false);
+
+	await clickSave();
+	await Promise.race([
+		redirectPromise,
+		messagePromise,
+		page.waitForTimeout(timeout).then(() => false),
+	]);
+
+	await page.waitForLoadState("domcontentloaded", { timeout: 5000 }).catch(() => undefined);
+	await page.waitForTimeout(500);
+
+	const finalUrl = page.url();
+	const redirectSuccess = acceptedPostSaveRoute.test(finalUrl);
+	const idSuccess = /\/viajes\/(?:editar|ver)\/(\d+)(?:\D|$)/.test(finalUrl)
+		|| await page.evaluate(() => {
+			const candidateSelectors = [
+				'input[name="Viajes[id]"]',
+				'input[name="viajes-id"]',
+				"[data-viaje-id]",
+			];
+			for (const sel of candidateSelectors) {
+				const el = document.querySelector(sel) as HTMLInputElement | null;
+				const value = el?.value || el?.getAttribute("data-viaje-id") || "";
+				if (/^\d+$/.test(value.trim())) return true;
+			}
+			return false;
+		}).catch(() => false);
+	const messageSuccess = await hasPlanificarSaveSuccessSignal(page);
+	const hasVisibleError = await page.evaluate(() => {
+		const isVisible = (element: Element) => {
+			const style = window.getComputedStyle(element);
+			const box = element.getBoundingClientRect();
+			return style.visibility !== "hidden" && style.display !== "none" && box.width > 0 && box.height > 0;
+		};
+		return Array.from(document.querySelectorAll(".help-block.badge-danger, .invalid-feedback, .alert-danger, .toast-error, .has-error, [aria-invalid='true'], .is-invalid"))
+			.some((el) => {
+				if (!isVisible(el)) return false;
+				if (el.matches("[aria-invalid='true'], .is-invalid, .has-error")) return true;
+				return !!(el.textContent || "").replace(/\s+/g, " ").trim();
+			});
+	}).catch(() => false);
+
+	return {
+		confirmed: !hasVisibleError && (redirectSuccess || idSuccess || messageSuccess),
+		viaResponse,
+		finalUrl,
+	};
 }
 
 /**
@@ -366,20 +428,10 @@ test.describe("[V01] Viajes - Planificar", () => {
 		await test.step("Fase 3: Guardar y capturar ID del Viaje", async () => {
 			logger.info("Fase 3: Guardar Viaje");
 
-			// Wait for navigation triggered by Guardar — the TMS redirects to:
-			//   /viajes/editar/{id}  or  /viajes/ver/{id}  after a successful save
-			const [_] = await Promise.all([
-				page
-					.waitForNavigation({
-						waitUntil: "networkidle",
-						timeout: 45000,
-					})
-					.catch(() => null),
-				viajesPlanificarPage.clickGuardar(),
-			]);
+			const saveResult = await confirmPlanificarSave(page, () => viajesPlanificarPage.clickGuardar());
 
 			// Extract the ID from the final URL
-			const finalUrl = page.url();
+			const finalUrl = saveResult.finalUrl;
 			logger.info(`URL post-guardado: ${finalUrl}`);
 
 			const urlMatch = finalUrl.match(/\/viajes\/(?:editar|ver)\/(\d+)/);
@@ -410,12 +462,11 @@ test.describe("[V01] Viajes - Planificar", () => {
 			}
 
 			if (!viajeId && finalUrl.includes("/viajes/crear")) {
-				const hasSuccessSignal = await waitForPlanificarSaveSuccessSignal(page);
 				const diagnostics = await collectPlanificarSaveDiagnostics(page);
 
-				if (hasSuccessSignal) {
+				if (saveResult.confirmed) {
 					logger.warn(
-						`⚠️ Guardado confirmado por mensaje de éxito, pero sin redirect/ID. Se continuará buscando por nroViaje. ${diagnostics}`,
+						`⚠️ Guardado confirmado sin redirect/ID (viaResponse=${saveResult.viaResponse}). Se continuará buscando por nroViaje. ${diagnostics}`,
 					);
 				} else {
 					logger.error(`❌ Guardado de Planificar no confirmado: ${diagnostics}`);
@@ -429,7 +480,7 @@ test.describe("[V01] Viajes - Planificar", () => {
 				}
 			}
 
-			logger.info("Boton guardar clickeado y navegacion completada");
+			logger.info(`Boton guardar clickeado. Confirmado=${saveResult.confirmed} viaResponse=${saveResult.viaResponse}`);
 		});
 
 		// =================================================================
@@ -721,10 +772,17 @@ test.describe("[V01] Viajes - Planificar", () => {
 
 		await test.step("Fase 3: Guardar Viaje", async () => {
 			logger.info("Fase 3: Guardar Viaje");
-			// Guardar (el sistema se queda en /viajes/crear con formulario limpio al usar multiplicador)
-			await viajesPlanificarPage.clickGuardar();
-			await page.waitForTimeout(5000); // Darle unos segundos al backend para completar la replicación
-			logger.info("Formulario guardado con éxito");
+			const saveResult = await confirmPlanificarSave(page, () => viajesPlanificarPage.clickGuardar());
+			if (!saveResult.confirmed) {
+				const diagnostics = await collectPlanificarSaveDiagnostics(page);
+				logger.error(`❌ Guardado de Planificar Multiplicador no confirmado: ${diagnostics}`);
+				await page.screenshot({
+					path: `./reports/screenshots/planificar-multiplicador-save-not-confirmed-${Date.now()}.png`,
+					fullPage: true,
+				});
+				throw new Error(`Guardado de Planificar Multiplicador no confirmado. ${diagnostics}`);
+			}
+			logger.info(`Formulario guardado con éxito. URL=${saveResult.finalUrl} viaResponse=${saveResult.viaResponse}`);
 		});
 
 		await test.step("Fase 4: Verificación", async () => {
