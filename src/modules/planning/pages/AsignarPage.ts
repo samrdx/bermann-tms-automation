@@ -438,6 +438,36 @@ export class AsignarPage extends BasePage {
 
     const rowId = await this.page.waitForFunction(
       ({ rowSelector, rowIndex }) => {
+        const extractIdFromRow = (row: HTMLTableRowElement): string | null => {
+          const cells = Array.from(row.querySelectorAll<HTMLTableCellElement>('td'));
+          const headers = Array.from(document.querySelectorAll<HTMLTableCellElement | HTMLTableHeaderCellElement>('#tabla_asignar thead th, #tabla_asignar thead td'))
+            .map((header) => (header.textContent || '').replace(/\s+/g, ' ').trim());
+          const isPlausibleId = (text: string | null | undefined) => !!text && /^\d{2,}$/.test(text.trim());
+          const isViajeIdHeader = (header: string) => /^(id|id\s+viaje|viaje\s+id|c[oó]digo\s+(?:de\s+)?viaje|n(?:ro|°|º)\.?\s+viaje|n[uú]mero\s+(?:de\s+)?viaje)$/i.test(header.trim());
+
+          const idHeaderIndex = headers.findIndex(isViajeIdHeader);
+          if (idHeaderIndex >= 0 && isPlausibleId(cells[idHeaderIndex]?.textContent)) {
+            return cells[idHeaderIndex].textContent!.trim();
+          }
+
+          for (const link of Array.from(row.querySelectorAll<HTMLAnchorElement>('a[href]'))) {
+            const href = link.getAttribute('href') || '';
+            const match = href.match(/\/viajes\/(?:editar|ver|asignar|view|update)\/(\d+)(?:\D|$)/i)
+              || href.match(/[?&](?:id|viaje_id)=(\d+)(?:\D|$)/i);
+            if (match?.[1]) return match[1];
+          }
+
+          for (const element of Array.from(row.querySelectorAll<HTMLElement>('*'))) {
+            for (const attr of Array.from(element.attributes)) {
+              if (/^(?:data-viaje-id|data_viaje_id|data-trip-id|data_trip_id)$/i.test(attr.name) && isPlausibleId(attr.value)) {
+                return attr.value.trim();
+              }
+            }
+          }
+
+          return null;
+        };
+
         const rows = Array.from(document.querySelectorAll<HTMLTableRowElement>(rowSelector))
           .filter((row) => {
             const text = (row.textContent || '').replace(/\s+/g, ' ').trim();
@@ -448,9 +478,7 @@ export class AsignarPage extends BasePage {
         const row = rows[rowIndex];
         if (!row) return null;
 
-        const cells = Array.from(row.querySelectorAll<HTMLTableCellElement>('td'));
-        const idText = (cells[1]?.textContent || '').trim();
-        return /^\d+$/.test(idText) ? idText : null;
+        return extractIdFromRow(row);
       },
       { rowSelector: this.selectors.table.rows, rowIndex: index },
       { timeout: 15000 },
@@ -459,8 +487,50 @@ export class AsignarPage extends BasePage {
       .catch(() => null);
 
     if (!rowId) {
-      const visibleRows = await this.page.locator(this.selectors.table.rows).count().catch(() => 0);
-      logger.warn(`No se pudo obtener ID de fila ${index + 1} en Asignación. Filas visibles: ${visibleRows}`);
+      const snapshot = await this.page.evaluate(({ rowSelector, rowIndex }) => {
+        const rows = Array.from(document.querySelectorAll<HTMLTableRowElement>(rowSelector))
+          .filter((row) => {
+            const text = (row.textContent || '').replace(/\s+/g, ' ').trim();
+            return text.length > 0
+              && !/cargando|procesando|processing|no hay datos|sin resultados/i.test(text);
+          });
+        const row = rows[rowIndex];
+        const headers = Array.from(document.querySelectorAll<HTMLTableCellElement | HTMLTableHeaderCellElement>('#tabla_asignar thead th, #tabla_asignar thead td'))
+          .map((header) => (header.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        const cells = row
+          ? Array.from(row.querySelectorAll<HTMLTableCellElement>('td')).map((cell, cellIndex) => ({
+            index: cellIndex,
+            text: (cell.textContent || '').replace(/\s+/g, ' ').trim(),
+            controls: Array.from(cell.querySelectorAll<HTMLElement>('input, button, a, i, .fa, .glyphicon')).map((el) => el.tagName.toLowerCase()).slice(0, 5),
+          }))
+          : [];
+        const links = row
+          ? Array.from(row.querySelectorAll<HTMLAnchorElement>('a[href]')).map((link) => ({
+            text: (link.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+            href: link.getAttribute('href') || '',
+          })).slice(0, 8)
+          : [];
+        const dataAttrs = row
+          ? Array.from(row.querySelectorAll<HTMLElement>('*')).flatMap((el) =>
+            Array.from(el.attributes)
+              .filter((attr) => attr.name.startsWith('data-') && attr.value)
+              .map((attr) => `${el.tagName.toLowerCase()}.${attr.name}=${attr.value}`),
+          ).slice(0, 20)
+          : [];
+
+        return {
+          visibleRows: rows.length,
+          headers,
+          cells,
+          links,
+          dataAttrs,
+        };
+      }, { rowSelector: this.selectors.table.rows, rowIndex: index }).catch(() => null);
+
+      logger.warn(
+        `No se pudo obtener ID de fila ${index + 1} en Asignación. Snapshot=${JSON.stringify(snapshot)}`,
+      );
       return null;
     }
 
