@@ -41,6 +41,10 @@ jobs:
           google-chrome --version
           google-chrome --headless --disable-gpu --no-sandbox --dump-dom about:blank >/dev/null
 
+      - name: Install Playwright FFmpeg
+        timeout-minutes: 2
+        run: npx playwright install ffmpeg
+
       - name: TypeScript check
         run: npm run typecheck
 
