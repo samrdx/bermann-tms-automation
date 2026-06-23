@@ -21,7 +21,7 @@ This file is a concise AI-facing mirror of `CLAUDE.md`.
 
 ## Stable Repo Facts
 
-- Web stack: Playwright, TypeScript, Winston, Node 20, ES Modules.
+- Web stack: Playwright, TypeScript, Winston, Node 24, ES Modules.
 - Supported web environments: `QA` and `DEMO`.
 - Primary browser target: Chromium.
 - Skills path: `.agents/skills/`.
