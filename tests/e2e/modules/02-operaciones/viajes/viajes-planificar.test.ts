@@ -20,8 +20,15 @@ async function collectPlanificarSaveDiagnostics(page: Page): Promise<string> {
 			".help-block",
 			".invalid-feedback",
 			".alert",
+			".alert-success",
 			".toast",
+			".toast-success",
 			".toast-message",
+			".text-danger",
+			"[data-notify]",
+			"[data-notify='message']",
+			".swal-title",
+			".swal2-title",
 			".swal2-html-container",
 			".bootbox-body",
 			".modal.show .modal-body",
@@ -39,13 +46,52 @@ async function collectPlanificarSaveDiagnostics(page: Page): Promise<string> {
 			return input.id || input.name || input.getAttribute("data-id") || input.outerHTML.slice(0, 120);
 		});
 
+		const fieldIds = [
+			"viajes-nro_viaje",
+			"tipo_operacion_form",
+			"viajes-tipo_servicio_id",
+			"viajes-cliente_id",
+			"viajes-tipo_viaje_id",
+			"viajes-unidad_negocio_id",
+			"viajes-carga_id",
+			"_origendestinoform-origen",
+			"_origendestinoform-destino",
+			"viajes-kilos",
+			"viajes-multiplicador_registro",
+		];
+
+		const fieldValues = fieldIds.map((id) => {
+			const element = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null;
+			if (!element) return `${id}=NOT_FOUND`;
+			if (element.tagName === "SELECT") {
+				const select = element as HTMLSelectElement;
+				const selectedText = select.options[select.selectedIndex]?.text?.replace(/\s+/g, " ").trim() || "EMPTY";
+				return `${id}="${selectedText}" value="${select.value}" options=${select.options.length}`;
+			}
+			return `${id}="${(element as HTMLInputElement).value}"`;
+		});
+
+		const visibleModals = Array.from(document.querySelectorAll(".modal, .bootbox, .swal2-container"))
+			.filter(isVisible)
+			.map((el) => `${el.id || el.className || el.tagName}: ${(el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 120)}`);
+		const visibleBackdrops = Array.from(document.querySelectorAll(".modal-backdrop, .swal2-backdrop-show"))
+			.filter(isVisible)
+			.length;
+		const saveButton = document.querySelector("#btn_guardar_form, #btn_guardar") as HTMLButtonElement | HTMLInputElement | null;
+
 		return {
 			messages: Array.from(new Set(messages)),
 			invalidFields: Array.from(new Set(invalidFields)),
+			fieldValues,
+			visibleModals,
+			visibleBackdrops,
+			saveButton: saveButton
+				? `found=true disabled=${!!saveButton.disabled} ariaDisabled=${saveButton.getAttribute("aria-disabled") || "none"} text="${(saveButton.textContent || saveButton.value || "").replace(/\s+/g, " ").trim()}"`
+				: "found=false",
 		};
 	});
 
-	return `url=${page.url()} | messages=${diagnostics.messages.join(" | ") || "none"} | invalidFields=${diagnostics.invalidFields.join(" | ") || "none"}`;
+	return `url=${page.url()} | messages=${diagnostics.messages.join(" | ") || "none"} | invalidFields=${diagnostics.invalidFields.join(" | ") || "none"} | saveButton=${diagnostics.saveButton} | visibleBackdrops=${diagnostics.visibleBackdrops} | visibleModals=${diagnostics.visibleModals.join(" | ") || "none"} | fields=${diagnostics.fieldValues.join(" | ")}`;
 }
 
 async function hasPlanificarSaveSuccessSignal(page: Page): Promise<boolean> {
