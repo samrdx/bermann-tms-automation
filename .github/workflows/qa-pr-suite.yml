@@ -35,9 +35,11 @@ jobs:
           npx playwright --version
           google-chrome --version || true
 
-      - name: Install Playwright browsers
-        timeout-minutes: 5
-        run: npx playwright install --with-deps chrome
+      - name: Verify Chrome runtime
+        timeout-minutes: 2
+        run: |
+          google-chrome --version
+          google-chrome --headless --disable-gpu --no-sandbox --dump-dom about:blank >/dev/null
 
       - name: TypeScript check
         run: npm run typecheck
