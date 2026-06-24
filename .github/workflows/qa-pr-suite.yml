@@ -2,6 +2,7 @@ name: QA PR SUITE
 
 on:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -9,7 +10,7 @@ permissions:
 jobs:
   qa-pr-suite:
     name: QA PR SUITE
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
 
     steps:
