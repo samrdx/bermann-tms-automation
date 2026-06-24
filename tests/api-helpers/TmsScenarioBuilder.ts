@@ -1399,17 +1399,30 @@ export class TmsScenarioBuilder {
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body?.classList.remove('modal-open');
     });
-    // waitForResponse puede no interceptarse si la respuesta
-    // llega antes de que el listener esté listo, o si el POST usa un patrón de redirect distinto.
-    // Hacemos el waitForResponse opcional y verificamos el éxito por URL/loadState.
-    await Promise.all([
-      this.page.waitForLoadState('domcontentloaded').catch(() => { }),
-      this.page.waitForResponse(
-        resp => resp.url().includes('/conductores/') && resp.status() < 400,
-        { timeout: 15000 }
-      ).catch(() => logger.warn('⚠️ waitForResponse /conductores/ timeout — verificando via URL')),
-      this.page.evaluate(() => { const b = document.getElementById('btn_guardar') as HTMLElement; if (b) b.click(); })
-    ]);
+
+    let saved = false;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      if (attempt > 1) {
+        logger.warn(`🔄 Reintentando guardar conductor (intento ${attempt}/2)...`);
+        await this.page.waitForTimeout(1000);
+      }
+
+      await Promise.all([
+        this.page.waitForURL(
+          /\/conductores\/(index|ver|view|editar|update)/,
+          { timeout: 20000 }
+        ).then(() => { saved = true; }).catch(() => {
+          logger.warn(`⚠️ waitForURL /conductores/crear timeout (intento ${attempt}/2) — reintentando`);
+        }),
+        this.page.evaluate(() => {
+          const btn = (document.getElementById('btn_guardar')
+            || Array.from(document.querySelectorAll('button')).find(b => b.textContent?.trim() === 'Guardar')) as HTMLElement;
+          if (btn) btn.click();
+        }),
+      ]);
+
+      if (saved) break;
+    }
 
     await this.page.waitForTimeout(2000);
 

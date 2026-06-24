@@ -2,6 +2,7 @@ name: QA PR SUITE
 
 on:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -9,15 +10,15 @@ permissions:
 jobs:
   qa-pr-suite:
     name: QA PR SUITE
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
@@ -28,8 +29,18 @@ jobs:
       - name: Preflight - Validate workflow script references
         run: npm run ci:validate:workflow-scripts
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chrome
+      - name: Diagnostics - Runtime and browser versions
+        run: |
+          node --version
+          npm --version
+          npx playwright --version
+          google-chrome --version || true
+
+      - name: Verify Chrome runtime
+        timeout-minutes: 2
+        run: |
+          google-chrome --version
+          google-chrome --headless --disable-gpu --no-sandbox --dump-dom about:blank >/dev/null
 
       - name: TypeScript check
         run: npm run typecheck
@@ -40,11 +51,12 @@ jobs:
           TMS_PASSWORD: ${{ secrets.TMS_PASSWORD || 'srodriguez' }}
           CI: true
           ENV: QA
+          PLAYWRIGHT_VIDEO: 'off'
         run: npm run qa:e2e:finanzas-full -- --project chromium-qa --workers 1
 
       - name: Upload PR Playwright/Allure evidences
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: qa-pr-evidences-${{ github.run_id }}
           path: |
